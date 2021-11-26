@@ -91,20 +91,8 @@ namespace DCL
 
         protected virtual void SetupEnvironment()
         {
-            Environment.SetupWithBuilders(
-                messagingBuilder: MessagingContextBuilder,
-                platformBuilder: PlatformContextBuilder,
-                worldRuntimeBuilder: WorldRuntimeContextBuilder,
-                hudBuilder: HUDContextBuilder);
+            Environment.Setup(ServiceLocatorFactory.CreateDefault());
         }
-
-        protected virtual MessagingContext MessagingContextBuilder() { return MessagingContextFactory.CreateDefault(); }
-
-        protected virtual PlatformContext PlatformContextBuilder() { return PlatformContextFactory.CreateDefault(); }
-
-        protected virtual WorldRuntimeContext WorldRuntimeContextBuilder() { return WorldRuntimeContextFactory.CreateDefault(componentFactory); }
-
-        protected virtual HUDContext HUDContextBuilder() { return HUDContextFactory.CreateDefault(); }
 
         protected virtual void Start()
         {
@@ -116,8 +104,6 @@ namespace DCL
 
             // We trigger the Decentraland logic once everything is initialized.
             DCL.Interface.WebInterface.StartDecentraland();
-
-            Environment.i.world.sceneController.Start();
         }
 
         protected virtual void Update()
