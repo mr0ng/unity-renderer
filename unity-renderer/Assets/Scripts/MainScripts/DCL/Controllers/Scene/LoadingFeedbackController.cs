@@ -3,8 +3,8 @@ using DCL.Controllers;
 using DCL.Interface;
 using System.Collections.Generic;
 using System.Linq;
+using MainScripts.DCL.GLTF;
 using UnityEngine;
-using UnityGLTF;
 
 /// <summary>
 /// This class recopiles all the needed information to be sent to the kernel and be able to show the feedback along the world loading.
