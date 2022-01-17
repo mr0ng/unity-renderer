@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 using DCL.Components;
 using NUnit.Framework;
 using UnityEngine;
@@ -79,6 +80,8 @@ namespace AvatarShape_Tests
             //Assert
             Assert.IsFalse(succeeded);
             Assert.IsTrue(failed);
+
+            LogAssert.Expect(LogType.Exception, new Regex(".+"));
         }
 
         [UnityTest]
