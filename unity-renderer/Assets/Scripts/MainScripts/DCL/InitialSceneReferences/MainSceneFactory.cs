@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SocialPlatforms.Impl;
 
@@ -9,7 +9,7 @@ namespace DCL
         public static List<GameObject> CreatePlayerSystems()
         {
             List<GameObject> result = new List<GameObject>();
-            GameObject playerGo = LoadAndInstantiate("Player");
+            GameObject playerGo = LoadAndInstantiate("Player Variant VR");
             var playerReferences = playerGo.GetComponent<PlayerReferences>();
             SceneReferences.i.playerAvatarController = playerReferences.avatarController;
             SceneReferences.i.biwCameraParent = playerReferences.biwCameraRoot;
