@@ -62,3 +62,9 @@ MonoBehaviour:
   - id: 16
     description: MoveAround
     axisConstraint: 4
+  - id: 17
+    description: Thumb Press
+    axisConstraint: 2
+  - id: 18
+    description: LookAround
+    axisConstraint: 4

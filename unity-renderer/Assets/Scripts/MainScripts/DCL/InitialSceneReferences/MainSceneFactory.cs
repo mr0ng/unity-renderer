@@ -9,7 +9,8 @@ namespace DCL
         public static List<GameObject> CreatePlayerSystems()
         {
             List<GameObject> result = new List<GameObject>();
-            GameObject playerGo = LoadAndInstantiate("Player Variant VR");
+            var controller = CrossPlatformManager.GetControllerName();
+            GameObject playerGo = LoadAndInstantiate(controller);
             var playerReferences = playerGo.GetComponent<PlayerReferences>();
             SceneReferences.i.playerAvatarController = playerReferences.avatarController;
             SceneReferences.i.biwCameraParent = playerReferences.biwCameraRoot;
