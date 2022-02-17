@@ -207,6 +207,22 @@ namespace DCL.SettingsCommon.SettingsControllers.Tests
         }
 
         [Test]
+        public void ChangeCameraFOVCorrectly() 
+        {
+            // Arrange
+            settingController = ScriptableObject.CreateInstance<FOVControlController>();
+            settingController.Initialize();
+
+            // Act
+            float newValue = 90f;
+            settingController.UpdateSetting(newValue);
+
+            // Assert
+            Assert.AreEqual(newValue, settingController.GetStoredValue(), "Camera FOV stored value mismatch");
+            Assert.AreEqual(firstPersonCamera.m_Lens.FieldOfView, newValue, "1st person camera FOV value mismatch");
+        }
+
+        [Test]
         public void ChangeFPSLimitCorrectly()
         {
             // Arrange
@@ -435,21 +451,6 @@ namespace DCL.SettingsCommon.SettingsControllers.Tests
 
             // Assert
             Assert.AreEqual(newValue, settingController.GetStoredValue(), "UI SFX Volume stored value mismatch");
-        }
-
-        [Test]
-        public void ChangeNightModeCorrectly()
-        {
-            // Arrange
-            settingController = ScriptableObject.CreateInstance<NightModeControlController>();
-            settingController.Initialize();
-
-            // Act
-            bool newValue = true;
-            settingController.UpdateSetting(newValue);
-
-            // Assert
-            Assert.AreEqual(newValue, settingController.GetStoredValue(), "nightMode stored value mismatch");
         }
 
         [Test]

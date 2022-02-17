@@ -25,6 +25,8 @@ namespace DCL.Camera
         [Header("InputActions")]
         [SerializeField]
         internal InputAction_Trigger cameraChangeAction;
+        [SerializeField]
+        internal InputAction_Measurable mouseWheelAction;
 
         internal Dictionary<CameraMode.ModeId, CameraStateBase> cachedModeToVirtualCamera;
 
@@ -37,6 +39,8 @@ namespace DCL.Camera
         public event CameraBlendFinished onCameraBlendFinished;
 
         private bool wasBlendingLastFrame;
+
+        private float mouseWheelThreshold = 0.04f;
 
         private Vector3Variable cameraForward => CommonScriptableObjects.cameraForward;
         private Vector3Variable cameraRight => CommonScriptableObjects.cameraRight;
@@ -69,6 +73,7 @@ namespace DCL.Camera
             }
 
             cameraChangeAction.OnTriggered += OnCameraChangeAction;
+            mouseWheelAction.OnValueChanged += OnMouseWheelChangeValue;
             worldOffset.OnChange += OnWorldReposition;
             CommonScriptableObjects.cameraMode.OnChange += OnCameraModeChange;
 
@@ -78,10 +83,12 @@ namespace DCL.Camera
                 OnFullscreenUIVisibilityChange(CommonScriptableObjects.isFullscreenHUDOpen.Get(), !CommonScriptableObjects.isFullscreenHUDOpen.Get());
 
             CommonScriptableObjects.isFullscreenHUDOpen.OnChange += OnFullscreenUIVisibilityChange;
+
+            DataStore.i.camera.outputTexture.OnChange += OnOutputTextureChange;
+            OnOutputTextureChange(DataStore.i.camera.outputTexture.Get(), null);
+
             wasBlendingLastFrame = false;
         }
-
-        private float prevRenderScale = 1.0f;
 
         void OnFullscreenUIVisibilityChange(bool visibleState, bool prevVisibleState)
         {
@@ -89,6 +96,11 @@ namespace DCL.Camera
                 return;
 
             camera.enabled = !visibleState && CommonScriptableObjects.rendererState.Get();
+        }
+
+        void OnOutputTextureChange(RenderTexture current, RenderTexture previous)
+        {
+            camera.targetTexture = current;
         }
 
         public bool TryGetCameraStateByType<T>(out CameraStateBase searchedCameraState)
@@ -117,6 +129,18 @@ namespace DCL.Camera
             {
                 cam.OnBlock(current);
             }
+        }
+
+        private void OnMouseWheelChangeValue(DCLAction_Measurable action, float value)
+        {
+            if (value > -mouseWheelThreshold && value < mouseWheelThreshold) return;
+            if (Utils.IsPointerOverUIElement()) return;
+
+            if (CommonScriptableObjects.cameraMode == CameraMode.ModeId.FirstPerson && value < -mouseWheelThreshold)
+                SetCameraMode(CameraMode.ModeId.ThirdPerson);   
+
+            if (CommonScriptableObjects.cameraMode == CameraMode.ModeId.ThirdPerson && value > mouseWheelThreshold)
+                SetCameraMode(CameraMode.ModeId.FirstPerson);
         }
 
         private void OnCameraChangeAction(DCLAction_Trigger action)
@@ -225,10 +249,12 @@ namespace DCL.Camera
 
             worldOffset.OnChange -= OnWorldReposition;
             cameraChangeAction.OnTriggered -= OnCameraChangeAction;
+            mouseWheelAction.OnValueChanged -= OnMouseWheelChangeValue;
             CommonScriptableObjects.rendererState.OnChange -= OnRenderingStateChanged;
             CommonScriptableObjects.cameraBlocked.OnChange -= CameraBlocked_OnChange;
             CommonScriptableObjects.isFullscreenHUDOpen.OnChange -= OnFullscreenUIVisibilityChange;
             CommonScriptableObjects.cameraMode.OnChange -= OnCameraModeChange;
+            DataStore.i.camera.outputTexture.OnChange -= OnOutputTextureChange;
         }
 
         [Serializable]

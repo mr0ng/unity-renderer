@@ -4,6 +4,7 @@ using DCL.Components;
 using DCL.Controllers;
 using DCL.Helpers;
 using Newtonsoft.Json;
+using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.TestTools;
 
@@ -18,11 +19,12 @@ namespace SceneBoundariesCheckerTests
             yield return base.SetUp();
             scene = TestUtils.CreateTestScene();
 
-            Environment.i.world.sceneBoundsChecker.SetFeedbackStyle(new SceneBoundsFeedbackStyle_RedFlicker());
+            Environment.i.world.sceneBoundsChecker.SetFeedbackStyle(new SceneBoundsFeedbackStyle_RedBox());
             Environment.i.world.sceneBoundsChecker.timeBetweenChecks = 0f;
 
             UnityEngine.Assertions.Assert.IsTrue(Environment.i.world.sceneBoundsChecker.enabled);
-            UnityEngine.Assertions.Assert.IsTrue(Environment.i.world.sceneBoundsChecker.GetFeedbackStyle() is SceneBoundsFeedbackStyle_RedFlicker);
+            UnityEngine.Assertions.Assert.IsTrue(
+                Environment.i.world.sceneBoundsChecker.GetFeedbackStyle() is SceneBoundsFeedbackStyle_RedBox);
         }
 
         [UnityTest]
@@ -79,6 +81,8 @@ namespace SceneBoundariesCheckerTests
         public IEnumerator GLTFShapeIsInvalidatedWhenStartingOutOfBoundsDebugMode() { yield return SBC_Asserts.GLTFShapeIsInvalidatedWhenStartingOutOfBounds(scene); }
 
         [UnityTest]
+        [Explicit]
+        [Category("Explicit")]
         public IEnumerator NFTShapeIsInvalidatedWhenStartingOutOfBoundsDebugMode() { yield return SBC_Asserts.NFTShapeIsInvalidatedWhenStartingOutOfBounds(scene); }
 
         [UnityTest]
@@ -88,12 +92,16 @@ namespace SceneBoundariesCheckerTests
         public IEnumerator GLTFShapeIsInvalidatedWhenLeavingBoundsDebugMode() { yield return SBC_Asserts.GLTFShapeIsInvalidatedWhenLeavingBounds(scene); }
 
         [UnityTest]
+        [Explicit]
+        [Category("Explicit")]
         public IEnumerator NFTShapeIsInvalidatedWhenLeavingBoundsDebugMode() { yield return SBC_Asserts.NFTShapeIsInvalidatedWhenLeavingBounds(scene); }
 
         [UnityTest]
         public IEnumerator PShapeIsResetWhenReenteringBoundsDebugMode() { yield return SBC_Asserts.PShapeIsResetWhenReenteringBounds(scene); }
 
         [UnityTest]
+        [Explicit]
+        [Category("Explicit")]
         public IEnumerator NFTShapeIsResetWhenReenteringBoundsDebugMode() { yield return SBC_Asserts.NFTShapeIsResetWhenReenteringBounds(scene); }
 
         [UnityTest]
