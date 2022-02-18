@@ -34,7 +34,7 @@ MonoBehaviour:
       reference: Microsoft.MixedReality.Toolkit.XRSDK.OpenXR.MicrosoftMotionController,
         Microsoft.MixedReality.Toolkit.Providers.OpenXR
     handedness: 3
-    usePlatformModels: 1
+    usePlatformModels: 0
     platformModelMaterial: {fileID: 2100000, guid: cac043ca3d4213e479d93527c64b955e,
       type: 2}
     overrideModel: {fileID: 469963229739672959, guid: 13e8b447a6d10e34aa8985c9da5109bf,
@@ -47,11 +47,24 @@ MonoBehaviour:
       reference: Microsoft.MixedReality.Toolkit.XRSDK.OpenXR.HPReverbG2Controller,
         Microsoft.MixedReality.Toolkit.Providers.OpenXR
     handedness: 3
-    usePlatformModels: 1
+    usePlatformModels: 0
     platformModelMaterial: {fileID: 2100000, guid: cac043ca3d4213e479d93527c64b955e,
       type: 2}
     overrideModel: {fileID: 469963229739672959, guid: 13e8b447a6d10e34aa8985c9da5109bf,
       type: 3}
     controllerVisualizationType:
       reference: Microsoft.MixedReality.Toolkit.Input.WindowsMixedRealityControllerVisualizer,
+        Microsoft.MixedReality.Toolkit.SDK
+  - description: Generic XRSDK Controller
+    controllerType:
+      reference: Microsoft.MixedReality.Toolkit.XRSDK.Input.GenericXRSDKController,
+        Microsoft.MixedReality.Toolkit.Providers.XRSDK
+    handedness: 3
+    usePlatformModels: 0
+    platformModelMaterial: {fileID: 2100000, guid: cac043ca3d4213e479d93527c64b955e,
+      type: 2}
+    overrideModel: {fileID: 469963229739672959, guid: 13e8b447a6d10e34aa8985c9da5109bf,
+      type: 3}
+    controllerVisualizationType:
+      reference: Microsoft.MixedReality.Toolkit.Input.MixedRealityControllerVisualizer,
         Microsoft.MixedReality.Toolkit.SDK

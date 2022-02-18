@@ -71,14 +71,14 @@ public class VRInputController : InputSystemGlobalHandlerListener, IMixedReality
 
     private void RotatePlayer(Vector2 inputData)
     {        
-        Debug.Log($"right hand input {inputData}");
-        characterXAxis.RaiseOnValueChanged(inputData.x);
-        characterYAxis.RaiseOnValueChanged(inputData.y);
+        Debug.Log($"left hand input {inputData}");
+        // characterXAxis.RaiseOnValueChanged(inputData.x);
+        // characterYAxis.RaiseOnValueChanged(inputData.y);
     }
 
     private void MovePlayer(Vector2 inputData)
     {
-        Debug.Log($"left hand input {inputData}");
+        Debug.Log($"right hand input {inputData}");
         characterXAxis.RaiseOnValueChanged(inputData.x);
         characterYAxis.RaiseOnValueChanged(inputData.y);
     }

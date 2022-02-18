@@ -1,6 +1,8 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
+using UnityEngine.XR;
 using UnityEngine.XR.Management;
 
 public class CrossPlatformManager
@@ -9,7 +11,10 @@ public class CrossPlatformManager
     {
         PlatformSettings settings = Resources.Load<PlatformSettings>($"PlatformSettings");
         var contorllerName = "";
-        if (XRGeneralSettings.Instance.Manager.activeLoader != null)
+        var devices = new List<InputDevice>();
+        InputDevices.GetDevicesWithCharacteristics(InputDeviceCharacteristics.Camera, devices);
+        Debug.LogWarning(devices.Any());
+        if (XRGeneralSettings.Instance.Manager.activeLoader == null)
         {
             contorllerName = settings.NonVRController;
         }

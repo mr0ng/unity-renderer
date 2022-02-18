@@ -28,8 +28,8 @@ public class VRCharacterController : MonoBehaviour
 
     private IEnumerator Start()
     {
-        // TODO: find callback for player repostion on start
-        while (!cachedTrans.hasChanged)
+        // TODO: find callback for player repostion on start        
+        while (cachedTrans.position.y < 50f)
             yield return null;
 
         PlaceCamera();
