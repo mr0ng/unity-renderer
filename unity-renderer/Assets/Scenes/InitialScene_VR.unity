@@ -368,7 +368,7 @@ MonoBehaviour:
   Seconds: 0
   Year: 2022
   Month: 2
-  Day: 15
+  Day: 27
   Hour: 1
   Minute: 0
   Second: 0
@@ -629,12 +629,12 @@ MonoBehaviour:
     ignoreGlobalScenes: 0
     msgStepByStep: 0
   openBrowserWhenStart: 1
-  webSocketSSL: 1
+  webSocketSSL: 0
   kernelVersion: 
   useCustomContentServer: 0
   customContentServerUrl: http://localhost:1338/
   baseUrlMode: 1
-  baseUrlCustom: https://play.decentraland.org/?
+  baseUrlCustom: https://play.decentraland.zone/?
   environment: 4
   realm: 
   startInCoords: {x: 0, y: 0}
