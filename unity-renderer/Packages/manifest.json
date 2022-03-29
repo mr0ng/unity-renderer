@@ -27,6 +27,7 @@
     "com.unity.timeline": "1.4.8",
     "com.unity.ugui": "1.0.0",
     "com.unity.xr.legacyinputhelpers": "2.1.8",
+    "com.unity.xr.oculus": "1.10.0",
     "com.unity.xr.openxr": "1.2.8",
     "net.tnrd.nsubstitute": "https://github.com/decentraland/Unity3D-NSubstitute.git",
     "com.unity.modules.androidjni": "1.0.0",
