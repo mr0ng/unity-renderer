@@ -28,7 +28,7 @@ public class VRCharacterController : MonoBehaviour
 
     private IEnumerator Start()
     {
-        // TODO: find callback for player repostion on start        
+        // TODO: find callback for player reposition on start
         while (cachedTrans.position.y < 50f)
             yield return null;
 
@@ -47,15 +47,13 @@ public class VRCharacterController : MonoBehaviour
 
     private void PlaceCamera()
     {
-        Debug.Log("world Reposition");
-        var playSpace = VRPlaySpace.i;
+        // this might be obsolete
+        VRPlaySpace playSpace = VRPlaySpace.i;
         Transform mixedRealityPlayspace = playSpace.transform;
 
         cameraParent.position = avatarTrans.position + Vector3.up;
 
-        playSpace.SetCameraInactive();
-
-        //Move and Reparent the MRplayspace to the characterController so that we always have our controllers with us
+        //Move and Reparent the MRPlaySpace to the characterController so that we always have our controllers with us
         mixedRealityPlayspace.position = cameraParent.position;
         mixedRealityPlayspace.parent = cameraParent;
     }

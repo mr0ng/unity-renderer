@@ -4,7 +4,7 @@ using System.Linq;
 using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
-using DCL.Configuration;
+using InputSettings = DCL.Configuration.InputSettings;
 
 /// <summary>
 /// Mapping for Trigger actions

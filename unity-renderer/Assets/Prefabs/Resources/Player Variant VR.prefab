@@ -13,6 +13,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   controller: {fileID: 5279246958917804627}
+  cameraChangeAction: {fileID: 11400000, guid: 6701d7e30ddf77c48accc629429f7e30, type: 2}
+  targetToFollow: {fileID: 0}
 --- !u!114 &7844977760530523158
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -55,12 +57,8 @@ MonoBehaviour:
     id: 17
     description: Thumb Press
     axisConstraint: 2
-  speed: 0.2
-  CameraFollowSpeed: 20
-  MaxDistCameraPlayer: 50
-  characterXAxis: {fileID: 11400000, guid: 44c3c5f07adca334696adae7b81c1869, type: 2}
-  characterYAxis: {fileID: 11400000, guid: d1bc201cd2f5a1d4b8f721ccc29d2c0f, type: 2}
-  jump: {fileID: 11400000, guid: 8eddef1fc072ec845aeb62f5e1041b52, type: 2}
+  cameraParent: {fileID: 7365129137961098290}
+  speed: 90
 --- !u!114 &1493624107550247969
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -98,6 +96,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 326638022635035865, guid: b0965b55b892d438da492708ea09799c,
         type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 326638022635035865, guid: b0965b55b892d438da492708ea09799c,
+        type: 3}
       propertyPath: m_Lens.m_SensorSize.x
       value: 1.6896
       objectReference: {fileID: 0}
@@ -114,12 +117,12 @@ PrefabInstance:
     - target: {fileID: 326638022910643306, guid: b0965b55b892d438da492708ea09799c,
         type: 3}
       propertyPath: m_LocalRotation.y
-      value: 0.1469535
+      value: 0.14695348
       objectReference: {fileID: 0}
     - target: {fileID: 326638022910643306, guid: b0965b55b892d438da492708ea09799c,
         type: 3}
       propertyPath: m_LocalRotation.z
-      value: 0.033438276
+      value: 0.03343826
       objectReference: {fileID: 0}
     - target: {fileID: 326638022910643309, guid: b0965b55b892d438da492708ea09799c,
         type: 3}
@@ -214,7 +217,7 @@ PrefabInstance:
     - target: {fileID: 326638024228033140, guid: b0965b55b892d438da492708ea09799c,
         type: 3}
       propertyPath: m_LocalRotation.w
-      value: 0.74714196
+      value: 0.7471419
       objectReference: {fileID: 0}
     - target: {fileID: 326638024228033140, guid: b0965b55b892d438da492708ea09799c,
         type: 3}
@@ -224,12 +227,12 @@ PrefabInstance:
     - target: {fileID: 326638024228033140, guid: b0965b55b892d438da492708ea09799c,
         type: 3}
       propertyPath: m_LocalRotation.y
-      value: 0.1678301
+      value: 0.16783006
       objectReference: {fileID: 0}
     - target: {fileID: 326638024228033140, guid: b0965b55b892d438da492708ea09799c,
         type: 3}
       propertyPath: m_LocalRotation.z
-      value: 0.008788455
+      value: 0.008788444
       objectReference: {fileID: 0}
     - target: {fileID: 326638024228033143, guid: b0965b55b892d438da492708ea09799c,
         type: 3}
@@ -240,11 +243,18 @@ PrefabInstance:
         type: 3}
       propertyPath: axisToMeasurableActions.Array.data[0].measurableAction
       value: 
-      objectReference: {fileID: 0}
+      objectReference: {fileID: 11400000, guid: c5302665e8f998e4ea2673bba5e22914,
+        type: 2}
     - target: {fileID: 954399581682607488, guid: b0965b55b892d438da492708ea09799c,
         type: 3}
       propertyPath: axisToMeasurableActions.Array.data[1].measurableAction
       value: 
+      objectReference: {fileID: 11400000, guid: 03d744388580e334391bfa394a66e6d7,
+        type: 2}
+    - target: {fileID: 1004392741471585909, guid: b0965b55b892d438da492708ea09799c,
+        type: 3}
+      propertyPath: m_Enabled
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 1271431263581989332, guid: b0965b55b892d438da492708ea09799c,
         type: 3}
@@ -269,7 +279,7 @@ PrefabInstance:
     - target: {fileID: 1271431263581989332, guid: b0965b55b892d438da492708ea09799c,
         type: 3}
       propertyPath: m_LocalRotation.y
-      value: 0.15597798
+      value: 0.155978
       objectReference: {fileID: 0}
     - target: {fileID: 1271431263581989332, guid: b0965b55b892d438da492708ea09799c,
         type: 3}
@@ -288,35 +298,10 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 11400000, guid: d1bc201cd2f5a1d4b8f721ccc29d2c0f,
         type: 2}
-    - target: {fileID: 3666597879787490177, guid: b0965b55b892d438da492708ea09799c,
+    - target: {fileID: 4096479600627248540, guid: b0965b55b892d438da492708ea09799c,
         type: 3}
-      propertyPath: m_Enabled
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 3666597879787490177, guid: b0965b55b892d438da492708ea09799c,
-        type: 3}
-      propertyPath: m_Lens.m_SensorSize.x
-      value: 2.0448
-      objectReference: {fileID: 0}
-    - target: {fileID: 4037588735475582821, guid: b0965b55b892d438da492708ea09799c,
-        type: 3}
-      propertyPath: m_LocalRotation.w
-      value: 0.90943515
-      objectReference: {fileID: 0}
-    - target: {fileID: 4037588735475582821, guid: b0965b55b892d438da492708ea09799c,
-        type: 3}
-      propertyPath: m_LocalRotation.x
-      value: -0.3648185
-      objectReference: {fileID: 0}
-    - target: {fileID: 4037588735475582821, guid: b0965b55b892d438da492708ea09799c,
-        type: 3}
-      propertyPath: m_LocalRotation.y
-      value: 0.1852389
-      objectReference: {fileID: 0}
-    - target: {fileID: 4037588735475582821, guid: b0965b55b892d438da492708ea09799c,
-        type: 3}
-      propertyPath: m_LocalRotation.z
-      value: 0.07430829
+      propertyPath: camera
+      value: 
       objectReference: {fileID: 0}
     - target: {fileID: 4178404825261920003, guid: b0965b55b892d438da492708ea09799c,
         type: 3}
@@ -328,8 +313,22 @@ PrefabInstance:
       propertyPath: m_HorizontalAxis.Value
       value: 23.02568
       objectReference: {fileID: 0}
+    - target: {fileID: 4852920391666169108, guid: b0965b55b892d438da492708ea09799c,
+        type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6152136595692442593, guid: b0965b55b892d438da492708ea09799c,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8300538586268340887, guid: b0965b55b892d438da492708ea09799c,
+        type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents:
-    - {fileID: 954399581682607488, guid: b0965b55b892d438da492708ea09799c, type: 3}
     - {fileID: 326638022526883033, guid: b0965b55b892d438da492708ea09799c, type: 3}
   m_SourcePrefab: {fileID: 100100000, guid: b0965b55b892d438da492708ea09799c, type: 3}
 --- !u!1 &1386573474952799969 stripped

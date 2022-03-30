@@ -13,4 +13,4 @@ MonoBehaviour:
   m_Name: PlatformSettings
   m_EditorClassIdentifier: 
   nonVRController: Player
-  vrControllerName: Player Variant VR
+  vrControllerName: MixedRealityToolkit

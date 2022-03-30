@@ -8,10 +8,15 @@ namespace DCL.VR
 
         [SerializeField]
         private GameObject cameraObject;
-
+        
         private void Awake()
         {
             i = this;
+        }
+        
+        public Camera GetCamera()
+        {
+            return cameraObject.GetComponent<Camera>();
         }
 
         public void SetCameraInactive()

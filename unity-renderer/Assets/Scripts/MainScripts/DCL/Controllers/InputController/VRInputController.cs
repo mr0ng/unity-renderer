@@ -1,109 +1,35 @@
+using System;
 using Microsoft.MixedReality.Toolkit;
 using Microsoft.MixedReality.Toolkit.Input;
 using Microsoft.MixedReality.Toolkit.Utilities;
-using DCL;
-using System;
-using System.Collections;
+using UnityEditor;
 using UnityEngine;
+using UnityEngine.XR;
 
-public class VRInputController : InputSystemGlobalHandlerListener, IMixedRealityInputHandler<Vector2>, IMixedRealityInputActionHandler
+public class VRInputController : MonoBehaviour
 {
     [SerializeField]
-    private MixedRealityInputAction moveAction;
+    private Transform cameraParent;
     [SerializeField]
-    private MixedRealityInputAction rotateAction;
-    [SerializeField]
-    private MixedRealityInputAction jumpAction;
-    [SerializeField]
-    private float speed = 0.1f;
-    [SerializeField]
-    private float CameraFollowSpeed = 100f;
-    [SerializeField]
-    private float MaxDistCameraPlayer = 20;
-    [SerializeField]
-    private InputAction_Measurable characterXAxis;
-    [SerializeField]
-    private InputAction_Measurable characterYAxis;
-    [SerializeField]
-    private InputAction_Hold jump;
+    private float speed = 15f;
+    private InputDevice rightController;
 
-    private void OnValidate()
+    private void Start()
     {
-        CheckForValidAction(ref moveAction, AxisType.DualAxis);
-        CheckForValidAction(ref rotateAction, AxisType.DualAxis);
-        CheckForValidAction(ref jumpAction, AxisType.Digital);
+        rightController = InputDevices.GetDeviceAtXRNode(XRNode.RightHand);
     }
 
-    private void CheckForValidAction(ref MixedRealityInputAction action, AxisType axisType)
+    private bool GetAxis(out Vector2 value) => rightController.TryGetFeatureValue(CommonUsages.primary2DAxis, out value);
+
+    private void Update() { CheckForRotation(); }
+    
+    private void CheckForRotation()
     {
-        if (action == MixedRealityInputAction.None)
+        if (!rightController.isValid)
+            rightController = InputDevices.GetDeviceAtXRNode(XRNode.RightHand);
+        if (GetAxis(out Vector2 value))
         {
-            Debug.LogWarning("Action has not been set", this);
+            cameraParent.eulerAngles += Time.deltaTime * speed * new Vector3(0f, value.x, 0f);
         }
-        else if (action.AxisConstraint != axisType)
-        {
-            Debug.LogError($"Move Action must be of DualAxis type, {moveAction.Description} is of {moveAction.AxisConstraint} type");
-            action = MixedRealityInputAction.None;
-        }
-    }
-
-    protected override void Start()
-    {
-        RegisterHandlers();
-    }
-
-    private void OnDestroy()
-    {
-        UnregisterHandlers();
-    }
-
-    public void OnInputChanged(InputEventData<Vector2> eventData)
-    {
-        if (eventData.MixedRealityInputAction.Equals(moveAction))
-        {
-            MovePlayer(eventData.InputData);
-        }        
-        else if (eventData.MixedRealityInputAction.Equals(rotateAction))
-        {
-            RotatePlayer(eventData.InputData);
-        }
-    }
-
-    private void RotatePlayer(Vector2 inputData)
-    {        
-        Debug.Log($"left hand input {inputData}");
-        // characterXAxis.RaiseOnValueChanged(inputData.x);
-        // characterYAxis.RaiseOnValueChanged(inputData.y);
-    }
-
-    private void MovePlayer(Vector2 inputData)
-    {
-        Debug.Log($"right hand input {inputData}");
-        characterXAxis.RaiseOnValueChanged(inputData.x);
-        characterYAxis.RaiseOnValueChanged(inputData.y);
-    }
-
-    public void OnActionStarted(BaseInputEventData eventData)
-    {
-        if (!eventData.MixedRealityInputAction.Description.Equals("Thumb Press")) return;
-        Debug.Log("Thumbstick was pressed.");
-    }
-
-    public void OnActionEnded(BaseInputEventData eventData)
-    {
-        if (!eventData.MixedRealityInputAction.Description.Equals("Thumb Press")) return;
-        Debug.Log("Thumbstick was released.");
-    }
-
-    protected override void RegisterHandlers()
-    {
-        CoreServices.InputSystem?.RegisterHandler<IMixedRealityInputActionHandler>(this);
-        CoreServices.InputSystem?.RegisterHandler<IMixedRealityInputHandler<Vector2>>(this);
-    }
-
-    protected override void UnregisterHandlers()
-    {
-        CoreServices.InputSystem?.UnregisterHandler<IMixedRealityInputActionHandler>(this);
-        CoreServices.InputSystem?.UnregisterHandler<IMixedRealityInputHandler<Vector2>>(this);
     }
 }

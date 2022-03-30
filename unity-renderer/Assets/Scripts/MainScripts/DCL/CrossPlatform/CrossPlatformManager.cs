@@ -1,4 +1,3 @@
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -24,5 +23,10 @@ public class CrossPlatformManager
         }
 
         return contorllerName;
+    }
+
+    public static bool IsVRPlatform()
+    {
+        return XRGeneralSettings.Instance.Manager.activeLoader != null;
     }
 }
