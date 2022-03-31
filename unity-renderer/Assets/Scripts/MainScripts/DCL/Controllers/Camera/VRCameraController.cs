@@ -12,6 +12,8 @@ namespace DCL.Camera
         [SerializeField]
         private Transform targetToFollow;
 
+        private Vector3 offset = new Vector3(0f, -0.5f, 0f);
+
         void Start()
         {
             CommonScriptableObjects.cameraBlocked.OnChange += CameraBlockedOnchange;
