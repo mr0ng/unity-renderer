@@ -42,16 +42,15 @@ MonoBehaviour:
     controllerVisualizationType:
       reference: Microsoft.MixedReality.Toolkit.Input.WindowsMixedRealityControllerVisualizer,
         Microsoft.MixedReality.Toolkit.SDK
-  - description: HP Reverb G2 Controller
+  - description: Oculus XRSDK Touch Controller
     controllerType:
-      reference: Microsoft.MixedReality.Toolkit.XRSDK.OpenXR.HPReverbG2Controller,
-        Microsoft.MixedReality.Toolkit.Providers.OpenXR
+      reference: Microsoft.MixedReality.Toolkit.XRSDK.Oculus.Input.OculusXRSDKTouchController,
+        Microsoft.MixedReality.Toolkit.Providers.XRSDK.Oculus
     handedness: 3
     usePlatformModels: 1
     platformModelMaterial: {fileID: 2100000, guid: cac043ca3d4213e479d93527c64b955e,
       type: 2}
-    overrideModel: {fileID: 469963229739672959, guid: 13e8b447a6d10e34aa8985c9da5109bf,
-      type: 3}
+    overrideModel: {fileID: 0}
     controllerVisualizationType:
       reference: Microsoft.MixedReality.Toolkit.Input.WindowsMixedRealityControllerVisualizer,
         Microsoft.MixedReality.Toolkit.SDK

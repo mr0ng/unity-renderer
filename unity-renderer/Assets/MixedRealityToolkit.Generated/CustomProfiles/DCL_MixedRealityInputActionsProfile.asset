@@ -62,3 +62,6 @@ MonoBehaviour:
   - id: 16
     description: MoveAround
     axisConstraint: 4
+  - id: 17
+    description: Click
+    axisConstraint: 2

@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using DCL.Components;
 using UnityEditor;
 using UnityEngine;
+using Vuplex.WebView;
+using UnityEngine.XR;
+
 
 namespace DCL
 {
@@ -129,7 +132,7 @@ namespace DCL
 
         private void OpenWebBrowser()
         {
-#if (UNITY_EDITOR || UNITY_STANDALONE)
+//#if (UNITY_EDITOR || UNITY_STANDALONE)
             string baseUrl = "";
             string debugString = "";
 
@@ -225,12 +228,15 @@ namespace DCL
             {
                 Debug.Log("[REMINDER] To be able to connect with SSL you should start Chrome with the --ignore-certificate-errors argument specified (or enabling the following option: chrome://flags/#allow-insecure-localhost). In Firefox set the configuration option `network.websocket.allowInsecureFromHTTPS` to true, then use the ws:// rather than the wss:// address.");                
             }
-
+#if UNITY_ANDROID
+            OculusWebViewInterface.instance.OpenURL(
+                $"{baseUrl}{debugString}{debugPanelString}position={startInCoords.x}%2C{startInCoords.y}&ws={DataStore.i.wsCommunication.url}");
+#else
             Application.OpenURL(
                 $"{baseUrl}{debugString}{debugPanelString}position={startInCoords.x}%2C{startInCoords.y}&ws={DataStore.i.wsCommunication.url}");
 #endif
+//#endif
         }
-
         private void OnDestroy() { DataStore.i.wsCommunication.communicationReady.OnChange -= OnCommunicationReadyChangedValue; }
         
         private void QuitGame()

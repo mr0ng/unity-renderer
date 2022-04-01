@@ -80,6 +80,9 @@ public class WebSocketCommunication : IKernelCommunication
         InitMessageTypeToBridgeName();
 
         DCL.DataStore.i.debugConfig.isWssDebugMode = true;
+#if UNITY_EDITOR
+        DCLWebSocketService.VERBOSE = true;
+#endif
 
         string url = StartServer(5000, 5100, withSSL);
 
@@ -240,8 +243,7 @@ public class WebSocketCommunication : IKernelCommunication
                         if (DCLWebSocketService.VERBOSE)
                         {
                             Debug.Log(
-                                "<b><color=#0000FF>WebSocketCommunication</color></b> >>> Got it! passing message of type " +
-                                msg.type);
+                                $"<b><color=#0000FF>WebSocketCommunication</color></b> >>> Got it! passing message of type {msg.type}, {msg.payload}");
                         }
                     }
                 }
