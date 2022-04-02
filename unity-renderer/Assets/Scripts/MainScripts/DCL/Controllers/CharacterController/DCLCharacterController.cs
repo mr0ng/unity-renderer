@@ -293,18 +293,11 @@ public class DCLCharacterController : MonoBehaviour
 
                 Vector3 forwardTarget = Vector3.zero;
 
-                if (characterYAxis.GetValue() > 0)
-                    forwardTarget += xzPlaneForward;
-                if (characterYAxis.GetValue() < 0)
-                    forwardTarget -= xzPlaneForward;
-
-                if (characterXAxis.GetValue() > 0)
-                    forwardTarget += xzPlaneRight;
-                if (characterXAxis.GetValue() < 0)
-                    forwardTarget -= xzPlaneRight;
-
-
-                forwardTarget.Normalize();
+                forwardTarget += characterYAxis.GetValue() * xzPlaneForward;
+                forwardTarget += characterXAxis.GetValue() * xzPlaneRight;
+                
+                if (forwardTarget.magnitude > 1)
+                    forwardTarget.Normalize();
                 velocity += forwardTarget * speed;
                 CommonScriptableObjects.playerUnityEulerAngles.Set(transform.eulerAngles);
             }

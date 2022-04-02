@@ -4,7 +4,6 @@ using System.Linq;
 using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
-using InputSettings = DCL.Configuration.InputSettings;
 
 /// <summary>
 /// Mapping for Trigger actions
@@ -146,6 +145,18 @@ public class InputController : MonoBehaviour
     bool allUIHidden => CommonScriptableObjects.allUIHidden.Get();
     public InputTypeMode inputTypeMode { get; set; } = InputTypeMode.GENERAL;
 
+    private DCLPlayerInput playerInput;
+    private DCLPlayerInput.PlayerActions player;
+    private void Awake()
+    {
+        playerInput = new DCLPlayerInput();
+        player = playerInput.Player;
+    }
+
+    private void OnEnable() => playerInput.Enable();
+
+    private void OnDisable() => playerInput.Disable();
+
     private void Update()
     {
         if (!renderingEnabled)
@@ -153,7 +164,7 @@ public class InputController : MonoBehaviour
             Stop_Measurable(measurableActions);
             return;
         }
-
+        
         switch (inputTypeMode)
         {
             case InputTypeMode.OFF:
@@ -390,11 +401,11 @@ public class InputController : MonoBehaviour
             switch (action.GetDCLAction())
             {
                 case DCLAction_Hold.Sprint:
-                    InputProcessor.FromKey(action, InputSettings.WalkButtonKeyCode,
+                    InputProcessor.FromKey(action, player.Walk.ReadValue<float>(),
                         InputProcessor.Modifier.FocusNotInInput | InputProcessor.Modifier.NotInStartMenu);
                     break;
                 case DCLAction_Hold.Jump:
-                    InputProcessor.FromKey(action, InputSettings.JumpButtonKeyCode,
+                    InputProcessor.FromKey(action, player.Jump.ReadValue<float>(),
                         InputProcessor.Modifier.FocusNotInInput | InputProcessor.Modifier.NotInStartMenu);
                     break;
                 case DCLAction_Hold.FreeCameraMode:
@@ -463,21 +474,23 @@ public class InputController : MonoBehaviour
             switch (action.GetDCLAction())
             {
                 case DCLAction_Measurable.CharacterXAxis:
-                    InputProcessor.FromAxis(action, "Horizontal", 
+                    InputProcessor.FromAxis(action, player.Move.ReadValue<Vector2>().x, 
                         InputProcessor.Modifier.FocusNotInInput | InputProcessor.Modifier.NotInStartMenu);
                     break;
                 case DCLAction_Measurable.CharacterYAxis:
-                    InputProcessor.FromAxis(action, "Vertical",
+                    InputProcessor.FromAxis(action, player.Move.ReadValue<Vector2>().y,
                         InputProcessor.Modifier.FocusNotInInput | InputProcessor.Modifier.NotInStartMenu);
                     break;
                 case DCLAction_Measurable.CameraXAxis:
-                    InputProcessor.FromAxis(action, "Mouse X", InputProcessor.Modifier.NeedsPointerLocked);
+                    InputProcessor.FromAxis(action, player.Look.ReadValue<Vector2>().x,
+                        InputProcessor.Modifier.NeedsPointerLocked);
                     break;
                 case DCLAction_Measurable.CameraYAxis:
-                    InputProcessor.FromAxis(action, "Mouse Y", InputProcessor.Modifier.NeedsPointerLocked);
+                    InputProcessor.FromAxis(action, player.Look.ReadValue<Vector2>().y
+                        , InputProcessor.Modifier.NeedsPointerLocked);
                     break;
                 case DCLAction_Measurable.MouseWheel:
-                    InputProcessor.FromAxis(action, "Mouse ScrollWheel", modifiers: InputProcessor.Modifier.FocusNotInInput);
+                    InputProcessor.FromAxis(action, player.ScrollMouse.ReadValue<float>(), modifiers: InputProcessor.Modifier.FocusNotInInput);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();
@@ -622,6 +635,15 @@ public static class InputProcessor
             action.RaiseOnFinished();
     }
 
+    public static void FromKey(InputAction_Hold action, float pressed, Modifier modifiers = Modifier.None)
+    {
+        if (!action.isOn && pressed > .5f)
+            action.RaiseOnStarted();
+        if (action.isOn && pressed < .5f)
+            action.RaiseOnFinished();
+        
+    }
+
     /// <summary>
     /// Process an input action mapped to a keyboard key
     /// </summary>
@@ -669,6 +691,17 @@ public static class InputProcessor
         }
 
         action.RaiseOnValueChanged(Input.GetAxis(axisName));
+    }
+
+    public static void FromAxis(InputAction_Measurable action, float value, Modifier modifiers = Modifier.None)
+    {
+        if (!PassModifiers(modifiers))
+        {
+            action.RaiseOnValueChanged(0);
+            return;
+        }
+
+        action.RaiseOnValueChanged(value);
     }
 
     /// <summary>
