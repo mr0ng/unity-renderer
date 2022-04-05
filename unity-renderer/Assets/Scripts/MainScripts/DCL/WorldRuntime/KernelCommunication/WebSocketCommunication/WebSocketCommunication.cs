@@ -79,7 +79,9 @@ public class WebSocketCommunication : IKernelCommunication
     public WebSocketCommunication(bool withSSL = false, int startPort = 5000, int endPort = 5100)
     {
         InitMessageTypeToBridgeName();
-
+#if UNITY_EDITOR
+        DCLWebSocketService.VERBOSE = true;
+#endif
         DCL.DataStore.i.debugConfig.isWssDebugMode = true;
 
         string url = StartServer(startPort, endPort, withSSL);
@@ -243,8 +245,7 @@ public class WebSocketCommunication : IKernelCommunication
                         if (DCLWebSocketService.VERBOSE)
                         {
                             Debug.Log(
-                                "<b><color=#0000FF>WebSocketCommunication</color></b> >>> Got it! passing message of type " +
-                                msg.type);
+                                $"<b><color=#0000FF>WebSocketCommunication</color></b> >>> Got it! passing message of type {msg.type}, {msg.payload}");
                         }
                     }
                 }

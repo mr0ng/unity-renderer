@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using DCL.Components;
 using UnityEditor;
 using UnityEngine;
+using Vuplex.WebView;
 
 namespace DCL
 {
@@ -92,6 +93,7 @@ namespace DCL
             DataStore.i.debugConfig.msgStepByStep = debugConfig.msgStepByStep;
             DataStore.i.performance.multithreading.Set(multithreaded);
             Texture.allowThreadedTextureCreation = multithreaded;
+            
         }
 
         private void Start()
@@ -100,10 +102,12 @@ namespace DCL
             {
                 if (DataStore.i.wsCommunication.communicationReady.Get())
                 {
+                    Debug.Log("WebView: did enter InitConfig");
                     InitConfig();
                 }
                 else
                 {
+                    Debug.Log("WebView: did not enter InitConfig");
                     DataStore.i.wsCommunication.communicationReady.OnChange += OnCommunicationReadyChangedValue;
                 }
             }
@@ -131,7 +135,7 @@ namespace DCL
 
         private void OpenWebBrowser()
         {
-#if (UNITY_EDITOR || UNITY_STANDALONE)
+#if (UNITY_EDITOR || UNITY_STANDALONE || UNITY_ANDROID)
             string baseUrl = "";
             string debugString = "";
 
@@ -222,9 +226,14 @@ namespace DCL
             {
                 Debug.Log("[REMINDER] To be able to connect with SSL you should start Chrome with the --ignore-certificate-errors argument specified (or enabling the following option: chrome://flags/#allow-insecure-localhost). In Firefox set the configuration option `network.websocket.allowInsecureFromHTTPS` to true, then use the ws:// rather than the wss:// address.");                
             }
-
+#if UNITY_ANDROID && !UNITY_EDITOR
+            Debug.Log($"WebView: android path selected {baseUrl}{debugString}{debugPanelString}position={startInCoords.x}%2C{startInCoords.y}&ws={DataStore.i.wsCommunication.url}");
+            OculusWebViewInterface.instance.OpenURL($"{baseUrl}{debugString}{debugPanelString}position={startInCoords.x}%2C{startInCoords.y}&ws={DataStore.i.wsCommunication.url}");
+#else
+            Debug.Log($"WebView: PC path selected {baseUrl}{debugString}{debugPanelString}position={startInCoords.x}%2C{startInCoords.y}&ws={DataStore.i.wsCommunication.url}");
             Application.OpenURL(
                 $"{baseUrl}{debugString}{debugPanelString}position={startInCoords.x}%2C{startInCoords.y}&ws={DataStore.i.wsCommunication.url}");
+#endif
 #endif
         }
 

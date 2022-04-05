@@ -95,7 +95,7 @@ namespace Builder
             }
         }
 
-#if UNITY_EDITOR
+#if UNITY_EDITOR || UNITY_ANDROID
         GameObject bridgeGameObject;
 
         private void EditorKeyDownEvent()
