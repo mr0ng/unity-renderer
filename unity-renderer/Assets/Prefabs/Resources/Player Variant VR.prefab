@@ -12,7 +12,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 25b2b8602525992499af4fbaeca33e82, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  rotateSpeed: 90
   controller: {fileID: 5279246958917804627}
   targetToFollow: {fileID: 8435887310141166953}
   cameraChangeAction: {fileID: 11400000, guid: 6701d7e30ddf77c48accc629429f7e30, type: 2}
@@ -284,6 +283,11 @@ PrefabInstance:
       propertyPath: m_HorizontalAxis.Value
       value: 23.02568
       objectReference: {fileID: 0}
+    - target: {fileID: 4809124994981281969, guid: b0965b55b892d438da492708ea09799c,
+        type: 3}
+      propertyPath: m_Camera
+      value: 
+      objectReference: {fileID: 6441102298861331460}
     - target: {fileID: 4852920391666169108, guid: b0965b55b892d438da492708ea09799c,
         type: 3}
       propertyPath: m_Enabled
@@ -292,7 +296,7 @@ PrefabInstance:
     - target: {fileID: 6152136595692442593, guid: b0965b55b892d438da492708ea09799c,
         type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8300538586268340887, guid: b0965b55b892d438da492708ea09799c,
         type: 3}
@@ -329,6 +333,12 @@ MonoBehaviour:
 --- !u!1 &2664722497377917998 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 6152136595692442593, guid: b0965b55b892d438da492708ea09799c,
+    type: 3}
+  m_PrefabInstance: {fileID: 8185918345684324303}
+  m_PrefabAsset: {fileID: 0}
+--- !u!20 &6441102298861331460 stripped
+Camera:
+  m_CorrespondingSourceObject: {fileID: 2952493522718747595, guid: b0965b55b892d438da492708ea09799c,
     type: 3}
   m_PrefabInstance: {fileID: 8185918345684324303}
   m_PrefabAsset: {fileID: 0}
