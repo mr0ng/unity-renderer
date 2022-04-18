@@ -1,22 +1,18 @@
 using System;
-using DCL;
 using DCL.Huds;
+using Microsoft.MixedReality.Toolkit.Input;
 using Microsoft.MixedReality.Toolkit.Input.Utilities;
 using Microsoft.MixedReality.Toolkit.UI;
-using Microsoft.MixedReality.Toolkit.Utilities;
 using UnityEngine;
-using Microsoft.MixedReality.Toolkit.Utilities.Solvers;
 using UnityEngine.UI;
 
 public class VRHUDHelper : MonoBehaviour
 {
-    private enum FollowBehavior
+    private enum HudType
     {
-        Stationary,
-        Toolbelt,
-        PalmUp,
-        Radial,
-        Orbital
+        Loading,
+        Menu,
+        Message
     }
     
     private enum InterationBehavior
@@ -29,31 +25,45 @@ public class VRHUDHelper : MonoBehaviour
     }
 
     [SerializeField]
-    private HUDElementID hudType;
-    [SerializeField]
-    private FollowBehavior followBehavior;
+    private HudType hudType;
     [SerializeField]
     private InterationBehavior interactionBehavior;
     [SerializeField]
     private Vector3 scale = new Vector3(0.001f, 0.001f, 0.001f);
-
     [SerializeField]
-    private GameObject visuals;
-    
-    private Transform cameraTrans;
-    private GameObject loadingCamera;
+    private LayerMask loadingMask;
+
+    private Transform myTrans;
 
     private void Awake()
     {
         if (!CrossPlatformManager.IsVRPlatform())
         {
             enabled = false;
-            RemoveDependencies();
             return;
         }
+        myTrans = transform;
         ConvertUI();
-        VRHUDController.I.Register(hudType, this);
     }
+
+    private void Start()
+    {
+        switch (hudType)
+        {
+            case HudType.Menu:
+                VRHUDController.I.Register(this);
+                break;
+            case HudType.Message:
+                VRHUDController.LoadingStart += Hide;
+                break;
+        }
+    }
+    private void Hide()
+    {
+        gameObject.SetActive(false);
+        VRHUDController.LoadingStart -= Hide;
+    }
+
     private void RemoveDependencies()
     {
         BoxCollider[] boxes = gameObject.GetComponentsInChildren<BoxCollider>();
@@ -68,13 +78,14 @@ public class VRHUDHelper : MonoBehaviour
     {
         Canvas canvas = GetComponent<Canvas>();
         canvas.renderMode = RenderMode.WorldSpace;
-        transform.localScale = scale;
-        if (GetComponent<GraphicRaycaster>() != null)
+        myTrans.localScale = scale;
+        if (GetComponent<GraphicRaycaster>() == null)
             gameObject.AddComponent<GraphicRaycaster>();
-        if (GetComponent<CanvasUtility>() != null)
+        if (GetComponent<CanvasUtility>() == null)
             gameObject.AddComponent<CanvasUtility>();
+        if (GetComponent<NearInteractionTouchableUnityUI>() == null)
+            gameObject.AddComponent<NearInteractionTouchableUnityUI>();
 
-        SetUpFollowBehavior();
         SetUpInteractionBehavtior();
     }
     
@@ -83,11 +94,7 @@ public class VRHUDHelper : MonoBehaviour
         switch (interactionBehavior)
         {
             case InterationBehavior.Loading:
-                if (cameraTrans == null)
-                {
-                    loadingCamera = Instantiate(Resources.Load<GameObject>("LoadingCamera"));
-                    cameraTrans = loadingCamera.transform;
-                }
+                
                 break;
             case InterationBehavior.Far:
                 Button[] buttons = GetComponentsInChildren<Button>(true);
@@ -98,7 +105,6 @@ public class VRHUDHelper : MonoBehaviour
                     interactable.OnClick.AddListener(() =>
                     {
                         Debug.LogWarning("Button clicked");
-                        button.onClick?.Invoke();
                     });
                 }
                 break;
@@ -108,52 +114,15 @@ public class VRHUDHelper : MonoBehaviour
             default: break;
         }
     }
-    
-    private void SetUpFollowBehavior()
-    {
-        switch (followBehavior)
-        {
-            case FollowBehavior.Orbital :
-                Orbital orbital = gameObject.AddComponent<Orbital>();
-                break;
-            case FollowBehavior.PalmUp :
-                SolverHandler solver = gameObject.AddComponent<SolverHandler>();
-                solver.TrackedTargetType = TrackedObjectType.HandJoint;
-                solver.TrackedHandJoint = TrackedHandJoint.Wrist;
-                HandConstraintPalmUp palmUp = gameObject.AddComponent<HandConstraintPalmUp>();
-                palmUp.OnHandActivate.AddListener(ActivateVisuals);
-                palmUp.OnHandDeactivate.AddListener(DeactivateVisuals);
-                break;
-            case FollowBehavior.Toolbelt:
-            case FollowBehavior.Radial:
-            case FollowBehavior.Stationary:
-            default:
-                gameObject.SetActive(false);
-                break;
-        }
-    }
 
     private void RunBehavior()
     {
-        switch (followBehavior)
-        {
-            case FollowBehavior.Orbital : 
-                break;
-            case FollowBehavior.Toolbelt:
-                break;
-            case FollowBehavior.PalmUp:
-                break;
-            case FollowBehavior.Radial:
-                break;
-            case FollowBehavior.Stationary:
-            default: break;
-        }
         switch (interactionBehavior)
         {
             case InterationBehavior.Loading:
-                if (Camera.main != null) Camera.main.enabled = false;
-                loadingCamera.SetActive(true);
-                transform.position = new Vector3(0f, 1.5f, 1f);
+                CrossPlatformManager.SetCameraForLoading(loadingMask);
+                SetPosition(Camera.main.transform);
+                VRHUDController.RaiseLoadingStart();
                 break;
             case InterationBehavior.Far:
                 break;
@@ -180,9 +149,8 @@ public class VRHUDHelper : MonoBehaviour
         switch (interactionBehavior)
         {
             case InterationBehavior.Loading:
-                if (Camera.main != null)
-                    Camera.main.enabled = true;
-                loadingCamera.SetActive(false);
+                CrossPlatformManager.SetCameraForGame();
+                VRHUDController.RaiseLoadingEnd();
                 break;
             case InterationBehavior.Far:
                 break;
@@ -192,12 +160,22 @@ public class VRHUDHelper : MonoBehaviour
             default: break;
         }
     }
-
-    private void ActivateVisuals() => visuals.SetActive(true);
-    private void DeactivateVisuals() => visuals.SetActive(false);
-
+    
+    public void SetPosition(Transform mainCam)
+    {
+        var foward = mainCam.forward;
+        var forward = new Vector3(foward.x, 0f , foward.z).normalized;
+        myTrans.position = mainCam.position + forward;
+        myTrans.forward = forward;
+    }
+    
     public void ActivateHud()
     {
         gameObject.SetActive(true);
+    }
+    
+    public void DeactivateHud()
+    {
+        gameObject.SetActive(false);
     }
 }

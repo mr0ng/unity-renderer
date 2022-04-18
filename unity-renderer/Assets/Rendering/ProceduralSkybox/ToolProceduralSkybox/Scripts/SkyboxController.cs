@@ -183,7 +183,7 @@ namespace DCL.Skybox
             }
 
             // make probe a child of main camera
-            if (Camera.main != null)
+            if (Camera.main != null && runtimeReflectionObj != null)
             {
                 GameObject mainCam = Camera.main.gameObject;
                 runtimeReflectionObj.followTransform = mainCam.transform;

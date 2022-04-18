@@ -333,8 +333,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0059bf4137601a84caf3c5549fe42066, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  behavior: 0
+  hudType: 0
+  interactionBehavior: -1
   scale: {x: 0.001, y: 0.001, z: 0.001}
+  loadingMask:
+    serializedVersion: 2
+    m_Bits: 32
 --- !u!114 &5755412700698615553
 MonoBehaviour:
   m_ObjectHideFlags: 0

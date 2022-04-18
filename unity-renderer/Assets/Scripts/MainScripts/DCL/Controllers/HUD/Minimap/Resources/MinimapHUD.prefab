@@ -1341,6 +1341,7 @@ GameObject:
   - component: {fileID: 5339787396754724817}
   - component: {fileID: 4545096824855088683}
   - component: {fileID: 4227713636645781401}
+  - component: {fileID: 5834885573012483856}
   m_Layer: 5
   m_Name: MinimapHUD
   m_TagString: Untagged
@@ -1521,6 +1522,21 @@ MonoBehaviour:
   animSpeedFactor: 1
   disableAfterFadeOut: 0
   visibleParam: visible
+--- !u!114 &5834885573012483856
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4525154057530514719}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0059bf4137601a84caf3c5549fe42066, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  hudType: 1
+  interactionBehavior: 1
+  scale: {x: 0.001, y: 0.001, z: 0.001}
 --- !u!1 &4665053653492846095
 GameObject:
   m_ObjectHideFlags: 0
