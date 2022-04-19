@@ -25,7 +25,7 @@ namespace DCL
                     ""type"": ""Value"",
                     ""id"": ""85e62bba-27a9-473b-a603-db50e5c40191"",
                     ""expectedControlType"": ""Vector2"",
-                    ""processors"": """",
+                    ""processors"": ""StickDeadzone"",
                     ""interactions"": """"
                 },
                 {
@@ -33,7 +33,7 @@ namespace DCL
                     ""type"": ""Value"",
                     ""id"": ""de3fc6e4-219a-4c02-a847-56f4a50027a4"",
                     ""expectedControlType"": ""Vector2"",
-                    ""processors"": """",
+                    ""processors"": ""StickDeadzone"",
                     ""interactions"": """"
                 },
                 {

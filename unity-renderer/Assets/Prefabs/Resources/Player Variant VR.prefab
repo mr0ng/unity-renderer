@@ -12,8 +12,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 25b2b8602525992499af4fbaeca33e82, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  cam: {fileID: 6441102298861331460}
   controller: {fileID: 5279246958917804627}
   targetToFollow: {fileID: 8435887310141166953}
+  secondsBetweenTurns: 0.5
+  rotation: 45
   cameraChangeAction: {fileID: 11400000, guid: 6701d7e30ddf77c48accc629429f7e30, type: 2}
   cameraX: {fileID: 11400000, guid: c5302665e8f998e4ea2673bba5e22914, type: 2}
 --- !u!114 &7844977760530523158

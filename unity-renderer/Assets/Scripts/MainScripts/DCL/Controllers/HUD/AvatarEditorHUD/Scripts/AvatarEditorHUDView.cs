@@ -447,6 +447,7 @@ public class AvatarEditorHUDView : MonoBehaviour
 
         transform.SetParent(parentTransform);
         transform.localScale = Vector3.one;
+        transform.localRotation = Quaternion.identity;
 
         RectTransform rectTransform = transform as RectTransform;
         rectTransform.anchorMin = Vector2.zero;
