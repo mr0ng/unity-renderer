@@ -24,6 +24,7 @@ namespace DCL
 
         [SerializeField] private float parcelHightlightScale = 1.25f;
         [SerializeField] private Button ParcelHighlightButton;
+        [SerializeField] private PointerHelper helper;
         private float parcelSizeInMap;
         private Vector3Variable playerWorldPosition => CommonScriptableObjects.playerWorldPosition;
         private Vector3Variable playerRotation => CommonScriptableObjects.cameraForward;
@@ -175,10 +176,11 @@ namespace DCL
             if (!parcelHighlightEnabled)
                 return;
 
-            parcelSizeInMap = centeredReferenceParcel.rect.width * centeredReferenceParcel.lossyScale.x;
+            var scale = centeredReferenceParcel.lossyScale.x < 1f ? 1f : centeredReferenceParcel.lossyScale.x;
+            parcelSizeInMap = centeredReferenceParcel.rect.width * scale;
 
             // the reference parcel has a bottom-left pivot
-            centeredReferenceParcel.GetWorldCorners(mapWorldspaceCorners);
+            helper.UpdateCorners(mapWorldspaceCorners, centeredReferenceParcel);
             worldCoordsOriginInMap = mapWorldspaceCorners[0];
 
             UpdateCursorMapCoords();
@@ -190,11 +192,11 @@ namespace DCL
 
         void UpdateCursorMapCoords()
         {
-            if (!IsCursorOverMapChunk())
+            if (!helper.IsCursorOverMapChunk(NAVMAP_CHUNK_LAYER))
                 return;
 
-            cursorMapCoords = Input.mousePosition - worldCoordsOriginInMap;
-            cursorMapCoords = cursorMapCoords / parcelSizeInMap;
+            cursorMapCoords = helper.GetPointerPos() - worldCoordsOriginInMap;
+            cursorMapCoords /= parcelSizeInMap;
 
             cursorMapCoords.x = (int)Mathf.Floor(cursorMapCoords.x);
             cursorMapCoords.y = (int)Mathf.Floor(cursorMapCoords.y);
@@ -202,7 +204,7 @@ namespace DCL
 
         bool IsCursorOverMapChunk()
         {
-            uiRaycastPointerEventData.position = Input.mousePosition;
+            uiRaycastPointerEventData.position = helper.GetPointerPos();
             EventSystem.current.RaycastAll(uiRaycastPointerEventData, uiRaycastResults);
 
             return uiRaycastResults.Count > 0 && uiRaycastResults[0].gameObject.layer == NAVMAP_CHUNK_LAYER;

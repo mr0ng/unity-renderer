@@ -1989,7 +1989,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   hudType: 1
   interactionBehavior: 1
-  scale: {x: 0.001, y: 0.001, z: 0.001}
+  scale: {x: 0.00075, y: 0.00075, z: 0.00075}
+  loadingMask:
+    serializedVersion: 2
+    m_Bits: 0
 --- !u!1 &3827417907366463804
 GameObject:
   m_ObjectHideFlags: 0

@@ -146,6 +146,7 @@ GameObject:
   - component: {fileID: 785378317}
   - component: {fileID: 829943578414287809}
   - component: {fileID: 7929854281947399184}
+  - component: {fileID: 342736248372365796}
   m_Layer: 0
   m_Name: Map Renderer
   m_TagString: Untagged
@@ -226,8 +227,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   parcelHightlightScale: 1.25
-  parcelHoldTimeInSeconds: 1
   ParcelHighlightButton: {fileID: 3511145948971381255}
+  helper: {fileID: 342736248372365796}
   cursorMapCoords: {x: 0, y: 0, z: 0}
   showCursorCoords: 1
   atlas: {fileID: 8867674412829076673}
@@ -243,6 +244,19 @@ MonoBehaviour:
     type: 3}
   globalUserMarkerPrefab: {fileID: 5313837265398941890, guid: 6b6245a77381540da8f58d770d619b05,
     type: 3}
+--- !u!114 &342736248372365796
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2708201484279548439}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cf4c6d058059d7148899e8866624c569, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  offset: {x: 30, y: 100, z: 0}
 --- !u!1 &3620416516788639812
 GameObject:
   m_ObjectHideFlags: 0

@@ -50,8 +50,7 @@ namespace DCL.Huds
             for (int i = 0; i < huds.Count; i++)
             {
                 var hud = huds[i];
-                hud.SetPosition(mainCam);
-                hud.ActivateHud();
+                hud.ShowHud(mainCam);
             }
         }
 
@@ -59,7 +58,7 @@ namespace DCL.Huds
         {
             for (int i = 0; i < huds.Count; i++)
             {
-                huds[i].DeactivateHud();
+                huds[i].HidHud();
             }
         }
     }

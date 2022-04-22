@@ -1536,7 +1536,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   hudType: 1
   interactionBehavior: 1
-  scale: {x: 0.001, y: 0.001, z: 0.001}
+  scale: {x: 0.00075, y: 0.00075, z: 0.00075}
+  loadingMask:
+    serializedVersion: 2
+    m_Bits: 0
 --- !u!1 &4665053653492846095
 GameObject:
   m_ObjectHideFlags: 0
@@ -2805,6 +2808,11 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 1347496358759656025}
     m_Modifications:
+    - target: {fileID: 342736248372365796, guid: d9dce1d29f77362429e9a3bdf98b238a,
+        type: 3}
+      propertyPath: referenceTrans
+      value: 
+      objectReference: {fileID: 1347496358759656025}
     - target: {fileID: 2708201484279548439, guid: d9dce1d29f77362429e9a3bdf98b238a,
         type: 3}
       propertyPath: m_Name

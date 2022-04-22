@@ -34,6 +34,7 @@ public class VRHUDHelper : MonoBehaviour
     private LayerMask loadingMask;
 
     private Transform myTrans;
+    private readonly Vector3 hidenPos = new Vector3(0, 300, 0);
 
     private void Awake()
     {
@@ -43,6 +44,7 @@ public class VRHUDHelper : MonoBehaviour
             return;
         }
         myTrans = transform;
+        myTrans.position = hidenPos;
         ConvertUI();
     }
 
@@ -121,7 +123,7 @@ public class VRHUDHelper : MonoBehaviour
         {
             case InterationBehavior.Loading:
                 CrossPlatformManager.SetCameraForLoading(loadingMask);
-                SetPosition(Camera.main.transform);
+                ShowHud(Camera.main.transform);
                 VRHUDController.RaiseLoadingStart();
                 break;
             case InterationBehavior.Far:
@@ -161,7 +163,7 @@ public class VRHUDHelper : MonoBehaviour
         }
     }
     
-    public void SetPosition(Transform mainCam)
+    public void ShowHud(Transform mainCam)
     {
         var foward = mainCam.forward;
         var forward = new Vector3(foward.x, 0f , foward.z).normalized;
@@ -169,13 +171,8 @@ public class VRHUDHelper : MonoBehaviour
         myTrans.forward = forward;
     }
     
-    public void ActivateHud()
+    public void HidHud()
     {
-        gameObject.SetActive(true);
-    }
-    
-    public void DeactivateHud()
-    {
-        gameObject.SetActive(false);
+        transform.position = hidenPos;
     }
 }
