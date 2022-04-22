@@ -43,9 +43,13 @@ public class PointerHelper : MonoBehaviour
         origin = corners[0];
     }
 
-    public void UpdateCorners(Vector3[] corners, RectTransform rectTrans)
+    public void UpdateCorners(Vector3[] refCorners, RectTransform rectTrans, ref Vector3 worldCoordsOriginInMap)
     {
-        rectTrans.GetWorldCorners(corners);
+        rectTrans.GetWorldCorners(refCorners);
+        if (isVR)
+            worldCoordsOriginInMap = rectTrans.worldToLocalMatrix.MultiplyPoint(refCorners[0]);
+        else
+            worldCoordsOriginInMap = refCorners[0];
         if (referenceTrans == null) referenceTrans = rectTrans;
     }
 

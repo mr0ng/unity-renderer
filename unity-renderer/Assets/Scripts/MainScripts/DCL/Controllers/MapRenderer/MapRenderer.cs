@@ -180,8 +180,7 @@ namespace DCL
             parcelSizeInMap = centeredReferenceParcel.rect.width * scale;
 
             // the reference parcel has a bottom-left pivot
-            helper.UpdateCorners(mapWorldspaceCorners, centeredReferenceParcel);
-            worldCoordsOriginInMap = mapWorldspaceCorners[0];
+            helper.UpdateCorners(mapWorldspaceCorners, centeredReferenceParcel, ref worldCoordsOriginInMap);
 
             UpdateCursorMapCoords();
 
