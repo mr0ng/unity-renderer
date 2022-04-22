@@ -149,6 +149,8 @@ public class PlaceCardComponentView : BaseComponentView, IPlaceCardComponentView
         CleanFriendHeadsItems();
     }
 
+    public override void Start() { transform.localRotation = Quaternion.identity; }
+
     public void Configure(BaseComponentModel newModel)
     {
         model = (PlaceCardComponentModel)newModel;
