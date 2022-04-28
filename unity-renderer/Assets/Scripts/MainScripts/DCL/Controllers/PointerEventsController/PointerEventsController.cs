@@ -9,6 +9,7 @@ using UnityEngine.EventSystems;
 using System.Collections.Generic;
 using System.Linq;
 using DCL.Models;
+using Microsoft.MixedReality.Toolkit.Input;
 using Ray = UnityEngine.Ray;
 
 namespace DCL
@@ -18,6 +19,9 @@ namespace DCL
         private static bool renderingEnabled => CommonScriptableObjects.rendererState.Get();
         public System.Action OnPointerHoverStarts;
         public System.Action OnPointerHoverEnds;
+        
+        
+        DCLPlayerInput inputActions = new DCLPlayerInput();
 
         InteractionHoverCanvasController hoverController;
         RaycastHitInfo lastPointerDownEventHitInfo;
@@ -36,6 +40,7 @@ namespace DCL
         PointerEventData uiGraphicRaycastPointerEventData = new PointerEventData(null);
         List<RaycastResult> uiGraphicRaycastResults = new List<RaycastResult>();
         GraphicRaycaster uiGraphicRaycaster;
+        private IRaycastPointerHandler raycastHandlerTarget;
 
         public void Initialize()
         {
@@ -108,10 +113,10 @@ namespace DCL
                 return;
             }
 
-            var raycastHandlerTarget = hitInfo.collider.GetComponent<IRaycastPointerHandler>();
+            raycastHandlerTarget = hitInfo.collider.GetComponent<IRaycastPointerHandler>();
             if (raycastHandlerTarget != null)
             {
-                ResolveGenericRaycastHandlers(raycastHandlerTarget);
+                ResolveGenericRaycastHandlers();
                 UnhoverLastHoveredObject();
                 return;
             }
@@ -200,13 +205,14 @@ namespace DCL
                    AreSameEntity(newHoveredInputEvent, colliderInfo);
         }
 
-        private void ResolveGenericRaycastHandlers(IRaycastPointerHandler raycastHandlerTarget)
+        private void ResolveGenericRaycastHandlers()
         {
             if (Utils.LockedThisFrame())
                 return;
 
-            var mouseIsDown = Input.GetMouseButtonDown(0);
-            var mouseIsUp = Input.GetMouseButtonUp(0);
+            //if (!inputActions.Player.enabled) inputActions.Player.Enable();
+            var mouseIsDown = inputActions.Player.Select.triggered;
+            var mouseIsUp = !inputActions.Player.Select.triggered;
 
             if (raycastHandlerTarget is IRaycastPointerDownHandler down)
             {
@@ -292,10 +298,16 @@ namespace DCL
             }
         }
 
-        public Ray GetRayFromCamera() { return charCamera.ScreenPointToRay(new Vector3(Screen.width / 2, Screen.height / 2, 0)); }
+        public Ray GetRayFromCamera()
+        {
+            if (CrossPlatformManager.IsVRPlatform())
+                return CrossPlatformManager.GetRay();
+            return charCamera.ScreenPointToRay(new Vector3(Screen.width / 2, Screen.height / 2, 0));
+        }
 
         void OnButtonEvent(WebInterface.ACTION_BUTTON buttonId, InputController_Legacy.EVENT evt, bool useRaycast, bool enablePointerEvent)
         {
+            Debug.Log("Handle Button event");
             //TODO(Brian): We should remove this when we get a proper initialization layer
             if (!EnvironmentSettings.RUNNING_TESTS)
             {
@@ -389,6 +401,7 @@ namespace DCL
 
             bool isOnClickComponentBlocked = IsBlockingOnClick(raycastInfoPointerEventLayer.hitInfo, raycastGlobalLayerHitInfo);
 
+            Debug.Log(isOnClickComponentBlocked);
             if (!isOnClickComponentBlocked && raycastInfoPointerEventLayer.hitInfo.hit.collider)
             {
                 Collider collider = raycastInfoPointerEventLayer.hitInfo.hit.collider;

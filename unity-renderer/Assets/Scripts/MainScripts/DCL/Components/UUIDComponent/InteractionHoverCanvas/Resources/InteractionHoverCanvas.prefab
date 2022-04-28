@@ -156,7 +156,7 @@ RectTransform:
   m_GameObject: {fileID: 6724603896333122190}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.001, y: 0.001, z: 0.001}
+  m_LocalScale: {x: 0.005, y: 0.005, z: 0.005}
   m_Children:
   - {fileID: 565925827137549140}
   m_Father: {fileID: 0}
@@ -208,6 +208,8 @@ MonoBehaviour:
   - {fileID: 8834928924649345436}
   - {fileID: 4485043749680457085}
   - {fileID: 7601175057603706379}
+  followSpeed: 0.5
+  offset: {x: 0, y: 0.2, z: 0}
 --- !u!114 &4672070199564005208
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -230,7 +232,7 @@ MonoBehaviour:
   m_FallbackScreenDPI: 96
   m_DefaultSpriteDPI: 96
   m_DynamicPixelsPerUnit: 1
-  m_PresetInfoIsWorld: 0
+  m_PresetInfoIsWorld: 1
 --- !u!225 &2899092455466172858
 CanvasGroup:
   m_ObjectHideFlags: 0
@@ -646,6 +648,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_PixelsPerUnitMultiplier
       value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 7786638872158442796, guid: e176613fd203f4bf281c28eb1a281524,
+        type: 3}
+      propertyPath: m_text
+      value: Y
       objectReference: {fileID: 0}
     - target: {fileID: 7786638872158442796, guid: e176613fd203f4bf281c28eb1a281524,
         type: 3}
@@ -1216,6 +1223,13 @@ PrefabInstance:
         type: 3}
       propertyPath: m_PixelsPerUnitMultiplier
       value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 7786638872158442796, guid: a4bb797156cca415b834c054d6affeb3,
+        type: 3}
+      propertyPath: m_text
+      value: 'X
+
+'
       objectReference: {fileID: 0}
     - target: {fileID: 7786638872158442796, guid: a4bb797156cca415b834c054d6affeb3,
         type: 3}

@@ -320,7 +320,7 @@ namespace DCL
                 {
                     ""name"": """",
                     ""id"": ""92dbbce5-f800-4e33-b75c-c9597b6bd64f"",
-                    ""path"": ""<XRController>{RightHand}/primaryButton"",
+                    ""path"": ""<XRController>{RightHand}/joystickClicked"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": ""XR"",
