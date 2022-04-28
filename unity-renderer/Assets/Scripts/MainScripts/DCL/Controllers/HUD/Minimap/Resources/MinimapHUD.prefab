@@ -1536,7 +1536,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   hudType: 1
   interactionBehavior: 1
-  scale: {x: 0.00075, y: 0.00075, z: 0.00075}
+  sortingOrder: 2
   loadingMask:
     serializedVersion: 2
     m_Bits: 0

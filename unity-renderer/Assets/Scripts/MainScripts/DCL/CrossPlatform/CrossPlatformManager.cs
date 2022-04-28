@@ -1,10 +1,20 @@
 using System.Collections.Generic;
+using Microsoft.MixedReality.Toolkit;
+using Microsoft.MixedReality.Toolkit.Input;
+using Microsoft.MixedReality.Toolkit.Physics;
 using UnityEngine;
 using UnityEngine.XR;
 using UnityEngine.XR.Management;
 
 public static class CrossPlatformManager
 {
+    private static bool isVR;
+    public static bool IsVR
+    {
+        get => isVR;
+        set => isVR = value;
+    }
+    
     private static LayerMask layerMask;
     public static string GetControllerName()
     {
@@ -12,7 +22,8 @@ public static class CrossPlatformManager
         string contorllerName;
         var devices = new List<InputDevice>();
         InputDevices.GetDevicesWithCharacteristics(InputDeviceCharacteristics.Camera, devices);
-        if (XRGeneralSettings.Instance.Manager.activeLoader == null)
+        IsVR = XRGeneralSettings.Instance.Manager.activeLoader != null;
+        if (!IsVR)
         {
             contorllerName = settings.NonVRController;
         }
@@ -32,6 +43,7 @@ public static class CrossPlatformManager
 
     private static void SetUpForVR()
     {
+        
         DCL.Helpers.Utils.LockCursor();
         DCL.Helpers.Utils.OnCursorLockChanged += LockCursor;
     }
@@ -39,6 +51,35 @@ public static class CrossPlatformManager
     private static void LockCursor(bool state)
     {
         if (!state) DCL.Helpers.Utils.LockCursor();
+    }
+    
+    public static Ray GetRay()
+    {
+        var pos = CoreServices.FocusProvider?.PrimaryPointer.Result.StartPoint;
+        var index = CoreServices.FocusProvider?.PrimaryPointer.Result.RayStepIndex;
+        if (!index.HasValue)
+            return default;
+        var rayStep = CoreServices.FocusProvider?.PrimaryPointer.Rays[index.Value];
+        var rayStepValue = rayStep.Value;
+        return new Ray(rayStepValue.Origin, rayStepValue.Direction);
+    }
+
+    public static bool PrimaryPointerDown()
+    {
+        if (IsVR)
+        {
+            return true;
+        }
+        return Input.GetMouseButtonDown(0);
+    }
+    
+    public static bool PrimaryPointerUp()
+    {
+        if (IsVR)
+        {
+            return true;
+        }
+        return Input.GetMouseButtonUp(0);
     }
 
     public static void SetCameraForLoading(LayerMask mask)
@@ -52,9 +93,18 @@ public static class CrossPlatformManager
 
     public static void SetCameraForGame()
     {
-        
         var mainCam = Camera.main;
         mainCam.cullingMask =layerMask;
         mainCam.clearFlags = CameraClearFlags.Skybox;
     }
+    public static Vector3 GetPoint()
+    {
+        var point = CoreServices.FocusProvider?.PrimaryPointer?.Result?.Details.Point;
+
+        return point ?? Vector3.zero;
+    }
+    // public static bool PointerPressed(WebInterface.ACTION_BUTTON getActionButton)
+    // {
+    //     //if (IsVR) 
+    // }
 }

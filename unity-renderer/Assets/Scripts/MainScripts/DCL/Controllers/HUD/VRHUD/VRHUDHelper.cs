@@ -1,5 +1,5 @@
-using System;
 using DCL.Huds;
+using Microsoft.MixedReality.Toolkit;
 using Microsoft.MixedReality.Toolkit.Input;
 using Microsoft.MixedReality.Toolkit.Input.Utilities;
 using Microsoft.MixedReality.Toolkit.UI;
@@ -8,6 +8,8 @@ using UnityEngine.UI;
 
 public class VRHUDHelper : MonoBehaviour
 {
+    private const string SortingLayer = "Menu";
+    private const  int SortingID = 1;
     private enum HudType
     {
         Loading,
@@ -29,12 +31,11 @@ public class VRHUDHelper : MonoBehaviour
     [SerializeField]
     private InterationBehavior interactionBehavior;
     [SerializeField]
-    private Vector3 scale = new Vector3(0.001f, 0.001f, 0.001f);
+    private int sortingOrder;
     [SerializeField]
     private LayerMask loadingMask;
 
     private Transform myTrans;
-    private readonly Vector3 hidenPos = new Vector3(0, 300, 0);
 
     private void Awake()
     {
@@ -44,50 +45,42 @@ public class VRHUDHelper : MonoBehaviour
             return;
         }
         myTrans = transform;
-        myTrans.position = hidenPos;
-        ConvertUI();
     }
 
     private void Start()
     {
+        ConvertUI();
         switch (hudType)
         {
             case HudType.Menu:
                 VRHUDController.I.Register(this);
+                VRHUDController.I.Reparent(myTrans);
                 break;
             case HudType.Message:
                 VRHUDController.LoadingStart += Hide;
                 break;
         }
     }
+
     private void Hide()
     {
         gameObject.SetActive(false);
         VRHUDController.LoadingStart -= Hide;
     }
 
-    private void RemoveDependencies()
-    {
-        BoxCollider[] boxes = gameObject.GetComponentsInChildren<BoxCollider>();
-        int count = boxes.Length;
-        for (int i = 0; i < count; i++)
-        {
-            Destroy(boxes[i]);
-        }
-    }
-
     private void ConvertUI()
     {
         Canvas canvas = GetComponent<Canvas>();
         canvas.renderMode = RenderMode.WorldSpace;
-        myTrans.localScale = scale;
+        canvas.overrideSorting = true;
+        canvas.sortingOrder = sortingOrder;
         if (GetComponent<GraphicRaycaster>() == null)
             gameObject.AddComponent<GraphicRaycaster>();
         if (GetComponent<CanvasUtility>() == null)
             gameObject.AddComponent<CanvasUtility>();
         if (GetComponent<NearInteractionTouchableUnityUI>() == null)
             gameObject.AddComponent<NearInteractionTouchableUnityUI>();
-
+        
         SetUpInteractionBehavtior();
     }
     
@@ -96,7 +89,7 @@ public class VRHUDHelper : MonoBehaviour
         switch (interactionBehavior)
         {
             case InterationBehavior.Loading:
-                
+                myTrans.localScale = 0.00075f * Vector3.one;
                 break;
             case InterationBehavior.Far:
                 Button[] buttons = GetComponentsInChildren<Button>(true);
@@ -123,7 +116,9 @@ public class VRHUDHelper : MonoBehaviour
         {
             case InterationBehavior.Loading:
                 CrossPlatformManager.SetCameraForLoading(loadingMask);
-                ShowHud(Camera.main.transform);
+                var forward = VRHUDController.I.GetForward();
+                myTrans.position = Camera.main.transform.position + forward;
+                myTrans.forward = forward;
                 VRHUDController.RaiseLoadingStart();
                 break;
             case InterationBehavior.Far:
@@ -162,17 +157,11 @@ public class VRHUDHelper : MonoBehaviour
             default: break;
         }
     }
-    
-    public void ShowHud(Transform mainCam)
+
+    public void ResetHud()
     {
-        var foward = mainCam.forward;
-        var forward = new Vector3(foward.x, 0f , foward.z).normalized;
-        myTrans.position = mainCam.position + forward;
-        myTrans.forward = forward;
-    }
-    
-    public void HidHud()
-    {
-        transform.position = hidenPos;
+        myTrans.localPosition = Vector3.zero;
+        myTrans.localRotation = Quaternion.identity;
+
     }
 }

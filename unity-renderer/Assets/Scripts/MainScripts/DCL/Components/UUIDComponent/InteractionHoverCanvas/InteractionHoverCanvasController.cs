@@ -12,7 +12,10 @@ public class InteractionHoverCanvasController : MonoBehaviour
     public RectTransform backgroundTransform;
     public TextMeshProUGUI text;
     public GameObject[] icons;
+    private Transform myTransform;
 
+    [SerializeField]
+    private Vector3 offset = new Vector3(0, 1f, 0);
     bool isHovered = false;
     Camera mainCamera;
     GameObject hoverIcon;
@@ -28,6 +31,7 @@ public class InteractionHoverCanvasController : MonoBehaviour
         i = this;
         mainCamera = Camera.main;
         backgroundTransform.gameObject.SetActive(false);
+        myTransform = transform;
     }
 
     public void Setup(string button, string feedbackText, IDCLEntity entity)
@@ -66,11 +70,14 @@ public class InteractionHoverCanvasController : MonoBehaviour
 
     public void SetHoverState(bool hoverState)
     {
+        // myTransform.position = Vector3.Lerp(myTransform.position, CrossPlatformManager.GetPoint() + offset, .8f);
+        // myTransform.forward = mainCamera.transform.forward;
         if (!enabled || hoverState == isHovered)
             return;
 
         isHovered = hoverState;
 
+        //myTransform.position = CrossPlatformManager.GetPoint() + offset;
         canvas.enabled = isHovered;
     }
 

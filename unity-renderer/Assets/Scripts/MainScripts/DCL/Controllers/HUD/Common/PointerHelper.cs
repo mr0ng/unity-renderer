@@ -25,7 +25,7 @@ public class PointerHelper : MonoBehaviour
             return Input.mousePosition;
         UpdateOrigin();
         Vector3 localPointerPos = default;
-        var hit = CoreServices.FocusProvider?.PrimaryPointer.Result.Details.Point;
+        var hit = CoreServices.FocusProvider?.PrimaryPointer?.Result?.Details.Point;
         
         Vector3 point = ToLocalSpace(hit ?? Vector3.zero);
         localPointerPos = point - origin;

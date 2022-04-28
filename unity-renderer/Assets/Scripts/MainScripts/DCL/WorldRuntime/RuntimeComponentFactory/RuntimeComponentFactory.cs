@@ -122,7 +122,7 @@ namespace DCL
                 Debug.LogError($"Unknown classId");
                 return null;
             }
-
+            
             IComponent newComponent = builders[classId](classId);
 
             return newComponent;
