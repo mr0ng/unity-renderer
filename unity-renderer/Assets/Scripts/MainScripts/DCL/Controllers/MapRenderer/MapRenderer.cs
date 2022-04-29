@@ -296,6 +296,7 @@ namespace DCL
             var marker = poolable.gameObject.GetComponent<MapUserIcon>();
             marker.gameObject.name = $"UserIcon-{player.name}";
             marker.gameObject.transform.SetParent(overlayContainer.transform, true);
+            marker.gameObject.transform.localScale = Vector3.one;
             marker.Populate(player);
             usersInfoMarkers.Add(userId, poolable);
         }
