@@ -184,7 +184,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   hudType: 2
   interactionBehavior: 0
-  scale: {x: 0.001, y: 0.001, z: 0.001}
+  sortingOrder: 0
   loadingMask:
     serializedVersion: 2
     m_Bits: 0
@@ -736,9 +736,9 @@ GameObject:
   - component: {fileID: 1755198062}
   - component: {fileID: 1755198061}
   - component: {fileID: 1755198067}
-  - component: {fileID: 1755198066}
   - component: {fileID: 1755198065}
   - component: {fileID: 1755198068}
+  - component: {fileID: 1755198066}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -1127,9 +1127,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 99c8336f35c7f1e4f993a49447e8b691, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  loadingMask:
-    serializedVersion: 2
-    m_Bits: 32
   cameraObject: {fileID: 1755198060}
 --- !u!4 &1998906712
 Transform:

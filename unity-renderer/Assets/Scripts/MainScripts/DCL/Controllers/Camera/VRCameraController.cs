@@ -23,7 +23,7 @@ namespace DCL.Camera
 
         private DateTime lastTurned;
 
-        private readonly Vector3 offset = new Vector3(0f, -0.5f, 0f);
+        private readonly Vector3 offset = new Vector3(0f, -1f, 0f);
         private Transform myTrans;
         private Transform camTrans;
 
@@ -66,7 +66,7 @@ namespace DCL.Camera
 
         private void FollowCharacter(float deltaTime)
         {
-            myTrans.position = targetToFollow.position + offset;
+            myTrans.position = targetToFollow.position;// + offset;
         }
 
         private void CameraBlockedOnchange(bool current, bool previous)

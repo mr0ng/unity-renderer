@@ -218,6 +218,7 @@ namespace DCL
         {
             if (!CrossPlatformManager.IsVR)
                 return Input.GetMouseButtonUp(btnMap.buttonNum);
+            
             rightHand.TryGetFeatureValue(CommonUsages.trigger, out float value);
 
             if (!buttonDown || value > .25f)
@@ -230,6 +231,7 @@ namespace DCL
         {
             if (!CrossPlatformManager.IsVR)
                 return Input.GetMouseButtonDown(btnMap.buttonNum);
+            
             rightHand.TryGetFeatureValue(CommonUsages.trigger, out float value);
 
             if (buttonDown || value < .75f)

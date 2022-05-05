@@ -1,3 +1,4 @@
+using System;
 using DCL.VR;
 using UnityEngine;
 
@@ -5,6 +6,9 @@ public class VRCharacterController : MonoBehaviour
 {
     [SerializeField]
     private Transform cameraParent;
+    private readonly Vector3 offset = new Vector3(0f, -0.475f, 0f);
+
+    private Transform mixedRealityPlayspace;
 
     private void Start()
     {
@@ -13,12 +17,10 @@ public class VRCharacterController : MonoBehaviour
     
     private void PlaceCamera()
     {
-        // this might be obsolete
         VRPlaySpace playSpace = VRPlaySpace.i;
-        Transform mixedRealityPlayspace = playSpace.transform;
+        mixedRealityPlayspace = playSpace.transform;
 
-        //Move and Reparent the MRPlaySpace to the characterController so that we always have our controllers with us
-        mixedRealityPlayspace.position = cameraParent.position;
+        mixedRealityPlayspace.position = cameraParent.position + offset;
         mixedRealityPlayspace.parent = cameraParent;
     }
 }

@@ -17,19 +17,8 @@ public class VRHUDHelper : MonoBehaviour
         Message
     }
     
-    private enum InterationBehavior
-    {
-        Loading = -1,
-        None = 0,
-        Far = 1,
-        Near = 2,
-        Both = 3
-    }
-
     [SerializeField]
     private HudType hudType;
-    [SerializeField]
-    private InterationBehavior interactionBehavior;
     [SerializeField]
     private int sortingOrder;
     [SerializeField]
@@ -39,7 +28,7 @@ public class VRHUDHelper : MonoBehaviour
 
     private void Awake()
     {
-        if (!CrossPlatformManager.IsVRPlatform())
+        if (!CrossPlatformManager.IsVR)
         {
             enabled = false;
             return;
@@ -86,46 +75,26 @@ public class VRHUDHelper : MonoBehaviour
     
     private void SetUpInteractionBehavtior()
     {
-        switch (interactionBehavior)
+        switch (hudType)
         {
-            case InterationBehavior.Loading:
+            case HudType.Loading:
                 myTrans.localScale = 0.00075f * Vector3.one;
                 break;
-            case InterationBehavior.Far:
-                Button[] buttons = GetComponentsInChildren<Button>(true);
-                foreach (Button button in buttons)
-                {
-                    Interactable interactable = button.gameObject.GetComponent<Interactable>();
-                    if (interactable == null) continue;
-                    interactable.OnClick.AddListener(() =>
-                    {
-                        Debug.LogWarning("Button clicked");
-                    });
-                }
-                break;
-            case InterationBehavior.Near:
-            case InterationBehavior.Both:
-            case InterationBehavior.None:
             default: break;
         }
     }
 
     private void RunBehavior()
     {
-        switch (interactionBehavior)
+        switch (hudType)
         {
-            case InterationBehavior.Loading:
+            case HudType.Loading:
                 CrossPlatformManager.SetCameraForLoading(loadingMask);
                 var forward = VRHUDController.I.GetForward();
                 myTrans.position = Camera.main.transform.position + forward;
                 myTrans.forward = forward;
                 VRHUDController.RaiseLoadingStart();
                 break;
-            case InterationBehavior.Far:
-                break;
-            case InterationBehavior.Near:
-            case InterationBehavior.Both:
-            case InterationBehavior.None:
             default: break;
         }
     }
@@ -143,17 +112,12 @@ public class VRHUDHelper : MonoBehaviour
 
     private void StopBehavior()
     {
-        switch (interactionBehavior)
+        switch (hudType)
         {
-            case InterationBehavior.Loading:
+            case HudType.Loading:
                 CrossPlatformManager.SetCameraForGame();
                 VRHUDController.RaiseLoadingEnd();
                 break;
-            case InterationBehavior.Far:
-                break;
-            case InterationBehavior.Near:
-            case InterationBehavior.Both:
-            case InterationBehavior.None:
             default: break;
         }
     }
@@ -162,6 +126,5 @@ public class VRHUDHelper : MonoBehaviour
     {
         myTrans.localPosition = Vector3.zero;
         myTrans.localRotation = Quaternion.identity;
-
     }
 }

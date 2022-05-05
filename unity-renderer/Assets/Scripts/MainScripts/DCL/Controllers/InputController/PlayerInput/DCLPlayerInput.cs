@@ -25,7 +25,7 @@ namespace DCL
                     ""type"": ""Value"",
                     ""id"": ""85e62bba-27a9-473b-a603-db50e5c40191"",
                     ""expectedControlType"": ""Vector2"",
-                    ""processors"": ""StickDeadzone"",
+                    ""processors"": """",
                     ""interactions"": """"
                 },
                 {
@@ -33,7 +33,7 @@ namespace DCL
                     ""type"": ""Value"",
                     ""id"": ""de3fc6e4-219a-4c02-a847-56f4a50027a4"",
                     ""expectedControlType"": ""Vector2"",
-                    ""processors"": ""StickDeadzone"",
+                    ""processors"": ""StickDeadzone(min=0.25)"",
                     ""interactions"": """"
                 },
                 {
@@ -201,7 +201,7 @@ namespace DCL
                     ""id"": ""3e5f5442-8668-4b27-a940-df99bad7e831"",
                     ""path"": ""<XRController>{RightHand}/joystick"",
                     ""interactions"": """",
-                    ""processors"": ""ScaleVector2(x=120,y=120)"",
+                    ""processors"": ""ScaleVector2(x=120,y=120),StickDeadzone(min=0.5)"",
                     ""groups"": ""XR"",
                     ""action"": ""Look"",
                     ""isComposite"": false,

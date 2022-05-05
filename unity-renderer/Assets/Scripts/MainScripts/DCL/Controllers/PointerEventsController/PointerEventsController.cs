@@ -20,7 +20,6 @@ namespace DCL
         public System.Action OnPointerHoverStarts;
         public System.Action OnPointerHoverEnds;
         
-        
         DCLPlayerInput inputActions = new DCLPlayerInput();
 
         InteractionHoverCanvasController hoverController;

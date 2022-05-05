@@ -64,24 +64,6 @@ public static class CrossPlatformManager
         return new Ray(rayStepValue.Origin, rayStepValue.Direction);
     }
 
-    public static bool PrimaryPointerDown()
-    {
-        if (IsVR)
-        {
-            return true;
-        }
-        return Input.GetMouseButtonDown(0);
-    }
-    
-    public static bool PrimaryPointerUp()
-    {
-        if (IsVR)
-        {
-            return true;
-        }
-        return Input.GetMouseButtonUp(0);
-    }
-
     public static void SetCameraForLoading(LayerMask mask)
     {
         var mainCam = Camera.main;
@@ -97,6 +79,7 @@ public static class CrossPlatformManager
         mainCam.cullingMask =layerMask;
         mainCam.clearFlags = CameraClearFlags.Skybox;
     }
+    
     public static Vector3 GetPoint()
     {
         var point = CoreServices.FocusProvider?.PrimaryPointer?.Result?.Details.Point;
