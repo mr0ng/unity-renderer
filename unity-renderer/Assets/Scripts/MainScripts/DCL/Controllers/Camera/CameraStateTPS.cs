@@ -139,7 +139,7 @@ namespace DCL.Camera
             var xzPlaneForward = Vector3.Scale(cameraTransform.forward, new Vector3(1, 0, 1));
             var xzPlaneRight = Vector3.Scale(cameraTransform.right, new Vector3(1, 0, 1));
 
-            if (characterYAxis.GetValue() != 0f || characterXAxis.GetValue() != 0f)
+            if ((characterYAxis != null && characterYAxis.GetValue() != 0f) || (characterXAxis != null && characterXAxis.GetValue() != 0f))
             {
                 Vector3 forwardTarget = Vector3.zero;
 

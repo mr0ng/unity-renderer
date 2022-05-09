@@ -1,4 +1,4 @@
-﻿using Cinemachine;
+using Cinemachine;
 using Cinemachine.Utility;
 using UnityEngine;
 
@@ -43,7 +43,7 @@ namespace DCL.Camera
                 return;
 
             var orbit = sourceFreeLook.m_Orbits[1];
-            if (characterYAxis.GetValue() > 0 && !DCLCharacterController.i.isWalking)
+            if (characterYAxis != null && characterYAxis.GetValue() > 0 && !DCLCharacterController.i.isWalking)
             {
                 currentDampingDelay += Time.deltaTime;
 

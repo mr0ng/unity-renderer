@@ -195,8 +195,8 @@ namespace WebSocketSharp.Server
 
             if (!addr.IsLocal())
             {
-                msg = "The IP address of the host is not a local IP address.";
-                throw new ArgumentException(msg, "url");
+                //msg = "The IP address of the host is not a local IP address.";
+                //throw new ArgumentException(msg, "url");
             }
 
             init(host, addr, uri.Port, uri.Scheme == "wss");

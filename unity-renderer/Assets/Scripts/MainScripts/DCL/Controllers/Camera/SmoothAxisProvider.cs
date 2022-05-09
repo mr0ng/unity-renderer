@@ -28,9 +28,12 @@ public class SmoothAxisProvider : MonoBehaviour, AxisState.IInputAxisProvider
     }
     void Update()
     {
-        axisTarget[0] = axisX.GetValue();
-        axisTarget[1] = axisY.GetValue();
-        axis += Damper.Damp(axisTarget - axis, dampTime, Time.deltaTime);
+        if (axisX != null && axisY != null)
+        {
+            axisTarget[0] = axisX.GetValue();
+            axisTarget[1] = axisY.GetValue();
+            axis += Damper.Damp(axisTarget - axis, dampTime, Time.deltaTime);
+        }
     }
 
     public float GetAxisValue(int axis)
