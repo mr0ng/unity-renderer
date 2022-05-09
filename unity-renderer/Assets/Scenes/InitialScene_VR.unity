@@ -183,7 +183,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   hudType: 2
-  interactionBehavior: 0
   sortingOrder: 0
   loadingMask:
     serializedVersion: 2
@@ -959,8 +958,8 @@ MonoBehaviour:
   Minutes: 0
   Seconds: 0
   Year: 2022
-  Month: 5
-  Day: 7
+  Month: 7
+  Day: 15
   Hour: 1
   Minute: 0
   Second: 0
