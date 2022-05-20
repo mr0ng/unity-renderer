@@ -9,19 +9,23 @@ using UnityEngine.XR.Management;
 public static class CrossPlatformManager
 {
     private static bool isVR;
+    private static PlatformSettings settings;
     public static bool IsVR
     {
-        get => isVR;
-        set => isVR = value;
+        get
+        {
+            if (settings == null)
+                GetControllerName();
+            return isVR;
+        }
+        private set => isVR = value;
     }
     
     private static LayerMask layerMask;
     public static string GetControllerName()
     {
-        PlatformSettings settings = Resources.Load<PlatformSettings>($"PlatformSettings");
+        if (settings == null) settings = Resources.Load<PlatformSettings>($"PlatformSettings");
         string contorllerName;
-        var devices = new List<InputDevice>();
-        InputDevices.GetDevicesWithCharacteristics(InputDeviceCharacteristics.Camera, devices);
         IsVR = XRGeneralSettings.Instance.Manager.activeLoader != null;
         if (!IsVR)
         {
@@ -43,7 +47,6 @@ public static class CrossPlatformManager
 
     private static void SetUpForVR()
     {
-        
         DCL.Helpers.Utils.LockCursor();
         DCL.Helpers.Utils.OnCursorLockChanged += LockCursor;
     }
