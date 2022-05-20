@@ -361,7 +361,7 @@ namespace DCL
 
             var gridPosition = playerGridPosition;
             playerPositionIcon.anchoredPosition = MapUtils.GetTileToLocalPosition(gridPosition.x, gridPosition.y);
-            playerPositionIcon.rotation = playerAngle;
+            playerPositionIcon.localRotation = playerAngle;
         }
 
         public Vector3 GetViewportCenter() { return atlas.viewport.TransformPoint(atlas.viewport.rect.center); }
