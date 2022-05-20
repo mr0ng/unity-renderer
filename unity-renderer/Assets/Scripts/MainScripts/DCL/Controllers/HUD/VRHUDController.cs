@@ -11,8 +11,9 @@ namespace DCL.Huds
         public static Action LoadingEnd;
         public static VRHUDController I { get; private set; }
         private HUDController controller => HUDController.i;
-        private readonly Vector3 hidenPos = new Vector3(0, 300, 0);
+        private readonly Vector3 hidenPos = new Vector3(0, -10, 0);
         private readonly List<VRHUDHelper> huds = new List<VRHUDHelper>();
+        private readonly List<VRHUDHelper> submenu = new List<VRHUDHelper>();
         BaseVariable<bool> exploreV2IsOpen => DataStore.i.exploreV2.isOpen;
         
         [SerializeField]
@@ -41,6 +42,16 @@ namespace DCL.Huds
         private void Start()
         {
             dock.position = hidenPos;
+            exploreV2IsOpen.OnChange += HideSubs;
+        }
+        private void HideSubs(bool current, bool previous)
+        {
+            for (int i = 0; i < submenu.Count; i++)
+            {
+                VRHUDHelper menu = submenu[i];
+                if (current) menu.Hide(hidenPos);
+                else menu.ResetHud();
+            }
         }
 
         private void ShowVisuals() => visuals.SetActive(true);
@@ -56,9 +67,10 @@ namespace DCL.Huds
             LoadingEnd?.Invoke();
         }
 
-        public void Register(VRHUDHelper helper)
+        public void Register(VRHUDHelper helper, bool isSubmenu)
         {
             huds.Add(helper);
+            if (isSubmenu) submenu.Add(helper);
         }
 
         public void Reparent(Transform helperTrans)

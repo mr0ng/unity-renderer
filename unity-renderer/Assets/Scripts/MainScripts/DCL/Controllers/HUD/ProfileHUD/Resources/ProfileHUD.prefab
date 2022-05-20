@@ -5671,11 +5671,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   hudType: 1
-  interactionBehavior: 1
-  scale: {x: 0.0075, y: 0.0075, z: 0.0075}
+  sortingOrder: 0
   loadingMask:
     serializedVersion: 2
     m_Bits: 0
+  submenu: 1
 --- !u!1 &4572852650187169043
 GameObject:
   m_ObjectHideFlags: 0

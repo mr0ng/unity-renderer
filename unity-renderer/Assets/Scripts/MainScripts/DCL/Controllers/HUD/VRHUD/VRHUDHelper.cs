@@ -23,6 +23,8 @@ public class VRHUDHelper : MonoBehaviour
     private int sortingOrder;
     [SerializeField]
     private LayerMask loadingMask;
+    [SerializeField]
+    private bool submenu;
 
     private Transform myTrans;
 
@@ -42,7 +44,7 @@ public class VRHUDHelper : MonoBehaviour
         switch (hudType)
         {
             case HudType.Menu:
-                VRHUDController.I.Register(this);
+                VRHUDController.I.Register(this, submenu);
                 VRHUDController.I.Reparent(myTrans);
                 break;
             case HudType.Message:
@@ -121,6 +123,8 @@ public class VRHUDHelper : MonoBehaviour
             default: break;
         }
     }
+
+    public void Hide(Vector3 pos) => myTrans.position += pos;
 
     public void ResetHud()
     {

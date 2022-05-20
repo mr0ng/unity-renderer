@@ -1535,11 +1535,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   hudType: 1
-  interactionBehavior: 1
   sortingOrder: 2
   loadingMask:
     serializedVersion: 2
     m_Bits: 0
+  submenu: 1
 --- !u!1 &4665053653492846095
 GameObject:
   m_ObjectHideFlags: 0
