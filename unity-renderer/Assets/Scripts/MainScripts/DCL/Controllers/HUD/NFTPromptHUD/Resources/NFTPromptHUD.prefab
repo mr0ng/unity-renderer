@@ -2915,6 +2915,7 @@ GameObject:
   - component: {fileID: 8707988610357600054}
   - component: {fileID: 4126122130204110566}
   - component: {fileID: 8851976729115886027}
+  - component: {fileID: 4668340217300486678}
   m_Layer: 5
   m_Name: Button_OpenInMarket
   m_TagString: Untagged
@@ -3023,7 +3024,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 8707988610357600054}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 4668340217300486678}
+        m_TargetAssemblyTypeName: RedirectAlert, HUD
+        m_MethodName: ShowAlert
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &8851976729115886027
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3040,6 +3053,18 @@ MonoBehaviour:
   playClick: 1
   playRelease: 1
   extraClickEvent: {fileID: 0}
+--- !u!114 &4668340217300486678
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4817783463477614125}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9528625d8ecb615439eb9a98ac3a71a2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &4847634133976190608
 GameObject:
   m_ObjectHideFlags: 0
@@ -4444,6 +4469,7 @@ GameObject:
   - component: {fileID: 3041992392077284834}
   - component: {fileID: 3386804028880980378}
   - component: {fileID: 1083005605679871223}
+  - component: {fileID: 8752525804711839093}
   m_Layer: 5
   m_Name: Content
   m_TagString: Untagged
@@ -4535,6 +4561,25 @@ MonoBehaviour:
   m_BlockingMask:
     serializedVersion: 2
     m_Bits: 4294967295
+--- !u!114 &8752525804711839093
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8849911816717577611}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0059bf4137601a84caf3c5549fe42066, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  hudType: 3
+  sortingOrder: 2
+  loadingMask:
+    serializedVersion: 2
+    m_Bits: 0
+  submenu: 0
+  objectToHide: {fileID: 4967629809127617032}
 --- !u!1001 &654907563950986874
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -4832,7 +4877,7 @@ PrefabInstance:
     - target: {fileID: 1893788018749953862, guid: 19d77508a9e1e44029db75cc00b71c03,
         type: 3}
       propertyPath: m_Value
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 2020970618945887429, guid: 19d77508a9e1e44029db75cc00b71c03,
         type: 3}

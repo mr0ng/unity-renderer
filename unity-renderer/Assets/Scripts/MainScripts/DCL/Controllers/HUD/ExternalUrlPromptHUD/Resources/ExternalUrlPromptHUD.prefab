@@ -1524,6 +1524,7 @@ GameObject:
   - component: {fileID: 1566415224542579564}
   - component: {fileID: 3871624349580654081}
   - component: {fileID: 3696104042857636695}
+  - component: {fileID: 3262328403844444941}
   m_Layer: 5
   m_Name: Content
   m_TagString: Untagged
@@ -1660,6 +1661,25 @@ CanvasGroup:
   m_Interactable: 1
   m_BlocksRaycasts: 1
   m_IgnoreParentGroups: 0
+--- !u!114 &3262328403844444941
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4642206131667890045}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0059bf4137601a84caf3c5549fe42066, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  hudType: 3
+  sortingOrder: 2
+  loadingMask:
+    serializedVersion: 2
+    m_Bits: 0
+  submenu: 0
+  objectToHide: {fileID: 9101157973253599486}
 --- !u!1 &4840031060944663586
 GameObject:
   m_ObjectHideFlags: 0
@@ -1985,6 +2005,7 @@ GameObject:
   - component: {fileID: 288142682893478928}
   - component: {fileID: 2729007794598204024}
   - component: {fileID: 5438361058928719481}
+  - component: {fileID: 788253735167428582}
   m_Layer: 5
   m_Name: Button_Continue
   m_TagString: Untagged
@@ -2093,7 +2114,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 4784409984069590464}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 788253735167428582}
+        m_TargetAssemblyTypeName: RedirectAlert, HUD
+        m_MethodName: ShowAlert
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &2729007794598204024
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2125,6 +2158,18 @@ MonoBehaviour:
   playClick: 1
   playRelease: 1
   extraClickEvent: {fileID: 0}
+--- !u!114 &788253735167428582
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8674331462890837211}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9528625d8ecb615439eb9a98ac3a71a2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &8789653760553667686
 GameObject:
   m_ObjectHideFlags: 0

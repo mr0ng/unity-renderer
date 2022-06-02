@@ -17,7 +17,7 @@ public class InteractionHoverCanvasController : MonoBehaviour
     [SerializeField]
     private float followSpeed = .8f;
     [SerializeField]
-    private Vector3 offset = new Vector3(0, 1f, 0);
+    private Vector3 offset = new Vector3(0, .8f, 0);
     bool isHovered = false;
     Camera mainCamera;
     GameObject hoverIcon;
@@ -72,14 +72,15 @@ public class InteractionHoverCanvasController : MonoBehaviour
 
     public void SetHoverState(bool hoverState)
     {
-        myTransform.position = Vector3.Lerp(myTransform.position, CrossPlatformManager.GetPoint() + offset, followSpeed);
+        Vector3 offsetPos = CrossPlatformManager.GetPoint() + offset;
+        myTransform.position = Vector3.Lerp(myTransform.position, offsetPos, followSpeed);
         myTransform.forward = mainCamera.transform.forward;
         if (!enabled || hoverState == isHovered)
             return;
 
         isHovered = hoverState;
 
-        myTransform.position = CrossPlatformManager.GetPoint() + offset;
+        myTransform.position = offsetPos;
         canvas.enabled = isHovered;
     }
 

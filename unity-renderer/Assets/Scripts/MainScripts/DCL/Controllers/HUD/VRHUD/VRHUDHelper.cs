@@ -1,8 +1,6 @@
 using DCL.Huds;
-using Microsoft.MixedReality.Toolkit;
 using Microsoft.MixedReality.Toolkit.Input;
 using Microsoft.MixedReality.Toolkit.Input.Utilities;
-using Microsoft.MixedReality.Toolkit.UI;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -14,7 +12,8 @@ public class VRHUDHelper : MonoBehaviour
     {
         Loading,
         Menu,
-        Message
+        Message,
+        PopUp
     }
     
     [SerializeField]
@@ -25,7 +24,9 @@ public class VRHUDHelper : MonoBehaviour
     private LayerMask loadingMask;
     [SerializeField]
     private bool submenu;
-
+    [SerializeField]
+    private GameObject objectToHide;
+    
     private Transform myTrans;
 
     private void Awake()
@@ -50,9 +51,12 @@ public class VRHUDHelper : MonoBehaviour
             case HudType.Message:
                 VRHUDController.LoadingStart += Hide;
                 break;
+            case HudType.PopUp:
+                objectToHide.SetActive(false);
+                break;
         }
     }
-
+    
     private void Hide()
     {
         gameObject.SetActive(false);
@@ -82,6 +86,9 @@ public class VRHUDHelper : MonoBehaviour
             case HudType.Loading:
                 myTrans.localScale = 0.00075f * Vector3.one;
                 break;
+            case HudType.PopUp:
+                myTrans.localScale = 0.0025f * Vector3.one;
+                break;
             default: break;
         }
     }
@@ -96,6 +103,11 @@ public class VRHUDHelper : MonoBehaviour
                 myTrans.position = Camera.main.transform.position + forward;
                 myTrans.forward = forward;
                 VRHUDController.RaiseLoadingStart();
+                break;
+            case HudType.PopUp:
+                CrossPlatformManager.GetSurfacePoint(out var point, out var normal);
+                myTrans.position = point + normal * .25f;
+                myTrans.forward = -normal;
                 break;
             default: break;
         }

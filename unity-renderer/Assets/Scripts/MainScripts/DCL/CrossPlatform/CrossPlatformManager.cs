@@ -1,9 +1,5 @@
-using System.Collections.Generic;
 using Microsoft.MixedReality.Toolkit;
-using Microsoft.MixedReality.Toolkit.Input;
-using Microsoft.MixedReality.Toolkit.Physics;
 using UnityEngine;
-using UnityEngine.XR;
 using UnityEngine.XR.Management;
 
 public static class CrossPlatformManager
@@ -24,7 +20,10 @@ public static class CrossPlatformManager
     private static LayerMask layerMask;
     public static string GetControllerName()
     {
-        if (settings == null) settings = Resources.Load<PlatformSettings>($"PlatformSettings");
+        if (settings == null)
+        {
+            settings = Resources.Load<PlatformSettings>($"PlatformSettings");
+        }
         string contorllerName;
         IsVR = XRGeneralSettings.Instance.Manager.activeLoader != null;
         if (!IsVR)
@@ -58,8 +57,8 @@ public static class CrossPlatformManager
     
     public static Ray GetRay()
     {
-        var pos = CoreServices.FocusProvider?.PrimaryPointer.Result.StartPoint;
-        var index = CoreServices.FocusProvider?.PrimaryPointer.Result.RayStepIndex;
+        var pos = CoreServices.FocusProvider?.PrimaryPointer?.Result?.StartPoint;
+        var index = CoreServices.FocusProvider?.PrimaryPointer?.Result?.RayStepIndex;
         if (!index.HasValue)
             return default;
         var rayStep = CoreServices.FocusProvider?.PrimaryPointer.Rays[index.Value];
@@ -85,9 +84,16 @@ public static class CrossPlatformManager
     
     public static Vector3 GetPoint()
     {
-        var point = CoreServices.FocusProvider?.PrimaryPointer?.Result?.Details.Point;
+        GetSurfacePoint(out var point, out var norm);
 
-        return point ?? Vector3.zero;
+        return point + norm * .25f;
+    }
+
+    public static void GetSurfacePoint(out Vector3 point, out Vector3 normal)
+    {
+        var details = CoreServices.FocusProvider?.PrimaryPointer?.Result?.Details;
+        point = details?.Point ?? Vector3.zero;
+        normal = details?.Normal ?? Vector3.zero;
     }
     // public static bool PointerPressed(WebInterface.ACTION_BUTTON getActionButton)
     // {
