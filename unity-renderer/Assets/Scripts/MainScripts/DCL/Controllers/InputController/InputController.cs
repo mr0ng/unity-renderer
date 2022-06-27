@@ -4,6 +4,7 @@ using System.Linq;
 using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.InputSystem;
 
 /// <summary>
 /// Mapping for Trigger actions
@@ -146,12 +147,14 @@ public class InputController : MonoBehaviour
     public InputTypeMode inputTypeMode { get; set; } = InputTypeMode.GENERAL;
 
     private DCLPlayerInput playerInput;
-    private DCLPlayerInput.PlayerActions player;
+    private static DCLPlayerInput.PlayerActions player;
     private void Awake()
     {
         playerInput = new DCLPlayerInput();
         player = playerInput.Player;
     }
+
+    public static DCLPlayerInput.PlayerActions GetPlayerActions() => player;
 
     private void OnEnable() => playerInput.Enable();
 

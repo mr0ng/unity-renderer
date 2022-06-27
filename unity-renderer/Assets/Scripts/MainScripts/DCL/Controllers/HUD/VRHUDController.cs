@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
-using Microsoft.MixedReality.Toolkit;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 namespace DCL.Huds
 {
@@ -14,6 +14,8 @@ namespace DCL.Huds
         private readonly Vector3 hidenPos = new Vector3(0, -10, 0);
         private readonly List<VRHUDHelper> huds = new List<VRHUDHelper>();
         private readonly List<VRHUDHelper> submenu = new List<VRHUDHelper>();
+
+        private DCLPlayerInput playerInput;
         BaseVariable<bool> exploreV2IsOpen => DataStore.i.exploreV2.isOpen;
         
         [SerializeField]
@@ -23,6 +25,7 @@ namespace DCL.Huds
         [SerializeField]
         private Canvas dockCanvas;
         private Transform mainCam;
+        private DCLPlayerInput.PlayerActions actions;
 
         private void Awake()
         {
@@ -41,9 +44,18 @@ namespace DCL.Huds
 
         private void Start()
         {
+            actions = InputController.GetPlayerActions();
+            if (!actions.enabled) actions.Enable();
+            actions.OpenMenu.performed += OpenHandMenu;
             dock.position = hidenPos;
             exploreV2IsOpen.OnChange += HideSubs;
         }
+        private void OpenHandMenu(InputAction.CallbackContext context)
+        {
+            Debug.Log("performed");
+            visuals.SetActive(!visuals.activeSelf);
+        }
+
         private void HideSubs(bool current, bool previous)
         {
             for (int i = 0; i < submenu.Count; i++)

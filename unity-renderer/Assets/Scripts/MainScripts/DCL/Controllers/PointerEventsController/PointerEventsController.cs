@@ -306,7 +306,6 @@ namespace DCL
 
         void OnButtonEvent(WebInterface.ACTION_BUTTON buttonId, InputController_Legacy.EVENT evt, bool useRaycast, bool enablePointerEvent)
         {
-            Debug.Log("Handle Button event");
             //TODO(Brian): We should remove this when we get a proper initialization layer
             if (!EnvironmentSettings.RUNNING_TESTS)
             {
@@ -400,7 +399,6 @@ namespace DCL
 
             bool isOnClickComponentBlocked = IsBlockingOnClick(raycastInfoPointerEventLayer.hitInfo, raycastGlobalLayerHitInfo);
 
-            Debug.Log(isOnClickComponentBlocked);
             if (!isOnClickComponentBlocked && raycastInfoPointerEventLayer.hitInfo.hit.collider)
             {
                 Collider collider = raycastInfoPointerEventLayer.hitInfo.hit.collider;

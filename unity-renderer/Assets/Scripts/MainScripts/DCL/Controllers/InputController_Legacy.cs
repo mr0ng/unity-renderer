@@ -125,7 +125,6 @@ namespace DCL
         // Note (Zak): it is public for testing purposes only
         public void RaiseEvent(WebInterface.ACTION_BUTTON buttonId, EVENT evt, bool useRaycast, bool enablePointerEvent)
         {
-            Debug.Log("Raise Button event");
             if (!listeners.ContainsKey(buttonId))
                 return;
 
