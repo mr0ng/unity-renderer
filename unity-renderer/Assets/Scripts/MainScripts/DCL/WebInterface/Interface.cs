@@ -9,6 +9,7 @@ using Ray = UnityEngine.Ray;
 using System.Runtime.InteropServices;
 #endif
 
+
 namespace DCL.Interface
 {
     /**
@@ -1290,6 +1291,10 @@ namespace DCL.Interface
         {
 #if UNITY_WEBGL
             SendMessage("OpenWebURL", new OpenURLPayload { url = url });
+            
+#elif UNITY_ANDROID
+            var webview = Vuplex.WebView.WebViewPrefab.Instantiate(600,300);
+            webview.WebView.LoadUrl(url);
 #else
             Application.OpenURL(url);
 #endif

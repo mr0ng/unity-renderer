@@ -42,7 +42,7 @@ MonoBehaviour:
   m_ShadowDepthBias: 1.56
   m_ShadowNormalBias: 0
   m_SoftShadowsSupported: 1
-  m_UseSRPBatcher: 1
+  m_UseSRPBatcher: 0
   m_SupportsDynamicBatching: 1
   m_MixedLightingSupported: 0
   m_DebugLevel: 0

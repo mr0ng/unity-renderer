@@ -29,7 +29,7 @@ public class NativeBridgeCommunication : IKernelCommunication
     public NativeBridgeCommunication(IMessageQueueHandler queueHandler)
     {
         NativeBridgeCommunication.queueHandler = queueHandler;
-#if UNITY_WEBGL && !UNITY_EDITOR
+#if (UNITY_WEBGL || UNITY_ANDROID) && !UNITY_EDITOR
         SetCallback_CreateEntity(CreateEntity);
         SetCallback_RemoveEntity(RemoveEntity);
         SetCallback_SceneReady(SceneReady);

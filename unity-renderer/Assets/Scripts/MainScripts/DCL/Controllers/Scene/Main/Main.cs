@@ -17,7 +17,7 @@ namespace DCL
     {
         [SerializeField] private bool disableSceneDependencies;
         public static Main i { get; private set; }
-
+        [SerializeField] private GameObject webViewPrefab;
         public PoolableComponentFactory componentFactory;
 
         private PerformanceMetricsController performanceMetricsController;
@@ -63,14 +63,15 @@ namespace DCL
 
 #if UNITY_WEBGL && !UNITY_EDITOR
             Debug.Log("DCL Unity Build Version: " + DCL.Configuration.ApplicationSettings.version);
-            Debug.unityLogger.logEnabled = false;
-
+            Debug.unityLogger.logEnabled = true;
+            Debug.Log($"Main: starting NativeBridgeCommunication");
             kernelCommunication = new NativeBridgeCommunication(Environment.i.world.sceneController);
 #else
             // TODO(Brian): Remove this branching once we finish migrating all tests out of the
             //              IntegrationTestSuite_Legacy base class.
             if (!Configuration.EnvironmentSettings.RUNNING_TESTS)
             {
+                Debug.Log($"Main: starting WebSockeSSL");
                 kernelCommunication = new WebSocketCommunication(DebugConfigComponent.i.webSocketSSL);
             }
 #endif

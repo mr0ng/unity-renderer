@@ -1,9 +1,12 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using DCL.Components;
 using UnityEditor;
 using UnityEngine;
-
+#if UNITY_ANDROID
+using Vuplex.WebView;
+#endif
 namespace DCL
 {
     public class DebugConfigComponent : MonoBehaviour
@@ -49,6 +52,8 @@ namespace DCL
 
         [Header("General Settings")]
         public bool openBrowserWhenStart;
+        CanvasWebViewPrefab _canvasWebViewPrefab;
+        CanvasKeyboard _keyboard;
         public bool webSocketSSL = false;
 
         [Header("Kernel General Settings")]
@@ -92,18 +97,25 @@ namespace DCL
             DataStore.i.debugConfig.msgStepByStep = debugConfig.msgStepByStep;
             DataStore.i.performance.multithreading.Set(multithreaded);
             Texture.allowThreadedTextureCreation = multithreaded;
+            Web.SetUserAgent(false);
+            Web.SetStorageEnabled(true); 
+            Web.SetIgnoreCertificateErrors(true);
+            
         }
 
         private void Start()
         {
+           
             lock (DataStore.i.wsCommunication.communicationReady)
             {
                 if (DataStore.i.wsCommunication.communicationReady.Get())
                 {
+                    Debug.Log("Debug Config Init");
                     InitConfig();
                 }
                 else
                 {
+                    Debug.Log("Debug Config starting listener for OnCommunicationReadyChangedValue");
                     DataStore.i.wsCommunication.communicationReady.OnChange += OnCommunicationReadyChangedValue;
                 }
             }
@@ -111,6 +123,7 @@ namespace DCL
 
         private void OnCommunicationReadyChangedValue(bool newState, bool prevState)
         {
+            Debug.Log($"DebugConfig OnCommunicationReadyChangedValue {newState}");
             if (newState && !prevState)
                 InitConfig();
 
@@ -131,9 +144,104 @@ namespace DCL
 
         private void OpenWebBrowser()
         {
-#if (UNITY_EDITOR || UNITY_STANDALONE)
             string baseUrl = "";
             string debugString = "";
+            string debugPanelString = "";
+ #if (UNITY_EDITOR  || UNITY_STANDALONE)
+            
+
+             if (baseUrlMode == BaseUrl.CUSTOM)
+                 baseUrl = baseUrlCustom;
+             else
+                 baseUrl = "http://localhost:3000/?";
+
+             switch (environment)
+             {
+                 case Environment.USE_DEFAULT_FROM_URL:
+                     break;
+                 case Environment.LOCAL:
+                     debugString = "DEBUG_MODE&";
+                     break;
+                 case Environment.ZONE:
+                     debugString = "NETWORK=ropsten&";
+                     break;
+                 case Environment.TODAY:
+                     debugString = "NETWORK=mainnet&";
+                     break;
+                 case Environment.ORG:
+                     debugString = "NETWORK=mainnet&";
+                     break;
+             }
+
+             if (!string.IsNullOrEmpty(kernelVersion))
+             {
+                 debugString += $"kernel-version={kernelVersion}&";
+             }
+
+             if (forceLocalComms)
+             {
+                 debugString += "LOCAL_COMMS&";
+             }
+
+             if (allWearables)
+             {
+                 debugString += "ALL_WEARABLES&";
+             }
+
+             if (testWearables)
+             {
+                 debugString += "TEST_WEARABLES&";
+             }
+
+             if (enableTutorial)
+             {
+                 debugString += "RESET_TUTORIAL&";
+             }
+
+             if (soloScene)
+             {
+                 debugString += "LOS=0&";
+             }
+
+             if (builderInWorld)
+             {
+                 debugString += "ENABLE_BUILDER_IN_WORLD&";
+             }
+
+             if (!string.IsNullOrEmpty(realm))
+             {
+                 debugString += $"realm={realm}&";
+             }
+
+             
+
+             if (debugPanelMode == DebugPanel.Engine)
+             {
+                 debugPanelString = ENGINE_DEBUG_PANEL + "&";
+             }
+             else if (debugPanelMode == DebugPanel.Scene)
+             {
+                 debugPanelString = SCENE_DEBUG_PANEL + "&";
+             }
+
+             if (!webSocketSSL)
+             {
+                 if (baseUrl.Contains("play.decentraland.org"))
+                 {
+                     Debug.LogError("play.decentraland.org only works with WebSocket SSL, please change the base URL to play.decentraland.zone");
+                     QuitGame();
+                     return;
+                 }
+             }
+             else
+             {
+                 Debug.Log("[REMINDER] To be able to connect with SSL you should start Chrome with the --ignore-certificate-errors argument specified (or enabling the following option: chrome://flags/#allow-insecure-localhost). In Firefox set the configuration option `network.websocket.allowInsecureFromHTTPS` to true, then use the ws:// rather than the wss:// address.");                
+             }
+
+             Application.OpenURL(
+                 $"{baseUrl}{debugString}{debugPanelString}position={startInCoords.x}%2C{startInCoords.y}&ws={DataStore.i.wsCommunication.url}");
+//#elif  UNITY_ANDROID
+           
 
             if (baseUrlMode == BaseUrl.CUSTOM)
                 baseUrl = baseUrlCustom;
@@ -198,7 +306,7 @@ namespace DCL
                 debugString += $"realm={realm}&";
             }
 
-            string debugPanelString = "";
+           
 
             if (debugPanelMode == DebugPanel.Engine)
             {
@@ -222,10 +330,52 @@ namespace DCL
             {
                 Debug.Log("[REMINDER] To be able to connect with SSL you should start Chrome with the --ignore-certificate-errors argument specified (or enabling the following option: chrome://flags/#allow-insecure-localhost). In Firefox set the configuration option `network.websocket.allowInsecureFromHTTPS` to true, then use the ws:// rather than the wss:// address.");                
             }
+            
+            var canvas = GameObject.Find("Canvas");
+            DontDestroyOnLoad(canvas);
+            WebViewOptions opt = new WebViewOptions();
+            opt.preferredPlugins  = new WebPluginType[] { WebPluginType.Android};
+            _canvasWebViewPrefab = CanvasWebViewPrefab.Instantiate(opt);
+            _canvasWebViewPrefab.InitialResolution = 400;
+            _canvasWebViewPrefab.NativeOnScreenKeyboardEnabled = false;
+            _canvasWebViewPrefab.transform.SetParent(canvas.transform, false);
+            _canvasWebViewPrefab.Initialized += (sender, eventArgs) => {
+                _canvasWebViewPrefab.WebView.LoadUrl($"{baseUrl}{debugString}{debugPanelString}position={startInCoords.x}%2C{startInCoords.y}&ws={DataStore.i.wsCommunication.url}");
+            };
+   
+            // Create a CanvasKeyboard
+            // https://developer.vuplex.com/webview/CanvasKeyboard
+            _keyboard = CanvasKeyboard.Instantiate();
+            _keyboard.InitialResolution = 400;
+            _keyboard.transform.SetParent(canvas.transform, false);
+            // Hook up the keyboard so that characters are routed to the CanvasWebViewPrefab.
+            _keyboard.InputReceived += (sender, eventArgs) => {
+                _canvasWebViewPrefab.WebView.HandleKeyboardInput(eventArgs.Value);
+            };
+            Debug.Log("Created WebView objects");
+            _positionPrefabs();
+            Debug.Log("finished positioning webview objects");
 
-            Application.OpenURL(
-                $"{baseUrl}{debugString}{debugPanelString}position={startInCoords.x}%2C{startInCoords.y}&ws={DataStore.i.wsCommunication.url}");
 #endif
+        }
+        private void _positionPrefabs() {
+
+            var rectTransform = _canvasWebViewPrefab.transform as RectTransform;
+            rectTransform.anchoredPosition3D = Vector3.zero;
+            rectTransform.offsetMin = new Vector2(0, 2);
+            rectTransform.offsetMax = Vector2.one;
+            rectTransform.pivot = new Vector2(0.5f, 1);
+            rectTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, 520/150);
+            rectTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, 520/150);
+            _canvasWebViewPrefab.transform.localScale = Vector3.one;
+
+            var keyboardTransform = _keyboard.transform as RectTransform;
+            keyboardTransform.anchoredPosition3D = Vector3.zero;
+            keyboardTransform.offsetMin = new Vector2(0.5f, 0);
+            keyboardTransform.offsetMax = new Vector2(0.5f, 0);
+            keyboardTransform.pivot = new Vector2(0.5f, 0);
+            keyboardTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, 690/150);
+            keyboardTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, 162/150);
         }
 
         private void OnDestroy() { DataStore.i.wsCommunication.communicationReady.OnChange -= OnCommunicationReadyChangedValue; }
