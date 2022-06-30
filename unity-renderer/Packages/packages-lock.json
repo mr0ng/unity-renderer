@@ -7,6 +7,13 @@
       "dependencies": {},
       "hash": "bda77ab0395282b9a2c417c6affa21c1d004321b"
     },
+    "com.cysharp.unitask": {
+      "version": "https://github.com/Cysharp/UniTask.git?path=src/UniTask/Assets/Plugins/UniTask",
+      "depth": 0,
+      "source": "git",
+      "dependencies": {},
+      "hash": "50a67d8f419b6cea0398eff6c19cf0bbe11ed609"
+    },
     "com.microsoft.mixedreality.openxr": {
       "version": "file:MixedReality/com.microsoft.mixedreality.openxr-1.2.1.tgz",
       "depth": 0,
@@ -49,14 +56,6 @@
       "dependencies": {
         "com.unity.textmeshpro": "2.1.4"
       }
-    },
-    "com.cysharp.unitask": {
-      "version": "https://github.com/Cysharp/UniTask.git?path=src/UniTask/Assets/Plugins/UniTask",
-      "depth": 0,
-      "source": "git",
-      "dependencies": {},
-      "hash": "50a67d8f419b6cea0398eff6c19cf0bbe11ed609"
-
     },
     "com.unity.2d.sprite": {
       "version": "1.0.0",
@@ -144,6 +143,13 @@
       "dependencies": {
         "com.unity.editorcoroutines": "1.0.0"
       },
+      "url": "https://packages.unity.com"
+    },
+    "com.unity.nuget.newtonsoft-json": {
+      "version": "2.0.2",
+      "depth": 0,
+      "source": "registry",
+      "dependencies": {},
       "url": "https://packages.unity.com"
     },
     "com.unity.performance.profile-analyzer": {

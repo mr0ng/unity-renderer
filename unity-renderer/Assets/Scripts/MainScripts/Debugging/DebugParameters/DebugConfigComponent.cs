@@ -240,7 +240,7 @@ namespace DCL
 
              Application.OpenURL(
                  $"{baseUrl}{debugString}{debugPanelString}position={startInCoords.x}%2C{startInCoords.y}&ws={DataStore.i.wsCommunication.url}");
-//#elif  UNITY_ANDROID
+#elif  UNITY_ANDROID
            
 
             if (baseUrlMode == BaseUrl.CUSTOM)
