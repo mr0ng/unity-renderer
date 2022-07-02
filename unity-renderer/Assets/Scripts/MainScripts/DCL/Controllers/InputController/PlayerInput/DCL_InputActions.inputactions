@@ -186,7 +186,7 @@
                     "id": "3e5f5442-8668-4b27-a940-df99bad7e831",
                     "path": "<XRController>{RightHand}/thumbstick",
                     "interactions": "",
-                    "processors": "ScaleVector2(x=120,y=0),StickDeadzone(min=0.5)",
+                    "processors": "StickDeadzone",
                     "groups": "XR",
                     "action": "Look",
                     "isComposite": false,

@@ -166,8 +166,6 @@ public class EventCardComponentView : BaseComponentView, IEventCardComponentView
 
     public override void Start()
     {
-        transform.localRotation = Quaternion.identity;
-        
         if (eventImage != null)
             eventImage.OnLoaded += OnEventImageLoaded;
 

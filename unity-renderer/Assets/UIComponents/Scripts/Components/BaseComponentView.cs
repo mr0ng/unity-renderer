@@ -105,7 +105,11 @@ public abstract class BaseComponentView : MonoBehaviour, IBaseComponentView
         DataStore.i.screen.size.OnChange += OnScreenSizeModified;
     }
 
-    public virtual void OnEnable() { StartCoroutine(RaiseOnScreenSizeChangedAfterDelay()); }
+    public virtual void OnEnable()
+    {
+        transform.localRotation = Quaternion.identity;
+        StartCoroutine(RaiseOnScreenSizeChangedAfterDelay());
+    }
 
     public virtual void OnDisable() { OnLoseFocus(); }
 

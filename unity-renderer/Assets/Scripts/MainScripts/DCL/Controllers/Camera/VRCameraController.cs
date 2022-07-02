@@ -27,6 +27,8 @@ namespace DCL.Camera
         private Transform myTrans;
         private Transform camTrans;
 
+        private bool smoothRotate;
+
         void Start()
         {
             myTrans = transform;
@@ -59,10 +61,25 @@ namespace DCL.Camera
 
         private void RotateCamera(DCLAction_Measurable action, float value)
         {
+            if (smoothRotate)
+            {
+                SmoothRotate(value);
+                return;
+            } 
+            SnapRotate(value);
+        }
+
+        private void SnapRotate(float value)
+        {
             if ((DateTime.Now - lastTurned).TotalSeconds < secondsBetweenTurns) return;
             var yValue = value >= 0 ? rotation : -rotation;
             myTrans.eulerAngles += new Vector3(0f, yValue, 0f);
             lastTurned = DateTime.Now;
+        }
+
+        private void SmoothRotate(float value)
+        {
+            myTrans.eulerAngles += new Vector3(0f, value * rotation * Time.deltaTime, 0f);
         }
 
         private void FollowCharacter(float deltaTime)
@@ -75,5 +92,7 @@ namespace DCL.Camera
             if (current == false)
                 CommonScriptableObjects.cameraBlocked.Set(true);
         }
+
+        public void SetSmoothRotate(bool value) => smoothRotate = value;
     }
 }

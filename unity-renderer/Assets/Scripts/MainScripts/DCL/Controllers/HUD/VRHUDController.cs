@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using Microsoft.MixedReality.Toolkit.Utilities;
+using Microsoft.MixedReality.Toolkit.Utilities.Solvers;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -26,6 +28,8 @@ namespace DCL.Huds
         private Canvas dockCanvas;
         private Transform mainCam;
         private DCLPlayerInput.PlayerActions actions;
+        private bool loading;
+
 
         private void Awake()
         {
@@ -37,8 +41,8 @@ namespace DCL.Huds
             I = this;
             if (Camera.main != null)
                 mainCam = Camera.main.transform;
-            LoadingStart += HideVisuals;
-            LoadingEnd += ShowVisuals;
+            LoadingStart += OnLoadingStart;
+            LoadingEnd += OnLoadingEnd;
             dockCanvas.overrideSorting = true;
         }
 
@@ -50,10 +54,12 @@ namespace DCL.Huds
             dock.position = hidenPos;
             exploreV2IsOpen.OnChange += HideSubs;
         }
+
         private void OpenHandMenu(InputAction.CallbackContext context)
         {
-            Debug.Log("performed");
+            if (loading) return;
             visuals.SetActive(!visuals.activeSelf);
+            DeactivateHud();
         }
 
         private void HideSubs(bool current, bool previous)
@@ -66,8 +72,15 @@ namespace DCL.Huds
             }
         }
 
-        private void ShowVisuals() => visuals.SetActive(true);
-        private void HideVisuals() => visuals.SetActive(false);
+        private void OnLoadingEnd()
+        {
+            loading = false;
+        }
+        private void OnLoadingStart()
+        {
+            loading = true;
+            visuals.SetActive(false);
+        }
 
         public static void RaiseLoadingStart()
         {
@@ -91,6 +104,12 @@ namespace DCL.Huds
             helperTrans.localPosition = Vector3.zero;
             helperTrans.localRotation = Quaternion.identity;
             helperTrans.localScale = Vector3.one;
+            switch (helperTrans)
+            {
+                case RectTransform rectTransform:
+                    rectTransform.sizeDelta = new Vector2(1920, 1080);
+                    break;
+            }
         }
 
         public void MoveHud()
