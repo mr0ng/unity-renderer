@@ -93,7 +93,7 @@ public abstract class BaseComponentView : MonoBehaviour, IBaseComponentView
     internal BaseComponentModel baseModel;
     internal ShowHideAnimator showHideAnimator;
 
-    public bool isVisible { get; private set; }
+    public virtual bool isVisible { get; private set; }
     private bool isDestroyed = false;
 
     public event Action<bool> onFocused;
@@ -158,9 +158,9 @@ public abstract class BaseComponentView : MonoBehaviour, IBaseComponentView
             Destroy(gameObject);
     }
 
-    public void OnPointerEnter(PointerEventData eventData) { OnFocus(); }
+    public virtual void OnPointerEnter(PointerEventData eventData) { OnFocus(); }
 
-    public void OnPointerExit(PointerEventData eventData) { OnLoseFocus(); }
+    public virtual void OnPointerExit(PointerEventData eventData) { OnLoseFocus(); }
 
     private void OnDestroy()
     {
@@ -182,7 +182,7 @@ public abstract class BaseComponentView : MonoBehaviour, IBaseComponentView
         OnScreenSizeChanged();
     }
 
-    internal static T Create<T>(string resourceName) where T : BaseComponentView
+    public static T Create<T>(string resourceName) where T : BaseComponentView
     {
         T buttonComponentView = Instantiate(Resources.Load<GameObject>(resourceName)).GetComponent<T>();
         return buttonComponentView;

@@ -9,9 +9,17 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "UserProfile", menuName = "UserProfile")]
 public class UserProfile : ScriptableObject //TODO Move to base variable
 {
+    public enum EmoteSource
+    {
+        EmotesWheel,
+        Shortcut,
+        Command
+    }
+
     static DateTime epochStart = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
     public event Action<UserProfile> OnUpdate;
-    public event Action<string, long> OnAvatarExpressionSet;
+    public event Action<string, long, EmoteSource> OnAvatarEmoteSet;
+    public event Action<Dictionary<string, int>> OnInventorySet;
 
     public string userId => model.userId;
     public string ethAddress => model.ethAddress;
@@ -19,12 +27,13 @@ public class UserProfile : ScriptableObject //TODO Move to base variable
     public string description => model.description;
     public string email => model.email;
     public string bodySnapshotURL => model.snapshots.body;
-    public string face128SnapshotURL => model.snapshots.face128;
+    public string face256SnapshotURL => model.snapshots.face256;
     public UserProfileModel.ParcelsWithAccess[] parcelsWithAccess => model.parcelsWithAccess;
     public List<string> blocked => model.blocked != null ? model.blocked : new List<string>();
     public List<string> muted => model.muted ?? new List<string>();
     public bool hasConnectedWeb3 => model.hasConnectedWeb3;
     public bool hasClaimedName => model.hasClaimedName;
+    public bool isGuest => !model.hasConnectedWeb3;
     public AvatarModel avatar => model.avatar;
     public int tutorialStep => model.tutorialStep;
 
@@ -45,7 +54,6 @@ public class UserProfile : ScriptableObject //TODO Move to base variable
             model = null;
             return;
         }
-
         bool faceSnapshotDirty = model.snapshots.face256 != newModel.snapshots.face256;
         bool bodySnapshotDirty = model.snapshots.body != newModel.snapshots.body;
 
@@ -98,21 +106,34 @@ public class UserProfile : ScriptableObject //TODO Move to base variable
         OnUpdate?.Invoke(this);
     }
 
-    public void SetAvatarExpression(string id)
+    public void SetAvatarExpression(string id, EmoteSource source)
     {
         var timestamp = (long) (DateTime.UtcNow - epochStart).TotalMilliseconds;
         avatar.expressionTriggerId = id;
         avatar.expressionTriggerTimestamp = timestamp;
         WebInterface.SendExpression(id, timestamp);
         OnUpdate?.Invoke(this);
-        OnAvatarExpressionSet?.Invoke(id, timestamp);
+        OnAvatarEmoteSet?.Invoke(id, timestamp, source);
     }
 
     public void SetInventory(string[] inventoryIds)
     {
         inventory.Clear();
         inventory = inventoryIds.GroupBy(x => x).ToDictionary(x => x.Key, x => x.Count());
+        OnInventorySet?.Invoke(inventory);
     }
+
+    public void AddToInventory(string wearableId)
+    {
+        if (inventory.ContainsKey(wearableId))
+            inventory[wearableId]++;
+        else
+            inventory.Add(wearableId, 1);
+    }
+
+    public void RemoveFromInventory(string wearableId) { inventory.Remove(wearableId); }
+    
+    public bool ContainsInInventory(string wearableId) => inventory.ContainsKey(wearableId);
 
     public string[] GetInventoryItemsIds() { return inventory.Keys.ToArray(); }
 
@@ -130,21 +151,18 @@ public class UserProfile : ScriptableObject //TODO Move to base variable
 
     public UserProfileModel CloneModel() => model.Clone();
 
-    public bool IsBlocked(string userId)
-    {
-        return blocked != null && blocked.Contains(userId);
-    }
+    public bool IsBlocked(string userId) { return blocked != null && blocked.Contains(userId); }
 
     public void Block(string userId)
     {
-        if (IsBlocked(userId)) return;
+        if (IsBlocked(userId))
+            return;
         blocked.Add(userId);
     }
     
-    public void Unblock(string userId)
-    {
-        blocked.Remove(userId);
-    }
+    public void Unblock(string userId) { blocked.Remove(userId); }
+    
+    public bool HasEquipped(string wearableId) => avatar.wearables.Contains(wearableId);
 
 #if UNITY_EDITOR
     private void OnEnable()

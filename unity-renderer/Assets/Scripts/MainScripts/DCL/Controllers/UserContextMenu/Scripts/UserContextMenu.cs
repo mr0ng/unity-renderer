@@ -1,4 +1,5 @@
 using DCL.Interface;
+using SocialFeaturesAnalytics;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -75,6 +76,7 @@ public class UserContextMenu : MonoBehaviour
     private bool isBlocked;
     private MenuConfigFlags currentConfigFlags;
     private IConfirmationDialog currentConfirmationDialog;
+    internal ISocialAnalytics socialAnalytics;
 
     /// <summary>
     /// Show context menu
@@ -138,6 +140,8 @@ public class UserContextMenu : MonoBehaviour
             FriendsController.i.OnUpdateFriendship -= OnFriendActionUpdate;
         }
     }
+    
+    public void ClickReportButton() => reportButton.onClick.Invoke();
 
     private void OnPassportButtonPressed()
     {
@@ -152,32 +156,41 @@ public class UserContextMenu : MonoBehaviour
     {
         OnReport?.Invoke(userId);
         WebInterface.SendReportPlayer(userId);
+        GetSocialAnalytics().SendPlayerReport(PlayerReportIssueType.None, 0, PlayerActionSource.ProfileContextMenu);
         Hide();
     }
 
     private void OnDeleteUserButtonPressed()
     {
         OnUnfriend?.Invoke(userId);
+
         if (currentConfirmationDialog != null)
         {
             currentConfirmationDialog.SetText(string.Format(DELETE_MSG_PATTERN, UserProfileController.userProfilesCatalog.Get(userId)?.userName));
             currentConfirmationDialog.Show(() =>
             {
-                FriendsController.i.UpdateFriendshipStatus(new FriendsController.FriendshipUpdateStatusMessage()
-                {
-                    userId = userId,
-                    action = FriendshipAction.DELETED
-                });
-
-                WebInterface.UpdateFriendshipStatus(
-                    new FriendsController.FriendshipUpdateStatusMessage()
-                    {
-                        action = FriendshipAction.DELETED,
-                        userId = userId
-                    });
+                UnfriendUser();
             });
         }
+        else
+        {
+            UnfriendUser();
+        }
+
+        GetSocialAnalytics().SendFriendDeleted(UserProfile.GetOwnUserProfile().userId, userId, PlayerActionSource.ProfileContextMenu);
         Hide();
+    }
+
+    private void UnfriendUser()
+    {
+        FriendsController.FriendshipUpdateStatusMessage newFriendshipStatusMessage = new FriendsController.FriendshipUpdateStatusMessage()
+        {
+            userId = userId,
+            action = FriendshipAction.DELETED
+        };
+
+        FriendsController.i.UpdateFriendshipStatus(newFriendshipStatusMessage);
+        WebInterface.UpdateFriendshipStatus(newFriendshipStatusMessage);
     }
 
     private void OnAddFriendButtonPressed()
@@ -206,6 +219,8 @@ public class UserContextMenu : MonoBehaviour
         {
             userId = userId, action = FriendshipAction.REQUESTED_TO
         });
+
+        GetSocialAnalytics().SendFriendRequestSent(UserProfile.GetOwnUserProfile().userId, userId, 0, PlayerActionSource.ProfileContextMenu);
     }
 
     private void OnCancelFriendRequestButtonPressed()
@@ -227,6 +242,8 @@ public class UserContextMenu : MonoBehaviour
         {
             userId = userId, action = FriendshipAction.CANCELLED
         });
+
+        GetSocialAnalytics().SendFriendRequestCancelled(UserProfile.GetOwnUserProfile().userId, userId, PlayerActionSource.ProfileContextMenu);
     }
 
     private void OnMessageButtonPressed()
@@ -243,10 +260,12 @@ public class UserContextMenu : MonoBehaviour
         if (blockUser)
         {
             WebInterface.SendBlockPlayer(userId);
+            GetSocialAnalytics().SendPlayerBlocked(FriendsController.i.IsFriend(userId), PlayerActionSource.ProfileContextMenu);
         }
         else
         {
             WebInterface.SendUnblockPlayer(userId);
+            GetSocialAnalytics().SendPlayerUnblocked(FriendsController.i.IsFriend(userId), PlayerActionSource.ProfileContextMenu);
         }
         Hide();
     }
@@ -286,7 +305,7 @@ public class UserContextMenu : MonoBehaviour
             configFlags &= ~usesFriendsApiFlags;
         }
 
-        this.currentConfigFlags = configFlags;
+        currentConfigFlags = configFlags;
         ProcessActiveElements(configFlags);
 
         if ((configFlags & MenuConfigFlags.Block) != 0)
@@ -396,6 +415,18 @@ public class UserContextMenu : MonoBehaviour
         {
             SetupFriendship(FriendshipStatus.NOT_FRIEND);
         }
+    }
+
+    private ISocialAnalytics GetSocialAnalytics()
+    {
+        if (socialAnalytics == null)
+        {
+            socialAnalytics = new SocialAnalytics(
+                DCL.Environment.i.platform.serviceProviders.analytics,
+                new UserProfileWebInterfaceBridge());
+        }
+
+        return socialAnalytics;
     }
 
 #if UNITY_EDITOR

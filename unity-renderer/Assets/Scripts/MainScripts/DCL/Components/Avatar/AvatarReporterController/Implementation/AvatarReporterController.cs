@@ -1,12 +1,13 @@
+using System.Collections.Generic;
 using System.Linq;
 using DCL;
 using DCL.Configuration;
+using DCL.Controllers;
 using DCL.Helpers;
 using UnityEngine;
 
 public class AvatarReporterController : IAvatarReporterController
 {
-    private string entityId;
     private string avatarId;
     private string lastSceneId;
     private Vector2Int lastCoords;
@@ -22,16 +23,30 @@ public class AvatarReporterController : IAvatarReporterController
         this.worldState = worldState;
     }
 
-    void IAvatarReporterController.SetUp(string sceneId, string entityId, string avatarId)
+    void IAvatarReporterController.SetUp(string sceneId, string avatarId)
     {
         // NOTE: do not report avatars that doesn't belong to the global scene
         if (sceneId != EnvironmentSettings.AVATAR_GLOBAL_SCENE_ID)
             return;
-
-        this.entityId = entityId;
+        
         this.avatarId = avatarId;
         isInitialReport = true;
         lastSceneId = null;
+    }
+    
+    string GetcurrentSceneIdNonAlloc(Vector2Int coords)
+    {
+        foreach (KeyValuePair<string, IParcelScene> parcelScene in worldState.loadedScenes)
+        {
+            var parcels = parcelScene.Value.sceneData.parcels;
+
+            if (parcels != null && parcels.Contains(coords))
+            {
+                return parcelScene.Key;
+            }
+        }
+        
+        return null;
     }
 
     void IAvatarReporterController.ReportAvatarPosition(Vector3 position)
@@ -50,18 +65,15 @@ public class AvatarReporterController : IAvatarReporterController
         {
             return;
         }
-
-        var scenePair = worldState.loadedScenes
-                                  .FirstOrDefault(pair => pair.Value.sceneData.parcels != null && pair.Value.sceneData.parcels.Contains(coords));
-
-        string currentSceneId = scenePair.Key;
+        
+        string currentSceneId = GetcurrentSceneIdNonAlloc(coords);
 
         if (currentSceneId == lastSceneId && !isInitialReport)
         {
             return;
         }
 
-        ((IAvatarReporterController)this).reporter.ReportAvatarSceneChange(entityId, avatarId, currentSceneId);
+        ((IAvatarReporterController)this).reporter.ReportAvatarSceneChange(avatarId, currentSceneId);
 
         lastSceneId = currentSceneId;
         lastCoords = coords;
@@ -74,9 +86,8 @@ public class AvatarReporterController : IAvatarReporterController
         if (!CanReport())
             return;
 
-        ((IAvatarReporterController)this).reporter.ReportAvatarRemoved(entityId, avatarId);
-
-        entityId = null;
+        ((IAvatarReporterController)this).reporter.ReportAvatarRemoved(avatarId);
+        
         avatarId = null;
         lastSceneId = null;
         isInitialReport = true;
@@ -84,7 +95,7 @@ public class AvatarReporterController : IAvatarReporterController
 
     private bool CanReport()
     {
-        return !string.IsNullOrEmpty(entityId) && !string.IsNullOrEmpty(avatarId);
+        return !string.IsNullOrEmpty(avatarId);
     }
 
     private bool HasMoved(Vector3 currentPosition)

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using DCL.Emotes;
 using UnityEngine;
 
 [Serializable]
@@ -39,6 +40,7 @@ public class WearablesAPIData
         public string rarity;
         public Data data;
         public i18n[] i18n;
+        public EmoteDataV0 emoteDataV0 = null;
         public int createdAt;
         public int updatedAt;
     }
@@ -51,7 +53,7 @@ public class WearablesAPIData
     }
 
     // TODO: dinamically use ICatalyst.contentUrl, content server is not a const
-    private const string WEARABLES_CONTENT_BASE_URL = "https://peer-lb.decentraland.org/content/contents/";
+    private const string WEARABLES_CONTENT_BASE_URL = "https://peer.decentraland.org/content/contents/";
 
     public List<Wearable> wearables;
     public PaginationData pagination;
@@ -73,6 +75,7 @@ public class WearablesAPIData
                 rarity = wearableData.rarity,
                 description = wearableData.description,
                 i18n = wearableData.i18n,
+                emoteDataV0 = wearableData.emoteDataV0,
                 data = new WearableItem.Data()
                 {
                     category = wearableData.data.category,

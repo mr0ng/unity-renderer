@@ -7,6 +7,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using DCL.Configuration;
+using Google.Protobuf.Collections;
 using Newtonsoft.Json;
 using TMPro;
 using UnityEngine;
@@ -58,6 +59,23 @@ namespace DCL.Helpers
             }
         }
 
+        public static Vector2[] FloatArrayToV2List(RepeatedField<float> uvs)
+        {
+            Vector2[] uvsResult = new Vector2[uvs.Count / 2];
+            int uvsResultIndex = 0;
+
+            for (int i = 0; i < uvs.Count;)
+            {
+                Vector2 tmpUv = Vector2.zero;
+                tmpUv.x = uvs[i++];
+                tmpUv.y = uvs[i++];
+
+                uvsResult[uvsResultIndex++] = tmpUv;
+            }
+
+            return uvsResult;
+        }
+        
         public static Vector2[] FloatArrayToV2List(float[] uvs)
         {
             Vector2[] uvsResult = new Vector2[uvs.Length / 2];
@@ -65,11 +83,7 @@ namespace DCL.Helpers
 
             for (int i = 0; i < uvs.Length;)
             {
-                Vector2 tmpUv = Vector2.zero;
-                tmpUv.x = uvs[i++];
-                tmpUv.y = uvs[i++];
-
-                uvsResult[uvsResultIndex++] = tmpUv;
+                uvsResult[uvsResultIndex++] = new Vector2(uvs[i++],uvs[i++]);
             }
 
             return uvsResult;
@@ -91,7 +105,7 @@ namespace DCL.Helpers
             t.sizeDelta = Vector2.zero;
             t.anchoredPosition = Vector2.zero;
         }
-
+        
         public static void SetToCentered(this RectTransform t)
         {
             t.anchorMin = Vector2.one * 0.5f;
@@ -282,7 +296,7 @@ namespace DCL.Helpers
         {
             if (obj is Transform)
                 return;
-            
+
 #if UNITY_EDITOR
             if (Application.isPlaying)
                 Object.Destroy(obj);
@@ -554,6 +568,9 @@ namespace DCL.Helpers
 
         public static bool IsPointerOverUIElement(Vector3 mousePosition)
         {
+            if (EventSystem.current == null)
+                return false;
+
             var eventData = new PointerEventData(EventSystem.current);
             eventData.position = mousePosition;
             var results = new List<RaycastResult>();

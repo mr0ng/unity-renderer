@@ -25,15 +25,22 @@ public class AvatarAnimatorLegacy : MonoBehaviour, IPoolLifecycleHandler, IAnima
     const float RAY_OFFSET_LENGTH = 3.0f;
 
     const float MAX_VELOCITY = 6.25f;
+    
+    // Time it takes to determine if a character is grounded when vertical velocity is 0
+    const float FORCE_GROUND_TIME = 0.05f;
+    
+    // Minimum vertical speed used to consider whether an avatar is on air
+    const float MIN_VERTICAL_SPEED_AIR = 0.025f;
+
 
     [System.Serializable]
-    public class BaseClipsIds
+    public class AvatarLocomotion
     {
-        public string idle;
-        public string walk;
-        public string run;
-        public string jump;
-        public string fall;
+        public AnimationClip idle;
+        public AnimationClip walk;
+        public AnimationClip run;
+        public AnimationClip jump;
+        public AnimationClip fall;
     }
 
     [System.Serializable]
@@ -49,11 +56,11 @@ public class AvatarAnimatorLegacy : MonoBehaviour, IPoolLifecycleHandler, IAnima
         public float deltaTime;
     }
 
-    [SerializeField] internal AvatarAnimationsVariable maleAnimations;
-    [SerializeField] internal AvatarAnimationsVariable femaleAnimations;
+    [SerializeField] internal AvatarLocomotion femaleLocomotions;
+    [SerializeField] internal AvatarLocomotion maleLocomotions;
+    AvatarLocomotion currentLocomotions;
 
     public new Animation animation;
-    public BaseClipsIds baseClipsIds;
     public BlackBoard blackboard;
     public Transform target;
 
@@ -63,9 +70,10 @@ public class AvatarAnimatorLegacy : MonoBehaviour, IPoolLifecycleHandler, IAnima
     internal System.Action<BlackBoard> currentState;
 
     Vector3 lastPosition;
-    AvatarAnimationsVariable currentAnimations;
     bool isOwnPlayer = false;
     private AvatarAnimationEventHandler animEventHandler;
+    
+    private float lastOnAirTime = 0;
 
     public void Start() { OnPoolGet(); }
 
@@ -114,6 +122,13 @@ public class AvatarAnimatorLegacy : MonoBehaviour, IPoolLifecycleHandler, IAnima
 
         //NOTE(Brian): Vertical speed
         float verticalVelocity = flattenedVelocity.y;
+
+        //NOTE(Kinerius): if we have more or less than zero we consider that we are either jumping or falling
+        if (Mathf.Abs(verticalVelocity) > MIN_VERTICAL_SPEED_AIR)
+        {
+            lastOnAirTime = Time.time;
+        }
+        
         blackboard.verticalSpeed = verticalVelocity;
 
         flattenedVelocity.y = 0;
@@ -124,12 +139,21 @@ public class AvatarAnimatorLegacy : MonoBehaviour, IPoolLifecycleHandler, IAnima
             blackboard.movementSpeed = flattenedVelocity.magnitude;
 
         Vector3 rayOffset = Vector3.up * RAY_OFFSET_LENGTH;
-        //NOTE(Brian): isGrounded?
-        blackboard.isGrounded = Physics.Raycast(target.transform.position + rayOffset,
+        
+        //NOTE(Kinerius): This check is just for the playing character, it uses a combination of collision flags and raycasts to determine the ground state, its precise
+        bool isGroundedByCharacterController = isOwnPlayer && DCLCharacterController.i.isGrounded;
+        
+        //NOTE(Kinerius): This check is for interpolated avatars (the other players) as we dont have a Character Controller, we determine their ground state by checking its vertical velocity
+        //                this check is cheap and fast but not precise
+        bool isGroundedByVelocity = !isOwnPlayer && Time.time - lastOnAirTime > FORCE_GROUND_TIME;
+
+        //NOTE(Kinerius): This additional check is both for the player and interpolated avatars, we cast an additional raycast per avatar to check ground state
+        bool isGroundedByRaycast = Physics.Raycast(target.transform.position + rayOffset,
             Vector3.down,
             RAY_OFFSET_LENGTH - ELEVATION_OFFSET,
             DCLCharacterController.i.groundLayers);
 
+        blackboard.isGrounded = isGroundedByCharacterController || isGroundedByVelocity || isGroundedByRaycast;
 #if UNITY_EDITOR
         Debug.DrawRay(target.transform.position + rayOffset, Vector3.down * (RAY_OFFSET_LENGTH - ELEVATION_OFFSET), blackboard.isGrounded ? Color.green : Color.red);
 #endif
@@ -157,22 +181,22 @@ public class AvatarAnimatorLegacy : MonoBehaviour, IPoolLifecycleHandler, IAnima
             return;
         }
 
-        animation[baseClipsIds.run].normalizedSpeed = bb.movementSpeed / bb.deltaTime * bb.runSpeedFactor;
-        animation[baseClipsIds.walk].normalizedSpeed = bb.movementSpeed / bb.deltaTime * bb.walkSpeedFactor;
+        animation[currentLocomotions.run.name].normalizedSpeed = bb.movementSpeed / bb.deltaTime * bb.runSpeedFactor;
+        animation[currentLocomotions.walk.name].normalizedSpeed = bb.movementSpeed / bb.deltaTime * bb.walkSpeedFactor;
 
         float movementSpeed = bb.movementSpeed / bb.deltaTime;
 
         if (movementSpeed > runMinSpeed)
         {
-            animation.CrossFade(baseClipsIds.run, RUN_TRANSITION_TIME);
+            animation.CrossFade(currentLocomotions.run.name, RUN_TRANSITION_TIME);
         }
         else if (movementSpeed > walkMinSpeed)
         {
-            animation.CrossFade(baseClipsIds.walk, WALK_TRANSITION_TIME);
+            animation.CrossFade(currentLocomotions.walk.name, WALK_TRANSITION_TIME);
         }
         else
         {
-            animation.CrossFade(baseClipsIds.idle, IDLE_TRANSITION_TIME);
+            animation.CrossFade(currentLocomotions.idle.name, IDLE_TRANSITION_TIME);
         }
 
         if (!bb.isGrounded)
@@ -186,17 +210,17 @@ public class AvatarAnimatorLegacy : MonoBehaviour, IPoolLifecycleHandler, IAnima
     {
         if (bb.verticalSpeed > 0)
         {
-            animation.CrossFade(baseClipsIds.jump, JUMP_TRANSITION_TIME, PlayMode.StopAll);
+            animation.CrossFade(currentLocomotions.jump.name, JUMP_TRANSITION_TIME, PlayMode.StopAll);
         }
         else
         {
-            animation.CrossFade(baseClipsIds.fall, FALL_TRANSITION_TIME, PlayMode.StopAll);
+            animation.CrossFade(currentLocomotions.fall.name, FALL_TRANSITION_TIME, PlayMode.StopAll);
         }
 
         if (bb.isGrounded)
         {
-            animation.Blend(baseClipsIds.jump, 0, AIR_EXIT_TRANSITION_TIME);
-            animation.Blend(baseClipsIds.fall, 0, AIR_EXIT_TRANSITION_TIME);
+            animation.Blend(currentLocomotions.jump.name, 0, AIR_EXIT_TRANSITION_TIME);
+            animation.Blend(currentLocomotions.fall.name, 0, AIR_EXIT_TRANSITION_TIME);
             currentState = State_Ground;
             Update(bb.deltaTime);
         }
@@ -206,8 +230,14 @@ public class AvatarAnimatorLegacy : MonoBehaviour, IPoolLifecycleHandler, IAnima
     {
         var animationInfo = animation[bb.expressionTriggerId];
         animation.CrossFade(bb.expressionTriggerId, EXPRESSION_TRANSITION_TIME, PlayMode.StopAll);
+        bool mustExit;
 
-        var mustExit = Math.Abs(bb.movementSpeed) > Mathf.Epsilon || animationInfo.length - animationInfo.time < EXPRESSION_TRANSITION_TIME || !bb.isGrounded;
+        //Introduced the isMoving variable that is true if there is user input, substituted the old Math.Abs(bb.movementSpeed) > Mathf.Epsilon that relies of too much precision
+        if (isOwnPlayer) 
+            mustExit = DCLCharacterController.i.isMovingByUserInput || animationInfo.length - animationInfo.time < EXPRESSION_TRANSITION_TIME || !bb.isGrounded;
+        else
+            mustExit = Math.Abs(bb.movementSpeed) > 0.07f || animationInfo.length - animationInfo.time < EXPRESSION_TRANSITION_TIME || !bb.isGrounded;
+
         if (mustExit)
         {
             animation.Blend(bb.expressionTriggerId, 0, EXPRESSION_TRANSITION_TIME);
@@ -233,8 +263,10 @@ public class AvatarAnimatorLegacy : MonoBehaviour, IPoolLifecycleHandler, IAnima
         if (string.IsNullOrEmpty(expressionTriggerId))
             return;
 
-        var mustTriggerAnimation = !string.IsNullOrEmpty(expressionTriggerId) && blackboard.expressionTriggerTimestamp != expressionTriggerTimestamp;
+        if (animation.GetClip(expressionTriggerId) == null)
+            return;
 
+        var mustTriggerAnimation = !string.IsNullOrEmpty(expressionTriggerId) && blackboard.expressionTriggerTimestamp != expressionTriggerTimestamp;
         blackboard.expressionTriggerId = expressionTriggerId;
         blackboard.expressionTriggerTimestamp = expressionTriggerTimestamp;
 
@@ -244,7 +276,6 @@ public class AvatarAnimatorLegacy : MonoBehaviour, IPoolLifecycleHandler, IAnima
             {
                 animation.Stop(expressionTriggerId);
             }
-
             currentState = State_Expression;
             Update();
         }
@@ -259,35 +290,24 @@ public class AvatarAnimatorLegacy : MonoBehaviour, IPoolLifecycleHandler, IAnima
         animation.Stop();
     }
 
-    public void SetIdleFrame() { animation.Play(baseClipsIds.idle); }
+    public void SetIdleFrame() { animation.Play(currentLocomotions.idle.name); }
 
-    public void BindBodyShape(Animation animation, string bodyShapeType, Transform target)
+    public void PrepareLocomotionAnims(string bodyshapeId)
     {
-        this.target = target;
-        this.animation = animation;
-
-        if (bodyShapeType.Contains(WearableLiterals.BodyShapes.MALE))
+        if (bodyshapeId.Contains(WearableLiterals.BodyShapes.MALE))
         {
-            currentAnimations = maleAnimations;
+            currentLocomotions = maleLocomotions;
         }
-        else if (bodyShapeType.Contains(WearableLiterals.BodyShapes.FEMALE))
+        else if (bodyshapeId.Contains(WearableLiterals.BodyShapes.FEMALE))
         {
-            currentAnimations = femaleAnimations;
+            currentLocomotions = femaleLocomotions;
         }
 
-        for (var i = 0; i < currentAnimations.Get().Length; i++)
-        {
-            var animationToId = currentAnimations.Get()[i];
-            if (this.animation.GetClip(animationToId.id) == null)
-            {
-                // animationToId.id and animationToId.clip.name must be the same or we get big performance drop here
-                // Already coordinated with art team to have the animations with the correct ids
-                this.animation.AddClip(animationToId.clip, animationToId.id);
-            }
-        }
-
-        SetIdleFrame();
-        animation.Sample();
+        EquipEmote(currentLocomotions.idle.name, currentLocomotions.idle);
+        EquipEmote(currentLocomotions.walk.name, currentLocomotions.walk);
+        EquipEmote(currentLocomotions.run.name, currentLocomotions.run);
+        EquipEmote(currentLocomotions.jump.name, currentLocomotions.jump);
+        EquipEmote(currentLocomotions.fall.name, currentLocomotions.fall);
     }
 
     // AvatarSystem entry points
@@ -302,17 +322,39 @@ public class AvatarAnimatorLegacy : MonoBehaviour, IPoolLifecycleHandler, IAnima
         animation = armatureParent.gameObject.GetOrCreateComponent<Animation>();
         armatureParent.gameObject.GetOrCreateComponent<StickerAnimationListener>();
 
-        BindBodyShape(animation, bodyshapeId, target);
+        PrepareLocomotionAnims(bodyshapeId);
+        SetIdleFrame();
+        animation.Sample();
         InitializeAvatarAudioAndParticleHandlers(animation);
         return true;
     }
 
-    public void PlayExpression(string expressionId, long timestamps) { SetExpressionValues(expressionId, timestamps); }
+    public void PlayEmote(string emoteId, long timestamps) { SetExpressionValues(emoteId, timestamps); }
+
+    public void EquipEmote(string emoteId, AnimationClip clip)
+    {
+        if (animation == null)
+            return;
+
+        if (animation.GetClip(emoteId) != null)
+            animation.RemoveClip(emoteId);
+        animation.AddClip(clip, emoteId);
+    }
+
+    public void UnequipEmote(string emoteId)
+    {
+        if (animation == null)
+            return;
+
+        if (animation.GetClip(emoteId) == null)
+            return;
+        animation.RemoveClip(emoteId);
+    }
 
     private void InitializeAvatarAudioAndParticleHandlers(Animation createdAnimation)
     {
         //NOTE(Mordi): Adds handler for animation events, and passes in the audioContainer for the avatar
-        AvatarAnimationEventHandler animationEventHandler = createdAnimation.gameObject.AddComponent<AvatarAnimationEventHandler>();
+        AvatarAnimationEventHandler animationEventHandler = createdAnimation.gameObject.GetOrCreateComponent<AvatarAnimationEventHandler>();
         AudioContainer audioContainer = transform.GetComponentInChildren<AudioContainer>();
         if (audioContainer != null)
         {

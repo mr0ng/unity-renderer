@@ -37,11 +37,11 @@ public class IntegrationTestSuite_Legacy
 
         Settings.CreateSharedInstance(new DefaultSettingsFactory());
 
-        legacySystems = SetUp_LegacySystems();
-
         InitializeDefaultRenderSettings();
 
         Environment.Setup(InitializeServiceLocator());
+
+        legacySystems = SetUp_LegacySystems();
 
         yield return SetUp_Camera();
     }
@@ -52,6 +52,7 @@ public class IntegrationTestSuite_Legacy
         result.Register<IMemoryManager>(() => Substitute.For<IMemoryManager>());
         result.Register<IParcelScenesCleaner>(() => Substitute.For<IParcelScenesCleaner>());
         result.Register<ICullingController>(() => Substitute.For<ICullingController>());
+        result.Register<ILastReadMessagesService>(() => Substitute.For<ILastReadMessagesService>());
 
         result.Register<IServiceProviders>(
             () =>
@@ -92,11 +93,13 @@ public class IntegrationTestSuite_Legacy
     {
         yield return null;
 
+        // Set rendererState as false so ParcelScene.CleanUp is called with immediate as true
+        CommonScriptableObjects.rendererState.Set(false);
+
         if (runtimeGameObjectsRoot != null)
             Object.Destroy(runtimeGameObjectsRoot.gameObject);
 
         yield return TearDown_LegacySystems();
-        Environment.Dispose();
         DataStore.Clear();
         TearDown_Memory();
 
@@ -104,6 +107,10 @@ public class IntegrationTestSuite_Legacy
             MapRenderer.i.Cleanup();
 
         CatalogController.Clear();
+
+        Environment.Dispose();
+
+        yield return null;
 
         GameObject[] gos = Object.FindObjectsOfType<GameObject>(true);
 

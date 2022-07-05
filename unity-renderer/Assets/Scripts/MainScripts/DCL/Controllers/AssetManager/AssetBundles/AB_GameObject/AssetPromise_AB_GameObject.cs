@@ -5,6 +5,7 @@ using DCL.Helpers;
 using UnityEngine;
 using System.Collections.Generic;
 using DCL.Models;
+using MainScripts.DCL.Analytics.PerformanceAnalytics;
 
 namespace DCL
 {
@@ -14,14 +15,9 @@ namespace DCL
         AssetPromise_AB subPromise;
         Coroutine loadingCoroutine;
 
-        public AssetPromise_AB_GameObject(string contentUrl, string hash) : base(contentUrl, hash)
-        {
-        }
+        public AssetPromise_AB_GameObject(string contentUrl, string hash) : base(contentUrl, hash) { }
 
-        protected override void OnLoad(Action OnSuccess, Action<Exception> OnFail)
-        {
-            loadingCoroutine = CoroutineStarter.Start(LoadingCoroutine(OnSuccess, OnFail));
-        }
+        protected override void OnLoad(Action OnSuccess, Action<Exception> OnFail) { loadingCoroutine = CoroutineStarter.Start(LoadingCoroutine(OnSuccess, OnFail)); }
 
         protected override bool AddToLibrary()
         {
@@ -59,9 +55,6 @@ namespace DCL
 
         protected override void OnBeforeLoadOrReuse()
         {
-#if UNITY_EDITOR
-            asset.container.name = "AB: " + hash;
-#endif
             settings.ApplyBeforeLoad(asset.container.transform);
         }
 
@@ -69,6 +62,7 @@ namespace DCL
         {
             if (loadingCoroutine != null)
             {
+                PerformanceAnalytics.ABTracker.TrackCancelled();
                 CoroutineStarter.Stop(loadingCoroutine);
                 loadingCoroutine = null;
             }
@@ -89,9 +83,18 @@ namespace DCL
 
         public IEnumerator LoadingCoroutine(Action OnSuccess, Action<Exception> OnFail)
         {
+            PerformanceAnalytics.ABTracker.TrackLoading();
             subPromise = new AssetPromise_AB(contentUrl, hash, asset.container.transform);
             bool success = false;
+            Exception loadingException = null;
             subPromise.OnSuccessEvent += (x) => success = true;
+
+            subPromise.OnFailEvent += ( ab,  exception) =>
+            {
+                loadingException = exception;
+                success = false;
+            };
+
             asset.ownerPromise = subPromise;
             AssetPromiseKeeper_AB.i.Keep(subPromise);
 
@@ -105,13 +108,19 @@ namespace DCL
                     success = false;
             }
 
+            loadingCoroutine = null;
+
             if (success)
             {
+                PerformanceAnalytics.ABTracker.TrackLoaded();
                 OnSuccess?.Invoke();
             }
             else
             {
-                OnFail?.Invoke(new Exception($"AB sub-promise asset or container is null. Asset: {subPromise.asset}, container: {asset.container}"));
+                PerformanceAnalytics.ABTracker.TrackFailed();
+                loadingException ??= new Exception($"AB sub-promise asset or container is null. Asset: {subPromise.asset}, container: {asset.container}");
+                Debug.LogException(loadingException);
+                OnFail?.Invoke(loadingException);
             }
         }
 
@@ -143,31 +152,34 @@ namespace DCL
 
                 asset.renderers = MeshesInfoUtils.ExtractUniqueRenderers(assetBundleModelGO);
                 asset.materials = MeshesInfoUtils.ExtractUniqueMaterials(asset.renderers);
-                asset.textures = MeshesInfoUtils.ExtractUniqueTextures(asset.materials);
+                asset.SetTextures(MeshesInfoUtils.ExtractUniqueTextures(asset.materials));
+                
                 UploadMeshesToGPU(MeshesInfoUtils.ExtractUniqueMeshes(asset.renderers));
                 asset.totalTriangleCount = MeshesInfoUtils.ComputeTotalTriangles(asset.renderers, asset.meshToTriangleCount);
 
                 //NOTE(Brian): Renderers are enabled in settings.ApplyAfterLoad
                 yield return MaterialCachingHelper.Process(asset.renderers.ToList(), enableRenderers: false, settings.cachingFlags);
 
-                var animators = assetBundleModelGO.GetComponentsInChildren<Animation>(true);
+                var animators = MeshesInfoUtils.ExtractUniqueAnimations(assetBundleModelGO);
+                asset.animationClipSize = 0; // TODO(Brian): Extract animation clip size from metadata
+                asset.meshDataSize = 0; // TODO(Brian): Extract mesh clip size from metadata
 
-                for (int animIndex = 0; animIndex < animators.Length; animIndex++)
+                foreach (var animator in animators)
                 {
-                    animators[animIndex].cullingType = AnimationCullingType.AlwaysAnimate;
+                    animator.cullingType = AnimationCullingType.AlwaysAnimate;
                 }
 
 #if UNITY_EDITOR
-                assetBundleModelGO.name = subPromise.asset.assetBundleAssetName;
+                assetBundleModelGO.name = subPromise.asset.GetName();
 #endif
                 assetBundleModelGO.transform.ResetLocalTRS();
+
                 yield return null;
             }
         }
 
         private void UploadMeshesToGPU(HashSet<Mesh> meshesList)
         {
-            var uploadToGPU = DataStore.i.featureFlags.flags.Get().IsFeatureEnabled(FeatureFlag.GPU_ONLY_MESHES);
             foreach ( Mesh mesh in meshesList )
             {
                 if ( !mesh.isReadable )
@@ -175,11 +187,6 @@ namespace DCL
 
                 asset.meshToTriangleCount[mesh] = mesh.triangles.Length;
                 asset.meshes.Add(mesh);
-                if (uploadToGPU)
-                {
-                    Physics.BakeMesh(mesh.GetInstanceID(), false);
-                    mesh.UploadMeshData(true);
-                }
             }
         }
 
@@ -195,4 +202,5 @@ namespace DCL
             }
         }
     }
+
 }

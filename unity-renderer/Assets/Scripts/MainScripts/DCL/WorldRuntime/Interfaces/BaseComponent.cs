@@ -18,7 +18,9 @@ namespace DCL.Components
 
         public IPoolableObject poolableObject { get; set; }
 
-        public string componentName => "BaseComponent";
+        string IComponent.componentName => componentName;
+
+        public abstract string componentName { get; }
 
         protected BaseModel model;
 
@@ -55,7 +57,10 @@ namespace DCL.Components
 
         public bool IsValid() { return this != null; }
 
-        public virtual void Cleanup() { updateHandler.Cleanup(); }
+        public virtual void Cleanup()
+        {
+            updateHandler?.Cleanup();
+        }
 
         public virtual void OnPoolRelease() { Cleanup(); }
 

@@ -68,16 +68,18 @@ namespace DCL.Components
 
         int IComponent.GetClassId() => (int)CLASS_ID_COMPONENT.CAMERA_MODE_AREA;
 
-        Transform IMonoBehaviour.GetTransform() => areaEntity?.gameObject.transform;
+        Transform IMonoBehaviour.GetTransform() => null;
 
         void ICleanable.Cleanup()
         {
             Dispose();
+            DataStore.i.player.ownPlayer.OnChange -= OnOwnPlayerChange;
         }
 
         void IEntityComponent.Initialize(IParcelScene scene, IDCLEntity entity)
         {
-            Initialize(scene, entity, Environment.i.platform.updateEventHandler, DataStore.i.player.playerCollider.Get());
+            Initialize(scene, entity, Environment.i.platform.updateEventHandler, DataStore.i.player.ownPlayer.Get()?.collider);
+            DataStore.i.player.ownPlayer.OnChange += OnOwnPlayerChange;
         }
 
         internal void OnModelUpdated(in Model newModel)
@@ -94,7 +96,7 @@ namespace DCL.Components
 
             if (cameraModeChanged && isPlayerInside)
             {
-                areasController.ChangeAreaMode(this, areaModel.cameraMode);
+                areasController.ChangeAreaMode(this);
             }
         }
 
@@ -179,6 +181,11 @@ namespace DCL.Components
             }
             areasController.RemoveInsideArea(this);
             isPlayerInside = false;
+        }
+
+        private void OnOwnPlayerChange(Player current, Player previous)
+        {
+            playerCollider = current.collider;
         }
     }
 }

@@ -28,6 +28,7 @@ namespace Test.AvatarSystem
         private ILOD lod;
         private IGPUSkinning gpuSkinning;
         private IGPUSkinningThrottler gpuSkinningThrottler;
+        private IEmoteAnimationEquipper emoteAnimationEquipper;
 
         [SetUp]
         public void SetUp()
@@ -41,6 +42,7 @@ namespace Test.AvatarSystem
             lod = Substitute.For<ILOD>();
             gpuSkinning = Substitute.For<IGPUSkinning>();
             gpuSkinningThrottler = Substitute.For<IGPUSkinningThrottler>();
+            emoteAnimationEquipper = Substitute.For<IEmoteAnimationEquipper>();
             avatar = new Avatar(
                 curator,
                 loader,
@@ -48,7 +50,8 @@ namespace Test.AvatarSystem
                 visibility,
                 lod,
                 gpuSkinning,
-                gpuSkinningThrottler
+                gpuSkinningThrottler,
+                emoteAnimationEquipper
             );
         }
 
@@ -69,15 +72,13 @@ namespace Test.AvatarSystem
                    .Curate(Arg.Any<AvatarSettings>(), Arg.Any<IEnumerable<string>>(), Arg.Any<CancellationToken>())
                    .Returns(x => throw new Exception("Curator failed"));
 
-
             var wearableIds = new List<string>();
 
             await TestUtils.ThrowsAsync<Exception>(avatar.Load(wearableIds, settings));
-            visibility.Received().AddGlobalConstrain(Avatar.LOADING_VISIBILITY_CONSTRAIN);
             visibility.DidNotReceive().RemoveGlobalConstrain(Avatar.LOADING_VISIBILITY_CONSTRAIN);
             curator.Received().Curate(settings, wearableIds, Arg.Any<CancellationToken>());
             loader.DidNotReceiveWithAnyArgs()
-                  .Load(default, default, default, default, default, default);
+                  .Load(default, default, default, default, default, default, default);
         });
 
         [UnityTest]
@@ -89,10 +90,11 @@ namespace Test.AvatarSystem
             WearableItem eyebrows = new WearableItem();
             WearableItem mouth = new WearableItem();
             List<WearableItem> wearables = new List<WearableItem>();
+            List<WearableItem> emotes = new List<WearableItem>();
 
             curator.Configure()
                    .Curate(Arg.Any<AvatarSettings>(), Arg.Any<IEnumerable<string>>(), Arg.Any<CancellationToken>())
-                   .Returns(x => new UniTask<(WearableItem bodyshape, WearableItem eyes, WearableItem eyebrows, WearableItem mouth, List<WearableItem> wearables)>((bodyshape, eyes, eyebrows, mouth, wearables)));
+                   .Returns(x => new UniTask<(WearableItem bodyshape, WearableItem eyes, WearableItem eyebrows, WearableItem mouth, List<WearableItem> wearables, List<WearableItem> emotes)>((bodyshape, eyes, eyebrows, mouth, wearables, emotes)));
             loader.Configure()
                   .Load(Arg.Any<WearableItem>(),
                       Arg.Any<WearableItem>(),
@@ -100,13 +102,14 @@ namespace Test.AvatarSystem
                       Arg.Any<WearableItem>(),
                       Arg.Any<List<WearableItem>>(),
                       Arg.Any<AvatarSettings>(),
+                      Arg.Any<SkinnedMeshRenderer>(),
                       Arg.Any<CancellationToken>())
                   .Returns(x => throw new Exception("Loader failed"));
 
             await TestUtils.ThrowsAsync<Exception>(avatar.Load(new List<string>(), settings));
 
             loader.Received()
-                  .Load(bodyshape, eyes, eyebrows, mouth, wearables, settings, Arg.Any<CancellationToken>());
+                .Load(bodyshape, eyes, eyebrows, mouth, wearables, settings, Arg.Any<CancellationToken>());
         });
 
         [UnityTest]

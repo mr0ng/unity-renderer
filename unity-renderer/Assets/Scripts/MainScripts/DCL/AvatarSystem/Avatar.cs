@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Runtime.ExceptionServices;
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using GPUSkinning;
@@ -7,6 +8,7 @@ using UnityEngine;
 
 namespace AvatarSystem
 {
+    // [ADR 65 - https://github.com/decentraland/adr]
     public class Avatar : IAvatar
     {
         private const float RESCALING_BOUNDS_FACTOR = 100f;
@@ -18,13 +20,14 @@ namespace AvatarSystem
         private readonly ILOD lod;
         private readonly IGPUSkinning gpuSkinning;
         private readonly IGPUSkinningThrottler gpuSkinningThrottler;
+        private readonly IEmoteAnimationEquipper emoteAnimationEquipper;
         private CancellationTokenSource disposeCts = new CancellationTokenSource();
 
         public IAvatar.Status status { get; private set; } = IAvatar.Status.Idle;
         public Vector3 extents { get; private set; }
         public int lodLevel => lod?.lodIndex ?? 0;
 
-        public Avatar(IAvatarCurator avatarCurator, ILoader loader, IAnimator animator, IVisibility visibility, ILOD lod, IGPUSkinning gpuSkinning, IGPUSkinningThrottler gpuSkinningThrottler)
+        public Avatar(IAvatarCurator avatarCurator, ILoader loader, IAnimator animator, IVisibility visibility, ILOD lod, IGPUSkinning gpuSkinning, IGPUSkinningThrottler gpuSkinningThrottler, IEmoteAnimationEquipper emoteAnimationEquipper)
         {
             this.avatarCurator = avatarCurator;
             this.loader = loader;
@@ -33,6 +36,7 @@ namespace AvatarSystem
             this.lod = lod;
             this.gpuSkinning = gpuSkinning;
             this.gpuSkinningThrottler = gpuSkinningThrottler;
+            this.emoteAnimationEquipper = emoteAnimationEquipper;
         }
 
         /// <summary>
@@ -52,22 +56,24 @@ namespace AvatarSystem
 
             try
             {
-                visibility.AddGlobalConstrain(LOADING_VISIBILITY_CONSTRAIN);
                 WearableItem bodyshape = null;
                 WearableItem eyes = null;
                 WearableItem eyebrows = null;
                 WearableItem mouth = null;
                 List<WearableItem> wearables = null;
+                List<WearableItem> emotes = null;
 
-                (bodyshape, eyes, eyebrows, mouth, wearables) = await avatarCurator.Curate(settings , wearablesIds, linkedCt);
-
+                (bodyshape, eyes, eyebrows, mouth, wearables, emotes) = await avatarCurator.Curate(settings, wearablesIds, linkedCt);
+                if (!loader.IsValidForBodyShape(bodyshape, eyes, eyebrows, mouth))
+                {
+                    visibility.AddGlobalConstrain(LOADING_VISIBILITY_CONSTRAIN);
+                }
                 await loader.Load(bodyshape, eyes, eyebrows, mouth, wearables, settings, linkedCt);
 
                 //Scale the bounds due to the giant avatar not being skinned yet
                 extents = loader.combinedRenderer.localBounds.extents * 2f / RESCALING_BOUNDS_FACTOR;
-
                 animator.Prepare(settings.bodyshapeId, loader.bodyshapeContainer);
-
+                emoteAnimationEquipper.SetEquippedEmotes(settings.bodyshapeId, emotes);
                 gpuSkinning.Prepare(loader.combinedRenderer);
                 gpuSkinningThrottler.Bind(gpuSkinning);
 
@@ -82,12 +88,16 @@ namespace AvatarSystem
             catch (OperationCanceledException)
             {
                 Dispose();
+                throw;
             }
             catch (Exception e)
             {
                 Dispose();
                 Debug.Log($"Avatar.Load failed with wearables:[{string.Join(",", wearablesIds)}] for bodyshape:{settings.bodyshapeId} and player {settings.playerName}");
-                throw;
+                if (e.InnerException != null)
+                    ExceptionDispatchInfo.Capture(e.InnerException).Throw();
+                else
+                    throw;
             }
             finally
             {
@@ -100,7 +110,7 @@ namespace AvatarSystem
 
         public void RemoveVisibilityConstrain(string key) { visibility.RemoveGlobalConstrain(key); }
 
-        public void SetExpression(string expressionId, long timestamps) { animator?.PlayExpression(expressionId, timestamps); }
+        public void PlayEmote(string emoteId, long timestamps) { animator?.PlayEmote(emoteId, timestamps); }
 
         public void SetLODLevel(int lodIndex) { lod.SetLodIndex(lodIndex); }
 

@@ -1,4 +1,3 @@
-using System;
 using Cinemachine;
 using UnityEngine;
 
@@ -174,13 +173,17 @@ namespace DCL.Camera
         public override void OnSetRotation(CameraController.SetRotationPayload payload)
         {
             var eulerDir = Vector3.zero;
+            var verticalAxisLookAt = Vector3.zero;
 
             if (payload.cameraTarget.HasValue)
             {
-                var newPos = new Vector3(payload.x, payload.y, payload.z);
                 var cameraTarget = payload.cameraTarget.GetValueOrDefault();
-                var dirToLook = (cameraTarget - newPos);
-                eulerDir = Quaternion.LookRotation(dirToLook).eulerAngles;
+
+                var horizontalAxisLookAt = payload.y - cameraTarget.y;
+                verticalAxisLookAt = new Vector3(cameraTarget.x - payload.x, 0, cameraTarget.z - payload.z);
+
+                eulerDir.y = Vector3.SignedAngle(Vector3.forward, verticalAxisLookAt, Vector3.up);
+                eulerDir.x = Mathf.Atan2(horizontalAxisLookAt, verticalAxisLookAt.magnitude) * Mathf.Rad2Deg;
             }
 
             defaultVirtualCameraAsFreeLook.m_XAxis.Value = eulerDir.y;
@@ -188,6 +191,8 @@ namespace DCL.Camera
             //value range 0 to 1, being 0 the bottom orbit and 1 the top orbit
             var yValue = Mathf.InverseLerp(-90, 90, eulerDir.x);
             defaultVirtualCameraAsFreeLook.m_YAxis.Value = yValue;
+            
+            characterForward.Set(verticalAxisLookAt); 
         }
 
         public override void OnBlock(bool blocked)
