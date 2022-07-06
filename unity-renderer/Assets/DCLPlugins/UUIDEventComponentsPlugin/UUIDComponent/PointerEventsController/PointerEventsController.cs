@@ -9,7 +9,6 @@ using UnityEngine.EventSystems;
 using System.Collections.Generic;
 using System.Linq;
 using DCL.Models;
-using Microsoft.MixedReality.Toolkit.Input;
 using DCLPlugins.UUIDEventComponentsPlugin.UUIDComponent.Interfaces;
 using Ray = UnityEngine.Ray;
 
@@ -234,7 +233,7 @@ namespace DCL
 
             //if (!inputActions.Player.enabled) inputActions.Player.Enable();
             var mouseIsDown = inputActions.Player.Select.triggered;
-            var mouseIsUp = !inputActions.Player.Select.triggered;
+            var mouseIsUp =  !inputActions.Player.Select.triggered;
 
             if (raycastHandlerTarget is IRaycastPointerDownHandler down)
             {

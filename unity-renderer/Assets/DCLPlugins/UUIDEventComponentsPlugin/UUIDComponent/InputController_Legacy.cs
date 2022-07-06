@@ -12,6 +12,7 @@ namespace DCL
             bool useRaycast, bool enablePointerEvent);
 
         private static bool renderingEnabled => CommonScriptableObjects.rendererState.Get();
+        private static DCLPlayerInput.PlayerActions actions;
 
         public enum EVENT
         {
@@ -41,6 +42,7 @@ namespace DCL
 
         public InputController_Legacy()
         {
+            InputController.GetPlayerActions(ref actions);
             buttonsMap.Add(new BUTTON_MAP()
             {
                 type = BUTTON_TYPE.MOUSE, buttonNum = 0, buttonId = WebInterface.ACTION_BUTTON.POINTER,
@@ -190,10 +192,10 @@ namespace DCL
                     case BUTTON_TYPE.MOUSE:
                         if (CommonScriptableObjects.allUIHidden.Get())
                             break;
-                        if (Input.GetMouseButtonDown(btnMap.buttonNum))
+                        if (GetButtonDown(btnMap))
                             RaiseEvent(btnMap.buttonId, EVENT.BUTTON_DOWN, btnMap.useRaycast,
                                 btnMap.enablePointerEvent);
-                        else if (Input.GetMouseButtonUp(btnMap.buttonNum))
+                        else if (GetButtonUp(btnMap))
                             RaiseEvent(btnMap.buttonId, EVENT.BUTTON_UP, btnMap.useRaycast, btnMap.enablePointerEvent);
                         break;
                     case BUTTON_TYPE.KEYBOARD:
@@ -208,13 +210,21 @@ namespace DCL
                 }
             }
         }
+        private bool GetButtonUp(BUTTON_MAP btnMap)
+        {
+            return !actions.Select.triggered;
+        }
+        private static bool GetButtonDown(BUTTON_MAP btnMap)
+        {
+            return actions.Select.triggered;
+        }
 
         public bool IsPressed(WebInterface.ACTION_BUTTON button)
         {
             switch (button)
             {
                 case WebInterface.ACTION_BUTTON.POINTER:
-                    return Input.GetMouseButton(0);
+                    return actions.Select.triggered;
                 case WebInterface.ACTION_BUTTON.PRIMARY:
                     return Input.GetKey(InputSettings.PrimaryButtonKeyCode);
                 case WebInterface.ACTION_BUTTON.SECONDARY:

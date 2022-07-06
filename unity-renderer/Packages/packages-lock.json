@@ -7,6 +7,13 @@
       "dependencies": {},
       "hash": "429ff2dd09264fd091ed3005c7a4c247f118c7ae"
     },
+    "com.cysharp.unitask": {
+      "version": "https://github.com/Cysharp/UniTask.git?path=src/UniTask/Assets/Plugins/UniTask",
+      "depth": 0,
+      "source": "git",
+      "dependencies": {},
+      "hash": "50a67d8f419b6cea0398eff6c19cf0bbe11ed609"
+    },
     "com.microsoft.mixedreality.openxr": {
       "version": "file:MixedReality/com.microsoft.mixedreality.openxr-1.2.1.tgz",
       "depth": 0,
@@ -49,14 +56,6 @@
       "dependencies": {
         "com.unity.textmeshpro": "2.1.4"
       }
-    },
-    "com.cysharp.unitask": {
-      "version": "https://github.com/Cysharp/UniTask.git?path=src/UniTask/Assets/Plugins/UniTask",
-      "depth": 0,
-      "source": "git",
-      "dependencies": {},
-      "hash": "50a67d8f419b6cea0398eff6c19cf0bbe11ed609"
-
     },
     "com.unity.2d.sprite": {
       "version": "1.0.0",
@@ -215,6 +214,15 @@
       },
       "url": "https://packages.unity.com"
     },
+    "com.unity.subsystemregistration": {
+      "version": "1.1.0",
+      "depth": 3,
+      "source": "registry",
+      "dependencies": {
+        "com.unity.modules.subsystems": "1.0.0"
+      },
+      "url": "https://packages.unity.com"
+    },
     "com.unity.test-framework": {
       "version": "1.1.31",
       "depth": 0,
@@ -227,14 +235,14 @@
       "url": "https://packages.unity.com"
     },
     "com.unity.test-framework.performance": {
-        "version": "2.8.1-preview",
-        "depth": 0,
-        "source": "registry",
-        "dependencies": {
-            "com.unity.test-framework": "1.1.0",
-            "com.unity.modules.jsonserialize": "1.0.0"
-        },
-        "url": "https://packages.unity.com"
+      "version": "2.8.1-preview",
+      "depth": 0,
+      "source": "registry",
+      "dependencies": {
+        "com.unity.test-framework": "1.1.0",
+        "com.unity.modules.jsonserialize": "1.0.0"
+      },
+      "url": "https://packages.unity.com"
     },
     "com.unity.testtools.codecoverage": {
       "version": "1.1.0",
@@ -287,7 +295,7 @@
       "url": "https://packages.unity.com"
     },
     "com.unity.xr.arsubsystems": {
-      "version": "4.1.7",
+      "version": "4.1.9",
       "depth": 2,
       "source": "registry",
       "dependencies": {

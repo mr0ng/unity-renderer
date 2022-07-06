@@ -175,6 +175,7 @@ GameObject:
   - component: {fileID: 6451314991274840061}
   - component: {fileID: -106581607681190576}
   - component: {fileID: -566327302672007162}
+  - component: {fileID: 3413440754920701764}
   m_Layer: 5
   m_Name: LoadingHUD
   m_TagString: Untagged
@@ -370,6 +371,25 @@ CanvasGroup:
   m_Interactable: 1
   m_BlocksRaycasts: 1
   m_IgnoreParentGroups: 0
+--- !u!114 &3413440754920701764
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5243769655597236792}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0059bf4137601a84caf3c5549fe42066, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  hudType: 0
+  sortingOrder: 0
+  loadingMask:
+    serializedVersion: 2
+    m_Bits: 32
+  submenu: 0
+  objectToHide: {fileID: 0}
 --- !u!1 &5416458486735604532
 GameObject:
   m_ObjectHideFlags: 0
@@ -568,7 +588,7 @@ MonoBehaviour:
   m_lineSpacingMax: 0
   m_paragraphSpacing: 0
   m_charWidthMaxAdj: 0
-  m_enableWordWrapping: 1
+  m_TextWrappingMode: 1
   m_wordWrappingRatios: 0.4
   m_overflowMode: 0
   m_linkedTextComponent: {fileID: 0}
@@ -577,6 +597,7 @@ MonoBehaviour:
   m_enableExtraPadding: 0
   checkPaddingRequired: 0
   m_isRichText: 1
+  m_EmojiFallbackSupport: 1
   m_parseCtrlCharacters: 1
   m_isOrthographic: 1
   m_isCullingEnabled: 0
@@ -966,7 +987,7 @@ MonoBehaviour:
   m_lineSpacingMax: 0
   m_paragraphSpacing: 0
   m_charWidthMaxAdj: 0
-  m_enableWordWrapping: 1
+  m_TextWrappingMode: 1
   m_wordWrappingRatios: 0.4
   m_overflowMode: 0
   m_linkedTextComponent: {fileID: 0}
@@ -975,6 +996,7 @@ MonoBehaviour:
   m_enableExtraPadding: 0
   checkPaddingRequired: 0
   m_isRichText: 1
+  m_EmojiFallbackSupport: 1
   m_parseCtrlCharacters: 1
   m_isOrthographic: 1
   m_isCullingEnabled: 0

@@ -33,7 +33,7 @@ namespace Microsoft.MixedReality.Toolkit.Examples.Demos
             if (InputRayUtils.TryGetRay(sourceType, handedness, out myRay))
             {
                 transform.localPosition = myRay.origin;
-                transform.localRotation = Quaternion.LookRotation(myRay.direction, Vector3.up);
+                transform.localRotation = Quaternion.LookRotation(myRay.direction, UnityEngine.Vector3.up);
                 SetIsDataAvailable(true);
             }
             else
