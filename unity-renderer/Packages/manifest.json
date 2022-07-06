@@ -1,7 +1,7 @@
 {
   "dependencies": {
-    "com.cysharp.unitask": "https://github.com/Cysharp/UniTask.git?path=src/UniTask/Assets/Plugins/UniTask",
     "com.coffee.ui-particle": "https://github.com/mob-sakai/ParticleEffectForUGUI.git",
+    "com.cysharp.unitask": "https://github.com/Cysharp/UniTask.git?path=src/UniTask/Assets/Plugins/UniTask",
     "com.microsoft.mixedreality.openxr": "file:MixedReality/com.microsoft.mixedreality.openxr-1.2.1.tgz",
     "com.microsoft.mixedreality.toolkit.examples": "file:MixedReality/com.microsoft.mixedreality.toolkit.examples-2.7.3.tgz",
     "com.microsoft.mixedreality.toolkit.extensions": "file:MixedReality/com.microsoft.mixedreality.toolkit.extensions-2.7.3.tgz",
@@ -15,6 +15,8 @@
     "com.unity.ide.visualstudio": "2.0.11",
     "com.unity.ide.vscode": "1.2.4",
     "com.unity.memoryprofiler": "0.2.4-preview.1",
+    "com.unity.mobile.android-logcat": "1.2.3",
+    "com.unity.nuget.newtonsoft-json": "2.0.2",
     "com.unity.performance.profile-analyzer": "1.1.0",
     "com.unity.postprocessing": "3.1.0",
     "com.unity.render-pipelines.universal": "10.6.0",
@@ -56,8 +58,7 @@
     "com.unity.modules.unitywebrequestwww": "1.0.0",
     "com.unity.modules.video": "1.0.0",
     "com.unity.modules.vr": "1.0.0",
-    "com.unity.modules.xr": "1.0.0",
-	"com.unity.nuget.newtonsoft-json": "2.0.2"
+    "com.unity.modules.xr": "1.0.0"
   },
   "testables": [
     "com.unity.test-framework.performance"
