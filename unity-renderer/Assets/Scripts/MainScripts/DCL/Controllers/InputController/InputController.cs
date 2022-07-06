@@ -178,7 +178,7 @@ public class InputController : MonoBehaviour
         player = playerInput.Player;
     }
 
-    public static DCLPlayerInput.PlayerActions GetPlayerActions() => player;
+    public static void GetPlayerActions(ref DCLPlayerInput.PlayerActions actions) => actions = player;
 
     private void OnEnable() => playerInput.Enable();
 

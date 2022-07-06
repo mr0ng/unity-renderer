@@ -6,8 +6,8 @@ namespace DCL
     {
         private void Start()
         {
-            AvatarVisibility visibility = GetComponent<AvatarVisibility>();
-            visibility.SetVisibility("VR_AVATAR_CONTROLLER", false);
+            //AvatarVisibility visibility = GetComponent<AvatarVisibility>();
+            //visibility.SetVisibility("VR_AVATAR_CONTROLLER", false);
         }
     }
 }

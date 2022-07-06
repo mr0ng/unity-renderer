@@ -95,8 +95,4 @@ public static class CrossPlatformManager
         point = details?.Point ?? Vector3.zero;
         normal = details?.Normal ?? Vector3.zero;
     }
-    // public static bool PointerPressed(WebInterface.ACTION_BUTTON getActionButton)
-    // {
-    //     //if (IsVR) 
-    // }
 }

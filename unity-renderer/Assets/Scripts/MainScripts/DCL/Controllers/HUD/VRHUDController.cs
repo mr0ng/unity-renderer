@@ -48,7 +48,7 @@ namespace DCL.Huds
 
         private void Start()
         {
-            actions = InputController.GetPlayerActions();
+            InputController.GetPlayerActions(ref actions);
             if (!actions.enabled) actions.Enable();
             actions.OpenMenu.performed += OpenHandMenu;
             dock.position = hidenPos;
