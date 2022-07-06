@@ -23,8 +23,8 @@ namespace DCL
         private PerformanceMetricsController performanceMetricsController;
         protected IKernelCommunication kernelCommunication;
 
-        private PluginSystem pluginSystem;
-
+        protected PluginSystem pluginSystem;
+        
         protected virtual void Awake()
         {
             if (i != null)
@@ -35,10 +35,10 @@ namespace DCL
 
             i = this;
 
-            Settings.CreateSharedInstance(new DefaultSettingsFactory());
-
             if (!disableSceneDependencies)
                 InitializeSceneDependencies();
+
+            Settings.CreateSharedInstance(new DefaultSettingsFactory());
 
             if (!Configuration.EnvironmentSettings.RUNNING_TESTS)
             {
@@ -47,9 +47,13 @@ namespace DCL
 
                 DataStore.i.HUDs.loadingHUD.visible.OnChange += OnLoadingScreenVisibleStateChange;
             }
+            
+#if UNITY_STANDALONE || UNITY_EDITOR
+            Application.quitting += () => DataStore.i.common.isApplicationQuitting.Set(true);
+#endif
 
+            InitializeDataStore();
             SetupPlugins();
-
             InitializeCommunication();
 
             // TODO(Brian): This is a temporary fix to address elevators issue in the xmas event.
@@ -58,9 +62,15 @@ namespace DCL
                 Environment.i.platform.cullingController.SetAnimationCulling(false);
         }
 
+        protected virtual void InitializeDataStore()
+        {
+            DataStore.i.textureConfig.gltfMaxSize.Set(512);
+            DataStore.i.textureConfig.generalMaxSize.Set(2048);
+            DataStore.i.avatarConfig.useHologramAvatar.Set(false);
+        }
+
         protected virtual void InitializeCommunication()
         {
-
 #if UNITY_WEBGL && !UNITY_EDITOR
             Debug.Log("DCL Unity Build Version: " + DCL.Configuration.ApplicationSettings.version);
             Debug.unityLogger.logEnabled = true;
@@ -90,6 +100,7 @@ namespace DCL
         protected virtual void SetupPlugins()
         {
             pluginSystem = PluginSystemFactory.Create();
+            pluginSystem.Initialize();
         }
 
         protected virtual void SetupServices()
@@ -113,21 +124,34 @@ namespace DCL
         {
             performanceMetricsController?.Update();
         }
+        
+        [RuntimeInitializeOnLoadMethod]
+        static void RunOnStart()
+        {
+            Application.wantsToQuit += ApplicationWantsToQuit;
+        }
+        private static bool ApplicationWantsToQuit()
+        {
+            if (i != null)
+                i.Dispose();
+    
+            return true;
+        }
 
-        protected virtual void OnDestroy()
+        protected virtual void Dispose()
         {
             DataStore.i.HUDs.loadingHUD.visible.OnChange -= OnLoadingScreenVisibleStateChange;
 
-            DataStore.i.common.isWorldBeingDestroyed.Set(true);
+            DataStore.i.common.isApplicationQuitting.Set(true);
 
             pluginSystem?.Dispose();
 
             if (!Configuration.EnvironmentSettings.RUNNING_TESTS)
                 Environment.Dispose();
-            pluginSystem?.Dispose();
+            
             kernelCommunication?.Dispose();
         }
-
+        
         protected virtual void InitializeSceneDependencies()
         {
             gameObject.AddComponent<UserProfileController>();
@@ -150,10 +174,8 @@ namespace DCL
             CreateEnvironment();
             MainSceneFactory.CreateAudioHandler();
             MainSceneFactory.CreateHudController();
-            MainSceneFactory.CreateSettingsController();
             MainSceneFactory.CreateNavMap();
             MainSceneFactory.CreateEventSystem();
-            MainSceneFactory.CreateInteractionHoverCanvas();
         }
 
         protected virtual void CreateEnvironment() => MainSceneFactory.CreateEnvironment();

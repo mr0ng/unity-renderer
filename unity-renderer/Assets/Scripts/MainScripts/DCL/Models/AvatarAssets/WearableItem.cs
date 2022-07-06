@@ -2,10 +2,14 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using DCL;
+using DCL.Emotes;
+using UnityEngine;
 
 [Serializable]
 public class WearableItem
 {
+    private const string THIRD_PARTY_COLLECTIONS_PATH = "collections-thirdparty";
+
     [Serializable]
     public class MappingPair
     {
@@ -34,6 +38,7 @@ public class WearableItem
     }
 
     public Data data;
+    public EmoteDataV0 emoteDataV0;
     public string id;
 
     public string baseUrl;
@@ -41,6 +46,24 @@ public class WearableItem
 
     public i18n[] i18n;
     public string thumbnail;
+    
+    private string thirdPartyCollectionId;
+    public string ThirdPartyCollectionId
+    {
+        get
+        {
+            if (!string.IsNullOrEmpty(thirdPartyCollectionId)) return thirdPartyCollectionId;
+            if (!id.Contains(THIRD_PARTY_COLLECTIONS_PATH)) return "";
+            var paths = id.Split(':');
+            var thirdPartyIndex = Array.IndexOf(paths, THIRD_PARTY_COLLECTIONS_PATH);
+            thirdPartyCollectionId = string.Join(":", paths, 0, thirdPartyIndex + 2);
+            return thirdPartyCollectionId;
+        }
+    }
+
+    public bool IsFromThirdPartyCollection => !string.IsNullOrEmpty(ThirdPartyCollectionId);
+    
+    public Sprite thumbnailSprite;
 
     //This fields are temporary, once Kernel is finished we must move them to wherever they are placed
     public string rarity;
@@ -109,7 +132,8 @@ public class WearableItem
         {
             baseUrl = baseUrl,
             contents = contents.Select(mapping => new ContentServerUtils.MappingPair()
-                {file = mapping.key, hash = mapping.hash}).ToList()
+                                   { file = mapping.key, hash = mapping.hash })
+                               .ToList()
         };
     }
 
@@ -160,12 +184,23 @@ public class WearableItem
         return hides;
     }
 
+    public void SanitizeHidesLists()
+    {
+        //remove bodyshape from hides list 
+        if (data.hides != null)
+            data.hides = data.hides.Except(new [] { WearableLiterals.Categories.BODY_SHAPE }).ToArray();
+        for (int i = 0; i < data.representations.Length; i++)
+        {
+            Representation representation = data.representations[i];
+            if (representation.overrideHides != null)
+                representation.overrideHides = representation.overrideHides.Except(new [] { WearableLiterals.Categories.BODY_SHAPE }).ToArray();
+
+        }
+    }
+
     public bool DoesHide(string category, string bodyShape) => GetHidesList(bodyShape).Any(s => s == category);
 
-    public bool IsCollectible()
-    {
-        return !string.IsNullOrEmpty(rarity);
-    }
+    public bool IsCollectible() { return !string.IsNullOrEmpty(rarity); }
 
     public bool IsSkin() => data.category == WearableLiterals.Categories.SKIN;
 
@@ -212,16 +247,13 @@ public class WearableItem
         return int.MaxValue;
     }
 
-    public string ComposeThumbnailUrl()
-    {
-        return baseUrl + thumbnail;
-    }
+    public string ComposeThumbnailUrl() { return baseUrl + thumbnail; }
 
-    public static HashSet<string> ComposeHiddenCategories(string bodyShapeId, WearableItem[] wearables)
+    public static HashSet<string> ComposeHiddenCategories(string bodyShapeId, List<WearableItem> wearables)
     {
         HashSet<string> result = new HashSet<string>();
         //Last wearable added has priority over the rest
-        for (int index = 0; index < wearables.Length; index++)
+        for (int index = 0; index < wearables.Count; index++)
         {
             WearableItem wearableItem = wearables[index];
             if (result.Contains(wearableItem.data.category)) //Skip hidden elements to avoid two elements hiding each other
@@ -246,6 +278,8 @@ public class WearableItem
             return true;
         return false;
     }
+
+    public bool IsEmote() { return emoteDataV0 != null; }
 }
 
 [Serializable]

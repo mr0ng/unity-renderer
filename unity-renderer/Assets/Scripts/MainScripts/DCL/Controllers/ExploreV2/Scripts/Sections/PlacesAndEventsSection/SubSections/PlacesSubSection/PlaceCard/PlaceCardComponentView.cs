@@ -149,8 +149,6 @@ public class PlaceCardComponentView : BaseComponentView, IPlaceCardComponentView
         CleanFriendHeadsItems();
     }
 
-    public override void Start() { transform.localRotation = Quaternion.identity; }
-
     public void Configure(BaseComponentModel newModel)
     {
         model = (PlaceCardComponentModel)newModel;
@@ -369,10 +367,9 @@ public class PlaceCardComponentView : BaseComponentView, IPlaceCardComponentView
     internal void OnPlaceImageLoaded(Sprite sprite)
     {
         if (sprite != null)
-        {
-            SetPlacePicture(sprite);
-        }
-        else if (!thumbnailFromMarketPlaceRequested)
+            return;
+
+        if (!thumbnailFromMarketPlaceRequested)
         {
             thumbnailFromMarketPlaceRequested = true;
             SetPlacePicture(MapUtils.GetMarketPlaceThumbnailUrl(model.parcels, THMBL_MARKETPLACE_WIDTH, THMBL_MARKETPLACE_HEIGHT, THMBL_MARKETPLACE_SIZEFACTOR));

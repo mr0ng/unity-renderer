@@ -57,9 +57,6 @@ namespace DCL
 
         protected override void OnBeforeLoadOrReuse()
         {
-#if UNITY_EDITOR
-            asset.container.name = "GLTF: " + this.id;
-#endif
             settings.ApplyBeforeLoad(asset.container.transform);
         }
 
@@ -83,7 +80,7 @@ namespace DCL
                 gltfComponent.Initialize(webRequestController, AssetPromiseKeeper_GLTF.i.throttlingCounter);
                 gltfComponent.RegisterCallbacks(MeshCreated, RendererCreated);
 
-                GLTFComponent.Settings tmpSettings = new GLTFComponent.Settings()
+                GLTFComponent.Settings tmpSettings = new GLTFComponent.Settings
                 {
                     useVisualFeedback = settings.visibleFlags ==
                                         AssetPromiseSettings_Rendering.VisibleFlags.VISIBLE_WITH_TRANSITION,
@@ -96,12 +93,21 @@ namespace DCL
 
                 gltfComponent.OnSuccess += () =>
                 {
+#if UNITY_STANDALONE || UNITY_EDITOR
+                    if (DataStore.i.common.isApplicationQuitting.Get())
+                        return;
+#endif
+                    
                     if (asset != null)
                     {
                         asset.totalTriangleCount =
                             MeshesInfoUtils.ComputeTotalTriangles(asset.renderers, asset.meshToTriangleCount);
                         asset.materials = MeshesInfoUtils.ExtractUniqueMaterials(asset.renderers);
                         asset.textures = MeshesInfoUtils.ExtractUniqueTextures(asset.materials);
+                        asset.animationClipSize = gltfComponent.GetAnimationClipMemorySize();
+                        asset.meshDataSize = gltfComponent.GetMeshesMemorySize();
+                        var animations = MeshesInfoUtils.ExtractUniqueAnimations(asset.container);
+                        asset.animationClips = MeshesInfoUtils.ExtractUniqueAnimationClips(animations);
                     }
 
                     OnSuccess.Invoke();

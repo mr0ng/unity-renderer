@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
-using Microsoft.MixedReality.Toolkit;
+using Microsoft.MixedReality.Toolkit.Utilities;
+using Microsoft.MixedReality.Toolkit.Utilities.Solvers;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 namespace DCL.Huds
 {
@@ -14,6 +16,8 @@ namespace DCL.Huds
         private readonly Vector3 hidenPos = new Vector3(0, -10, 0);
         private readonly List<VRHUDHelper> huds = new List<VRHUDHelper>();
         private readonly List<VRHUDHelper> submenu = new List<VRHUDHelper>();
+
+        private DCLPlayerInput playerInput;
         BaseVariable<bool> exploreV2IsOpen => DataStore.i.exploreV2.isOpen;
         
         [SerializeField]
@@ -23,6 +27,9 @@ namespace DCL.Huds
         [SerializeField]
         private Canvas dockCanvas;
         private Transform mainCam;
+        private DCLPlayerInput.PlayerActions actions;
+        private bool loading;
+
 
         private void Awake()
         {
@@ -34,16 +41,27 @@ namespace DCL.Huds
             I = this;
             if (Camera.main != null)
                 mainCam = Camera.main.transform;
-            LoadingStart += HideVisuals;
-            LoadingEnd += ShowVisuals;
+            LoadingStart += OnLoadingStart;
+            LoadingEnd += OnLoadingEnd;
             dockCanvas.overrideSorting = true;
         }
 
         private void Start()
         {
+            actions = InputController.GetPlayerActions();
+            if (!actions.enabled) actions.Enable();
+            actions.OpenMenu.performed += OpenHandMenu;
             dock.position = hidenPos;
             exploreV2IsOpen.OnChange += HideSubs;
         }
+
+        private void OpenHandMenu(InputAction.CallbackContext context)
+        {
+            if (loading) return;
+            visuals.SetActive(!visuals.activeSelf);
+            DeactivateHud();
+        }
+
         private void HideSubs(bool current, bool previous)
         {
             for (int i = 0; i < submenu.Count; i++)
@@ -54,8 +72,15 @@ namespace DCL.Huds
             }
         }
 
-        private void ShowVisuals() => visuals.SetActive(true);
-        private void HideVisuals() => visuals.SetActive(false);
+        private void OnLoadingEnd()
+        {
+            loading = false;
+        }
+        private void OnLoadingStart()
+        {
+            loading = true;
+            visuals.SetActive(false);
+        }
 
         public static void RaiseLoadingStart()
         {
@@ -79,6 +104,12 @@ namespace DCL.Huds
             helperTrans.localPosition = Vector3.zero;
             helperTrans.localRotation = Quaternion.identity;
             helperTrans.localScale = Vector3.one;
+            switch (helperTrans)
+            {
+                case RectTransform rectTransform:
+                    rectTransform.sizeDelta = new Vector2(1920, 1080);
+                    break;
+            }
         }
 
         public void MoveHud()

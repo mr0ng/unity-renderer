@@ -199,9 +199,9 @@ namespace DCL
                 {
                     ""name"": """",
                     ""id"": ""3e5f5442-8668-4b27-a940-df99bad7e831"",
-                    ""path"": ""<XRController>{RightHand}/joystick"",
+                    ""path"": ""<XRController>{RightHand}/thumbstick"",
                     ""interactions"": """",
-                    ""processors"": ""ScaleVector2(x=120,y=120),StickDeadzone(min=0.5)"",
+                    ""processors"": ""StickDeadzone"",
                     ""groups"": ""XR"",
                     ""action"": ""Look"",
                     ""isComposite"": false,
@@ -298,7 +298,7 @@ namespace DCL
                 {
                     ""name"": """",
                     ""id"": ""1d64adf0-fdda-479c-a0e2-cac73c20be0f"",
-                    ""path"": ""<XRController>/menu"",
+                    ""path"": ""<XRController>{RightHand}/primaryButton"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": ""XR"",
@@ -320,7 +320,7 @@ namespace DCL
                 {
                     ""name"": """",
                     ""id"": ""92dbbce5-f800-4e33-b75c-c9597b6bd64f"",
-                    ""path"": ""<XRController>{RightHand}/joystickClicked"",
+                    ""path"": ""<XRController>{RightHand}/gripPressed"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": ""XR"",
