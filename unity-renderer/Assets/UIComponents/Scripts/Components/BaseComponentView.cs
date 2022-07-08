@@ -99,15 +99,17 @@ public abstract class BaseComponentView : MonoBehaviour, IBaseComponentView
     public event Action<bool> onFocused;
     public bool isFocused { get; private set; }
 
+    private Transform myTrans;
+
     public virtual void Awake()
     {
+        myTrans = transform;
         showHideAnimator = GetComponent<ShowHideAnimator>();
         DataStore.i.screen.size.OnChange += OnScreenSizeModified;
     }
 
     public virtual void OnEnable()
     {
-        transform.localRotation = Quaternion.identity;
         StartCoroutine(RaiseOnScreenSizeChangedAfterDelay());
     }
 
@@ -149,7 +151,10 @@ public abstract class BaseComponentView : MonoBehaviour, IBaseComponentView
         onFocused?.Invoke(false);
     }
 
-    public virtual void OnScreenSizeChanged() { }
+    public virtual void OnScreenSizeChanged() 
+    {
+        myTrans.localRotation = Quaternion.identity; 
+    }
 
     public virtual void Dispose()
     {
