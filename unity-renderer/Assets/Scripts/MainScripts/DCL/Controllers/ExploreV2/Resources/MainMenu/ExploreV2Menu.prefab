@@ -1809,7 +1809,7 @@ GameObject:
   - component: {fileID: 6663752424403041971}
   - component: {fileID: 1583191953220489047}
   - component: {fileID: 8196500026640497850}
-  - component: {fileID: 1378119139586371802}
+  - component: {fileID: 5418703357883922310}
   m_Layer: 5
   m_Name: ExploreV2Menu
   m_TagString: Untagged
@@ -1979,7 +1979,7 @@ MonoBehaviour:
   questSection: {fileID: 7560450657710516207}
   settingsSection: {fileID: 1295177993248223780}
   profileCardTooltipReference: {fileID: 9124741521929710214}
---- !u!114 &1378119139586371802
+--- !u!114 &5418703357883922310
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -1988,16 +1988,13 @@ MonoBehaviour:
   m_GameObject: {fileID: 3625240137481464222}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0059bf4137601a84caf3c5549fe42066, type: 3}
+  m_Script: {fileID: 11500000, guid: c2741530f002f7841bf417201957881e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  hudType: 1
   sortingOrder: 0
-  loadingMask:
-    serializedVersion: 2
-    m_Bits: 0
-  submenu: 0
+  hudType: 0
   objectToHide: {fileID: 0}
+  submenu: 0
 --- !u!1 &3827417907366463804
 GameObject:
   m_ObjectHideFlags: 0

@@ -801,7 +801,6 @@ public static class InputProcessor
             action.RaiseOnValueChanged(0);
             return;
         }
-        if (action.GetDCLAction() == DCLAction_Measurable.CameraXAxis) Debug.Log($"{value}");
 
         action.RaiseOnValueChanged(value);
     }
