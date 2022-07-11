@@ -1,9 +1,7 @@
 using System;
-using System.Collections.Generic;
-using Microsoft.MixedReality.Toolkit.Utilities;
-using Microsoft.MixedReality.Toolkit.Utilities.Solvers;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using System.Collections.Generic;
 
 namespace DCL.Huds
 {
@@ -17,7 +15,6 @@ namespace DCL.Huds
         private readonly List<VRHUDHelper> huds = new List<VRHUDHelper>();
         private readonly List<VRHUDHelper> submenu = new List<VRHUDHelper>();
 
-        private DCLPlayerInput playerInput;
         BaseVariable<bool> exploreV2IsOpen => DataStore.i.exploreV2.isOpen;
         
         [SerializeField]
@@ -29,8 +26,7 @@ namespace DCL.Huds
         private Transform mainCam;
         private DCLPlayerInput.PlayerActions actions;
         private bool loading;
-
-
+        
         private void Awake()
         {
             if (I != null)
@@ -76,6 +72,7 @@ namespace DCL.Huds
         {
             loading = false;
         }
+        
         private void OnLoadingStart()
         {
             loading = true;
@@ -94,11 +91,9 @@ namespace DCL.Huds
             helperTrans.localPosition = Vector3.zero;
             helperTrans.localRotation = Quaternion.identity;
             helperTrans.localScale = Vector3.one;
-            switch (helperTrans)
+            if (helperTrans is RectTransform rect)
             {
-                case RectTransform rectTransform:
-                    rectTransform.sizeDelta = new Vector2(1920, 1080);
-                    break;
+                rect.sizeDelta = new Vector2(1920, 1080);
             }
         }
 
