@@ -388,6 +388,7 @@ MonoBehaviour:
   loadingMask:
     serializedVersion: 2
     m_Bits: 32
+  animator: {fileID: -106581607681190576}
   submenu: 0
   objectToHide: {fileID: 0}
 --- !u!1 &5416458486735604532

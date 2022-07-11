@@ -82,16 +82,6 @@ namespace DCL.Huds
             visuals.SetActive(false);
         }
 
-        public static void RaiseLoadingStart()
-        {
-            LoadingStart?.Invoke();
-        }
-
-        public static void RaiseLoadingEnd()
-        {
-            LoadingEnd?.Invoke();
-        }
-
         public void Register(VRHUDHelper helper, bool isSubmenu)
         {
             huds.Add(helper);
@@ -143,6 +133,11 @@ namespace DCL.Huds
             {
                 dock.position = hidenPos;
             }
+        }
+        public void SetupLoading(ShowHideAnimator animator)
+        {
+            animator.OnWillFinishStart += (ani) => { LoadingStart.Invoke(); };
+            animator.OnWillFinishHide += (ani) => { LoadingEnd.Invoke(); };
         }
     }
 }
