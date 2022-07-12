@@ -372,7 +372,22 @@ namespace DCL
             _canvasWebViewPrefab = CanvasWebViewPrefab.Instantiate(opt);
             
             _canvasWebViewPrefab.InitialResolution = 400;
-      
+            var webViewWithUserAgent = _canvasWebViewPrefab.WebView as IWithSettableUserAgent;
+            if (webViewWithUserAgent != null) {
+                // Set a flag indicating a mobile User-Agent.
+                webViewWithUserAgent.SetUserAgent(false);
+                // // OR set a custom User-Agent string.
+                // webViewWithUserAgent.SetUserAgent("Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:91.0) Gecko/20100101 Firefox/91.0");
+                
+//#if UNITY_ANDROID && !UNITY_EDITOR
+                AndroidGeckoWebView.SetPreferences(new Dictionary<string, string> {
+                    ["security.fileuri.strict_origin_policy"] = "false",
+                    ["network.websocket.allowInsecureFromHTTPS"] = "true"
+                });
+                AndroidGeckoWebView.SetIgnoreCertificateErrors(true);
+                AndroidGeckoWebView.GloballySetUserAgent(false);
+                AndroidGeckoWebView.SetCameraAndMicrophoneEnabled(true);
+//#endif
             _canvasWebViewPrefab.RemoteDebuggingEnabled = true;
             _canvasWebViewPrefab.LogConsoleMessages = true;
             _canvasWebViewPrefab.NativeOnScreenKeyboardEnabled = false;
