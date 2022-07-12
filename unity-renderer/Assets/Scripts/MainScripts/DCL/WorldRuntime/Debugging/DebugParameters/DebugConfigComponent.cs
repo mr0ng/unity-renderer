@@ -372,12 +372,7 @@ namespace DCL
             _canvasWebViewPrefab = CanvasWebViewPrefab.Instantiate(opt);
             
             _canvasWebViewPrefab.InitialResolution = 400;
-            var webViewWithUserAgent = _canvasWebViewPrefab.WebView as IWithSettableUserAgent;
-            if (webViewWithUserAgent != null) {
-                // Set a flag indicating a mobile User-Agent.
-                webViewWithUserAgent.SetUserAgent(false);
-                // // OR set a custom User-Agent string.
-                // webViewWithUserAgent.SetUserAgent("Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:91.0) Gecko/20100101 Firefox/91.0");
+     
                 
 //#if UNITY_ANDROID && !UNITY_EDITOR
                 AndroidGeckoWebView.SetPreferences(new Dictionary<string, string> {
