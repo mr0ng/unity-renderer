@@ -12,6 +12,8 @@ namespace DCL
     public class DebugConfigComponent : MonoBehaviour
     {
         private static DebugConfigComponent sharedInstance;
+        [SerializeField] private CanvasWebViewPrefab options;
+        [SerializeField] private CanvasKeyboard keyboard;
 
         public static DebugConfigComponent i
         {
@@ -100,6 +102,8 @@ namespace DCL
             Web.SetUserAgent(false);
             Web.SetStorageEnabled(true); 
             Web.SetIgnoreCertificateErrors(true);
+            
+            
             Web.EnableRemoteDebugging();
             
             
@@ -108,7 +112,10 @@ namespace DCL
 
         private void Start()
         {
-           
+            keyboard.InputReceived += (sender, eventArgs) =>
+            {
+                options.WebView.HandleKeyboardInput(eventArgs.Value);
+            };
             lock (DataStore.i.wsCommunication.communicationReady)
             {
                 if (DataStore.i.wsCommunication.communicationReady.Get())
@@ -365,6 +372,7 @@ namespace DCL
             _canvasWebViewPrefab = CanvasWebViewPrefab.Instantiate(opt);
             
             _canvasWebViewPrefab.InitialResolution = 400;
+      
             _canvasWebViewPrefab.RemoteDebuggingEnabled = true;
             _canvasWebViewPrefab.LogConsoleMessages = true;
             _canvasWebViewPrefab.NativeOnScreenKeyboardEnabled = false;
@@ -382,6 +390,7 @@ namespace DCL
             // Hook up the keyboard so that characters are routed to the CanvasWebViewPrefab.
             _keyboard.InputReceived += (sender, eventArgs) => {
                 _canvasWebViewPrefab.WebView.HandleKeyboardInput(eventArgs.Value);
+                
             };
             Debug.Log("Created WebView objects");
             _positionPrefabs();

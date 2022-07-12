@@ -57,7 +57,9 @@ public class WebSocketCommunication : IKernelCommunication
             }
 
             ws.AddWebSocketService<DCLWebSocketService>("/" + wssServiceId);
+           
             ws.Start();
+            Debug.Log($"WebSocket Started, {wssServerUrl}, Listening {ws.IsListening}");
         }
         catch (InvalidOperationException e)
         {
@@ -191,7 +193,7 @@ public class WebSocketCommunication : IKernelCommunication
     {
         var hudControllerGO = GameObject.Find("HUDController");
         var mainGO = GameObject.Find("Main");
-
+        Debug.Log("Websocket Connected and processing messages");
         while (!requestStop)
         {
             lock (queuedMessages)
