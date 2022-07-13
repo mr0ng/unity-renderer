@@ -54,9 +54,9 @@ namespace DCL.Camera
         
         private void DisableCamera()
         {
-            if (!cam.enabled)
+            if (cam.enabled)
                 return;
-            cam.enabled = false;
+            cam.enabled = true;
         }
 
         private void RotateCamera(DCLAction_Measurable action, float value)

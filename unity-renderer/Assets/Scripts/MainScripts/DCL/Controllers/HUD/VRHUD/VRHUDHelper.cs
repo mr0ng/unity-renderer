@@ -1,5 +1,4 @@
 using Microsoft.MixedReality.Toolkit.Input;
-using Microsoft.MixedReality.Toolkit.Input.Utilities;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -36,10 +35,10 @@ public abstract class VRHUDHelper : MonoBehaviour
         canvas.sortingOrder = sortingOrder;
         if (GetComponent<GraphicRaycaster>() == null)
             gameObject.AddComponent<GraphicRaycaster>();
-        if (GetComponent<CanvasUtility>() == null)
-            gameObject.AddComponent<CanvasUtility>();
-        if (GetComponent<NearInteractionTouchableUnityUI>() == null)
-            gameObject.AddComponent<NearInteractionTouchableUnityUI>();
+        // if (GetComponent<CanvasUtility>() == null)
+        //     gameObject.AddComponent<CanvasUtility>();
+        // if (GetComponent<NearInteractionTouchableUnityUI>() == null)
+        //     gameObject.AddComponent<NearInteractionTouchableUnityUI>();
     }
 
     private void OnEnable()

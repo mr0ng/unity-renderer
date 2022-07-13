@@ -1,7 +1,5 @@
 using System;
 using System.Collections.Generic;
-using Microsoft.MixedReality.Toolkit;
-using Microsoft.MixedReality.Toolkit.Input;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
@@ -25,7 +23,7 @@ public class PointerHelper : MonoBehaviour
             return Input.mousePosition;
         UpdateOrigin();
         Vector3 localPointerPos = default;
-        var hit = CoreServices.FocusProvider?.PrimaryPointer?.Result?.Details.Point;
+        Vector3? hit = default;//CoreServices.FocusProvider?.PrimaryPointer?.Result?.Details.Point;
         
         Vector3 point = ToLocalSpace(hit ?? Vector3.zero);
         localPointerPos = point - origin;
@@ -62,8 +60,9 @@ public class PointerHelper : MonoBehaviour
     
     private bool IsPointerOnUI(int layer)
     {
-        var target = CoreServices.FocusProvider?.PrimaryPointer.Result.CurrentPointerTarget;
-        return target != null && target.layer == layer;
+        // var target = CoreServices.FocusProvider?.PrimaryPointer.Result.CurrentPointerTarget;
+        // return target != null && target.layer == layer;
+        return false;
     }
     
     private bool IsMouseOverUI(int layer)
@@ -75,9 +74,4 @@ public class PointerHelper : MonoBehaviour
 
         return uiRaycastResults.Count > 0 && uiRaycastResults[0].gameObject.layer == layer;
     }
-
-    public void OnPointerDown(MixedRealityPointerEventData eventData) { throw new NotImplementedException(); }
-    public void OnPointerDragged(MixedRealityPointerEventData eventData) { throw new NotImplementedException(); }
-    public void OnPointerUp(MixedRealityPointerEventData eventData) { throw new NotImplementedException(); }
-    public void OnPointerClicked(MixedRealityPointerEventData eventData) { throw new NotImplementedException(); }
 }

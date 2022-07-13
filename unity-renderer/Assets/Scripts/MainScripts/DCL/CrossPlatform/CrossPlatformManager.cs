@@ -57,13 +57,14 @@ public static class CrossPlatformManager
     
     public static Ray GetRay()
     {
-        var pos = CoreServices.FocusProvider?.PrimaryPointer?.Result?.StartPoint;
-        var index = CoreServices.FocusProvider?.PrimaryPointer?.Result?.RayStepIndex;
-        if (!index.HasValue)
-            return default;
-        var rayStep = CoreServices.FocusProvider?.PrimaryPointer.Rays[index.Value];
-        var rayStepValue = rayStep.Value;
-        return new Ray(rayStepValue.Origin, rayStepValue.Direction);
+        // var pos = CoreServices.FocusProvider?.PrimaryPointer?.Result?.StartPoint;
+        // var index = CoreServices.FocusProvider?.PrimaryPointer?.Result?.RayStepIndex;
+        // if (!index.HasValue)
+        //     return default;
+        // var rayStep = CoreServices.FocusProvider?.PrimaryPointer.Rays[index.Value];
+        // var rayStepValue = rayStep.Value;
+        // return new Ray(rayStepValue.Origin, rayStepValue.Direction);
+        return new Ray();
     }
 
     public static void SetCameraForLoading(LayerMask mask)
@@ -91,8 +92,8 @@ public static class CrossPlatformManager
 
     public static void GetSurfacePoint(out Vector3 point, out Vector3 normal)
     {
-        var details = CoreServices.FocusProvider?.PrimaryPointer?.Result?.Details;
-        point = details?.Point ?? Vector3.zero;
-        normal = details?.Normal ?? Vector3.zero;
+        //var details = CoreServices.FocusProvider?.PrimaryPointer?.Result?.Details;
+        point = Vector3.zero;
+        normal = Vector3.zero;
     }
 }
