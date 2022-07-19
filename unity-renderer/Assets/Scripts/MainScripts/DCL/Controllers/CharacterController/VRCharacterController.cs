@@ -6,7 +6,7 @@ public class VRCharacterController : MonoBehaviour
 {
     [SerializeField]
     private Transform cameraParent;
-    private readonly Vector3 offset = new Vector3(0f, -0.475f, 0f);
+    private readonly Vector3 offset = new Vector3(0f, -0.55f, 0f);
 
     private Transform mixedRealityPlayspace;
 
@@ -20,7 +20,7 @@ public class VRCharacterController : MonoBehaviour
         VRPlaySpace playSpace = VRPlaySpace.i;
         mixedRealityPlayspace = playSpace.transform;
 
-        mixedRealityPlayspace.position = cameraParent.position + offset;
-        mixedRealityPlayspace.parent = cameraParent;
+        mixedRealityPlayspace.parent = transform;
+        mixedRealityPlayspace.localPosition = Vector3.zero + offset;
     }
 }

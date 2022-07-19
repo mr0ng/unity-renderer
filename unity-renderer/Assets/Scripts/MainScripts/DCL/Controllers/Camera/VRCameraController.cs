@@ -20,6 +20,10 @@ namespace DCL.Camera
         private InputAction_Trigger cameraChangeAction;
         [SerializeField]
         private InputAction_Measurable cameraX;
+        [SerializeField]
+        private InputAction_Measurable characterX;
+        [SerializeField]
+        private InputAction_Measurable characterY;
 
         private DateTime lastTurned;
 
