@@ -1232,17 +1232,27 @@ PrefabInstance:
     - target: {fileID: 114949863196309792, guid: 3e10f3b6a733e441c8352020cff2f1f6,
         type: 3}
       propertyPath: InitialUrl
-      value: about:support
+      value: about:config
       objectReference: {fileID: 0}
     - target: {fileID: 114949863196309792, guid: 3e10f3b6a733e441c8352020cff2f1f6,
         type: 3}
       propertyPath: Resolution
-      value: 350
+      value: 300
+      objectReference: {fileID: 0}
+    - target: {fileID: 114949863196309792, guid: 3e10f3b6a733e441c8352020cff2f1f6,
+        type: 3}
+      propertyPath: LogConsoleMessages
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 114949863196309792, guid: 3e10f3b6a733e441c8352020cff2f1f6,
         type: 3}
       propertyPath: Native2DModeEnabled
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 114949863196309792, guid: 3e10f3b6a733e441c8352020cff2f1f6,
+        type: 3}
+      propertyPath: RemoteDebuggingEnabled
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 114949863196309792, guid: 3e10f3b6a733e441c8352020cff2f1f6,
         type: 3}
@@ -2878,7 +2888,7 @@ RectTransform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1861716076}
   m_LocalRotation: {x: -0, y: 0.4054607, z: -0, w: 0.9141125}
-  m_LocalPosition: {x: 0, y: 0, z: -0.9461162}
+  m_LocalPosition: {x: 0, y: 0, z: -1.3371}
   m_LocalScale: {x: 0.002783602, y: 0.0027836023, z: 0.002783602}
   m_Children:
   - {fileID: 1313219405}
@@ -2887,8 +2897,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 3.0039263, y: -1.047}
-  m_SizeDelta: {x: 377.43, y: 37.7}
+  m_AnchoredPosition: {x: 3.5077, y: -1.088}
+  m_SizeDelta: {x: 788.17, y: 37.7}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1861716078
 MonoBehaviour:
@@ -2938,14 +2948,14 @@ MonoBehaviour:
   m_VerticalScrollbarEventHandler: {fileID: 0}
   m_LayoutGroup: {fileID: 0}
   m_ScrollSensitivity: 1
-  m_ContentType: 0
+  m_ContentType: 4
   m_InputType: 0
   m_AsteriskChar: 42
-  m_KeyboardType: 0
+  m_KeyboardType: 1
   m_LineType: 0
   m_HideMobileInput: 0
   m_HideSoftKeyboard: 0
-  m_CharacterValidation: 0
+  m_CharacterValidation: 4
   m_RegexValue: 
   m_GlobalPointSize: 14
   m_CharacterLimit: 0
