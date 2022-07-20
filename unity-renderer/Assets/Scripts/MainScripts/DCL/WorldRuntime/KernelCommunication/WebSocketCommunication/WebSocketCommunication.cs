@@ -49,11 +49,13 @@ public class WebSocketCommunication : IKernelCommunication
                     },
                     KeepClean = false
                 };
+                Debug.Log("WSS set up with SSL");
             }
             else
             {
                 wssServerUrl = $"ws://localhost:{port}/";
                 ws = new WebSocketServer(wssServerUrl);
+                Debug.Log("WSS set up without SSL");
             }
 
             ws.AddWebSocketService<DCLWebSocketService>("/" + wssServiceId);
@@ -67,7 +69,17 @@ public class WebSocketCommunication : IKernelCommunication
             if (withSSL) // Search for available ports only if we're using SSL
             {
                 SocketException se = (SocketException)e.InnerException;
+                Debug.Log($"WSS Socket Exception {se.Message}, {se.ErrorCode}, {se.SocketErrorCode.ToString()}");
                 if (se is { SocketErrorCode: SocketError.AddressAlreadyInUse })
+                {
+                    return StartServer(port + 1, maxPort, withSSL);
+                }
+            }
+            else
+            {
+                SocketException se = (SocketException)e.InnerException;
+                Debug.Log($"WSS Socket Exception {se.Message}, {se.ErrorCode}, {se.SocketErrorCode.ToString()}");
+                if (se is { SocketErrorCode: SocketError.ConnectionRefused })
                 {
                     return StartServer(port + 1, maxPort, withSSL);
                 }
@@ -203,7 +215,7 @@ public class WebSocketCommunication : IKernelCommunication
                     while (queuedMessages.Count > 0)
                     {
                         DCLWebSocketService.Message msg = queuedMessages.Dequeue();
-
+                        Debug.Log($"WSS Message: {msg.type.ToString()}, {msg.payload}");
                         switch (msg.type)
                         {
                             // Add to this list the messages that are used a lot and you want better performance
