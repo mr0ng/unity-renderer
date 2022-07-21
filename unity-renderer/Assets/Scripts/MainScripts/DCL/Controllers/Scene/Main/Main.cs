@@ -82,7 +82,11 @@ namespace DCL
             if (!Configuration.EnvironmentSettings.RUNNING_TESTS)
             {
                 Debug.Log($"Main: starting WebSockeSSL");
-                kernelCommunication = new WebSocketCommunication(DebugConfigComponent.i.webSocketSSL);
+                WebSocketCommunication webSocketCommunication = new WebSocketCommunication(DebugConfigComponent.i.webSocketSSL);
+                kernelCommunication = webSocketCommunication;
+                
+
+
             }
 #endif
         }

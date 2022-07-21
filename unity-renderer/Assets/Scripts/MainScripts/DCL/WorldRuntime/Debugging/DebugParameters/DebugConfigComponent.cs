@@ -377,33 +377,21 @@ namespace DCL
                 Debug.Log(
                     "[REMINDER] To be able to connect with SSL you should start Chrome with the --ignore-certificate-errors argument specified (or enabling the following option: chrome://flags/#allow-insecure-localhost). In Firefox set the configuration option `network.websocket.allowInsecureFromHTTPS` to true, then use the ws:// rather than the wss:// address.");
             }
-            // _webViewPrefab = WebViewPrefab.Instantiate(0.9f, 0.6f);
-            // _webViewPrefab.transform.parent = transform;
-            // _webViewPrefab.transform.localPosition = new Vector3(0, 0f, 0.6f);
-            // _webViewPrefab.transform.LookAt(transform);
-            // _webViewPrefab.Initialized += (sender, e) => {
-            //     _webViewPrefab.WebView.LoadUrl($"{baseUrl}{debugString}{debugPanelString}position={startInCoords.x}%2C{startInCoords.y}&ws={DataStore.i.wsCommunication.url}");
-            // };
-
-            // Add the keyboard under the main webview.
-            // _keyboard = Keyboard.Instantiate();
-            // _keyboard.transform.parent = _webViewPrefab.transform;
-            // _keyboard.transform.localPosition = new Vector3(0, -0.41f, 0);
-            // _keyboard.transform.localEulerAngles = new Vector3(0, 0, 0);
-            // // Hook up the keyboard so that characters are routed to the main webview.
-            // _keyboard.InputReceived += (sender, e) => _webViewPrefab.WebView.HandleKeyboardInput(e.Value);
+         
 
             webViewURL = $"{baseUrl}{debugString}{debugPanelString}position={startInCoords.x}%2C{startInCoords.y}&ws={DataStore.i.wsCommunication.url}";
             urlInput.text = webViewURL;
             var canvas = GameObject.Find("Canvas");
             //DontDestroyOnLoad(canvas);
             WebViewOptions opt = new WebViewOptions();
-            opt.preferredPlugins  = new WebPluginType[] { WebPluginType.AndroidGecko};
+            opt.preferredPlugins  = new WebPluginType[] { WebPluginType.Android};
+            
+            AndroidGeckoWebView.GloballySetUserAgent("Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2228.0 Safari/537.36");
             
             _canvasWebViewPrefab = CanvasWebViewPrefab.Instantiate(opt);
             _canvasWebViewPrefab.transform.SetParent(canvas.transform, false);
             _canvasWebViewPrefab.InitialResolution = 400;
-            //_canvasWebViewPrefab.InitialUrl = $"https://www.google.com";
+
             _canvasWebViewPrefab.RemoteDebuggingEnabled = true;
             _canvasWebViewPrefab.LogConsoleMessages = true;
             _canvasWebViewPrefab.NativeOnScreenKeyboardEnabled = false;

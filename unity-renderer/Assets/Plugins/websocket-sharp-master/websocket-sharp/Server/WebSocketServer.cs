@@ -41,6 +41,7 @@ using System.Net.Sockets;
 using System.Security.Principal;
 using System.Text;
 using System.Threading;
+using UnityEngine;
 using WebSocketSharp.Net;
 using WebSocketSharp.Net.WebSockets;
 
@@ -996,12 +997,14 @@ namespace WebSocketSharp.Server
             if (_state == ServerState.Start)
             {
                 _log.Info("The server has already started.");
+                Debug.Log("The server has already started.");
                 return;
             }
 
             if (_state == ServerState.ShuttingDown)
             {
                 _log.Warn("The server is shutting down.");
+                Debug.Log("The server is shutting down.");
                 return;
             }
 
@@ -1010,12 +1013,14 @@ namespace WebSocketSharp.Server
                 if (_state == ServerState.Start)
                 {
                     _log.Info("The server has already started.");
+                    Debug.Log("The server has already started.");
                     return;
                 }
 
                 if (_state == ServerState.ShuttingDown)
                 {
                     _log.Warn("The server is shutting down.");
+                    Debug.Log("The server is shutting down.");
                     return;
                 }
 
@@ -1029,6 +1034,7 @@ namespace WebSocketSharp.Server
                 }
                 catch
                 {
+                    Debug.LogError("Error at WebSocket StartReceiving");
                     _services.Stop(1011, String.Empty);
                     throw;
                 }
@@ -1053,6 +1059,7 @@ namespace WebSocketSharp.Server
             catch (Exception ex)
             {
                 var msg = "The underlying listener has failed to start.";
+                Debug.LogError(msg);
                 throw new InvalidOperationException(msg, ex);
             }
 
@@ -1066,18 +1073,21 @@ namespace WebSocketSharp.Server
             if (_state == ServerState.Ready)
             {
                 _log.Info("The server is not started.");
+                Debug.Log("The server is not started.");
                 return;
             }
 
             if (_state == ServerState.ShuttingDown)
             {
                 _log.Info("The server is shutting down.");
+                Debug.Log("The server is shutting down.");
                 return;
             }
 
             if (_state == ServerState.Stop)
             {
                 _log.Info("The server has already stopped.");
+                Debug.Log("The server has already stopped.");
                 return;
             }
 
@@ -1086,12 +1096,14 @@ namespace WebSocketSharp.Server
                 if (_state == ServerState.ShuttingDown)
                 {
                     _log.Info("The server is shutting down.");
+                    Debug.Log("The server is shutting down.");
                     return;
                 }
 
                 if (_state == ServerState.Stop)
                 {
                     _log.Info("The server has already stopped.");
+                    Debug.Log("The server has already stopped.");
                     return;
                 }
 
@@ -1140,6 +1152,7 @@ namespace WebSocketSharp.Server
             catch (Exception ex)
             {
                 var msg = "The underlying listener has failed to stop.";
+                Debug.Log("The underlying listener has failed to stop.");
                 throw new InvalidOperationException(msg, ex);
             }
 
@@ -1159,8 +1172,9 @@ namespace WebSocketSharp.Server
             {
                 result = null;
                 message = "It includes either or both path and query components.";
+                Debug.Log(message);
 
-                return false;
+            return false;
             }
 
             return true;
@@ -1474,6 +1488,7 @@ namespace WebSocketSharp.Server
                 string msg;
                 if (!checkSslConfiguration(sslConfig, out msg))
                 {
+                    Debug.LogError($"Websocket Start error: {msg}");
                     throw new InvalidOperationException(msg);
                 }
             }

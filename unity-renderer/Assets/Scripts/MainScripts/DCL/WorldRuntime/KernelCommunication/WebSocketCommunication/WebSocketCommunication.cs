@@ -55,13 +55,18 @@ public class WebSocketCommunication : IKernelCommunication
             {
                 wssServerUrl = $"ws://localhost:{port}/";
                 ws = new WebSocketServer(wssServerUrl);
-                Debug.Log("WSS set up without SSL");
+                ws.AllowForwardedRequest = true;
+                
+                
+                
+                Debug.Log("WS set up without SSL");
             }
 
             ws.AddWebSocketService<DCLWebSocketService>("/" + wssServiceId);
            
             ws.Start();
-            Debug.Log($"WebSocket Started, {wssServerUrl}, Listening {ws.IsListening}");
+            
+               Debug.Log($"WebSocket Started, {wssServerUrl}, Listening {ws.IsListening}");
         }
         catch (InvalidOperationException e)
         {
