@@ -1,8 +1,10 @@
 using System;
 using System.Collections.Generic;
-using DCL.Configuration;
+using Castle.Components.DictionaryAdapter;
 using DCL.Interface;
 using UnityEngine;
+using UnityEngine.InputSystem;
+using InputSettings = DCL.Configuration.InputSettings;
 
 namespace DCL
 {
@@ -201,22 +203,35 @@ namespace DCL
                     case BUTTON_TYPE.KEYBOARD:
                         if (CommonScriptableObjects.allUIHidden.Get())
                             break;
-                        if (Input.GetKeyDown((KeyCode) btnMap.buttonNum))
+                        if (GetKeyDown((KeyCode) btnMap.buttonNum))
                             RaiseEvent(btnMap.buttonId, EVENT.BUTTON_DOWN, btnMap.useRaycast,
                                 btnMap.enablePointerEvent);
-                        else if (Input.GetKeyUp((KeyCode) btnMap.buttonNum))
+                        else if (!GetKeyDown((KeyCode) btnMap.buttonNum))
                             RaiseEvent(btnMap.buttonId, EVENT.BUTTON_UP, btnMap.useRaycast, btnMap.enablePointerEvent);
                         break;
                 }
             }
         }
-        private bool GetButtonUp(BUTTON_MAP btnMap)
+        private static bool GetButtonUp(BUTTON_MAP btnMap)
         {
             return !actions.Select.triggered;
         }
         private static bool GetButtonDown(BUTTON_MAP btnMap)
         {
             return actions.Select.triggered;
+        }
+
+        private static bool GetKeyDown(KeyCode code)
+        {
+            switch (code)
+            {
+                case KeyCode.E:
+                    return actions.PrimaryInteraction.triggered;
+                case KeyCode.F:
+                    return actions.SecondaryInteraction.triggered;
+                default: 
+                    return default;
+            }
         }
 
         public bool IsPressed(WebInterface.ACTION_BUTTON button)
@@ -226,13 +241,13 @@ namespace DCL
                 case WebInterface.ACTION_BUTTON.POINTER:
                     return actions.Select.triggered;
                 case WebInterface.ACTION_BUTTON.PRIMARY:
-                    return Input.GetKey(InputSettings.PrimaryButtonKeyCode);
+                    return actions.PrimaryInteraction.triggered;
                 case WebInterface.ACTION_BUTTON.SECONDARY:
-                    return Input.GetKey(InputSettings.SecondaryButtonKeyCode);
+                    return actions.SecondaryInteraction.triggered;
                 default: // ANY
-                    return Input.GetMouseButton(0) ||
-                           Input.GetKey(InputSettings.PrimaryButtonKeyCode) ||
-                           Input.GetKey(InputSettings.SecondaryButtonKeyCode);
+                    return actions.Select.triggered ||
+                           actions.PrimaryInteraction.triggered ||
+                           actions.SecondaryInteraction.triggered;
             }
         }
 
