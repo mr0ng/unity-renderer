@@ -193,6 +193,11 @@ PrefabInstance:
       propertyPath: m_Enabled
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 3685995009960693630, guid: ec38b9f0e68994a449ca6246b42bbe7a,
+        type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 4861747969611859022, guid: ec38b9f0e68994a449ca6246b42bbe7a,
         type: 3}
       propertyPath: m_Lens.m_SensorSize.x
@@ -396,6 +401,7 @@ PrefabInstance:
     m_RemovedComponents:
     - {fileID: 1379171156070171185, guid: ec38b9f0e68994a449ca6246b42bbe7a, type: 3}
     - {fileID: 8981457495845710415, guid: ec38b9f0e68994a449ca6246b42bbe7a, type: 3}
+    - {fileID: 3685995009960693630, guid: ec38b9f0e68994a449ca6246b42bbe7a, type: 3}
   m_SourcePrefab: {fileID: 100100000, guid: ec38b9f0e68994a449ca6246b42bbe7a, type: 3}
 --- !u!4 &7632371690914280770 stripped
 Transform:
@@ -557,6 +563,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d90d3cfbbfb3d5a47b9026aebcbb41b6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  controller: {fileID: 9177170845444596438}
 --- !u!1001 &3944363279721790483
 PrefabInstance:
   m_ObjectHideFlags: 0

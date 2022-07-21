@@ -12,10 +12,16 @@ public class InteractionHoverCanvasController : MonoBehaviour
     public RectTransform backgroundTransform;
     public TextMeshProUGUI text;
     public GameObject[] icons;
+    private Transform myTrans;
 
     bool isHovered = false;
     GameObject hoverIcon;
     Vector3 meshCenteredPos;
+
+    [SerializeField]
+    private float followSpeed = .8f;
+    [SerializeField]
+    private Vector3 offset = new Vector3(0f, .8f, 0f);
 
     const string ACTION_BUTTON_POINTER = "POINTER";
     const string ACTION_BUTTON_PRIMARY = "PRIMARY";
@@ -25,6 +31,7 @@ public class InteractionHoverCanvasController : MonoBehaviour
 
     void Awake()
     {
+        myTrans = transform;
         dataStore = DataStore.i.Get<DataStore_Cursor>();
         backgroundTransform.gameObject.SetActive(false);
 
@@ -70,6 +77,15 @@ public class InteractionHoverCanvasController : MonoBehaviour
         UpdateCanvas();
     }
 
+    private void Update()
+    {
+        if (!isHovered)
+            return;
+        Vector3 offsetPos = CrossPlatformManager.GetPoint() + offset;
+        myTrans.position = Vector3.Lerp(myTrans.position, offsetPos, followSpeed);
+        myTrans.forward = CommonScriptableObjects.cameraForward.Get();
+    }
+
     public void Setup(string button, string feedbackText)
     {
         text.text = feedbackText;
@@ -107,6 +123,7 @@ public class InteractionHoverCanvasController : MonoBehaviour
             return;
 
         isHovered = hoverState;
+        myTrans.position = CrossPlatformManager.GetPoint() + offset;
         UpdateCanvas();
     }
 

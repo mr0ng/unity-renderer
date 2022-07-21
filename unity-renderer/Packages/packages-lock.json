@@ -56,6 +56,13 @@
       "dependencies": {
         "com.unity.textmeshpro": "2.1.4"
       }
+	},
+    "com.decentraland.rpc-csharp": {
+      "version": "https://github.com/decentraland/rpc-csharp.git?path=rpc-csharp/src",
+      "depth": 0,
+      "source": "git",
+      "dependencies": {},
+      "hash": "31340a3706dda78916910dc2b925756fd3ee0ece"
     },
     "com.unity.2d.sprite": {
       "version": "1.0.0",

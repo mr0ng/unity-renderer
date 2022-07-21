@@ -7,6 +7,8 @@ public class PopupHudHelper : VRHUDHelper
     
     protected override void SetupHelper()
     {
+        if (!objectToHide)
+            objectToHide = gameObject;
         myTrans.localScale = 0.0025f * Vector3.one;
         objectToHide.SetActive(false);
     }

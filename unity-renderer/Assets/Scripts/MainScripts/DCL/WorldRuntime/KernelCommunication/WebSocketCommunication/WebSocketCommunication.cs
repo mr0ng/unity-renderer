@@ -8,6 +8,9 @@ using WebSocketSharp.Server;
 
 public class WebSocketCommunication : IKernelCommunication
 {
+    public static event Action<DCLWebSocketService> OnWebSocketServiceAdded;
+    public static DCLWebSocketService service;
+
     WebSocketServer ws;
     private Coroutine updateCoroutine;
     private bool requestStop = false;
@@ -49,24 +52,20 @@ public class WebSocketCommunication : IKernelCommunication
                     },
                     KeepClean = false
                 };
-                Debug.Log("WSS set up with SSL");
             }
             else
             {
                 wssServerUrl = $"ws://localhost:{port}/";
                 ws = new WebSocketServer(wssServerUrl);
-                ws.AllowForwardedRequest = true;
-                
-                
-                
-                Debug.Log("WS set up without SSL");
             }
 
-            ws.AddWebSocketService<DCLWebSocketService>("/" + wssServiceId);
-           
+            ws.AddWebSocketService("/" + wssServiceId, () =>
+            {
+                service = new DCLWebSocketService();
+                OnWebSocketServiceAdded?.Invoke(service);
+                return service;
+            });
             ws.Start();
-            
-               Debug.Log($"WebSocket Started, {wssServerUrl}, Listening {ws.IsListening}");
         }
         catch (InvalidOperationException e)
         {
@@ -74,17 +73,7 @@ public class WebSocketCommunication : IKernelCommunication
             if (withSSL) // Search for available ports only if we're using SSL
             {
                 SocketException se = (SocketException)e.InnerException;
-                Debug.Log($"WSS Socket Exception {se.Message}, {se.ErrorCode}, {se.SocketErrorCode.ToString()}");
                 if (se is { SocketErrorCode: SocketError.AddressAlreadyInUse })
-                {
-                    return StartServer(port + 1, maxPort, withSSL);
-                }
-            }
-            else
-            {
-                SocketException se = (SocketException)e.InnerException;
-                Debug.Log($"WSS Socket Exception {se.Message}, {se.ErrorCode}, {se.SocketErrorCode.ToString()}");
-                if (se is { SocketErrorCode: SocketError.ConnectionRefused })
                 {
                     return StartServer(port + 1, maxPort, withSSL);
                 }
@@ -210,7 +199,7 @@ public class WebSocketCommunication : IKernelCommunication
     {
         var hudControllerGO = GameObject.Find("HUDController");
         var mainGO = GameObject.Find("Main");
-        Debug.Log("Websocket Connected and processing messages");
+
         while (!requestStop)
         {
             lock (queuedMessages)
@@ -220,7 +209,7 @@ public class WebSocketCommunication : IKernelCommunication
                     while (queuedMessages.Count > 0)
                     {
                         DCLWebSocketService.Message msg = queuedMessages.Dequeue();
-                        Debug.Log($"WSS Message: {msg.type.ToString()}, {msg.payload}");
+
                         switch (msg.type)
                         {
                             // Add to this list the messages that are used a lot and you want better performance

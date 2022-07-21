@@ -1,7 +1,5 @@
-using System;
 using System.Collections.Generic;
 using Microsoft.MixedReality.Toolkit;
-using Microsoft.MixedReality.Toolkit.Input;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
@@ -32,10 +30,12 @@ public class PointerHelper : MonoBehaviour
 
         return localPointerPos + offset;
     }
+    
     private Vector3 ToLocalSpace(Vector3 hitpoint)
     {
         return referenceTrans.worldToLocalMatrix.MultiplyPoint(hitpoint);
     }
+    
     private void UpdateOrigin()
     {
         if (referenceTrans != null)
@@ -75,9 +75,4 @@ public class PointerHelper : MonoBehaviour
 
         return uiRaycastResults.Count > 0 && uiRaycastResults[0].gameObject.layer == layer;
     }
-
-    public void OnPointerDown(MixedRealityPointerEventData eventData) { throw new NotImplementedException(); }
-    public void OnPointerDragged(MixedRealityPointerEventData eventData) { throw new NotImplementedException(); }
-    public void OnPointerUp(MixedRealityPointerEventData eventData) { throw new NotImplementedException(); }
-    public void OnPointerClicked(MixedRealityPointerEventData eventData) { throw new NotImplementedException(); }
 }
