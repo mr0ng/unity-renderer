@@ -23,7 +23,7 @@ namespace DCL
 
         private PerformanceMetricsController performanceMetricsController;
         protected IKernelCommunication kernelCommunication;
-
+        public  WebSocketCommunication webSocketCommunication;
         protected PluginSystem pluginSystem;
         
         protected virtual void Awake()
@@ -83,11 +83,8 @@ namespace DCL
             if (!Configuration.EnvironmentSettings.RUNNING_TESTS)
             {
                 Debug.Log($"Main: starting WebSockeSSL");
-                WebSocketCommunication webSocketCommunication = new WebSocketCommunication(DebugConfigComponent.i.webSocketSSL);
+                webSocketCommunication = new WebSocketCommunication(DebugConfigComponent.i.webSocketSSL);
                 kernelCommunication = webSocketCommunication;
-                
-
-
             }
 #endif
             RPCServerBuilder.BuildDefaultServer();

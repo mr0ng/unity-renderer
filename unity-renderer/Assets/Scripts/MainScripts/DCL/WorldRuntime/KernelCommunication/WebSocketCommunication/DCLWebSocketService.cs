@@ -98,6 +98,7 @@ public class DCLWebSocketService : WebSocketBehavior
 
         WebInterface.OnMessageFromEngine += SendMessageToWeb;
         DataStore.i.wsCommunication.communicationEstablished.Set(true);
+        DebugConfigComponent.i.HideWebViewScreens();
         OnConnectEvent?.Invoke();
     }
 }
