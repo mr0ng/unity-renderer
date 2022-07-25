@@ -11,6 +11,7 @@
             android:launchMode="singleTask"
             android:name="com.unity3d.player.UnityPlayerActivity"
             android:hardwareAccelerated="true"
+            android:requestLegacyExternalStorage="true"
             android:excludeFromRecents="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>

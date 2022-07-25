@@ -1059,10 +1059,10 @@ namespace WebSocketSharp.Server
             catch (Exception ex)
             {
                 var msg = "The underlying listener has failed to start.";
-                Debug.LogError(msg);
+                Debug.LogError($"WebSocketServer: {msg}");
                 throw new InvalidOperationException(msg, ex);
             }
-
+            Debug.Log("WebSocketServer: Listener Started");
             _receiveThread = new Thread(new ThreadStart(receiveRequest));
             _receiveThread.IsBackground = true;
             _receiveThread.Start();

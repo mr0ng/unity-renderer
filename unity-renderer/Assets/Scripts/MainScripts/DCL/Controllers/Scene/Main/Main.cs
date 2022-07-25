@@ -80,12 +80,12 @@ namespace DCL
 #else
             // TODO(Brian): Remove this branching once we finish migrating all tests out of the
             //              IntegrationTestSuite_Legacy base class.
-            if (!Configuration.EnvironmentSettings.RUNNING_TESTS)
-            {
-                Debug.Log($"Main: starting WebSockeSSL");
-                webSocketCommunication = new WebSocketCommunication(DebugConfigComponent.i.webSocketSSL);
-                kernelCommunication = webSocketCommunication;
-            }
+            // if (!Configuration.EnvironmentSettings.RUNNING_TESTS)
+            // {
+            Debug.Log($"Main: starting WebSockeSSL");
+            kernelCommunication = new WebSocketCommunication(DebugConfigComponent.i.webSocketSSL);
+                
+            // }
 #endif
             RPCServerBuilder.BuildDefaultServer();
         }

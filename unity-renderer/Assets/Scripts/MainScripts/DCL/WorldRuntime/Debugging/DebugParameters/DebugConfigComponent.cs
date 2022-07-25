@@ -115,28 +115,27 @@ namespace DCL
             Web.SetIgnoreCertificateErrors(true);
             Web.EnableRemoteDebugging();
             Web.SetAutoplayEnabled(true);
-            AndroidWebView.SetIgnoreCertificateErrors(true);
-            AndroidWebView.GloballySetUserAgent(false);
-            AndroidWebView.SetCameraAndMicrophoneEnabled(true);
-            AndroidWebView.SetAutoplayEnabled(true);
-            AndroidWebView.SetStorageEnabled(true);
+            AndroidGeckoWebView.SetIgnoreCertificateErrors(true);
+            AndroidGeckoWebView.GloballySetUserAgent(false);
+            AndroidGeckoWebView.SetCameraAndMicrophoneEnabled(true);
+            AndroidGeckoWebView.SetAutoplayEnabled(true);
+            AndroidGeckoWebView.SetStorageEnabled(true);
 
-            // AndroidGeckoWebView.SetPreferences(new Dictionary<string, string> {
-            //     ["security.fileuri.strict_origin_policy"] = "false",
-            //     ["network.websocket.allowInsecureFromHTTPS"] = "true",
-            //     ["security.csp.enable"] = "false",
-            //     ["network.cors_preflight.allow_client_cert"] = "true",
-            //     ["dom.cross_origin_iframes_loaded_in_background"] = "true",
-            //     ["dom.webnotifications.allowcrossoriginiframe"] = "true",
-            //     ["network.auth.subresource-img-cross-origin-http-auth-allow"] = "true",
-            //     ["network.http.referer.XOriginPolicy"] = "true",
-            //     ["network.http.referer.disallowCrossSiteRelaxingDefault.pbmode"] = "false",
-            //     ["network.http.referer.XOriginPolicy"] = "1",
-            //     ["network.websocket.auto-follow-http-redirects"] = "true",
-            //     ["security.csp.enableNavigateTo"] = "true",
-            //     ["security.mixed_content.block_active_content"] = "	false",
-            //     ["security.mixed_content.upgrade_display_content"] = "true"
-            // });
+            AndroidGeckoWebView.SetPreferences(new Dictionary<string, string> {
+                ["security.fileuri.strict_origin_policy"] = "false",
+                ["network.websocket.allowInsecureFromHTTPS"] = "true",
+                ["security.csp.enable"] = "false",
+                ["network.cors_preflight.allow_client_cert"] = "true",
+                ["dom.cross_origin_iframes_loaded_in_background"] = "true",
+                ["dom.webnotifications.allowcrossoriginiframe"] = "true",
+                ["network.auth.subresource-img-cross-origin-http-auth-allow"] = "true",
+                ["network.http.referer.XOriginPolicy"] = "true",
+                ["network.http.referer.XOriginPolicy"] = "1",
+                //["network.websocket.auto-follow-http-redirects"] = "false",
+                ["security.csp.enableNavigateTo"] = "true",
+                ["security.mixed_content.block_active_content"] = "	false",
+                ["security.mixed_content.upgrade_display_content"] = "false"
+            });
 #elif (UNITY_EDITOR || UNITY_STANDALONE)
              /*
             StandaloneWebView.SetPreferences(new Dictionary<string, string>
@@ -205,7 +204,7 @@ namespace DCL
                 OpenWebBrowser();
         }
 
-        private async void OpenWebBrowser()
+        private void OpenWebBrowser()
         {
             string baseUrl = "";
             string debugString = "";
@@ -308,7 +307,7 @@ namespace DCL
             //DontDestroyOnLoad(canvas);
             WebViewOptions opt = new WebViewOptions();
 #if (UNITY_EDITOR  || UNITY_STANDALONE)
-            opt.preferredPlugins  = new WebPluginType[] { WebPluginType.Android,WebPluginType.iOS, WebPluginType.Windows, WebPluginType.UniversalWindowsPlatform};
+            opt.preferredPlugins  = new WebPluginType[] { WebPluginType.AndroidGecko,WebPluginType.iOS, WebPluginType.Windows, WebPluginType.UniversalWindowsPlatform};
             
             StandaloneWebView.GloballySetUserAgent("Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2228.0 Safari/537.36");
             _canvasWebViewPrefab = CanvasWebViewPrefab.Instantiate(opt);
@@ -316,7 +315,7 @@ namespace DCL
                 _canvasWebViewPrefab.WebView.LoadUrl(webViewURL);
             };
             _canvasWebViewPrefab.transform.SetParent(canvas.transform, false);
-            _canvasWebViewPrefab.InitialResolution = 400;
+            _canvasWebViewPrefab.InitialResolution = 350;
 
             _canvasWebViewPrefab.RemoteDebuggingEnabled = true;
             _canvasWebViewPrefab.LogConsoleMessages = true;
@@ -326,7 +325,7 @@ namespace DCL
             // Create a CanvasKeyboard
             // https://developer.vuplex.com/webview/CanvasKeyboard
             _keyboard = CanvasKeyboard.Instantiate();
-            _keyboard.InitialResolution = 400;
+            _keyboard.InitialResolution = 350;
             _keyboard.transform.SetParent(canvas.transform, false);
             // Hook up the keyboard so that characters are routed to the CanvasWebViewPrefab.
             _keyboard.InputReceived += (sender, eventArgs) => {
@@ -343,15 +342,15 @@ namespace DCL
             Debug.Log("finished positioning webview objects");
              // Application.OpenURL(
              //     $"{baseUrl}{debugString}{debugPanelString}position={startInCoords.x}%2C{startInCoords.y}&ws={DataStore.i.wsCommunication.url}");
-#elif  UNITY_ANDROID
+ #elif  UNITY_ANDROID
             
-            opt.preferredPlugins  = new WebPluginType[] {WebPluginType.Android};
+            opt.preferredPlugins  = new WebPluginType[] {WebPluginType.AndroidGecko};
             
             _canvasWebViewPrefab = CanvasWebViewPrefab.Instantiate(opt);
             _canvasWebViewPrefab.Initialized += (sender, eventArgs) => {
-                var androidWebView =  _canvasWebViewPrefab.WebView as AndroidWebView;
-                androidWebView.SetMixedContentMode(MixedContentMode.AlwaysAllow);
-                androidWebView.SetUserAgent(false);
+                // var androidWebView =  _canvasWebViewPrefab.WebView as AndroidWebView;
+                // androidWebView.SetMixedContentMode(MixedContentMode.AlwaysAllow);
+                // androidWebView.SetUserAgent(false);
 
                 _canvasWebViewPrefab.WebView.LoadUrl(webViewURL);
                 //options.WebView.LoadUrl(webViewURL);
@@ -372,7 +371,7 @@ namespace DCL
             _keyboard.InputReceived += (sender, eventArgs) => {
                 _canvasWebViewPrefab.WebView.HandleKeyboardInput(eventArgs.Value);
                 Web.SetUserAgent(false);
-                urlInput.text.Insert(urlInput.caretPosition,eventArgs.Value);
+                //urlInput.text.Insert(urlInput.text.Length,eventArgs.Value);
             };
             urlInput.keyboardType = TouchScreenKeyboardType.URL;
             urlInput.contentType = TMP_InputField.ContentType.Alphanumeric;
@@ -425,7 +424,7 @@ namespace DCL
             // urlInput.gameObject.SetActive(true);
             Web.SetUserAgent(false);
 #if UNITY_ANDROID && !UNITY_EDITOR
-            AndroidWebView.GloballySetUserAgent(false);
+            AndroidGeckoWebView.GloballySetUserAgent(false);
 #endif 
             if(_canvasWebViewPrefab!=null) _canvasWebViewPrefab.Destroy();
             if(_keyboard!= null)  Destroy(_keyboard.gameObject);
