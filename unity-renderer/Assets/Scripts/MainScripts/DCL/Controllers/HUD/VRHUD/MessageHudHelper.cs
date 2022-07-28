@@ -8,9 +8,6 @@ public class MessageHudHelper : VRHUDHelper
         VRHUDController.LoadingStart += HideMessage;
     }
     
-    protected override void RunOnEnable() { }
-    protected override void RunOnDisable() { }
-
     private void HideMessage()
     {
         gameObject.SetActive(false);

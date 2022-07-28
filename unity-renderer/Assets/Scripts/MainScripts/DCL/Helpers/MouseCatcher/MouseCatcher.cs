@@ -32,6 +32,12 @@ namespace DCL
         //Default OnPointerEvent
         public LayerMask OnPointerDownTarget = 1 << 9;
 
+        private void Awake()
+        {
+            if (CrossPlatformManager.IsVR)
+                enabled = false;
+        }
+
         private void Start()
         {
             unlockInputAction.OnTriggered += HandleUnlockInput;

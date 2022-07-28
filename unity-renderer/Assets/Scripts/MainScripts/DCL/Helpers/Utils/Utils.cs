@@ -373,7 +373,7 @@ namespace DCL.Helpers
         public static bool IsCursorLocked
         {
             get => isCursorLocked;
-            private set
+            set
             {
                 if (isCursorLocked == value) return;
                 isCursorLocked = value;

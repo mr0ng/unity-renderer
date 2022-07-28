@@ -4593,7 +4593,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   sortingOrder: 2
-  objectToHide: {fileID: 0}
+  objectToHide: {fileID: 4967629809127617032}
 --- !u!1001 &654907563950986874
 PrefabInstance:
   m_ObjectHideFlags: 0

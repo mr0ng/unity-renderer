@@ -12,15 +12,14 @@ public class VRCharacterController : MonoBehaviour
 
     private void Start()
     {
+        mixedRealityPlayspace = VRPlaySpace.i.transform;
         PlaceCamera();
     }
     
     private void PlaceCamera()
     {
-        VRPlaySpace playSpace = VRPlaySpace.i;
-        mixedRealityPlayspace = playSpace.transform;
-
-        mixedRealityPlayspace.parent = transform;
-        mixedRealityPlayspace.localPosition = Vector3.zero + offset;
+        mixedRealityPlayspace.parent = cameraParent;
+        mixedRealityPlayspace.localPosition = offset;
+        mixedRealityPlayspace.localRotation = Quaternion.identity;
     }
 }

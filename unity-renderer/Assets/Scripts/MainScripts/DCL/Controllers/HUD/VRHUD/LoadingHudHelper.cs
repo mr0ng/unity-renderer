@@ -25,7 +25,4 @@ public class LoadingHudHelper : VRHUDHelper
         };
         VRHUDController.LoadingEnd += CrossPlatformManager.SetCameraForGame;
     }
-
-    protected override void RunOnEnable() {  }
-    protected override void RunOnDisable() { }
 }
