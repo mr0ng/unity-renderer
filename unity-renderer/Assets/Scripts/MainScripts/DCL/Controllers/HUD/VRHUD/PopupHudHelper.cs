@@ -1,4 +1,4 @@
-using System;
+using DCL;
 using UnityEngine;
 
 public class PopupHudHelper : VRHUDHelper
@@ -14,11 +14,11 @@ public class PopupHudHelper : VRHUDHelper
         objectToHide.SetActive(false);
         if (showHideAnimator)
             showHideAnimator.OnStartShow += PositionHud;
+        else
+            DataStore.i.common.onOpenNFTPrompt.OnChange += OnNFTPromptOpened;
     }
-
-    private void OnEnable()
+    private void OnNFTPromptOpened(NFTPromptModel current, NFTPromptModel previous)
     {
-        if (showHideAnimator) return;
         PositionHud();
     }
 

@@ -1,9 +1,7 @@
 using System;
 using System.Collections.Generic;
-using Castle.Components.DictionaryAdapter;
 using DCL.Interface;
 using UnityEngine;
-using UnityEngine.InputSystem;
 using InputSettings = DCL.Configuration.InputSettings;
 
 namespace DCL
