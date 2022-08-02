@@ -83,6 +83,22 @@ namespace DCL
                     ""expectedControlType"": ""Axis"",
                     ""processors"": """",
                     ""interactions"": """"
+                },
+                {
+                    ""name"": ""PrimaryInteraction"",
+                    ""type"": ""Button"",
+                    ""id"": ""afa7e912-739a-418e-97c0-94c63ae36f33"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """"
+                },
+                {
+                    ""name"": ""SecondaryInteraction"",
+                    ""type"": ""Button"",
+                    ""id"": ""c1784f93-1d03-434c-9b45-ca55d75216aa"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """"
                 }
             ],
             ""bindings"": [
@@ -358,6 +374,50 @@ namespace DCL
                     ""processors"": """",
                     ""groups"": ""Keyboard&Mouse"",
                     ""action"": ""ScrollMouse"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""056de063-2ecb-4403-940a-21a6631b2aea"",
+                    ""path"": ""<Keyboard>/e"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Keyboard&Mouse"",
+                    ""action"": ""PrimaryInteraction"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""e7e3a006-7d3d-4927-8eed-3365d4d315fd"",
+                    ""path"": ""<XRController>{LeftHand}/primaryButton"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""PrimaryInteraction"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""4258c24a-0f13-4d64-84b7-f53b69d20f39"",
+                    ""path"": ""<Keyboard>/f"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Keyboard&Mouse"",
+                    ""action"": ""SecondaryInteraction"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""135ccb9d-7c75-496a-86c8-dba1d0c3d048"",
+                    ""path"": ""<XRController>{LeftHand}/secondaryButton"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""SecondaryInteraction"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 }
@@ -943,6 +1003,8 @@ namespace DCL
             m_Player_Jump = m_Player.FindAction("Jump", throwIfNotFound: true);
             m_Player_Walk = m_Player.FindAction("Walk", throwIfNotFound: true);
             m_Player_ScrollMouse = m_Player.FindAction("ScrollMouse", throwIfNotFound: true);
+            m_Player_PrimaryInteraction = m_Player.FindAction("PrimaryInteraction", throwIfNotFound: true);
+            m_Player_SecondaryInteraction = m_Player.FindAction("SecondaryInteraction", throwIfNotFound: true);
             // UI
             m_UI = asset.FindActionMap("UI", throwIfNotFound: true);
             m_UI_Navigate = m_UI.FindAction("Navigate", throwIfNotFound: true);
@@ -1012,6 +1074,8 @@ namespace DCL
         private readonly InputAction m_Player_Jump;
         private readonly InputAction m_Player_Walk;
         private readonly InputAction m_Player_ScrollMouse;
+        private readonly InputAction m_Player_PrimaryInteraction;
+        private readonly InputAction m_Player_SecondaryInteraction;
         public struct PlayerActions
         {
             private @DCLPlayerInput m_Wrapper;
@@ -1024,6 +1088,8 @@ namespace DCL
             public InputAction @Jump => m_Wrapper.m_Player_Jump;
             public InputAction @Walk => m_Wrapper.m_Player_Walk;
             public InputAction @ScrollMouse => m_Wrapper.m_Player_ScrollMouse;
+            public InputAction @PrimaryInteraction => m_Wrapper.m_Player_PrimaryInteraction;
+            public InputAction @SecondaryInteraction => m_Wrapper.m_Player_SecondaryInteraction;
             public InputActionMap Get() { return m_Wrapper.m_Player; }
             public void Enable() { Get().Enable(); }
             public void Disable() { Get().Disable(); }
@@ -1057,6 +1123,12 @@ namespace DCL
                     @ScrollMouse.started -= m_Wrapper.m_PlayerActionsCallbackInterface.OnScrollMouse;
                     @ScrollMouse.performed -= m_Wrapper.m_PlayerActionsCallbackInterface.OnScrollMouse;
                     @ScrollMouse.canceled -= m_Wrapper.m_PlayerActionsCallbackInterface.OnScrollMouse;
+                    @PrimaryInteraction.started -= m_Wrapper.m_PlayerActionsCallbackInterface.OnPrimaryInteraction;
+                    @PrimaryInteraction.performed -= m_Wrapper.m_PlayerActionsCallbackInterface.OnPrimaryInteraction;
+                    @PrimaryInteraction.canceled -= m_Wrapper.m_PlayerActionsCallbackInterface.OnPrimaryInteraction;
+                    @SecondaryInteraction.started -= m_Wrapper.m_PlayerActionsCallbackInterface.OnSecondaryInteraction;
+                    @SecondaryInteraction.performed -= m_Wrapper.m_PlayerActionsCallbackInterface.OnSecondaryInteraction;
+                    @SecondaryInteraction.canceled -= m_Wrapper.m_PlayerActionsCallbackInterface.OnSecondaryInteraction;
                 }
                 m_Wrapper.m_PlayerActionsCallbackInterface = instance;
                 if (instance != null)
@@ -1085,6 +1157,12 @@ namespace DCL
                     @ScrollMouse.started += instance.OnScrollMouse;
                     @ScrollMouse.performed += instance.OnScrollMouse;
                     @ScrollMouse.canceled += instance.OnScrollMouse;
+                    @PrimaryInteraction.started += instance.OnPrimaryInteraction;
+                    @PrimaryInteraction.performed += instance.OnPrimaryInteraction;
+                    @PrimaryInteraction.canceled += instance.OnPrimaryInteraction;
+                    @SecondaryInteraction.started += instance.OnSecondaryInteraction;
+                    @SecondaryInteraction.performed += instance.OnSecondaryInteraction;
+                    @SecondaryInteraction.canceled += instance.OnSecondaryInteraction;
                 }
             }
         }
@@ -1249,6 +1327,8 @@ namespace DCL
             void OnJump(InputAction.CallbackContext context);
             void OnWalk(InputAction.CallbackContext context);
             void OnScrollMouse(InputAction.CallbackContext context);
+            void OnPrimaryInteraction(InputAction.CallbackContext context);
+            void OnSecondaryInteraction(InputAction.CallbackContext context);
         }
         public interface IUIActions
         {

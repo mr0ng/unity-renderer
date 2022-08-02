@@ -11,7 +11,4 @@ public class MenuHudHelper : VRHUDHelper
         VRHUDController.I.Register(this, submenu);
         VRHUDController.I.Reparent(myTrans);
     }
-    
-    protected override void RunOnEnable() { }
-    protected override void RunOnDisable() { }
 }

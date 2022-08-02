@@ -1,3 +1,5 @@
+using DCL;
+using DCL.Helpers;
 using Microsoft.MixedReality.Toolkit;
 using UnityEngine;
 using UnityEngine.XR.Management;
@@ -46,13 +48,13 @@ public static class CrossPlatformManager
 
     private static void SetUpForVR()
     {
-        DCL.Helpers.Utils.LockCursor();
-        DCL.Helpers.Utils.OnCursorLockChanged += LockCursor;
+        OverrideCursorLock(false);
+        DCL.Helpers.Utils.OnCursorLockChanged += OverrideCursorLock;
     }
     
-    private static void LockCursor(bool state)
+    private static void OverrideCursorLock(bool state)
     {
-        if (!state) DCL.Helpers.Utils.LockCursor();
+        Utils.IsCursorLocked = true;
     }
     
     public static Ray GetRay()

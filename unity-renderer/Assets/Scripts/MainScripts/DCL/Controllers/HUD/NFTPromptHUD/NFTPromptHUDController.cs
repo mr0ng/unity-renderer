@@ -5,7 +5,7 @@ using Object = UnityEngine.Object;
 
 public class NFTPromptHUDController : IHUD
 {
-    internal const string VIEW_PREFAB_PATH = "NFTPromptHUD";
+    internal const string VIEW_PREFAB_PATH = "NFTPromptHUDVR";
     internal const string COULD_NOT_FETCH_NFT_FROM_API = "Couldn't fetch NFT: '{0}/{1}'.";
     internal const string DOES_NOT_SUPPORT_POLYGON = "Warning: OpenSea API does not support fetching Polygon assets.";
 
@@ -23,7 +23,7 @@ public class NFTPromptHUDController : IHUD
     {
         view = Object.Instantiate(Resources.Load<GameObject>(VIEW_PREFAB_PATH))
             .GetComponent<NFTPromptHUDView>();
-        view.SetActive(false);
+        //view.SetActive(false);
 
         view.OnOwnerLabelPointerEnter += ShowOwnersTooltip;
         view.OnOwnerLabelPointerExit += TryHideOwnersTooltip;

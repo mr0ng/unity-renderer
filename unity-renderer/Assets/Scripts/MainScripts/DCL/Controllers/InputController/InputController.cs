@@ -578,11 +578,11 @@ public class InputController : MonoBehaviour
                     break;
                 case DCLAction_Measurable.CameraXAxis:
                     InputProcessor.FromAxis(action, player.Look.ReadValue<Vector2>().x,
-                        InputProcessor.Modifier.NeedsPointerLocked);
+                        InputProcessor.Modifier.NeedsPointerLocked | InputProcessor.Modifier.RequiresPointer);
                     break;
                 case DCLAction_Measurable.CameraYAxis:
                     InputProcessor.FromAxis(action, player.Look.ReadValue<Vector2>().y
-                        , InputProcessor.Modifier.NeedsPointerLocked);
+                        , InputProcessor.Modifier.NeedsPointerLocked | InputProcessor.Modifier.RequiresPointer);
                     break;
                 case DCLAction_Measurable.MouseWheel:
                     InputProcessor.FromAxis(action, player.ScrollMouse.ReadValue<float>(), modifiers: InputProcessor.Modifier.FocusNotInInput);
@@ -617,7 +617,8 @@ public static class InputProcessor
         NeedsPointerLocked = 0b0000001, // The pointer must be locked to the game
         FocusNotInInput = 0b0000010, // The game focus cannot be in an input field
         NotInStartMenu = 0b0000100, // The game focus cannot be in full-screen start menu
-        OnlyWithInputFocused = 0b0001000 // The game focus must be in an input field
+        OnlyWithInputFocused = 0b0001000, // The game focus must be in an input field
+        RequiresPointer = 0b0010000
     }
 
     /// <summary>
@@ -654,7 +655,8 @@ public static class InputProcessor
     /// <returns></returns>
     public static bool PassModifiers(Modifier modifiers)
     {
-        if (IsModifierSet(modifiers, Modifier.NeedsPointerLocked) && !DCL.Helpers.Utils.IsCursorLocked)
+        bool hasPointer = IsModifierSet(modifiers, Modifier.RequiresPointer) && !CrossPlatformManager.IsVR;
+        if (hasPointer && IsModifierSet(modifiers, Modifier.NeedsPointerLocked) && !DCL.Helpers.Utils.IsCursorLocked)
             return false;
 
         var isInputFieldFocused = FocusIsInInputField();

@@ -1,3 +1,4 @@
+using DCL.VR;
 using Microsoft.MixedReality.Toolkit.Input;
 using Microsoft.MixedReality.Toolkit.Input.Utilities;
 using UnityEngine;
@@ -7,6 +8,8 @@ public abstract class VRHUDHelper : MonoBehaviour
 {
     [SerializeField]
     private int sortingOrder;
+    [SerializeField]
+    protected ShowHideAnimator showHideAnimator;
     
     protected Transform myTrans;
 
@@ -35,26 +38,17 @@ public abstract class VRHUDHelper : MonoBehaviour
         canvas.overrideSorting = true;
         canvas.sortingOrder = sortingOrder;
         if (GetComponent<GraphicRaycaster>() == null)
-            gameObject.AddComponent<GraphicRaycaster>();
+        {
+            var caster = gameObject.AddComponent<GraphicRaycaster>();
+        }
         if (GetComponent<CanvasUtility>() == null)
             gameObject.AddComponent<CanvasUtility>();
         if (GetComponent<NearInteractionTouchableUnityUI>() == null)
-            gameObject.AddComponent<NearInteractionTouchableUnityUI>();
+        {
+            var inter = gameObject.AddComponent<NearInteractionTouchableUnityUI>();
+            inter.EventsToReceive = TouchableEventType.Pointer;
+        }
     }
-
-    private void OnEnable()
-    {
-        RunOnEnable();
-    }
-    
-    protected abstract void RunOnEnable();
-
-    private void OnDisable()
-    {
-        if (!CrossPlatformManager.IsVR) return;
-        RunOnDisable();
-    }
-    protected abstract void RunOnDisable();
 
     public void Hide(Vector3 pos) => myTrans.position += pos;
 

@@ -5,7 +5,9 @@ using UnityEngine;
 public class ShowHideAnimator : MonoBehaviour
 {
     public event System.Action<ShowHideAnimator> OnWillFinishHide;
+    public event Action OnStartHide; 
     public event System.Action<ShowHideAnimator> OnWillFinishStart;
+    public event Action OnStartShow;
 
     public bool hideOnEnable = true;
     public float animSpeedFactor = 1.0f;
@@ -75,6 +77,10 @@ public class ShowHideAnimator : MonoBehaviour
     }
 
     public void AnimEvent_ShowFinished() { OnWillFinishStart?.Invoke(this); }
+    
+    public void AnimEvent_HideStarted() { OnStartHide?.Invoke(); }
+
+    public void AnimEvent_ShowStarted() { OnStartShow?.Invoke(); }
 
     private void OnEnable()
     {
