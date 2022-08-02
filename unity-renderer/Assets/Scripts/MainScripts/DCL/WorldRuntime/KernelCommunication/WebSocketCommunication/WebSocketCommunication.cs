@@ -29,6 +29,7 @@ public class WebSocketCommunication : IKernelCommunication
 
     private string StartServer(int port, int maxPort, bool withSSL)
     {
+        Debug.Log($"WebSocketCommunication: StartServer 1");
         if (port > maxPort)
         {
             throw new SocketException((int)SocketError.AddressAlreadyInUse);
@@ -39,7 +40,7 @@ public class WebSocketCommunication : IKernelCommunication
         {
             if (withSSL)
             {
-                wssServerUrl = $"wss://localhost:{port}/";
+                wssServerUrl = $"wss://127.0.0.1:{port}/";
                 ws = new WebSocketServer(wssServerUrl)
                 {
                     SslConfiguration =
@@ -52,10 +53,12 @@ public class WebSocketCommunication : IKernelCommunication
                     },
                     KeepClean = false
                 };
+   
+                Debug.Log("WebSocketCommunication: SSL used");
             }
             else
             {
-                wssServerUrl = $"ws://localhost:{port}/";
+                wssServerUrl = $"ws://127.0.0.1:{port}/";
                 ws = new WebSocketServer(wssServerUrl);
             }
 
@@ -63,9 +66,12 @@ public class WebSocketCommunication : IKernelCommunication
             {
                 service = new DCLWebSocketService();
                 OnWebSocketServiceAdded?.Invoke(service);
+                Debug.Log("WebSocketCommunication: Added DCLWebSocket Service");
                 return service;
             });
             ws.Start();
+            Debug.Log("WebSocketCommunication: Start Called");
+            
         }
         catch (InvalidOperationException e)
         {
@@ -87,19 +93,21 @@ public class WebSocketCommunication : IKernelCommunication
 
     public WebSocketCommunication(bool withSSL = false, int startPort = 5000, int endPort = 5100)
     {
+        Debug.Log($"WebSocketCommunication: withSSL:{withSSL}, port {startPort}-{endPort}");
         InitMessageTypeToBridgeName();
-
+        Debug.Log($"WebSocketCommunication: 1");
         DCL.DataStore.i.debugConfig.isWssDebugMode = true;
-
+        Debug.Log($"WebSocketCommunication: 2");
         string url = StartServer(startPort, endPort, withSSL);
-
-        Debug.Log("WebSocket Server URL: " + url);
+        
+        Debug.Log("WebSocketCommunication: 3started " + url);
 
         DataStore.i.wsCommunication.url = url;
 
         DataStore.i.wsCommunication.communicationReady.Set(true);
-
+        Debug.Log($"WebSocketCommunication: 4 start ProcessMessages");
         updateCoroutine = CoroutineStarter.Start(ProcessMessages());
+        Debug.Log($"WebSocketCommunication: 5");
     }
 
     private void InitMessageTypeToBridgeName()
