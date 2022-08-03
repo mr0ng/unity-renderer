@@ -111,11 +111,11 @@ namespace DCL
             DataStore.i.debugConfig.msgStepByStep = debugConfig.msgStepByStep;
             DataStore.i.performance.multithreading.Set(multithreaded);
             Texture.allowThreadedTextureCreation = multithreaded;
-            options.Initialized += (sender, eventArgs) =>
-            {
-                Debug.Log($"Secondary Webview loading {htmlServerTest}");
-                options.WebView.LoadHtml(htmlServerTest);
-            };
+            // options.Initialized += (sender, eventArgs) =>
+            // {
+            //     Debug.Log($"Secondary Webview loading {htmlServerTest}");
+            //     options.WebView.LoadHtml(htmlServerTest);
+            // };
            
 #if (UNITY_EDITOR  || UNITY_STANDALONE)
             StandaloneWebView.GloballySetUserAgent("Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2228.0 Safari/537.36");
@@ -127,7 +127,7 @@ namespace DCL
             Web.SetUserAgent("Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2228.0 Safari/537.36");
             Web.SetStorageEnabled(true); 
             Web.SetIgnoreCertificateErrors(true);
-            Web.EnableRemoteDebugging();
+            // Web.EnableRemoteDebugging();
             Web.SetAutoplayEnabled(true);
             AndroidGeckoWebView.SetIgnoreCertificateErrors(true);
             // AndroidGeckoWebView.GloballySetUserAgent(false);
@@ -329,8 +329,8 @@ namespace DCL
             _canvasWebViewPrefab.transform.SetParent(canvas.transform, false);
             _canvasWebViewPrefab.InitialResolution = 350;
 
-            _canvasWebViewPrefab.RemoteDebuggingEnabled = true;
-            _canvasWebViewPrefab.LogConsoleMessages = true;
+            _canvasWebViewPrefab.RemoteDebuggingEnabled = false;
+            _canvasWebViewPrefab.LogConsoleMessages = false;
             _canvasWebViewPrefab.NativeOnScreenKeyboardEnabled = false;
             _canvasWebViewPrefab.Native2DModeEnabled = false;
 
@@ -438,6 +438,9 @@ namespace DCL
              _canvasWebViewPrefab.transform.localPosition -= new Vector3(0, 10, 0);
             _keyboard.WebViewPrefab.transform.localPosition -= new Vector3(0, 10, 0);
              urlInput.gameObject.SetActive(false);
+            _canvasWebViewPrefab.gameObject.SetActive(false);
+            _keyboard.gameObject.SetActive(false);
+            
         }
         public void ReloadPage()
         {
@@ -480,51 +483,51 @@ namespace DCL
 #endif
         }
         
-   private const string htmlServerTest = @"<!DOCTYPE HTML>
-   <html>
-   <head>
-   <script type = ""text/javascript"">
-                  function WebSocketTest() {
-       if (""WebSocket"" in window) {
-           document.getElementById(""sse"").innerHTML += ""\r\n  WebSocket is supported by your Browser!"";    
-           // Let us open a web socket
-           var ws = new WebSocket(""ws://localhost:5000/dcl"");
-           ws.onopen = function() {
-             
-               // Web Socket is connected, send data using send()
-               ws.send(""Message to send"");
-               document.getElementById(""sse"").innerHTML += ""\r\n  CONNECTED: Message is sent..."";
-           };
-           
-           ws.onmessage = function (evt) { 
-               var received_msg = evt.data;
-               document.getElementById(""sse"").innerHTML += ""\r\n  Message is received..."";
-           };
-           
-           ws.onclose = function() { 
-             
-               // websocket is closed.
-               //alert(""Connection is closed...""); 
-               document.getElementById(""sse"").innerHTML += ""\r\n  Connection is closed..."";
-           };
-       } 
-    else {
-         
-           // The browser doesn't support WebSocket
-           document.getElementById(""sse"").innerHTML += ""\r\n  WebSocket NOT supported by your Browser!"";
-       }
-   }
-   </script>
-   
-   </head>
-   
-   <body>
-   <div id = ""sse"">
-       <a href = ""javascript:WebSocketTest()"">Run WebSocket</a>
-   </div>
-   
-   </body>
-   </html>";
+   // private const string htmlServerTest = @"<!DOCTYPE HTML>
+   // <html>
+   // <head>
+   // <script type = ""text/javascript"">
+   //                function WebSocketTest() {
+   //     if (""WebSocket"" in window) {
+   //         document.getElementById(""sse"").innerHTML += ""\r\n  WebSocket is supported by your Browser!"";    
+   //         // Let us open a web socket
+   //         var ws = new WebSocket(""ws://localhost:5000/dcl"");
+   //         ws.onopen = function() {
+   //           
+   //             // Web Socket is connected, send data using send()
+   //             ws.send(""Message to send"");
+   //             document.getElementById(""sse"").innerHTML += ""\r\n  CONNECTED: Message is sent..."";
+   //         };
+   //         
+   //         ws.onmessage = function (evt) { 
+   //             var received_msg = evt.data;
+   //             document.getElementById(""sse"").innerHTML += ""\r\n  Message is received..."";
+   //         };
+   //         
+   //         ws.onclose = function() { 
+   //           
+   //             // websocket is closed.
+   //             //alert(""Connection is closed...""); 
+   //             document.getElementById(""sse"").innerHTML += ""\r\n  Connection is closed..."";
+   //         };
+   //     } 
+   //  else {
+   //       
+   //         // The browser doesn't support WebSocket
+   //         document.getElementById(""sse"").innerHTML += ""\r\n  WebSocket NOT supported by your Browser!"";
+   //     }
+   // }
+   // </script>
+   //
+   // </head>
+   //
+   // <body>
+   // <div id = ""sse"">
+   //     <a href = ""javascript:WebSocketTest()"">Run WebSocket</a>
+   // </div>
+   //
+   // </body>
+   // </html>";
 
     }
     

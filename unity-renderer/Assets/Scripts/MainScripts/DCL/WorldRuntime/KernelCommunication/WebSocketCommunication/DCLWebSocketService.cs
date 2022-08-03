@@ -11,7 +11,7 @@ using ErrorEventArgs = WebSocketSharp.ErrorEventArgs;
 
 public class DCLWebSocketService : WebSocketBehavior
 {
-    public static bool VERBOSE = true;
+    public static bool VERBOSE = false;
     
     public event Action OnCloseEvent;
 
@@ -59,7 +59,7 @@ public class DCLWebSocketService : WebSocketBehavior
 
     protected override void OnMessage(MessageEventArgs e)
     {
-        Debug.LogError($"DCLWebSocketService: Message {e.Data}");
+        // Debug.LogError($"DCLWebSocketService: Message {e.Data}");
         base.OnMessage(e);
         
         if (e.IsBinary)
@@ -100,7 +100,6 @@ public class DCLWebSocketService : WebSocketBehavior
 
         WebInterface.OnMessageFromEngine += SendMessageToWeb;
         DataStore.i.wsCommunication.communicationEstablished.Set(true);
-        DebugConfigComponent.i.HideWebViewScreens();
         OnConnectEvent?.Invoke();
     }
 }

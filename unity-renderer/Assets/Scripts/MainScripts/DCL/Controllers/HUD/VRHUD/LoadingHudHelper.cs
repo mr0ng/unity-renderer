@@ -1,3 +1,4 @@
+using DCL;
 using DCL.Huds;
 using UnityEngine;
 
@@ -21,6 +22,7 @@ public class LoadingHudHelper : VRHUDHelper
             CrossPlatformManager.SetCameraForLoading(loadingMask);
             var forward = VRHUDController.I.GetForward();
             myTrans.position = Camera.main.transform.position + forward;
+            DebugConfigComponent.i.HideWebViewScreens();
             myTrans.forward = forward;
         };
         VRHUDController.LoadingEnd += CrossPlatformManager.SetCameraForGame;

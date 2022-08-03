@@ -40,7 +40,11 @@ public class WebSocketCommunication : IKernelCommunication
         {
             if (withSSL)
             {
+#if UNITY_ANDROID && !UNITY_EDITOR
                 wssServerUrl = $"wss://127.0.0.1:{port}/";
+#else
+                wssServerUrl = $"wss://localhost:{port}/";
+#endif
                 ws = new WebSocketServer(wssServerUrl)
                 {
                     SslConfiguration =
@@ -58,7 +62,11 @@ public class WebSocketCommunication : IKernelCommunication
             }
             else
             {
+#if UNITY_ANDROID && !UNITY_EDITOR
                 wssServerUrl = $"ws://127.0.0.1:{port}/";
+#else
+                wssServerUrl = $"ws://localhost:{port}/";
+#endif
                 ws = new WebSocketServer(wssServerUrl);
             }
 
