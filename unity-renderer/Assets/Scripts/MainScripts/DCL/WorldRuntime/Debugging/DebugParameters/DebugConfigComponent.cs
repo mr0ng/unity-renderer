@@ -125,6 +125,8 @@ namespace DCL
             StandaloneWebView.SetIgnoreCertificateErrors(true);
             StandaloneWebView.GloballySetUserAgent(false);
             StandaloneWebView.SetCameraAndMicrophoneEnabled(true);
+            options.gameObject.SetActive(false);
+            keyboard.gameObject.SetActive(false);
 #elif UNITY_ANDROID
             AndroidGeckoWebView.GloballySetUserAgent("Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2228.0 Safari/537.36");
             Web.SetUserAgent("Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2228.0 Safari/537.36");
@@ -159,7 +161,7 @@ namespace DCL
                 ["security.csp.enable"] = "false"
             });
 #endif
-            
+
         }
 
         private void Start()
