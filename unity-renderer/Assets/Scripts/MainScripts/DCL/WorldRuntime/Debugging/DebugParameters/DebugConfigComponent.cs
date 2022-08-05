@@ -7,6 +7,7 @@ using UnityEngine;
 using System.Threading.Tasks;
 using System.Timers;
 using TMPro;
+using UnityEngine.UI;
 
 #if UNITY_ANDROID
 using Vuplex.WebView;
@@ -22,6 +23,7 @@ namespace DCL
         [SerializeField] private CanvasWebViewPrefab options;
         [SerializeField] private CanvasKeyboard keyboard;
         [SerializeField] private TMP_InputField urlInput;
+        [SerializeField] private Button reload;
         private string webViewURL = "";
         CanvasWebViewPrefab _canvasWebViewPrefab;
         CanvasKeyboard _keyboard;
@@ -95,7 +97,8 @@ namespace DCL
         public bool testWearables = false;
         public bool enableTutorial = false;
         public bool builderInWorld = false;
-        public bool soloScene = true;
+        //public bool soloScene = true;
+        public int parcelRadiusToLoad = 4;
         public bool disableAssetBundles = true;
         public bool multithreaded = false;
         public DebugPanel debugPanelMode = DebugPanel.Off;
@@ -136,23 +139,24 @@ namespace DCL
             AndroidGeckoWebView.SetStorageEnabled(true);
 
             AndroidGeckoWebView.SetPreferences(new Dictionary<string, string> {
-                ["security.csp.enable"] = "false",
                 ["dom.security.https_only_check_path_upgrade_downgrade_endless_loop"] = "false",
                 ["dom.security.https_only_mode_break_upgrade_downgrade_endless_loop"] = "false",
                 ["dom.security.https_only_mode_send_http_background_request"] = "false",
                 ["dom.webnotifications.allowcrossoriginiframe"] = "true",
                 ["dom.webnotifications.allowinsecure"] = "true",
+                ["security.allow_unsafe_parent_loads"] = "true",
                 ["network.auth.subresource-img-cross-origin-http-auth-allow"] = "true",
                 ["network.dns.echconfig.fallback_to_origin_when_all_failed"] = "false",
                 ["network.http.referer.XOriginPolicy"] = "1",
                 ["network.websocket.allowInsecureFromHTTPS"] = "true",
                 ["security.fileuri.strict_origin_policy"] = "false",
-                ["network.cors_preflight.allow_client_cert"] = "true",
                 ["dom.cross_origin_iframes_loaded_in_background"] = "true",
                 ["security.csp.enableNavigateTo"] = "true",
                 ["security.mixed_content.block_active_content"] = "	false",
                 ["security.insecure_field_warning.ignore_local_ip_address"] = "false",
-                ["security.mixed_content.upgrade_display_content"] = "false"
+                ["security.mixed_content.upgrade_display_content"] = "false",
+                ["network.websocket.auto-follow-http-redirects"] = "true",
+                ["security.csp.enable"] = "false"
             });
 #endif
             
@@ -264,13 +268,13 @@ namespace DCL
                  debugString += "RESET_TUTORIAL&";
              }
 
-             if (soloScene)
+             if (parcelRadiusToLoad != 4)
              {
-                 debugString += "LOS=0&";
+                 debugString += $"LOS={parcelRadiusToLoad}&";
              }
             if (disableAssetBundles)
             {
-                debugString += "DISABLE_ASSET_BUNDLES&";
+                debugString += "DISABLE_ASSET_BUNDLES&DISABLE_WEARABLE_ASSET_BUNDLES&";
             }
 
              if (builderInWorld)
@@ -437,7 +441,10 @@ namespace DCL
             // _canvasWebViewPrefab.Visible = false;
              _canvasWebViewPrefab.transform.localPosition -= new Vector3(0, 10, 0);
             _keyboard.WebViewPrefab.transform.localPosition -= new Vector3(0, 10, 0);
+            keyboard.gameObject.SetActive(false);
+            options.gameObject.SetActive(false);
              urlInput.gameObject.SetActive(false);
+            reload.gameObject.SetActive((false));
             _canvasWebViewPrefab.gameObject.SetActive(false);
             _keyboard.gameObject.SetActive(false);
             
@@ -466,6 +473,12 @@ namespace DCL
  
          
         }
+        public void KillWebViews()
+        {
+            if(_canvasWebViewPrefab!=null) _canvasWebViewPrefab.Destroy();
+            if(_keyboard!= null)  Destroy(_keyboard.gameObject);
+        }
+    
        
         private void OnDestroy()
         {

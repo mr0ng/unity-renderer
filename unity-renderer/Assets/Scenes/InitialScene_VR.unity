@@ -294,6 +294,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   sortingOrder: 0
+  showHideAnimator: {fileID: 0}
 --- !u!114 &285713779
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -879,7 +880,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &852295434
 RectTransform:
   m_ObjectHideFlags: 0
@@ -1231,7 +1232,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1535822479614194, guid: 3e10f3b6a733e441c8352020cff2f1f6, type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 114949863196309792, guid: 3e10f3b6a733e441c8352020cff2f1f6,
         type: 3}
@@ -1608,6 +1609,7 @@ MonoBehaviour:
   options: {fileID: 1444499962}
   keyboard: {fileID: 1693031358}
   urlInput: {fileID: 1861716078}
+  reload: {fileID: 852295435}
   debugConfig:
     soloScene: 0
     soloSceneCoords: {x: 0, y: 0}
@@ -1622,13 +1624,14 @@ MonoBehaviour:
   baseUrlCustom: https://play.decentraland.zone/?
   environment: 4
   realm: loki
-  startInCoords: {x: 0, y: 0}
+  startInCoords: {x: -26, y: -123}
   forceLocalComms: 0
   allWearables: 0
   testWearables: 0
   enableTutorial: 0
   builderInWorld: 0
-  soloScene: 0
+  parcelRadiusToLoad: 2
+  disableAssetBundles: 1
   multithreaded: 1
   debugPanelMode: 0
 --- !u!4 &1444882337
@@ -2556,7 +2559,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a79441f348de89743a2939f4d699eac1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_RenderShadows: 1
+  m_RenderShadows: 0
   m_RequiresDepthTextureOption: 2
   m_RequiresOpaqueTextureOption: 2
   m_CameraType: 0
@@ -2632,7 +2635,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ExpirationMode: 0
   RemoteDateTimeCheck: 1
-  CheckMode: 1
+  CheckMode: 0
   FreezeTime: -1
   QuitTime: 30
   OnExpired:
