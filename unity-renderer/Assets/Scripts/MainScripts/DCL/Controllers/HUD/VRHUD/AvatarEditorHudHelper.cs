@@ -1,0 +1,27 @@
+using DCL;
+using UnityEngine;
+
+public class AvatarEditorHudHelper : VRHUDHelper
+{
+    [SerializeField]
+    private AvatarEditorHUDView view;
+    private BaseVariable<bool> dataStoreIsOpen = DataStore.i.exploreV2.isOpen;
+    protected override void SetupHelper()
+    {
+        view.OnSetVisibility += OnVisiblityChange;
+    }
+    private void OnVisiblityChange(bool visible)
+    {
+        if (dataStoreIsOpen.Get())
+            myTrans.localRotation = Quaternion.identity;
+        else if (visible) 
+            Position();
+    }
+    
+    private void Position()
+    {
+        var forward = CommonScriptableObjects.cameraForward;
+        myTrans.position = CommonScriptableObjects.cameraPosition.Get() + forward;
+        myTrans.forward = forward;
+    }
+}

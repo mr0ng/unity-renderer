@@ -15,8 +15,8 @@ using static WearableCollectionsAPIData;
 public class AvatarEditorHUDView : MonoBehaviour, IPointerDownHandler
 {
     private static readonly int RANDOMIZE_ANIMATOR_LOADING_BOOL = Animator.StringToHash("Loading");
-    private const string VIEW_PATH = "AvatarEditorHUD";
-    private const string VIEW_OBJECT_NAME = "_AvatarEditorHUD";
+    private const string VIEW_PATH = "AvatarEditorHUDVR";
+    private const string VIEW_OBJECT_NAME = "_AvatarEditorHUDVR";
     internal const int AVATAR_SECTION_INDEX = 0;
     internal const string AVATAR_SECTION_TITLE = "Avatar";
     internal const int EMOTES_SECTION_INDEX = 1;
