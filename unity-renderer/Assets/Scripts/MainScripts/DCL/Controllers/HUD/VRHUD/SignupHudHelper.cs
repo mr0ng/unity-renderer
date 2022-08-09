@@ -1,10 +1,11 @@
 using DCL;
+using SignupHUD;
 using UnityEngine;
 
-public class AvatarEditorHudHelper : VRHUDHelper
+public class SignupHudHelper : VRHUDHelper
 {
     [SerializeField]
-    private AvatarEditorHUDView view;
+    private SignupHUDView view;
     private BaseVariable<bool> dataStoreIsOpen = DataStore.i.exploreV2.isOpen;
     protected override void SetupHelper()
     {

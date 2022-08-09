@@ -2,6 +2,7 @@ using System;
 using System.Net.Mail;
 using System.Text.RegularExpressions;
 using DCL.Helpers;
+using Microsoft.MixedReality.Toolkit.Experimental.UI;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -31,7 +32,8 @@ namespace SignupHUD
         public event Action OnEditAvatar;
         public event Action OnTermsOfServiceAgreed;
         public event Action OnTermsOfServiceBack;
-
+        public event Action<bool> OnSetVisibility;
+        
         [Header("Name and Email Screen")]
         [SerializeField] internal RectTransform nameAndEmailPanel;
 
@@ -53,7 +55,7 @@ namespace SignupHUD
         [SerializeField] internal Button termsOfServiceBackButton;
         [SerializeField] internal Button termsOfServiceAgreeButton;
         [SerializeField] internal RawImage avatarPic;
-
+        public NonNativeKeyboard keyboard;
         private ILazyTextureObserver snapshotTextureObserver;
 
         private void Awake()
@@ -84,7 +86,14 @@ namespace SignupHUD
                 nameInputInvalidLabel.SetActive(!IsValidName(text));
                 nameInputFieldFullOrInvalid.SetActive(text.Length >= MAX_NAME_LENGTH || !IsValidName(text));
             });
-
+            nameInputField.onSelect.AddListener(text =>
+            {
+                keyboard.ShowAlphaKeyboard();
+            });
+            nameInputField.onDeselect.AddListener(text =>
+            {
+                keyboard.Close();
+            });
             emailInputField.onValueChanged.AddListener((text) =>
             {
                 emailInputFieldInvalid.SetActive(!IsValidEmail(text));
@@ -113,7 +122,7 @@ namespace SignupHUD
 
         public static SignupHUDView CreateView()
         {
-            SignupHUDView view = Instantiate(Resources.Load<GameObject>("SignupHUD")).GetComponent<SignupHUDView>();
+            SignupHUDView view = Instantiate(Resources.Load<GameObject>("SignupHUDVR")).GetComponent<SignupHUDView>();
             view.gameObject.name = "_SignupHUD";
             return view;
         }
