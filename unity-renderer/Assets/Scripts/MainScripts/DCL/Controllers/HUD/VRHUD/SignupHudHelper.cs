@@ -23,6 +23,6 @@ public class SignupHudHelper : VRHUDHelper
     {
         var forward = CommonScriptableObjects.cameraForward;
         myTrans.position = CommonScriptableObjects.cameraPosition.Get() + forward + 2*Vector3.up + Vector3.forward;
-        myTrans.forward = forward;
+        //myTrans.forward = forward;
     }
 }
