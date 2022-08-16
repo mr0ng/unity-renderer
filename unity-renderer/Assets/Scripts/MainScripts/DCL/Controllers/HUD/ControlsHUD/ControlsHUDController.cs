@@ -15,7 +15,7 @@ public class ControlsHUDController : IHUD
 
     public ControlsHUDController()
     {
-        view = UnityEngine.Object.Instantiate(Resources.Load<GameObject>("ControlsHUD")).GetComponent<ControlsHUDView>();
+        view = UnityEngine.Object.Instantiate(Resources.Load<GameObject>("ControlsHUDVR")).GetComponent<ControlsHUDView>();
         view.name = "_ControlsHUD";
         view.gameObject.SetActive(false);
 

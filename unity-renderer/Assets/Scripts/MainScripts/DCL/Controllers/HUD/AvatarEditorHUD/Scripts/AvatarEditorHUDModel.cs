@@ -12,6 +12,7 @@ public class AvatarEditorHUDModel
 
     public AvatarModel ToAvatarModel()
     {
+        
         return new AvatarModel()
         {
             bodyShape = bodyShape.id,

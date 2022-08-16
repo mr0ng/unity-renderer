@@ -46,6 +46,10 @@ PrefabInstance:
       propertyPath: m_PresetInfoIsWorld
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 22335612, guid: c4e389e44d96da64ea974ab237ce1a9a, type: 3}
+      propertyPath: m_SortingLayerID
+      value: 337625371
+      objectReference: {fileID: 0}
     - target: {fileID: 22458684, guid: c4e389e44d96da64ea974ab237ce1a9a, type: 3}
       propertyPath: m_Pivot.x
       value: 0.5
@@ -698,6 +702,11 @@ PrefabInstance:
       propertyPath: m_HorizontalAlignment
       value: 2
       objectReference: {fileID: 0}
+    - target: {fileID: 6363978764271269843, guid: c4e389e44d96da64ea974ab237ce1a9a,
+        type: 3}
+      propertyPath: clickSound
+      value: 
+      objectReference: {fileID: 8300000, guid: 69ce58bdf542d904d81eea1245e31686, type: 3}
     - target: {fileID: 6626297671168331649, guid: c4e389e44d96da64ea974ab237ce1a9a,
         type: 3}
       propertyPath: m_textAlignment

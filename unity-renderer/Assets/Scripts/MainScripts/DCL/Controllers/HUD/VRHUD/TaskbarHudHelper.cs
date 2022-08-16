@@ -1,15 +1,14 @@
 using DCL;
-using SignupHUD;
 using UnityEngine;
 
-public class SignupHudHelper : VRHUDHelper
+public class TaskbarHudHelper : VRHUDHelper
 {
     [SerializeField]
-    private SignupHUDView view;
+    private TaskbarHUDView view;
     private BaseVariable<bool> dataStoreIsOpen = DataStore.i.exploreV2.isOpen;
     protected override void SetupHelper()
     {
-        view.OnSetVisibility += OnVisiblityChange;
+        //view.OnSetVisibility += OnVisiblityChange;
     }
     private void OnVisiblityChange(bool visible)
     {
@@ -24,5 +23,6 @@ public class SignupHudHelper : VRHUDHelper
         var forward = CommonScriptableObjects.cameraForward;
         myTrans.position = CommonScriptableObjects.cameraPosition.Get() + forward + 2*Vector3.up + Vector3.forward;
         myTrans.forward = forward;
+        Debug.Log("AvatarEditor: Positioned");
     }
 }

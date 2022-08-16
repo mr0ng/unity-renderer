@@ -13,8 +13,9 @@ public class ControlsHUDView : MonoBehaviour
 
     private void Awake()
     {
-        closeAction.OnTriggered += OnCloseActionTriggered;
-        closeButton.onPointerDown += () => Close(true);
+        OnCloseActionTriggered(DCLAction_Trigger.CloseWindow);
+        //closeAction.OnTriggered += OnCloseActionTriggered;
+        //closeButton.onPointerDown += () => Close(true);
     }
 
     private void OnDestroy() { closeAction.OnTriggered -= OnCloseActionTriggered; }

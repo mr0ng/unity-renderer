@@ -359,17 +359,6 @@ namespace DCL
             DCLWebview.NativeOnScreenKeyboardEnabled = false;
             DCLWebview.Native2DModeEnabled = false;
 
-            // Create a CanvasKeyboard
-            // https://developer.vuplex.com/webview/CanvasKeyboard
-            // _keyboard = CanvasKeyboard.Instantiate();
-            // _keyboard.InitialResolution = 350;
-            // _keyboard.transform.SetParent(canvas.transform, false);
-            // Hook up the keyboard so that characters are routed to the CanvasWebViewPrefab.
-            // _keyboard.InputReceived += (sender, eventArgs) => {
-            //     _canvasWebViewPrefab.WebView.HandleKeyboardInput(eventArgs.Value);
-            //     //Web.SetUserAgent(false);
-            // };
-
            
             urlInput.keyboardType = TouchScreenKeyboardType.URL;
             urlInput.contentType = TMP_InputField.ContentType.Alphanumeric;

@@ -57,15 +57,12 @@ namespace SignupHUD
         [SerializeField] internal Button termsOfServiceBackButton;
         [SerializeField] internal Button termsOfServiceAgreeButton;
         [SerializeField] internal RawImage avatarPic;
-        public CanvasKeyboard keyboard;
+        //public CanvasKeyboard keyboard;
         private ILazyTextureObserver snapshotTextureObserver;
 
         private void Awake()
         {
-            nameAndEmailNextButton.onClick.AddListener(() =>
-            {
-                keyboard.gameObject.SetActive((false));
-            });
+            
             InitNameAndEmailScreen();
             InitTermsOfServicesScreen();
         }
@@ -75,8 +72,7 @@ namespace SignupHUD
             UserProfile userProfile = UserProfile.GetOwnUserProfile();
             snapshotTextureObserver = userProfile.snapshotObserver;
             snapshotTextureObserver.AddListener(OnFaceSnapshotReady);
-            keyboard = DebugConfigComponent.i.keyboardOptions;
-            
+           
             nameAndEmailNextButton.interactable = false;
             nameCurrentCharacters.text = $"{0}/{MAX_NAME_LENGTH}";
             nameInputField.characterLimit = MAX_NAME_LENGTH;
@@ -93,23 +89,7 @@ namespace SignupHUD
                 nameInputInvalidLabel.SetActive(!IsValidName(text));
                 nameInputFieldFullOrInvalid.SetActive(text.Length >= MAX_NAME_LENGTH || !IsValidName(text));
             });
-            nameInputField.onSelect.AddListener(text =>
-            {
-               
-                keyboard.gameObject.SetActive(true);
-                keyboard.InputReceived += (sender, received) =>
-                {
-                    nameInputField.text += received.Value;
-                    nameInputField.onValueChanged.Invoke(nameInputField.text);
-                    nameInputField.Select();
-                    
-                };
-            });
-            nameInputField.onDeselect.AddListener(text =>
-            {
-               
-                //keyboard.gameObject.SetActive(false);
-            });
+
             emailInputField.onValueChanged.AddListener((text) =>
             {
                 emailInputFieldInvalid.SetActive(!IsValidEmail(text));
@@ -123,7 +103,7 @@ namespace SignupHUD
 
         private void InitTermsOfServicesScreen()
         {
-            keyboard.gameObject.SetActive((false));
+            //keyboard.gameObject.SetActive((false));
             termsOfServiceScrollView.onValueChanged.AddListener(pos =>
             {
                 if (pos.y <= 0.1f)

@@ -4,7 +4,7 @@ using UnityEngine.UI;
 
 public class TaskbarHUDView : MonoBehaviour
 {
-    private const string VIEW_PATH = "Taskbar";
+    private const string VIEW_PATH = "TaskbarVR";
 
     [Header("Taskbar Animation")] [SerializeField]
     internal ShowHideAnimator taskbarAnimator;

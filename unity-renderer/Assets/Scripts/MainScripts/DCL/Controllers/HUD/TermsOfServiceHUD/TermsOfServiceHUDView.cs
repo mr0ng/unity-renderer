@@ -5,7 +5,7 @@ using UnityEngine.UI;
 
 public class TermsOfServiceHUDView : MonoBehaviour
 {
-    private const string VIEW_PATH = "TermsOfServiceHUD";
+    private const string VIEW_PATH = "TermsOfServiceHUDVR";
 
     private const string SCENE_NAME_VAR = "$sceneName";
     private static readonly string TITLE = $"Terms of Service - {SCENE_NAME_VAR}";
@@ -26,7 +26,7 @@ public class TermsOfServiceHUDView : MonoBehaviour
     [SerializeField] internal Button tosLinkButton;
     [SerializeField] internal Button privacyLinkButton;
     [SerializeField] internal Button emailLinkButton;
-
+    public event Action<bool> OnSetVisibility;
     public void Initialize(Action<bool> agreedCallback, Action<bool> declinedCallback, Action tosClickedCallback, Action privacyClickedCallback, Action emailClickedCallback)
     {
         agreedButton.onClick.RemoveAllListeners();
@@ -54,10 +54,12 @@ public class TermsOfServiceHUDView : MonoBehaviour
         if (visible)
         {
             AudioScriptableObjects.dialogOpen.Play(true);
+            OnSetVisibility?.Invoke(visible);
         }
         else
         {
             AudioScriptableObjects.dialogClose.Play(true);
+            OnSetVisibility?.Invoke(visible);
         }
     }
 

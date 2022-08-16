@@ -444,7 +444,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1535822479614194, guid: 3e10f3b6a733e441c8352020cff2f1f6, type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 114949863196309792, guid: 3e10f3b6a733e441c8352020cff2f1f6,
         type: 3}
@@ -459,7 +459,7 @@ PrefabInstance:
     - target: {fileID: 114949863196309792, guid: 3e10f3b6a733e441c8352020cff2f1f6,
         type: 3}
       propertyPath: LogConsoleMessages
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 114949863196309792, guid: 3e10f3b6a733e441c8352020cff2f1f6,
         type: 3}
@@ -469,7 +469,7 @@ PrefabInstance:
     - target: {fileID: 114949863196309792, guid: 3e10f3b6a733e441c8352020cff2f1f6,
         type: 3}
       propertyPath: RemoteDebuggingEnabled
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 114949863196309792, guid: 3e10f3b6a733e441c8352020cff2f1f6,
         type: 3}
@@ -1738,7 +1738,7 @@ PrefabInstance:
     - target: {fileID: 114949863196309792, guid: 3e10f3b6a733e441c8352020cff2f1f6,
         type: 3}
       propertyPath: LogConsoleMessages
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 114949863196309792, guid: 3e10f3b6a733e441c8352020cff2f1f6,
         type: 3}
@@ -1748,7 +1748,7 @@ PrefabInstance:
     - target: {fileID: 114949863196309792, guid: 3e10f3b6a733e441c8352020cff2f1f6,
         type: 3}
       propertyPath: RemoteDebuggingEnabled
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 114949863196309792, guid: 3e10f3b6a733e441c8352020cff2f1f6,
         type: 3}
@@ -2262,7 +2262,7 @@ MonoBehaviour:
     msgStepByStep: 0
   openBrowserWhenStart: 1
   webSocketSSL: 0
-  kernelVersion: 
+  kernelVersion: kernel-version=1.0.0-2590481394.commit-4b16c90
   useCustomContentServer: 0
   customContentServerUrl: http://localhost:1338/
   baseUrlMode: 1
@@ -2277,7 +2277,7 @@ MonoBehaviour:
   builderInWorld: 0
   parcelRadiusToLoad: 3
   disableAssetBundles: 1
-  multithreaded: 1
+  multithreaded: 0
   debugPanelMode: 0
 --- !u!4 &1444882337
 Transform:
@@ -3324,7 +3324,7 @@ MonoBehaviour:
   Minutes: 0
   Seconds: 0
   Year: 2022
-  Month: 8
+  Month: 9
   Day: 15
   Hour: 1
   Minute: 0
@@ -4180,7 +4180,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1077352107545268, guid: 8f67f2d646b0a4cc58c56790b3f53ef4, type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 114444086270251362, guid: 8f67f2d646b0a4cc58c56790b3f53ef4,
         type: 3}

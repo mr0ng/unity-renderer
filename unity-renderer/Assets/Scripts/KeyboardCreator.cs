@@ -4,6 +4,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 using Vuplex.WebView;
+using Vector3 = UnityEngine.Vector3;
 
 public class KeyboardCreator : MonoBehaviour
 {
@@ -48,7 +49,7 @@ public class KeyboardCreator : MonoBehaviour
         SetupEvents();
         keyboard.PresentKeyboard(NonNativeKeyboard.LayoutType.URL);
         var forward = CommonScriptableObjects.cameraForward.Get();
-        keyboardTrans.position = CommonScriptableObjects.cameraPosition.Get() + forward;
+        keyboardTrans.position = CommonScriptableObjects.cameraPosition.Get() + 0.7f* forward + new UnityEngine.Vector3(0,0.6f,0);
         canvasKeyboard.SetActive(true);
     }
     
