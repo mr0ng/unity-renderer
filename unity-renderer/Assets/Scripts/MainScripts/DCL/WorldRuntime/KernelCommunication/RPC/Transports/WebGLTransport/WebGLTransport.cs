@@ -47,7 +47,7 @@ namespace RPC.Transports
 #endif
 
         private static event Action<byte[]> OnWebGLMessage;
-
+#if !UNITY_ANDROID || UNITY_EDITOR
         [DllImport("__Internal")]
         private static extern void SetCallback_BinaryMessage(JS_Delegate_VII callback);
 
@@ -58,5 +58,6 @@ namespace RPC.Transports
             Marshal.Copy(new IntPtr(intPtr), data, 0, length);
             OnWebGLMessage?.Invoke(data);
         }
+#endif
     }
 }

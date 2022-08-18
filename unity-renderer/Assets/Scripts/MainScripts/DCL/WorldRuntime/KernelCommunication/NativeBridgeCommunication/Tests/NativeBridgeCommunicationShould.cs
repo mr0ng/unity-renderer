@@ -171,6 +171,7 @@ public class NativeBridgeCommunicationShould
     [Test]
     public void QueueSceneReadyCorrectly()
     {
+        
         NativeBridgeCommunication.SceneReady();
 
         string json1 = JsonConvert.SerializeObject(queueHandler.messagesList[0]);

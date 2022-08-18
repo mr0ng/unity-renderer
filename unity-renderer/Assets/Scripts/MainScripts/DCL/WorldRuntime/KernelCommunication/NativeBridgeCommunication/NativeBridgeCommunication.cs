@@ -55,7 +55,7 @@ public class NativeBridgeCommunication : IKernelCommunication
     {
         
     }
-
+#if !UNITY_ANDROID || UNITY_EDITOR
     [MonoPInvokeCallback(typeof(JS_Delegate_VSSS))]
     internal static void OpenNftDialog(string contactAddress, string comment, string tokenId)
     {
@@ -297,6 +297,7 @@ public class NativeBridgeCommunication : IKernelCommunication
 
         queueHandler.EnqueueSceneMessage(queuedMessage);
     }
+#endif
 
     internal static QueuedSceneMessage_Scene GetSceneMessageInstance()
     {
@@ -314,6 +315,7 @@ public class NativeBridgeCommunication : IKernelCommunication
         return message;
     }
 
+#if !UNITY_ANDROID || UNITY_EDITOR
     [DllImport("__Internal")]
     private static extern void SetCallback_CreateEntity(JS_Delegate_V callback);
 
@@ -361,4 +363,5 @@ public class NativeBridgeCommunication : IKernelCommunication
 
     [DllImport("__Internal")]
     private static extern void SetCallback_Query(JS_Delegate_Query callback);
+#endif
 }
