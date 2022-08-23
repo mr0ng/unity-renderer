@@ -5,7 +5,7 @@ using UnityEngine.UI;
 
 public class MinimapHUDView : MonoBehaviour
 {
-    public const string VIEW_PATH = "MinimapHUD";
+    public const string VIEW_PATH = "MinimapHUDVR";
     public const string VIEW_OBJECT_NAME = "_MinimapHUD";
 
     private int START_MENU_HOVER_BOOL = Animator.StringToHash("hover");

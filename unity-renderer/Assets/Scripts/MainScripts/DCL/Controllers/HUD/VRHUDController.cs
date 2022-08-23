@@ -63,7 +63,7 @@ namespace DCL.Huds
             for (int i = 0; i < submenu.Count; i++)
             {
                 VRHUDHelper menu = submenu[i];
-                if (current) menu.Hide(hidenPos);
+                if (current) menu.Hide();
                 else menu.ResetHud();
             }
         }
@@ -115,8 +115,12 @@ namespace DCL.Huds
         {
             for (int i = 0; i < huds.Count; i++)
             {
-                huds[i].ResetHud();
+                var hud = huds[i];
+                hud.ResetHud();
+                if (submenu.Contains(hud))
+                    hud.Show();
             }
+            
             dock.position = mainCam.position + forward;
             dock.forward = forward;
         }
