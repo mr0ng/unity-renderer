@@ -153,14 +153,17 @@ public class TeleportPromptHUDView : MonoBehaviour
     {
         OnCloseEvent?.Invoke();
         contentAnimator.Hide(true);
-
+        OnSetVisibility?.Invoke(false);
         AudioScriptableObjects.dialogClose.Play(true);
+        transform.position += 20*Vector3.down;
     }
 
     private void OnTeleportPressed()
     {
         OnTeleportEvent?.Invoke();
+        OnSetVisibility?.Invoke(false);
         contentAnimator.Hide(true);
+        transform.position += 20*Vector3.down;
     }
 
     private void OnDestroy()

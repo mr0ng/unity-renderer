@@ -3,6 +3,7 @@ using System.Net.Mail;
 using System.Text.RegularExpressions;
 using DCL;
 using DCL.Helpers;
+
 using Microsoft.MixedReality.Toolkit.Experimental.UI;
 using TMPro;
 using UnityEngine;
@@ -124,12 +125,24 @@ namespace SignupHUD
             return view;
         }
 
-        public void SetVisibility(bool visible) { gameObject.SetActive(visible); }
+        public void SetVisibility(bool visible)
+        {
+            OnSetVisibility?.Invoke(visible);
+            gameObject.SetActive(visible);
+            OnSetVisibility?.Invoke(visible);
+            
+            var forward = CommonScriptableObjects.cameraForward;
+            transform.position = Camera.main.transform.position + forward + 0f*Vector3.up + 2.0f*Vector3.forward;
+            transform.forward = forward;
+
+
+        }
 
         public void ShowNameScreen()
         {
             nameAndEmailPanel.gameObject.SetActive(true);
             termsOfServicePanel.gameObject.SetActive(false);
+            OnSetVisibility?.Invoke(true);
         }
 
         public void ShowTermsOfServiceScreen()

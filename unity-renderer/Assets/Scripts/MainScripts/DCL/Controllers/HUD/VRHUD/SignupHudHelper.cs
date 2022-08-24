@@ -1,3 +1,4 @@
+using System;
 using DCL;
 using DCL.Huds;
 using SignupHUD;
@@ -11,29 +12,27 @@ public class SignupHudHelper : VRHUDHelper
     protected override void SetupHelper()
     {
         myTrans.localScale = 0.002f * Vector3.one;
+        view.OnSetVisibility += OnVisiblityChange;
         if (myTrans is RectTransform rect)
         {
             rect.sizeDelta = new Vector2(1920, 1080);
         }
-        
-        view.OnSetVisibility += OnVisiblityChange;
+
     }
+   
     private void OnVisiblityChange(bool visible)
     {
+        Debug.Log($"SignupHudHelper OnVisiblityChange {visible}");
         if (dataStoreIsOpen.Get())
             myTrans.localRotation = Quaternion.identity;
         else if (visible) 
             Position();
     }
     
-    private void Position()
+    public void Position()
     {
         var forward = VRHUDController.I.GetForward();
-        #if UNITY_ANDROID && !UNITY_EDITOR
-        myTrans.position = Camera.main.transform.position + forward;
-        #else
-        myTrans.position = Camera.main.transform.position + forward + 2.3f*Vector3.up + 3.75f*Vector3.forward;
-        #endif
+        myTrans.position = Camera.main.transform.position + forward + 0f*Vector3.up + 3.75f*Vector3.forward;
         myTrans.forward = forward;
     }
 }

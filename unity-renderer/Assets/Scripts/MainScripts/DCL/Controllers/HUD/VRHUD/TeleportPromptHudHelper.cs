@@ -16,10 +16,12 @@ public class TeleportPromptHudHelper : VRHUDHelper
     }
     private void OnVisiblityChange(bool visible)
     {
-        if (dataStoreIsOpen.Get())
+        if (dataStoreIsOpen.Get()) { 
+            myTrans.position += 10 * Vector3.down;
             myTrans.localRotation = Quaternion.identity;
+        }
         else if (visible) 
-            Position();
+                Position();
     }
     
     private void Position()
