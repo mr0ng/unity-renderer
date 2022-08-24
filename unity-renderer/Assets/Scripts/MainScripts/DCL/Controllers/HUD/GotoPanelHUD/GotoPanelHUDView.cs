@@ -29,7 +29,8 @@ namespace GotoPanel
 
         public event Action<ParcelCoordinates> OnTeleportPressed;
         public event Action OnClosePressed;
-
+        public event Action<bool> OnSetVisibility;
+        
         private void Start()
         {
             teleportButton.onClick.RemoveAllListeners();
@@ -42,7 +43,7 @@ namespace GotoPanel
 
         public static IGotoPanelHUDView CreateView()
         {
-            GotoPanelHUDView view = UnityEngine.Object.Instantiate(Resources.Load<GameObject>("GotoPanelHUD")).GetComponent<GotoPanelHUDView>();
+            GotoPanelHUDView view = UnityEngine.Object.Instantiate(Resources.Load<GameObject>("GotoPanelHUDVR")).GetComponent<GotoPanelHUDView>();
             view.name = "_GotoPanelHUD";
             return view;
         }
@@ -59,6 +60,7 @@ namespace GotoPanel
             contentAnimator.Show(!isVisible);
             loadingSpinner.SetActive(isVisible);
             scenePreviewImage.texture = null;
+            OnSetVisibility.Invoke(isVisible);
         }
 
         public void SetPanelInfo(ParcelCoordinates parcelCoordinates)

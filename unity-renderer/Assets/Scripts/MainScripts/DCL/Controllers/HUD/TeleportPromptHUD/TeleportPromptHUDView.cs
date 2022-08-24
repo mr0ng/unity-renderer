@@ -49,6 +49,7 @@ public class TeleportPromptHUDView : MonoBehaviour
 
     public event Action OnCloseEvent;
     public event Action OnTeleportEvent;
+    public event Action<bool> OnSetVisibility;
 
     WebRequestAsyncOperation fetchParcelImageOp;
     Texture2D downloadedBanner;
@@ -107,8 +108,12 @@ public class TeleportPromptHUDView : MonoBehaviour
         textEventInfo.text = eventStatus;
         textEventName.text = eventName;
         textEventAttendees.text = string.Format("+{0}", attendeesCount);
+        
     }
-
+    public void SetVisibility(bool visible)
+    {
+        OnSetVisibility?.Invoke(visible);
+    }
     private void Hide()
     {
         content.SetActive(false);

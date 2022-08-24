@@ -17,7 +17,7 @@ public class TeleportPromptHUDController : IHUD
 
     public TeleportPromptHUDController()
     {
-        view = UnityEngine.Object.Instantiate(Resources.Load<GameObject>("TeleportPromptHUD")).GetComponent<TeleportPromptHUDView>();
+        view = UnityEngine.Object.Instantiate(Resources.Load<GameObject>("TeleportPromptHUDVR")).GetComponent<TeleportPromptHUDView>();
         view.name = "_TeleportPromptHUD";
         view.content.SetActive(false);
         view.OnTeleportEvent += OnTeleportPressed;
@@ -25,6 +25,7 @@ public class TeleportPromptHUDController : IHUD
 
     public void SetVisibility(bool visible)
     {
+        
         if (view.contentAnimator.isVisible && !visible)
         {
             view.contentAnimator.Hide();
@@ -33,8 +34,8 @@ public class TeleportPromptHUDController : IHUD
         {
             view.content.SetActive(true);
             view.contentAnimator.Show();
-
             AudioScriptableObjects.fadeIn.Play(true);
+            view.SetVisibility(visible);
         }
     }
 

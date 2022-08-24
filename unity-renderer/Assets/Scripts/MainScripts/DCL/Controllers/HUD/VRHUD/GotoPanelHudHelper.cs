@@ -1,21 +1,17 @@
 using DCL;
 using DCL.Huds;
+using GotoPanel;
 using SignupHUD;
 using UnityEngine;
 
-public class SignupHudHelper : VRHUDHelper
+public class GotoPanelHudHelper : VRHUDHelper
 {
     [SerializeField]
-    private SignupHUDView view;
+    private GotoPanelHUDView view;
     private BaseVariable<bool> dataStoreIsOpen = DataStore.i.exploreV2.isOpen;
     protected override void SetupHelper()
     {
         myTrans.localScale = 0.002f * Vector3.one;
-        if (myTrans is RectTransform rect)
-        {
-            rect.sizeDelta = new Vector2(1920, 1080);
-        }
-        
         view.OnSetVisibility += OnVisiblityChange;
     }
     private void OnVisiblityChange(bool visible)

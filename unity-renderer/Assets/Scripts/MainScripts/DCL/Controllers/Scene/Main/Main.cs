@@ -18,7 +18,7 @@ namespace DCL
     {
         [SerializeField] private bool disableSceneDependencies;
         public static Main i { get; private set; }
-        [SerializeField] private GameObject webViewPrefab;
+
         public PoolableComponentFactory componentFactory;
 
         private PerformanceMetricsController performanceMetricsController;

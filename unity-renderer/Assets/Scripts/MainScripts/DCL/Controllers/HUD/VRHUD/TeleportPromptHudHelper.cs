@@ -1,21 +1,17 @@
 using DCL;
 using DCL.Huds;
+using GotoPanel;
 using SignupHUD;
 using UnityEngine;
 
-public class SignupHudHelper : VRHUDHelper
+public class TeleportPromptHudHelper : VRHUDHelper
 {
     [SerializeField]
-    private SignupHUDView view;
+    private TeleportPromptHUDView view;
     private BaseVariable<bool> dataStoreIsOpen = DataStore.i.exploreV2.isOpen;
     protected override void SetupHelper()
     {
-        myTrans.localScale = 0.002f * Vector3.one;
-        if (myTrans is RectTransform rect)
-        {
-            rect.sizeDelta = new Vector2(1920, 1080);
-        }
-        
+        transform.localScale = 0.0035f * Vector3.one;
         view.OnSetVisibility += OnVisiblityChange;
     }
     private void OnVisiblityChange(bool visible)
@@ -32,7 +28,8 @@ public class SignupHudHelper : VRHUDHelper
         #if UNITY_ANDROID && !UNITY_EDITOR
         myTrans.position = Camera.main.transform.position + forward;
         #else
-        myTrans.position = Camera.main.transform.position + forward + 2.3f*Vector3.up + 3.75f*Vector3.forward;
+        myTrans.position = Camera.main.transform.position + 1.3f*forward;// + 2.3f*Vector3.up + 3.75f*Vector3.forward;
+        
         #endif
         myTrans.forward = forward;
     }
