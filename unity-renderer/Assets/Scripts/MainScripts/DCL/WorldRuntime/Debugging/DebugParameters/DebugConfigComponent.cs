@@ -11,7 +11,7 @@ using Microsoft.MixedReality.Toolkit.Experimental.UI;
 using TMPro;
 using UnityEngine.UI;
 
-#if UNITY_ANDROID
+#if UNITY_ANDROID || UNITY_EDITOR
 using Vuplex.WebView;
 
 #endif
@@ -20,7 +20,6 @@ namespace DCL
     public class DebugConfigComponent : MonoBehaviour
     {
         private static DebugConfigComponent sharedInstance;
-//#if (UNITY_ANDROID || UNITY_STANDALONE)
         [SerializeField] private CanvasWebViewPrefab DCLWebview;
         [SerializeField] private CanvasKeyboard keyboardDCL;
         [SerializeField] private CanvasWebViewPrefab optionsWeview;
@@ -31,8 +30,6 @@ namespace DCL
         private string webViewURL = "";
         private bool isMainTab = true;
         
-        //public NonNativeKeyboard keyboard;
-//#endif
         public static DebugConfigComponent i
         {
             get

@@ -1,55 +1,5 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!114 &2875050414071777768
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1386573474952799969}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 25b2b8602525992499af4fbaeca33e82, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  cam: {fileID: 6441102298861331460}
-  controller: {fileID: 5279246958917804627}
-  targetToFollow: {fileID: 8435887310141166953}
-  secondsBetweenTurns: 0.5
-  rotation: 45
-  cameraChangeAction: {fileID: 11400000, guid: 6701d7e30ddf77c48accc629429f7e30, type: 2}
-  cameraX: {fileID: 11400000, guid: c5302665e8f998e4ea2673bba5e22914, type: 2}
---- !u!114 &7844977760530523158
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2664722497377917998}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5a2a9c34df4095f47b9ca8f975175f5b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_Device: 0
-  m_PoseSource: 2
-  m_PoseProviderComponent: {fileID: 0}
-  m_TrackingType: 0
-  m_UpdateType: 0
-  m_UseRelativeTransform: 0
---- !u!114 &1493624107550247969
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8435887310141166956}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3b31713ff4925b0459205cbb80ca1201, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  cameraParent: {fileID: 7365129137961098290}
 --- !u!1001 &8185918345684324303
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -231,33 +181,38 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1271431263581989332, guid: b0965b55b892d438da492708ea09799c,
         type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1271431263581989332, guid: b0965b55b892d438da492708ea09799c,
+        type: 3}
       propertyPath: m_LocalPosition.y
-      value: -0.25518703
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 1271431263581989332, guid: b0965b55b892d438da492708ea09799c,
         type: 3}
       propertyPath: m_LocalPosition.z
-      value: 0.6401191
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 1271431263581989332, guid: b0965b55b892d438da492708ea09799c,
         type: 3}
       propertyPath: m_LocalRotation.w
-      value: 0.914908
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 1271431263581989332, guid: b0965b55b892d438da492708ea09799c,
         type: 3}
       propertyPath: m_LocalRotation.x
-      value: -0.3670139
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 1271431263581989332, guid: b0965b55b892d438da492708ea09799c,
         type: 3}
       propertyPath: m_LocalRotation.y
-      value: 0.155978
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 1271431263581989332, guid: b0965b55b892d438da492708ea09799c,
         type: 3}
       propertyPath: m_LocalRotation.z
-      value: 0.062570326
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 1595184896326523158, guid: b0965b55b892d438da492708ea09799c,
         type: 3}
@@ -388,3 +343,56 @@ Transform:
     type: 3}
   m_PrefabInstance: {fileID: 8185918345684324303}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &2875050414071777768
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1386573474952799969}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 25b2b8602525992499af4fbaeca33e82, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  cam: {fileID: 6441102298861331460}
+  controller: {fileID: 5279246958917804627}
+  targetToFollow: {fileID: 8435887310141166953}
+  secondsBetweenTurns: 0.5
+  rotation: 45
+  cameraChangeAction: {fileID: 11400000, guid: 6701d7e30ddf77c48accc629429f7e30, type: 2}
+  cameraX: {fileID: 11400000, guid: c5302665e8f998e4ea2673bba5e22914, type: 2}
+  characterX: {fileID: 0}
+  characterY: {fileID: 0}
+--- !u!114 &7844977760530523158
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2664722497377917998}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5a2a9c34df4095f47b9ca8f975175f5b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Device: 0
+  m_PoseSource: 2
+  m_PoseProviderComponent: {fileID: 0}
+  m_TrackingType: 0
+  m_UpdateType: 0
+  m_UseRelativeTransform: 0
+--- !u!114 &1493624107550247969
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8435887310141166956}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3b31713ff4925b0459205cbb80ca1201, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  cameraParent: {fileID: 7365129137961098290}
+  menuOpen: {fileID: 0}

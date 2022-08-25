@@ -1,6 +1,3 @@
-using System;
-using DCL;
-using DCL.Huds;
 using SignupHUD;
 using UnityEngine;
 
@@ -8,31 +5,30 @@ public class SignupHudHelper : VRHUDHelper
 {
     [SerializeField]
     private SignupHUDView view;
-    private BaseVariable<bool> dataStoreIsOpen = DataStore.i.exploreV2.isOpen;
-    protected override void SetupHelper()
+    private Transform camTrans;
+    protected override void Awake()
     {
-        myTrans.localScale = 0.002f * Vector3.one;
+        base.Awake();
         view.OnSetVisibility += OnVisiblityChange;
         if (myTrans is RectTransform rect)
         {
             rect.sizeDelta = new Vector2(1920, 1080);
         }
-
     }
-   
+    
+    protected override void SetupHelper() { }
+
     private void OnVisiblityChange(bool visible)
     {
-        Debug.Log($"SignupHudHelper OnVisiblityChange {visible}");
-        if (dataStoreIsOpen.Get())
-            myTrans.localRotation = Quaternion.identity;
-        else if (visible) 
-            Position();
+        Position();
     }
     
     public void Position()
     {
-        var forward = VRHUDController.I.GetForward();
-        myTrans.position = Camera.main.transform.position + forward + 0f*Vector3.up + 3.75f*Vector3.forward;
+        var rawForward = CommonScriptableObjects.cameraForward.Get();
+        var forward = new Vector3(rawForward.x, 0, rawForward.z).normalized;
+        var pos = CommonScriptableObjects.cameraPosition.Get() + forward;
+        myTrans.position = new Vector3(pos.x, 1.2f, pos.z);
         myTrans.forward = forward;
     }
 }

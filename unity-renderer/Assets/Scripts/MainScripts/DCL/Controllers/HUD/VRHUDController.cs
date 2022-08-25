@@ -15,8 +15,10 @@ namespace DCL.Huds
         private readonly List<VRHUDHelper> huds = new List<VRHUDHelper>();
         private readonly List<VRHUDHelper> submenu = new List<VRHUDHelper>();
 
-        BaseVariable<bool> exploreV2IsOpen => DataStore.i.exploreV2.isOpen;
+        private BaseVariable<bool> exploreV2IsOpen => DataStore.i.exploreV2.isOpen;
         
+        [SerializeField]
+        private BooleanVariable hudOpen;
         [SerializeField]
         private GameObject visuals;
         [SerializeField]
@@ -55,6 +57,7 @@ namespace DCL.Huds
         {
             if (loading) return;
             visuals.SetActive(!visuals.activeSelf);
+            hudOpen.Set(visuals.activeSelf);
             DeactivateHud();
         }
 

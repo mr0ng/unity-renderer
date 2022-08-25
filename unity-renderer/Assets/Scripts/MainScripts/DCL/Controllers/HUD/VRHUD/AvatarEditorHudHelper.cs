@@ -20,10 +20,11 @@ public class AvatarEditorHudHelper : VRHUDHelper
     
     private void Position()
     {
-        var forward = CommonScriptableObjects.cameraForward;
-        myTrans.position = CommonScriptableObjects.cameraPosition.Get() + forward + 2.8f*Vector3.up + 1.5f*Vector3.forward;
+        var rawForward = CommonScriptableObjects.cameraForward.Get();
+        var forward = new Vector3(rawForward.x, 0, rawForward.z).normalized;
+        var pos = CommonScriptableObjects.cameraPosition.Get() + forward;
+        myTrans.position = new Vector3(pos.x, 1.2f, pos.z);
         myTrans.forward = forward;
-        Debug.Log("AvatarEditor: Positioned");
         
     }
 }

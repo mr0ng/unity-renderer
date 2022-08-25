@@ -1,4 +1,3 @@
-using DCL.VR;
 using Microsoft.MixedReality.Toolkit.Input;
 using Microsoft.MixedReality.Toolkit.Input.Utilities;
 using UnityEngine;
@@ -13,7 +12,7 @@ public abstract class VRHUDHelper : MonoBehaviour
     
     protected Transform myTrans;
 
-    private void Awake()
+    protected virtual void Awake()
     {
         if (!CrossPlatformManager.IsVR)
         {

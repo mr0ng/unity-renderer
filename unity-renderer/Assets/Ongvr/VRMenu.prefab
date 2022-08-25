@@ -467,6 +467,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 21d8fd62a6d84b44bb64ecdf79b47699, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  hudOpen: {fileID: 11400000, guid: 22a1962dbbd6f9a4b98f8d55115ebc3e, type: 2}
   visuals: {fileID: 8141916139541614596}
   dock: {fileID: 1957425713726574527}
   dockCanvas: {fileID: 917619845806293473}
