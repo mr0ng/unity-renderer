@@ -123,8 +123,13 @@ namespace DCL.Components
 
             // Canvas
             canvas = canvasGameObject.AddComponent<Canvas>();
-            canvas.renderMode = RenderMode.ScreenSpaceOverlay;
+            
+            #if UNITY_ANDROID && !UNITY_EDITOR
+            canvas.renderMode = RenderMode.WorldSpace;
+            #else
 
+            canvas.renderMode = RenderMode.ScreenSpaceOverlay;
+#endif
             // Canvas Scaler (for maintaining ui aspect ratio)
             CanvasScaler canvasScaler = canvasGameObject.AddComponent<CanvasScaler>();
             canvasScaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;

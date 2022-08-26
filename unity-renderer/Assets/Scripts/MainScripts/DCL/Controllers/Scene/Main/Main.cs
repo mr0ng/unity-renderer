@@ -161,8 +161,9 @@ namespace DCL
             gameObject.AddComponent<RenderingController>();
             gameObject.AddComponent<CatalogController>();
             gameObject.AddComponent<MinimapMetadataController>();
-            gameObject.AddComponent<ChatController>();
-            gameObject.AddComponent<FriendsController>();
+            //TODO: handle HUDS that need to be converted to VR
+            //gameObject.AddComponent<ChatController>();
+            //gameObject.AddComponent<FriendsController>();
             gameObject.AddComponent<HotScenesController>();
             gameObject.AddComponent<GIFProcessingBridge>();
             gameObject.AddComponent<RenderProfileBridge>();
@@ -172,7 +173,8 @@ namespace DCL
 
             MainSceneFactory.CreateBuilderInWorldBridge(gameObject);
             MainSceneFactory.CreateBridges();
-            MainSceneFactory.CreateMouseCatcher();
+            //TODO: handle HUDS that need to be converted to VR
+            //MainSceneFactory.CreateMouseCatcher();
             MainSceneFactory.CreatePlayerSystems();
             CreateEnvironment();
             MainSceneFactory.CreateAudioHandler();

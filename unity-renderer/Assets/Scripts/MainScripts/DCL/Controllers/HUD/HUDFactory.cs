@@ -24,15 +24,17 @@ public class HUDFactory : IHUDFactory
             case HUDElementID.PROFILE_HUD:
                 hudElement = new ProfileHUDController(new UserProfileWebInterfaceBridge());
                 break;
-            case HUDElementID.NOTIFICATION:
-                hudElement = new NotificationHUDController();
-                break;
+            //TODO: handle HUDS that need to be converted to VR
+            // case HUDElementID.NOTIFICATION:
+            //     hudElement = new NotificationHUDController();
+            //     break;
             case HUDElementID.AVATAR_EDITOR:
                 hudElement = new AvatarEditorHUDController(DataStore.i.featureFlags, Environment.i.platform.serviceProviders.analytics);
                 break;
-            case HUDElementID.SETTINGS_PANEL:
-                hudElement = new SettingsPanelHUDController();
-                break;
+            //TODO: handle HUDS that need to be converted to VR
+            // case HUDElementID.SETTINGS_PANEL:
+            //     hudElement = new SettingsPanelHUDController();
+            //     break;
             case HUDElementID.PLAYER_INFO_CARD:
                 hudElement = new PlayerInfoCardHUDController(FriendsController.i,
                     Resources.Load<StringVariable>("CurrentPlayerInfoCardId"),

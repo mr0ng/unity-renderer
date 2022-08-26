@@ -186,10 +186,11 @@ public class HUDController : IHUDController
             case HUDElementID.PROFILE_HUD:
                 CreateHudElement(configuration, hudElementId);
                 break;
-            case HUDElementID.NOTIFICATION:
-                CreateHudElement(configuration, hudElementId);
-                NotificationsController.i?.Initialize(notificationHud);
-                break;
+            //TODO: handle HUDS that need to be converted to VR
+            // case HUDElementID.NOTIFICATION:
+            //     CreateHudElement(configuration, hudElementId);
+            //     NotificationsController.i?.Initialize(notificationHud);
+            //     break;
             case HUDElementID.AVATAR_EDITOR:
                 CreateHudElement(configuration, hudElementId);
                 avatarEditorHud?.Initialize(ownUserProfile, wearableCatalog);
@@ -199,147 +200,151 @@ public class HUDController : IHUDController
                 if (settingsPanelHud != null)
                     settingsPanelHud.Initialize();
                 break;
-            case HUDElementID.PLAYER_INFO_CARD:
-                CreateHudElement(configuration, hudElementId);
-                break;
-            case HUDElementID.AIRDROPPING:
-                CreateHudElement(configuration, hudElementId);
-                break;
+            //TODO: handle HUDS that need to be converted to VR
+            // case HUDElementID.PLAYER_INFO_CARD:
+            //     CreateHudElement(configuration, hudElementId);
+            //     break;
+            // case HUDElementID.AIRDROPPING:
+            //     CreateHudElement(configuration, hudElementId);
+            //     break;
             case HUDElementID.TERMS_OF_SERVICE:
                 CreateHudElement(configuration, hudElementId);
                 break;
-            case HUDElementID.WORLD_CHAT_WINDOW:
-                if (worldChatWindowHud == null)
-                {
-                    CreateHudElement(configuration, hudElementId);
-
-                    if (worldChatWindowHud != null)
-                    {
-                        worldChatWindowHud.Initialize(WorldChatWindowComponentView.Create());
-                        worldChatWindowHud.SetVisibility(false);
-                        worldChatWindowHud.OnOpenPrivateChat -= OpenPrivateChatWindow;
-                        worldChatWindowHud.OnOpenPrivateChat += OpenPrivateChatWindow;
-                        worldChatWindowHud.OnOpenPublicChannel -= OpenPublicChannelWindow;
-                        worldChatWindowHud.OnOpenPublicChannel += OpenPublicChannelWindow;
-
-                        taskbarHud?.AddWorldChatWindow(worldChatWindowHud);
-                    }
-                }
-                else
-                    UpdateHudElement(configuration, hudElementId);
-
-                if (PublicChatChannelHud == null)
-                {
-                    CreateHudElement(configuration, HUDElementID.PUBLIC_CHAT_CHANNEL);
-                    PublicChatChannelHud.Initialize();
-                    PublicChatChannelHud.OnBack -= HandlePublicChatChannelBacked;
-                    PublicChatChannelHud.OnBack += HandlePublicChatChannelBacked;
-                    PublicChatChannelHud.OnClosed -= HandlePublicChatChannelClosed;
-                    PublicChatChannelHud.OnClosed += HandlePublicChatChannelClosed;
-                    taskbarHud?.AddPublicChatChannel(PublicChatChannelHud);
-                    // TODO: this call should be removed when chat notifications are implemented
-                    taskbarHud?.OpenPublicChatChannel("general", false);
-                    PublicChatChannelHud.ActivatePreviewModeInstantly();
-                }
-                else
-                    UpdateHudElement(configuration, HUDElementID.PUBLIC_CHAT_CHANNEL);
-
-                if (PrivateChatWindow == null)
-                {
-                    CreateHudElement(configuration, HUDElementID.PRIVATE_CHAT_WINDOW);
-
-                    if (PrivateChatWindow != null)
-                    {
-                        PrivateChatWindow.Initialize();
-                        PrivateChatWindow.SetVisibility(false);
-                        PrivateChatWindow.OnPressBack -= PrivateChatWindowHud_OnPressBack;
-                        PrivateChatWindow.OnPressBack += PrivateChatWindowHud_OnPressBack;
-
-                        taskbarHud?.AddPrivateChatWindow(PrivateChatWindow);
-                    }
-                }
-                else
-                    UpdateHudElement(configuration, HUDElementID.PRIVATE_CHAT_WINDOW);
-
-                break;
-            case HUDElementID.FRIENDS:
-                if (friendsHud == null)
-                {
-                    CreateHudElement(configuration, hudElementId);
-
-                    if (friendsHud != null)
-                    {
-                        friendsHud.Initialize();
-                        friendsHud.OnPressWhisper -= OpenPrivateChatWindow;
-                        friendsHud.OnPressWhisper += OpenPrivateChatWindow;
-
-                        taskbarHud?.AddFriendsWindow(friendsHud);
-                    }
-                }
-                else
-                {
-                    UpdateHudElement(configuration, hudElementId);
-
-                    if (!configuration.active)
-                        taskbarHud?.DisableFriendsWindow();
-                }
-
-                break;
-            case HUDElementID.TASKBAR:
-                if (taskbarHud == null)
-                {
-                    CreateHudElement(configuration, hudElementId);
-
-                    if (taskbarHud != null)
-                    {
-                        taskbarHud.Initialize(SceneReferences.i.mouseCatcher);
-                        taskbarHud.OnAnyTaskbarButtonClicked -= TaskbarHud_onAnyTaskbarButtonClicked;
-                        taskbarHud.OnAnyTaskbarButtonClicked += TaskbarHud_onAnyTaskbarButtonClicked;
-
-                        OnTaskbarCreation?.Invoke();
-                    }
-                }
-                else
-                {
-                    UpdateHudElement(configuration, hudElementId);
-                }
-
-                break;
+            //TODO: handle HUDS that need to be converted to VR
+            // case HUDElementID.WORLD_CHAT_WINDOW:
+            //     if (worldChatWindowHud == null)
+            //     {
+            //         CreateHudElement(configuration, hudElementId);
+            //
+            //         if (worldChatWindowHud != null)
+            //         {
+            //             worldChatWindowHud.Initialize(WorldChatWindowComponentView.Create());
+            //             worldChatWindowHud.SetVisibility(false);
+            //             worldChatWindowHud.OnOpenPrivateChat -= OpenPrivateChatWindow;
+            //             worldChatWindowHud.OnOpenPrivateChat += OpenPrivateChatWindow;
+            //             worldChatWindowHud.OnOpenPublicChannel -= OpenPublicChannelWindow;
+            //             worldChatWindowHud.OnOpenPublicChannel += OpenPublicChannelWindow;
+            //
+            //             taskbarHud?.AddWorldChatWindow(worldChatWindowHud);
+            //         }
+            //     }
+            //     else
+            //         UpdateHudElement(configuration, hudElementId);
+            //
+            //     if (PublicChatChannelHud == null)
+            //     {
+            //         CreateHudElement(configuration, HUDElementID.PUBLIC_CHAT_CHANNEL);
+            //         PublicChatChannelHud.Initialize();
+            //         PublicChatChannelHud.OnBack -= HandlePublicChatChannelBacked;
+            //         PublicChatChannelHud.OnBack += HandlePublicChatChannelBacked;
+            //         PublicChatChannelHud.OnClosed -= HandlePublicChatChannelClosed;
+            //         PublicChatChannelHud.OnClosed += HandlePublicChatChannelClosed;
+            //         taskbarHud?.AddPublicChatChannel(PublicChatChannelHud);
+            //         // TODO: this call should be removed when chat notifications are implemented
+            //         taskbarHud?.OpenPublicChatChannel("general", false);
+            //         PublicChatChannelHud.ActivatePreviewModeInstantly();
+            //     }
+            //     else
+            //         UpdateHudElement(configuration, HUDElementID.PUBLIC_CHAT_CHANNEL);
+            //
+            //     if (PrivateChatWindow == null)
+            //     {
+            //         CreateHudElement(configuration, HUDElementID.PRIVATE_CHAT_WINDOW);
+            //
+            //         if (PrivateChatWindow != null)
+            //         {
+            //             PrivateChatWindow.Initialize();
+            //             PrivateChatWindow.SetVisibility(false);
+            //             PrivateChatWindow.OnPressBack -= PrivateChatWindowHud_OnPressBack;
+            //             PrivateChatWindow.OnPressBack += PrivateChatWindowHud_OnPressBack;
+            //
+            //             taskbarHud?.AddPrivateChatWindow(PrivateChatWindow);
+            //         }
+            //     }
+            //     else
+            //         UpdateHudElement(configuration, HUDElementID.PRIVATE_CHAT_WINDOW);
+            //
+            //     break;
+            // case HUDElementID.FRIENDS:
+            //     if (friendsHud == null)
+            //     {
+            //         CreateHudElement(configuration, hudElementId);
+            //
+            //         if (friendsHud != null)
+            //         {
+            //             friendsHud.Initialize();
+            //             friendsHud.OnPressWhisper -= OpenPrivateChatWindow;
+            //             friendsHud.OnPressWhisper += OpenPrivateChatWindow;
+            //
+            //             taskbarHud?.AddFriendsWindow(friendsHud);
+            //         }
+            //     }
+            //     else
+            //     {
+            //         UpdateHudElement(configuration, hudElementId);
+            //
+            //         if (!configuration.active)
+            //             taskbarHud?.DisableFriendsWindow();
+            //     }
+            //
+            //     break;
+            // case HUDElementID.TASKBAR:
+            //     if (taskbarHud == null)
+            //     {
+            //         CreateHudElement(configuration, hudElementId);
+            //
+            //         if (taskbarHud != null)
+            //         {
+            //             taskbarHud.Initialize(SceneReferences.i.mouseCatcher);
+            //             taskbarHud.OnAnyTaskbarButtonClicked -= TaskbarHud_onAnyTaskbarButtonClicked;
+            //             taskbarHud.OnAnyTaskbarButtonClicked += TaskbarHud_onAnyTaskbarButtonClicked;
+            //
+            //             OnTaskbarCreation?.Invoke();
+            //         }
+            //     }
+            //     else
+            //     {
+            //         UpdateHudElement(configuration, hudElementId);
+            //     }
+            //
+            //     break;
             case HUDElementID.OPEN_EXTERNAL_URL_PROMPT:
                 CreateHudElement(configuration, hudElementId);
                 break;
-            case HUDElementID.NFT_INFO_DIALOG:
-                CreateHudElement(configuration, hudElementId);
-                break;
+            //TODO: handle HUDS that need to be converted to VR
+            // case HUDElementID.NFT_INFO_DIALOG:
+            //     CreateHudElement(configuration, hudElementId);
+            //     break;
             case HUDElementID.TELEPORT_DIALOG:
                 CreateHudElement(configuration, hudElementId);
                 break;
             case HUDElementID.CONTROLS_HUD:
                 CreateHudElement(configuration, hudElementId);
                 break;
-            case HUDElementID.HELP_AND_SUPPORT_HUD:
-                CreateHudElement(configuration, hudElementId);
-                settingsPanelHud?.AddHelpAndSupportWindow(helpAndSupportHud);
-                break;
-            case HUDElementID.USERS_AROUND_LIST_HUD:
-                CreateHudElement(configuration, hudElementId);
-                if (voiceChatHud != null)
-                    taskbarHud?.AddVoiceChatWindow(voiceChatHud);
-
-                break;
-            case HUDElementID.GRAPHIC_CARD_WARNING:
-                CreateHudElement(configuration, hudElementId);
-                break;
-            case HUDElementID.QUESTS_PANEL:
-                CreateHudElement(configuration, hudElementId);
-                if (configuration.active)
-                    questsPanelHUD.Initialize(QuestsController.i);
-                break;
-            case HUDElementID.QUESTS_TRACKER:
-                CreateHudElement(configuration, hudElementId);
-                if (configuration.active)
-                    questsTrackerHUD.Initialize(QuestsController.i);
-                break;
+            //TODO: handle HUDS that need to be converted to VR
+            // case HUDElementID.HELP_AND_SUPPORT_HUD:
+            //     CreateHudElement(configuration, hudElementId);
+            //     settingsPanelHud?.AddHelpAndSupportWindow(helpAndSupportHud);
+            //     break;
+            // case HUDElementID.USERS_AROUND_LIST_HUD:
+            //     CreateHudElement(configuration, hudElementId);
+            //     if (voiceChatHud != null)
+            //         taskbarHud?.AddVoiceChatWindow(voiceChatHud);
+            //
+            //     break;
+            // case HUDElementID.GRAPHIC_CARD_WARNING:
+            //     CreateHudElement(configuration, hudElementId);
+            //     break;
+            // case HUDElementID.QUESTS_PANEL:
+            //     CreateHudElement(configuration, hudElementId);
+            //     if (configuration.active)
+            //         questsPanelHUD.Initialize(QuestsController.i);
+            //     break;
+            // case HUDElementID.QUESTS_TRACKER:
+            //     CreateHudElement(configuration, hudElementId);
+            //     if (configuration.active)
+            //         questsTrackerHUD.Initialize(QuestsController.i);
+            //     break;
             case HUDElementID.SIGNUP:
                 CreateHudElement(configuration, hudElementId);
                 if (configuration.active)
@@ -361,9 +366,9 @@ public class HUDController : IHUDController
                 }
 
                 break;
-            case HUDElementID.AVATAR_NAMES:
-                // TODO Remove the HUDElementId once kernel stops sending the Configure HUD message
-                break;
+            // case HUDElementID.AVATAR_NAMES:
+            //     // TODO Remove the HUDElementId once kernel stops sending the Configure HUD message
+            //     break;
         }
 
         var hudElement = GetHUDElement(hudElementId);

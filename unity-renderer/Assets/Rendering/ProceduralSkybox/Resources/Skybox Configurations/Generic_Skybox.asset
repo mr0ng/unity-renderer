@@ -294,7 +294,7 @@ MonoBehaviour:
   avatarEditorTintColor: {r: 0.745283, g: 0.68967444, b: 0.6433339, a: 1}
   avatarEditorLightDir: {x: 135, y: 85, z: 45}
   avatarEditorLightColor: {r: 1, g: 1, b: 1, a: 1}
-  useFog: 1
+  useFog: 0
   fogMode: 1
   fogColor:
     serializedVersion: 2
@@ -488,9 +488,9 @@ MonoBehaviour:
     movementTypePlanar_Radial: 0
     movementTypeSatellite: 0
   - slotID: 0
-    renderType: 0
+    renderType: 1
     layerType: 1
-    enabled: 1
+    enabled: 0
     nameInEditor: Stars
     expandedInEditor: 0
     timeSpan_start: 18
@@ -568,7 +568,7 @@ MonoBehaviour:
   - slotID: 1
     renderType: 1
     layerType: 2
-    enabled: 1
+    enabled: 0
     nameInEditor: Big Sun
     expandedInEditor: 0
     timeSpan_start: 5
@@ -732,9 +732,9 @@ MonoBehaviour:
     movementTypePlanar_Radial: 0
     movementTypeSatellite: 1
   - slotID: 1
-    renderType: 0
+    renderType: 1
     layerType: 2
-    enabled: 1
+    enabled: 0
     nameInEditor: Moon
     expandedInEditor: 0
     timeSpan_start: 21
@@ -820,9 +820,9 @@ MonoBehaviour:
     movementTypePlanar_Radial: 0
     movementTypeSatellite: 1
   - slotID: 2
-    renderType: 0
+    renderType: 1
     layerType: 4
-    enabled: 1
+    enabled: 0
     nameInEditor: Far Clouds
     expandedInEditor: 0
     timeSpan_start: 0
@@ -892,9 +892,9 @@ MonoBehaviour:
     movementTypePlanar_Radial: 0
     movementTypeSatellite: 0
   - slotID: 3
-    renderType: 0
+    renderType: 1
     layerType: 4
-    enabled: 1
+    enabled: 0
     nameInEditor: Near Clouds
     expandedInEditor: 0
     timeSpan_start: 0
