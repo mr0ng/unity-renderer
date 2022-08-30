@@ -123,9 +123,12 @@ namespace DCL
             if (deferredDecodingCoroutine != null)
                 CoroutineStarter.Stop(deferredDecodingCoroutine);
         }
-
+        private int updateSkip =  0;
         public void Update()
         {
+            updateSkip = (updateSkip + 1 ) % 20;
+            if (updateSkip != 0)
+                return;
             if (!enabled)
                 return;
 

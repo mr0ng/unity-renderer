@@ -68,9 +68,12 @@ namespace DCL.ECSComponents
             this.entity = entity;
             ApplyCurrentModel(model);
         }
-        
-        private void Update()
+        private int updateSkip =  0;
+        internal void Update()
         {
+            updateSkip = (updateSkip + 1 ) % 20;
+            if (updateSkip != 0)
+                return;
             if (model == null)
                 return;
             

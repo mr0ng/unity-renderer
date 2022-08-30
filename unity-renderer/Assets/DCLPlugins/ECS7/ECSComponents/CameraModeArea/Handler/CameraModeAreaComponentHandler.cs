@@ -70,8 +70,12 @@ namespace DCL.ECSComponents
             cameraModeRepresentantion = new CameraModeRepresentantion();
         }
 
+        private int updateSkip =  0;
         internal void Update()
         {
+            updateSkip = (updateSkip + 1 ) % 20;
+            if (updateSkip != 0)
+                return;
             if (lastModel == null)
                 return;
             

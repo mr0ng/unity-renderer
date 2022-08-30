@@ -27,7 +27,10 @@ namespace DCL.Models
         }
 
         GameObject meshRootGameObjectValue;
-
+        //private Shader unlit = Shader.Find("Oculus/Unlit");
+        private Shader simpleLit = Shader.Find("Universal Render Pipeline/Simple Lit");
+        private Shader unlitTexture = Shader.Find("Unlit/Texture");
+        private Shader BumpedDiffuse = Shader.Find("Mobile/Bumped Diffuse");
         public IShape currentShape;
         public Renderer[] renderers;
         public MeshFilter[] meshFilters;
@@ -60,9 +63,11 @@ namespace DCL.Models
         
         public void UpdateRenderersCollection(Renderer[] renderers, MeshFilter[] meshFilters, Animation animation = null)
         {
+            //renderers = SwapShaders(renderers);
             if (meshRootGameObjectValue != null)
             {
                 this.renderers = renderers;
+                
                 this.meshFilters = meshFilters;
                 this.animation = animation;
 
@@ -77,6 +82,7 @@ namespace DCL.Models
             if (meshRootGameObjectValue != null)
             {
                 renderers = meshRootGameObjectValue.GetComponentsInChildren<Renderer>(true);
+                //renderers = SwapShaders(renderers);
                 meshFilters = meshRootGameObjectValue.GetComponentsInChildren<MeshFilter>(true);
                 animation = meshRootGameObjectValue.GetComponentInChildren<Animation>();
 
@@ -92,7 +98,30 @@ namespace DCL.Models
                 OnUpdated?.Invoke();
             }
         }
-
+        
+        public Renderer[] SwapShaders(Renderer[] renderers)
+        {
+            foreach (Renderer r in renderers)
+            {
+                if (r.material.shader.name.Contains("Universal Render Pipeline/Lit"))
+                {
+                    r.material.shader = BumpedDiffuse;
+                }
+                else if (r.material.shader.name.Contains("Universal Render Pipeline/Unlit"))
+                {
+                    r.material.shader = BumpedDiffuse;
+                }
+                else if (r.material.shader.name.Contains("Hidden/InternalErrorShader"))
+                {
+                    r.material.shader = BumpedDiffuse;
+                }
+                else
+                {
+                    Debug.Log( $"Shader in use: {r.material.shader.name}");
+                }
+            }
+            return renderers;
+        }
         public void RecalculateBounds()
         {
             if (renderers == null || renderers.Length == 0)

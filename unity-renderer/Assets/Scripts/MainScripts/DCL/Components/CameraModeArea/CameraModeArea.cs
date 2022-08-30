@@ -109,9 +109,12 @@ namespace DCL.Components
 
             updateEventHandler.AddListener(IUpdateEventHandler.EventType.Update, Update);
         }
-
+        private int updateSkip =  0;
         internal void Update()
         {
+            updateSkip = (updateSkip + 1 ) % 20;
+            if (updateSkip != 0)
+                return;
             bool playerInside = IsPlayerInsideArea();
 
             switch (playerInside)

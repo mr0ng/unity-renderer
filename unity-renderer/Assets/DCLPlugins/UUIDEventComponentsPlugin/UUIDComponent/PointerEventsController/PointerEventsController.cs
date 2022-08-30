@@ -70,9 +70,12 @@ namespace DCL
 
             HideOrShowCursor(Utils.IsCursorLocked);
         }
-
+        private int updateSkip =  0;
         public void Update()
         {
+            updateSkip = (updateSkip + 1 ) % 40;
+            if (updateSkip != 0)
+                return;
             if (charCamera == null)
                 RetrieveCamera();
 

@@ -39,7 +39,7 @@ namespace DCL
             pluginSystem.Register<PlacesAndEventsFeature>(() => new PlacesAndEventsFeature());
 
             pluginSystem.Register<SpawnPointsDisplayerPlugin>(() => new SpawnPointsDisplayerPlugin());
-            pluginSystem.RegisterWithFlag<BuilderInWorldPlugin>(() => new BuilderInWorldPlugin(), "builder_in_world");
+            //pluginSystem.RegisterWithFlag<BuilderInWorldPlugin>(() => new BuilderInWorldPlugin(), "builder_in_world");
             //TODO: handle plugins that need to be converted to VR
             //pluginSystem.RegisterWithFlag<TutorialController>(() => new TutorialController(), "tutorial");
             pluginSystem.RegisterWithFlag<TextureCompressionTogglePlugin>(() => new TextureCompressionTogglePlugin(), "perf_tex_compression");
