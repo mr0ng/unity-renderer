@@ -650,7 +650,27 @@ PrefabInstance:
     - target: {fileID: 3408605131849706223, guid: ebd34a75eb7168f4b94b5f95002b67a9,
         type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5091882214467032356, guid: ebd34a75eb7168f4b94b5f95002b67a9,
+        type: 3}
+      propertyPath: label
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 5091882214467032356, guid: ebd34a75eb7168f4b94b5f95002b67a9,
+        type: 3}
+      propertyPath: pivot
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 5091882214467032356, guid: ebd34a75eb7168f4b94b5f95002b67a9,
+        type: 3}
+      propertyPath: anchor
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 5091882214467032356, guid: ebd34a75eb7168f4b94b5f95002b67a9,
+        type: 3}
+      propertyPath: contentParent
+      value: 
       objectReference: {fileID: 0}
     - target: {fileID: 9057527650872773532, guid: ebd34a75eb7168f4b94b5f95002b67a9,
         type: 3}
