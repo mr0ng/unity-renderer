@@ -46,8 +46,12 @@ namespace DCL.ECSComponents
         }
         
         // This runs on LateUpdate() instead of Update() to be applied AFTER the transform was moved by the transform component
+        private int updateSkip =  0;
         private void LateUpdate()
         {
+            updateSkip = (updateSkip + 1 ) % 10;
+            if (updateSkip != 0)
+                return;
             //NOTE(Brian): This fixes #757 (https://github.com/decentraland/unity-client/issues/757)
             //             We must find a more performant way to handle this, until that time, this is the approach.
 

@@ -385,6 +385,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   sortingOrder: 0
+  showHideAnimator: {fileID: 0}
   loadingMask:
     serializedVersion: 2
     m_Bits: 32

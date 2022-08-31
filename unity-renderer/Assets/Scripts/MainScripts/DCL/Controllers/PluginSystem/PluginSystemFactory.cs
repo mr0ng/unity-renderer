@@ -23,7 +23,7 @@ namespace DCL
             pluginSystem.Register<ExploreV2Feature>(() => new ExploreV2Feature());
             pluginSystem.Register<DebugShapesBoundingBoxDisplayer>(() => new DebugShapesBoundingBoxDisplayer());
             //TODO: handle plugins that need to be converted to VR
-           // pluginSystem.Register<TransactionFeature>(() => new TransactionFeature());
+           pluginSystem.Register<TransactionFeature>(() => new TransactionFeature());
             pluginSystem.Register<PreviewMenuPlugin>(() => new PreviewMenuPlugin());
             //pluginSystem.Register<SkyboxController>(() => new SkyboxController());
             pluginSystem.Register<GotoPanelPlugin>(() => new GotoPanelPlugin());
@@ -31,7 +31,7 @@ namespace DCL
             pluginSystem.Register<EmoteAnimationsPlugin>(() => new EmoteAnimationsPlugin());
             pluginSystem.Register<EquippedEmotesInitializerPlugin>(() => new EquippedEmotesInitializerPlugin());
             //TODO: handle plugins that need to be converted to VR
-            //pluginSystem.Register<EmotesWheelUIPlugin>(() => new EmotesWheelUIPlugin());
+            pluginSystem.Register<EmotesWheelUIPlugin>(() => new EmotesWheelUIPlugin());
             pluginSystem.Register<NFTShapePlugin>(() => new NFTShapePlugin());
             pluginSystem.Register<UUIDEventsPlugin>(() => new UUIDEventsPlugin());
             pluginSystem.Register<UIComponentsPlugin>(() => new UIComponentsPlugin());
@@ -45,11 +45,11 @@ namespace DCL
             pluginSystem.RegisterWithFlag<TextureCompressionTogglePlugin>(() => new TextureCompressionTogglePlugin(), "perf_tex_compression");
             pluginSystem.RegisterWithFlag<ECS7Plugin>(() => new ECS7Plugin(), "ecs7");
             //TODO: handle plugins that need to be converted to VR
-            // pluginSystem.Register<FriendsNotificationPlugin>(() => new FriendsNotificationPlugin(new DefaultPlayerPrefs(),
-            //     FriendsController.i,
-            //     NotificationScriptableObjects.pendingFriendRequests,
-            //     NotificationScriptableObjects.newApprovedFriends,
-            //     DataStore.i));
+            pluginSystem.Register<FriendsNotificationPlugin>(() => new FriendsNotificationPlugin(new DefaultPlayerPrefs(),
+                FriendsController.i,
+                NotificationScriptableObjects.pendingFriendRequests,
+                NotificationScriptableObjects.newApprovedFriends,
+                DataStore.i));
 
             pluginSystem.SetFeatureFlagsData(DataStore.i.featureFlags.flags);
 

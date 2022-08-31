@@ -37,7 +37,7 @@ namespace DCL
         private int updateSkip =  0;
         public void Update()
         {
-            updateSkip = (updateSkip + 1 ) % 30;
+            updateSkip = (updateSkip + 1 ) % 60;
             if (updateSkip != 0)
                 return;
             Vector3 mouseDelta = Input.mousePosition - lastMouseCoordinate;

@@ -447,7 +447,10 @@ namespace DCL
             OpenWebBrowser();
 
         }
-    
+        public void PauseWebview()
+        {
+            DCLWebview.WebView.Dispose();
+        }
        
         private void OnDestroy()
         {

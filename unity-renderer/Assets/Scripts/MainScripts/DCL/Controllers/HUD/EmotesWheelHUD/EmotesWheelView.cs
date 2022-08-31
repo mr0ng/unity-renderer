@@ -21,7 +21,7 @@ namespace DCL.EmotesWheel
             public Color markColor;
         }
 
-        private const string PATH = "EmotesWheelHUD";
+        private const string PATH = "EmotesWheelHUDVR";
       
 
         public event Action<string> onEmoteClicked;

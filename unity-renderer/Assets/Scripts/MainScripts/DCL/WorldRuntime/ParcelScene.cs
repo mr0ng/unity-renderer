@@ -1,3 +1,4 @@
+using System.Collections;
 using DCL.Components;
 using DCL.Configuration;
 using DCL.Helpers;
@@ -52,6 +53,10 @@ namespace DCL.Controllers
             metricsCounter = new SceneMetricsCounter(DataStore.i.sceneWorldObjects);
             crdtExecutor = new CRDTExecutor(this);
         }
+        public void Start()
+        {
+            StartCoroutine(CRUpdate());
+        }
 
         private void OnDestroy()
         {
@@ -64,6 +69,14 @@ namespace DCL.Controllers
 
         private void Update()
         {
+            // if (sceneLifecycleHandler.state == SceneLifecycleHandler.State.READY
+            //     && CommonScriptableObjects.rendererState.Get())
+            //     SendMetricsEvent();
+        }
+        private readonly WaitForSeconds yieldTime = new WaitForSeconds(0.2f);
+        private IEnumerator CRUpdate()
+        {
+            yield return yieldTime;
             if (sceneLifecycleHandler.state == SceneLifecycleHandler.State.READY
                 && CommonScriptableObjects.rendererState.Get())
                 SendMetricsEvent();
@@ -267,6 +280,7 @@ namespace DCL.Controllers
             PoolableObject po = PoolManager.i.Get(PoolManagerFactory.EMPTY_GO_POOL_NAME);
 
             newEntity.meshesInfo.innerGameObject = po.gameObject;
+            
             newEntity.gameObject = po.gameObject;
 
 #if UNITY_EDITOR
@@ -275,6 +289,7 @@ namespace DCL.Controllers
             newEntity.gameObject.transform.SetParent(gameObject.transform, false);
             newEntity.gameObject.SetActive(true);
             newEntity.scene = this;
+            
 
             newEntity.OnCleanupEvent += po.OnCleanup;
 

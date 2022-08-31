@@ -139,9 +139,13 @@ namespace DCL
                 SortScenesByDistance();
             }
         }
-
+        private int updateSkip2 =  0;
         public void LateUpdate()
         {
+            updateSkip2 = (updateSkip2 + 1 ) % 3;
+            if (updateSkip2 != 0)
+                return;
+            
             if (!enabled)
                 return;
 

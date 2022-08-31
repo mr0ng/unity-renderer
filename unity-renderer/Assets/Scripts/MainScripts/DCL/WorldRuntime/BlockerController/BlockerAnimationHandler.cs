@@ -35,6 +35,7 @@ namespace DCL.Controllers
             while (color.a < 0.5f)
             {
                 color.a += Time.deltaTime;
+                
                 rend.material.SetColor(ShaderUtils.BaseColor, color);
                 yield return null;
             }

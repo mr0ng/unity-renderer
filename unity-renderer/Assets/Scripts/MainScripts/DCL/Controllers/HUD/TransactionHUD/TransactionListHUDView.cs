@@ -10,7 +10,7 @@ public class TransactionListHUDView : MonoBehaviour
     public event Action<ITransactionHUD> OnTransactionAcceptedEvent;
     public event Action<ITransactionHUD> OnTransactionRejectedEvent;
 
-    private const string VIEW_PATH = "TransactionListHUD";
+    private const string VIEW_PATH = "TransactionListHUDVR";
     private const string VIEW_CHILD_PATH = "TransactionHUD";
     private const string VIEW_OBJECT_NAME = "_TransactionListHUD";
 
@@ -18,6 +18,7 @@ public class TransactionListHUDView : MonoBehaviour
     {
         TransactionListHUDView view = Instantiate(Resources.Load<TransactionListHUDView>(VIEW_PATH));
         view.Initialize();
+        
         return view;
     }
 

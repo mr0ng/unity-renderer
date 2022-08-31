@@ -175,14 +175,17 @@ namespace DCL
                 callbacks[i].Invoke(buttonId, evt, useRaycast, enablePointerEvent);
             }
         }
-
+        private int updateSkip = 0;
         public void Update()
         {
+            updateSkip = (updateSkip + 1 ) % 2;
+            if (updateSkip != 0)
+                return;
             if (!renderingEnabled)
                 return;
 
             int count = buttonsMap.Count;
-
+            
             for (int i = 0; i < count; i++)
             {
                 BUTTON_MAP btnMap = buttonsMap[i];

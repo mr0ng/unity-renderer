@@ -1,3 +1,4 @@
+using DCL;
 using UnityEngine;
 
 public class Options : MonoBehaviour
@@ -32,5 +33,9 @@ public class Options : MonoBehaviour
 
         }
         
+    }
+    public void PauseWebview()
+    {
+        DebugConfigComponent.i.PauseWebview();
     }
 }

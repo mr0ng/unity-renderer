@@ -441,8 +441,8 @@ public class ExploreV2MenuComponentView : BaseComponentView, IExploreV2MenuCompo
         else
         {
             //TODO: handle HUDS that need to be converted to VR
-           // realmSelectorModal = GameObject.Instantiate(realmSelectorModalPrefab);
-           // realmSelectorModal.name = REALM_SELECTOR_MODAL_ID;
+           realmSelectorModal = GameObject.Instantiate(realmSelectorModalPrefab);
+           realmSelectorModal.name = REALM_SELECTOR_MODAL_ID;
         }
 
         realmSelectorModal.Hide(true);

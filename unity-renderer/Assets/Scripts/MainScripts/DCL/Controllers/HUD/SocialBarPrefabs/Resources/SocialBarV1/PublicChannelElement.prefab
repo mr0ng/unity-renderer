@@ -245,7 +245,7 @@ MonoBehaviour:
   m_lineSpacingMax: 0
   m_paragraphSpacing: 0
   m_charWidthMaxAdj: 0
-  m_enableWordWrapping: 0
+  m_TextWrappingMode: 0
   m_wordWrappingRatios: 0.4
   m_overflowMode: 1
   m_linkedTextComponent: {fileID: 0}
@@ -254,6 +254,7 @@ MonoBehaviour:
   m_enableExtraPadding: 0
   checkPaddingRequired: 0
   m_isRichText: 1
+  m_EmojiFallbackSupport: 1
   m_parseCtrlCharacters: 1
   m_isOrthographic: 1
   m_isCullingEnabled: 0
@@ -281,6 +282,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4663500253316674720}
   - component: {fileID: 54474813580769298}
+  - component: {fileID: 4489199421820738019}
   m_Layer: 5
   m_Name: PublicChannelElement
   m_TagString: Untagged
@@ -329,6 +331,21 @@ MonoBehaviour:
     channelId: 
     name: 
   unreadNotifications: {fileID: 5339917990378357076}
+--- !u!114 &4489199421820738019
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2756965194572647716}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c2741530f002f7841bf417201957881e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  sortingOrder: 0
+  showHideAnimator: {fileID: 0}
+  submenu: 0
 --- !u!1 &3904071756382279521
 GameObject:
   m_ObjectHideFlags: 0
