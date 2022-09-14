@@ -1703,7 +1703,7 @@ MonoBehaviour:
   testWearables: 0
   enableTutorial: 0
   builderInWorld: 0
-  parcelRadiusToLoad: 1
+  parcelRadiusToLoad: 5
   disableAssetBundles: 1
   multithreaded: 1
   debugPanelMode: 0
