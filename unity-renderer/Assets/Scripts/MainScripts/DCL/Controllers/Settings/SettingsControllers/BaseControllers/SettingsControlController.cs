@@ -7,8 +7,8 @@ namespace DCL.SettingsCommon.SettingsControllers.BaseControllers
     /// </summary>
     public class SettingsControlController : ScriptableObject
     {
-        protected GeneralSettings currentGeneralSettings;
-        protected QualitySettings currentQualitySetting;
+        public static GeneralSettings currentGeneralSettings;
+        public static QualitySettings currentQualitySetting;
         protected AudioSettings currentAudioSettings;
 
         public virtual void Initialize()

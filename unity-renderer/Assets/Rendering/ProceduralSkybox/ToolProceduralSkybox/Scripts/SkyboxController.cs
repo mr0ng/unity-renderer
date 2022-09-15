@@ -427,8 +427,12 @@ namespace DCL.Skybox
         private void Configuration_OnTimelineEvent(string tag, bool enable, bool trigger) { OnTimelineEvent?.Invoke(tag, enable, trigger); }
 
         // Update is called once per frame
+        private int updateSkip =  0;
         public void Update()
         {
+            updateSkip = (updateSkip + 1 ) % 25;
+            if (updateSkip != 0)
+                return;
             if (!DataStore.i.skyboxConfig.disableReflection.Get() && skyboxProbe != null && !probeParented)
             {
                 AssignCameraInstancetoProbe();

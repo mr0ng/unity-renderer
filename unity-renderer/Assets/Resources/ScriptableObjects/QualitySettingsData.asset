@@ -12,18 +12,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: de20c26162ae24092b9bf5d122b2d850, type: 3}
   m_Name: QualitySettingsData
   m_EditorClassIdentifier: 
-  defaultPresetIndex: 1
+  defaultPresetIndex: 0
   settings:
   - displayName: Low
     baseResolution: 0
     antiAliasing: 1
-    renderScale: 0.7
+    renderScale: 0.9
     shadows: 0
     softShadows: 0
     shadowResolution: 256
-    cameraDrawDistance: 100
+    cameraDrawDistance: 59
     bloom: 0
-    fpsCap: 1
+    fpsCap: 0
     shadowDistance: 45
     enableDetailObjectCulling: 1
     detailObjectCullingLimit: 85

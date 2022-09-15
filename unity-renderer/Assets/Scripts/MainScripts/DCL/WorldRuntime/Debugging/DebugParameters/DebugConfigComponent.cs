@@ -398,7 +398,7 @@ namespace DCL
         {
             Debug.Log("WebView Connected, hiding web browsers.");
             // _canvasWebViewPrefab.Visible = false;
-             DCLWebview.transform.localPosition -= new Vector3(0, 10, 0);
+            // DCLWebview.transform.localPosition -= new Vector3(0, 10, 0);
             //_keyboard.WebViewPrefab.transform.localPosition -= new Vector3(0, 10, 0);
             keyboardOptions.gameObject.SetActive(false);
             keyboardDCL.gameObject.SetActive((false));
@@ -409,6 +409,15 @@ namespace DCL
             DCLWebview.gameObject.SetActive(false);
             //_keyboard.gameObject.SetActive(false);
 
+        }
+        public void ShowWebviewScreen()
+        {
+            DCLWebview.gameObject.SetActive(true);
+            keyboardDCL.gameObject.SetActive((true));
+            urlInput.gameObject.SetActive(false);
+            reload.gameObject.SetActive((true));
+            
+            
         }
         public void SwapBrowserTabs()
         {

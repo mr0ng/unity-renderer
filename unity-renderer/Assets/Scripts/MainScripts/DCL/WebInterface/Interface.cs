@@ -4,6 +4,7 @@ using DCL.Helpers;
 using DCL.Models;
 using Newtonsoft.Json;
 using UnityEngine;
+using Vuplex.WebView;
 using Ray = UnityEngine.Ray;
 
 #if UNITY_WEBGL && !UNITY_EDITOR
@@ -1250,15 +1251,46 @@ namespace DCL.Interface
                 timestamp = timestamp
             });
         }
-
-        public static void OpenURL(string url)
+        private static CanvasWebViewPrefab mainWebViewPrefab;
+        private static bool isWebViewInitiated = false;
+        private static GameObject _canvas;
+        public static async void OpenURL(string url)
         {
 #if UNITY_WEBGL
             SendMessage("OpenWebURL", new OpenURLPayload { url = url });
             
-#elif UNITY_ANDROID
-            var webview = Vuplex.WebView.WebViewPrefab.Instantiate(600,300);
-            webview.WebView.LoadUrl(url);
+#elif UNITY_ANDROID 
+
+            
+            if (!isWebViewInitiated)
+            {
+                
+                CanvasKeyboard keyboardFocused;
+                _canvas = GameObject.Find("Canvas");
+                // Create a webview for the main content.
+                mainWebViewPrefab = CanvasWebViewPrefab.Instantiate();
+                mainWebViewPrefab.InitialUrl = url;
+                mainWebViewPrefab.Resolution = 400f;
+                mainWebViewPrefab.PixelDensity = 2;
+                mainWebViewPrefab.Native2DModeEnabled = false;
+                mainWebViewPrefab.transform.SetParent(_canvas.transform, false);
+            
+                var rectTransform = mainWebViewPrefab.transform as RectTransform;
+                rectTransform.anchoredPosition3D = Vector3.zero;
+                rectTransform.offsetMin = Vector2.zero;
+                rectTransform.offsetMax = Vector2.zero;
+                mainWebViewPrefab.transform.localPosition = new Vector3(0,1.5f,0);
+                mainWebViewPrefab.transform.localRotation = Quaternion.identity;
+                mainWebViewPrefab.transform.localScale = Vector3.one;
+                
+                //mainWebViewPrefab.WebView.Init(400, 300);
+                isWebViewInitiated = true;
+            }
+            //mainWebViewPrefab.InitialUrl = url;
+            mainWebViewPrefab.gameObject.SetActive((true));
+            await mainWebViewPrefab.WaitUntilInitialized();
+            mainWebViewPrefab.WebView.LoadUrl(url);
+            
 #else
             Application.OpenURL(url);
 #endif

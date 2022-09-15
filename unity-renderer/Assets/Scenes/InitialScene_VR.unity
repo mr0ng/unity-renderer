@@ -20,11 +20,11 @@ RenderSettings:
   m_FogDensity: 0.0001
   m_LinearFogStart: 0
   m_LinearFogEnd: 1500
-  m_AmbientSkyColor: {r: 0.6043434, g: 0.53042006, b: 0.94333065, a: 1}
+  m_AmbientSkyColor: {r: 0.7060875, g: 0.8091458, b: 0.8867924, a: 1}
   m_AmbientEquatorColor: {r: 0.7258775, g: 0.54147625, b: 0.9323277, a: 1}
   m_AmbientGroundColor: {r: 0.21254912, g: 0.039945226, b: 0.47077477, a: 1}
   m_AmbientIntensity: 1
-  m_AmbientMode: 1
+  m_AmbientMode: 3
   m_SubtractiveShadowColor: {r: 0.42, g: 0.478, b: 0.627, a: 1}
   m_SkyboxMaterial: {fileID: 10304, guid: 0000000000000000f000000000000000, type: 0}
   m_HaloStrength: 0.5
@@ -32,13 +32,13 @@ RenderSettings:
   m_FlareFadeSpeed: 3
   m_HaloTexture: {fileID: 0}
   m_SpotCookie: {fileID: 10001, guid: 0000000000000000e000000000000000, type: 0}
-  m_DefaultReflectionMode: 0
-  m_DefaultReflectionResolution: 64
+  m_DefaultReflectionMode: 1
+  m_DefaultReflectionResolution: 16
   m_ReflectionBounces: 1
-  m_ReflectionIntensity: 1
+  m_ReflectionIntensity: 0
   m_CustomReflection: {fileID: 8900000, guid: b4f78c510a8526547ab9c9946449480e, type: 3}
-  m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.087558255, g: 0.081648454, b: 0.058122806, a: 1}
+  m_Sun: {fileID: 394827628}
+  m_IndirectSpecularColor: {r: 0, g: 0, b: 0, a: 0}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -97,8 +97,9 @@ LightmapSettings:
     m_ExportTrainingData: 0
     m_TrainingDataDestination: TrainingData
     m_LightProbeSampleCountMultiplier: 4
-  m_LightingDataAsset: {fileID: 0}
-  m_LightingSettings: {fileID: 4890085278179872738, guid: b9f7d97583ca83845a13fab265214464,
+  m_LightingDataAsset: {fileID: 112000000, guid: 1818cfd30516b524da315db04cb2791d,
+    type: 2}
+  m_LightingSettings: {fileID: 4890085278179872738, guid: a6b30f6ea6ee4dd498df72e2b539efcd,
     type: 2}
 --- !u!196 &4
 NavMeshSettings:
@@ -495,6 +496,11 @@ PrefabInstance:
       propertyPath: m_RootOrder
       value: 6
       objectReference: {fileID: 0}
+    - target: {fileID: 1661546049136564926, guid: 3e10f3b6a733e441c8352020cff2f1f6,
+        type: 3}
+      propertyPath: m_RootOrder
+      value: 3
+      objectReference: {fileID: 0}
     - target: {fileID: 3619469846186925450, guid: 3e10f3b6a733e441c8352020cff2f1f6,
         type: 3}
       propertyPath: m_RootOrder
@@ -504,6 +510,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_RootOrder
       value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 6770222496309737582, guid: 3e10f3b6a733e441c8352020cff2f1f6,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7548915759905534267, guid: 3e10f3b6a733e441c8352020cff2f1f6,
         type: 3}
@@ -602,8 +613,8 @@ Light:
   serializedVersion: 10
   m_Type: 1
   m_Shape: 0
-  m_Color: {r: 0.6862773, g: 0.6546064, b: 0.7378345, a: 1}
-  m_Intensity: 0
+  m_Color: {r: 0.8775246, g: 0.9056604, b: 0.7817729, a: 1}
+  m_Intensity: 1
   m_Range: 10
   m_SpotAngle: 30
   m_InnerSpotAngle: 21.80208
@@ -637,18 +648,19 @@ Light:
   m_Cookie: {fileID: 0}
   m_DrawHalo: 0
   m_Flare: {fileID: 0}
-  m_RenderMode: 0
+  m_RenderMode: 1
   m_CullingMask:
     serializedVersion: 2
     m_Bits: 4294967295
   m_RenderingLayerMask: 1
-  m_Lightmapping: 2
+  m_Lightmapping: 1
   m_LightShadowCasterMode: 0
   m_AreaSize: {x: 1, y: 1}
   m_BounceIntensity: 1
   m_ColorTemperature: 6570
   m_UseColorTemperature: 0
-  m_BoundingSphereOverride: {x: 0, y: 0, z: 0, w: 0}
+  m_BoundingSphereOverride: {x: 2.8896355e+29, y: 1.8105819e+22, z: 9.450666e+26,
+    w: 5.7759133e-31}
   m_UseBoundingSphereOverride: 0
   m_UseViewFrustumForShadowCasterCull: 1
   m_ShadowRadius: 0
@@ -660,13 +672,13 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 394827627}
-  m_LocalRotation: {x: -0.6439244, y: -0.6619163, z: -0.29216662, w: -0.24873045}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalRotation: {x: 0.3639224, y: -0.3639224, z: 0.6062677, w: 0.6062677}
+  m_LocalPosition: {x: 0, y: 103.61, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 5
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 61.95, y: 0, z: 90}
 --- !u!1 &608521182
 GameObject:
   m_ObjectHideFlags: 0
@@ -1697,16 +1709,16 @@ MonoBehaviour:
   baseUrlCustom: https://play.decentraland.zone/?
   environment: 4
   realm: loki
-  startInCoords: {x: -26, y: -123}
+  startInCoords: {x: -26, y: -124}
   forceLocalComms: 0
   allWearables: 0
   testWearables: 0
   enableTutorial: 0
   builderInWorld: 0
-  parcelRadiusToLoad: 1
+  parcelRadiusToLoad: 2
   disableAssetBundles: 1
   multithreaded: 1
-  debugPanelMode: 0
+  debugPanelMode: 1
 --- !u!4 &1444882337
 Transform:
   m_ObjectHideFlags: 0

@@ -1,3 +1,4 @@
+using System;
 using DCL;
 using UnityEngine;
 
@@ -46,7 +47,11 @@ public class LoadingHUDController : IHUD
             SetViewVisible(false, false);
     }
 
-    public void SetVisibility(bool visible) { this.visible.Set(visible); }
+    public void SetVisibility(bool visible)
+    {
+        this.visible.Set(visible);
+        GC.Collect();
+    }
 
     public void Dispose()
     {

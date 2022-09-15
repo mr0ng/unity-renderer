@@ -126,7 +126,7 @@ namespace DCL
         private int updateSkip =  0;
         public void Update()
         {
-            updateSkip = (updateSkip + 1 ) % 20;
+            updateSkip = (updateSkip + 1 ) % 31;
             if (updateSkip != 0)
                 return;
             if (!enabled)
@@ -138,11 +138,12 @@ namespace DCL
                 sceneSortDirty = false;
                 SortScenesByDistance();
             }
+            //UnloadSceneBeyondLOS();
         }
         private int updateSkip2 =  0;
         public void LateUpdate()
         {
-            updateSkip2 = (updateSkip2 + 1 ) % 3;
+            updateSkip2 = (updateSkip2 + 1 ) % 6;
             if (updateSkip2 != 0)
                 return;
             
@@ -623,10 +624,13 @@ namespace DCL
         {
             sortAuxiliaryVector = sceneA.sceneData.basePosition - currentGridSceneCoordinate;
             int dist1 = sortAuxiliaryVector.sqrMagnitude;
+            if(currentGridSceneCoordinate.x != EnvironmentSettings.MORDOR_SCALAR)
+                sceneA.distanceToPlayer = dist1;
 
             sortAuxiliaryVector = sceneB.sceneData.basePosition - currentGridSceneCoordinate;
             int dist2 = sortAuxiliaryVector.sqrMagnitude;
-
+            if(currentGridSceneCoordinate.x != EnvironmentSettings.MORDOR_SCALAR)
+                sceneB.distanceToPlayer = dist2;
             return dist1 - dist2;
         }
 
@@ -790,6 +794,18 @@ namespace DCL
                     continue;
                 
                 UnloadParcelSceneExecute(list[i].Key);
+            }
+        }
+        public void UnloadSceneBeyondLOS(int LOS = 4)
+        {
+            var worldState = Environment.i.world.state;
+
+            var list = worldState.loadedScenes.ToArray();
+
+            for (int i = 0; i < list.Length; i++)
+            {
+                if (list[i].Value.distanceToPlayer > LOS && currentGridSceneCoordinate != new Vector2Int(EnvironmentSettings.MORDOR_SCALAR, EnvironmentSettings.MORDOR_SCALAR))
+                    UnloadParcelSceneExecute(list[i].Key);
             }
         }
 

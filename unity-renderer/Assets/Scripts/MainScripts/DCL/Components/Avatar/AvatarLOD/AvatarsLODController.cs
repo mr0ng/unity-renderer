@@ -72,7 +72,7 @@ namespace DCL
         {
             cameraPosition = CommonScriptableObjects.cameraPosition.Get();
             cameraForward = CommonScriptableObjects.cameraForward.Get();
-            updateSkip = (updateSkip + 1 ) % 3;
+            updateSkip = (updateSkip + 1 ) % 15;
             if (updateSkip != 0)
                 return;
             UpdateAllLODs(maxAvatars.Get(), maxImpostors.Get());

@@ -112,8 +112,12 @@ public class BuilderInWorldPlugin : IPlugin
         UnregisterRuntimeComponents();
     }
 
+    private int updateSkip =  0;
     public void Update()
     {
+        updateSkip = (updateSkip + 1 ) % 16;
+        if (updateSkip != 0)
+            return;
         editor.Update();
         sceneManager.Update();
     }

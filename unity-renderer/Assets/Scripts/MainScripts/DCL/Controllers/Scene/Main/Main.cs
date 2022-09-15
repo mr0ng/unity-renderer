@@ -66,7 +66,7 @@ namespace DCL
         protected virtual void InitializeDataStore()
         {
             DataStore.i.textureConfig.gltfMaxSize.Set(512);
-            DataStore.i.textureConfig.generalMaxSize.Set(2048);
+            DataStore.i.textureConfig.generalMaxSize.Set(128);
             DataStore.i.avatarConfig.useHologramAvatar.Set(true);
         }
 
@@ -162,13 +162,15 @@ namespace DCL
             gameObject.AddComponent<CatalogController>();
             gameObject.AddComponent<MinimapMetadataController>();
             //TODO: handle HUDS that need to be converted to VR
-            //gameObject.AddComponent<ChatController>();
-            //gameObject.AddComponent<FriendsController>();
+            gameObject.AddComponent<ChatController>();
+            //TODO: handle HUDS that need to be converted to VR
+            gameObject.AddComponent<FriendsController>();
+            
             gameObject.AddComponent<HotScenesController>();
             gameObject.AddComponent<GIFProcessingBridge>();
             gameObject.AddComponent<RenderProfileBridge>();
             gameObject.AddComponent<AssetCatalogBridge>();
-            gameObject.AddComponent<ScreenSizeWatcher>();
+            //gameObject.AddComponent<ScreenSizeWatcher>();//Test VR not needed.
             gameObject.AddComponent<SceneControllerBridge>();
 
             MainSceneFactory.CreateBuilderInWorldBridge(gameObject);

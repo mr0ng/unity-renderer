@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using DCL.Components;
 using DCL.Configuration;
@@ -20,6 +21,7 @@ namespace DCL.Controllers
 
         public HashSet<Vector2Int> parcels = new HashSet<Vector2Int>();
         public ISceneMetricsCounter metricsCounter { get; set; }
+        public int distanceToPlayer { get; set; }
         public event System.Action<IDCLEntity> OnEntityAdded;
         public event System.Action<IDCLEntity> OnEntityRemoved;
         public event System.Action<LoadParcelScenesMessage.UnityParcelScene> OnSetData;
@@ -80,6 +82,8 @@ namespace DCL.Controllers
             if (sceneLifecycleHandler.state == SceneLifecycleHandler.State.READY
                 && CommonScriptableObjects.rendererState.Get())
                 SendMetricsEvent();
+            
+                
         }
 
         protected virtual string prettyName => sceneData.basePosition.ToString();
@@ -162,6 +166,8 @@ namespace DCL.Controllers
                 RemoveAllEntitiesImmediate();
                 PoolManager.i.Cleanup(true, true);
                 DataStore.i.sceneWorldObjects.RemoveScene(sceneData.id);
+                Resources.UnloadUnusedAssets();
+                GC.Collect();
             }
             else
             {
@@ -171,14 +177,19 @@ namespace DCL.Controllers
                     this.gameObject.SetActive(false);
 
                     RemoveAllEntities();
+                    Resources.UnloadUnusedAssets();
+                    GC.Collect();
                 }
                 else
                 {
                     Destroy(this.gameObject);
                     DataStore.i.sceneWorldObjects.RemoveScene(sceneData.id);
+                    Resources.UnloadUnusedAssets();
+                    GC.Collect();
                 }
             }
-
+            
+            
             isReleased = true;
         }
 

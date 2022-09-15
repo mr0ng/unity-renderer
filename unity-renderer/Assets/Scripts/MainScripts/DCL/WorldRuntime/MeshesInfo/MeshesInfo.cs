@@ -61,7 +61,7 @@ namespace DCL.Models
         
         public void UpdateRenderersCollection(Renderer[] renderers, MeshFilter[] meshFilters, Animation animation = null)
         {
-            renderers = SwapShaders(renderers);
+            //renderers = SwapShaders(renderers);
             if (meshRootGameObjectValue != null)
             {
                 this.renderers = renderers;
@@ -80,7 +80,7 @@ namespace DCL.Models
             if (meshRootGameObjectValue != null)
             {
                 renderers = meshRootGameObjectValue.GetComponentsInChildren<Renderer>(true);
-                renderers = SwapShaders(renderers);
+                //renderers = SwapShaders(renderers);
                 meshFilters = meshRootGameObjectValue.GetComponentsInChildren<MeshFilter>(true);
                 animation = meshRootGameObjectValue.GetComponentInChildren<Animation>();
 

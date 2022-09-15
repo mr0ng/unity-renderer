@@ -53,12 +53,12 @@ namespace DCL
 
         void Dispatch( IUpdateEventHandler.EventType eventType )
         {
-            var list = eventCollections[eventType].eventList;
+            //var list = eventCollections[eventType].eventList;
             int count = eventCollections[eventType].eventList.Count;
 
             for ( int i = 0; i < count; i++ )
             {
-                list[i].Invoke();
+                eventCollections[eventType].eventList[i].Invoke();
             }
         }
 

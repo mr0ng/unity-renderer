@@ -49,7 +49,7 @@ namespace DCL.ECSComponents
         private int updateSkip =  0;
         private void LateUpdate()
         {
-            updateSkip = (updateSkip + 1 ) % 10;
+            updateSkip = (updateSkip + 1 ) % 4;
             if (updateSkip != 0)
                 return;
             //NOTE(Brian): This fixes #757 (https://github.com/decentraland/unity-client/issues/757)

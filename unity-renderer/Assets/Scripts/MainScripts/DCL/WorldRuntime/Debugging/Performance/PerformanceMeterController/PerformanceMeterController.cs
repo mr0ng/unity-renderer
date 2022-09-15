@@ -304,7 +304,7 @@ namespace DCL
         /// </summary>
         private float CalculatePerformanceScore()
         {
-            float topFPS = Settings.i.qualitySettings.Data.fpsCap ? 30f : 60f;
+            float topFPS = Settings.i.qualitySettings.Data.fpsCap ? 72f : 90f;
             float fpsScore = Mathf.Min(averageFPS / topFPS, 1); // from 0 to 1
             float hiccupsScore = 1 - ((float) totalHiccupFrames / samples.Count); // from 0 to 1
 

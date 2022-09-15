@@ -101,9 +101,9 @@ namespace DCL.Components
         private int updateSkip =  0;
         internal void LateUpdate()
         {
-            // updateSkip = (updateSkip + 1 ) % 2;
-            // if (updateSkip != 0)
-            //     return;
+            updateSkip = (updateSkip + 1 ) % 4;
+            if (updateSkip != 0)
+                return;
             if (entity == null || scene == null)
             {
                 StopComponentUpdate();

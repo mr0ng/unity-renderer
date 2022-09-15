@@ -33,12 +33,14 @@ namespace DCL
             public WebInterface.ACTION_BUTTON buttonId;
             public bool useRaycast;
             public bool enablePointerEvent;
+            public bool lastState;
         }
 
         private Dictionary<WebInterface.ACTION_BUTTON, List<ButtonListenerCallback>> listeners =
             new Dictionary<WebInterface.ACTION_BUTTON, List<ButtonListenerCallback>>();
 
         private List<BUTTON_MAP> buttonsMap = new List<BUTTON_MAP>();
+        
 
         public InputController_Legacy()
         {
@@ -178,16 +180,17 @@ namespace DCL
         private int updateSkip = 0;
         public void Update()
         {
-            updateSkip = (updateSkip + 1 ) % 2;
-            if (updateSkip != 0)
-                return;
+            
             if (!renderingEnabled)
                 return;
-
+            // updateSkip = (updateSkip + 1 ) % 25;
+            // if (updateSkip != 0)
+            //     return;
             int count = buttonsMap.Count;
-            
+
             for (int i = 0; i < count; i++)
             {
+                
                 BUTTON_MAP btnMap = buttonsMap[i];
 
                 switch (btnMap.type)
@@ -195,19 +198,19 @@ namespace DCL
                     case BUTTON_TYPE.MOUSE:
                         if (CommonScriptableObjects.allUIHidden.Get())
                             break;
-                        if (GetButtonDown(btnMap))
+                        if (GetButtonDown(btnMap) && !btnMap.lastState)
                             RaiseEvent(btnMap.buttonId, EVENT.BUTTON_DOWN, btnMap.useRaycast,
                                 btnMap.enablePointerEvent);
-                        else if (GetButtonUp(btnMap))
+                        else if (GetButtonUp(btnMap) && btnMap.lastState)
                             RaiseEvent(btnMap.buttonId, EVENT.BUTTON_UP, btnMap.useRaycast, btnMap.enablePointerEvent);
                         break;
                     case BUTTON_TYPE.KEYBOARD:
                         if (CommonScriptableObjects.allUIHidden.Get())
                             break;
-                        if (GetKeyDown((KeyCode) btnMap.buttonNum))
+                        if (GetKeyDown((KeyCode) btnMap.buttonNum) && !btnMap.lastState)
                             RaiseEvent(btnMap.buttonId, EVENT.BUTTON_DOWN, btnMap.useRaycast,
                                 btnMap.enablePointerEvent);
-                        else if (!GetKeyDown((KeyCode) btnMap.buttonNum))
+                        else if (!GetKeyDown((KeyCode) btnMap.buttonNum)&& btnMap.lastState)
                             RaiseEvent(btnMap.buttonId, EVENT.BUTTON_UP, btnMap.useRaycast, btnMap.enablePointerEvent);
                         break;
                 }

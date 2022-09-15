@@ -156,10 +156,14 @@ namespace DCL
 
             if (fileToHash != null)
             {
-                if (!fileToHash.ContainsKey(url))
+                if (!fileToHash.ContainsKey(url) )
                 {
-                    Debug.LogError($"GetContentsUrl >>> File {url} not found!!!");
-                    return false;
+                    if (!fileToHash.ContainsKey("src/" + url))
+                    {
+                        Debug.LogError($"GetContentsUrl >>> File {url} not found!!!");
+                        return false;
+                    }
+                    url = "src/" + url;
                 }
 
                 result = baseUrl + fileToHash[url];

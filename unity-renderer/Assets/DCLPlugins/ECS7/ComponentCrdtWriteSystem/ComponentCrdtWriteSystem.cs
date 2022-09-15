@@ -72,12 +72,10 @@ public class ComponentCrdtWriteSystem : IDisposable
             sceneMessages.Enqueue(message);
         }
     }
-    private int updateSkip =  0;
+    
     internal void ProcessMessages()
     {
-        // updateSkip = (updateSkip + 1 ) % 4;
-        // if (updateSkip != 0)
-        //     return;
+        
         if (queuedMessages.Count == 0)
         {
             return;

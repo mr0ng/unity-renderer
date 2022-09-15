@@ -142,6 +142,9 @@ public class HUDFactory : IHUDFactory
             case HUDElementID.LOADING:
                 hudElement = new LoadingHUDController();
                 break;
+            case HUDElementID.SETTINGS_PANEL:
+                hudElement = new SettingsPanelHUDController();
+                break;
         }
 
         return hudElement;

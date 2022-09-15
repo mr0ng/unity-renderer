@@ -91,6 +91,7 @@ public class DCLWebSocketService : WebSocketBehavior
         WebInterface.OnMessageFromEngine -= SendMessageToWeb;
         DataStore.i.wsCommunication.communicationEstablished.Set(false);
         OnCloseEvent?.Invoke();
+        
     }
 
     protected override void OnOpen()

@@ -1742,7 +1742,6 @@ GameObject:
   - component: {fileID: 7497584698789204027}
   - component: {fileID: 6657599453731148754}
   - component: {fileID: 2216557797817228083}
-  - component: {fileID: 8415919358749500605}
   m_Layer: 5
   m_Name: ChatHUD
   m_TagString: Untagged
@@ -1818,21 +1817,6 @@ MonoBehaviour:
     type: 2}
   previousChatInHistoryInput: {fileID: 11400000, guid: 963604f308a161b4daa2e9ad5a9beba4,
     type: 2}
---- !u!114 &8415919358749500605
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8244520440482719091}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c2741530f002f7841bf417201957881e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  sortingOrder: 0
-  showHideAnimator: {fileID: 0}
-  submenu: 0
 --- !u!1 &8305413179443684899
 GameObject:
   m_ObjectHideFlags: 0

@@ -11,7 +11,6 @@ GameObject:
   - component: {fileID: 4540070755932127706}
   - component: {fileID: 2700259136045117502}
   - component: {fileID: 601301297874170717}
-  - component: {fileID: 5963124199350892131}
   m_Layer: 5
   m_Name: GeneralChatChannelHUD
   m_TagString: Untagged
@@ -84,21 +83,6 @@ MonoBehaviour:
   - {fileID: 1465780631268768265}
   - {fileID: 2676580422195266286}
   previewModeSize: {x: 410, y: 350}
---- !u!114 &5963124199350892131
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 131438050534106329}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c2741530f002f7841bf417201957881e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  sortingOrder: 0
-  showHideAnimator: {fileID: 0}
-  submenu: 0
 --- !u!1 &1420651169502582257
 GameObject:
   m_ObjectHideFlags: 0
@@ -1325,6 +1309,11 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 4540070755932127706}
     m_Modifications:
+    - target: {fileID: 116538546712708781, guid: bac007ac4ef98284c8cf05867a35ee0f,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 2216557797817228083, guid: bac007ac4ef98284c8cf05867a35ee0f,
         type: 3}
       propertyPath: defaultChatEntryFactory
@@ -1334,12 +1323,12 @@ PrefabInstance:
     - target: {fileID: 4755746969343816562, guid: bac007ac4ef98284c8cf05867a35ee0f,
         type: 3}
       propertyPath: m_AnchorMax.x
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 4755746969343816562, guid: bac007ac4ef98284c8cf05867a35ee0f,
         type: 3}
       propertyPath: m_AnchorMax.y
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 6795723292658424848, guid: bac007ac4ef98284c8cf05867a35ee0f,
         type: 3}
