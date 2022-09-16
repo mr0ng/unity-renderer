@@ -7,7 +7,7 @@ public class ToolTipBehavior : MonoBehaviour, IPointerEnterHandler, IPointerExit
 {
     [SerializeField]
     private GameObject _toolTip;
-    private float _waitTime = 0.5f;
+    private float _waitTime = 0;
 
     private void Start()
     {
@@ -15,24 +15,16 @@ public class ToolTipBehavior : MonoBehaviour, IPointerEnterHandler, IPointerExit
     }
     public void OnPointerEnter(PointerEventData eventData)
     {
-        StopAllCoroutines();
-        StartCoroutine(StartTimer());
+        ShowTip();
     }
 
     public void OnPointerExit(PointerEventData eventData)
     {
-        StopAllCoroutines();
         _toolTip.SetActive(false);
     }
 
     private void ShowTip()
     {
         _toolTip.SetActive(true);
-    }
-
-    private IEnumerator StartTimer()
-    {
-        yield return new WaitForSeconds(_waitTime);
-       ShowTip();
     }
 }
