@@ -22,7 +22,7 @@ public class PerformanceController : MonoBehaviour
     private long allocatedMemoryForGraphicsDriver;
     private long totalUnusedReservedMemoryLong;
     private long totalMemory;
-    private int frameCount = 100;
+    private int frameCount = 10;
     #if UNITY_ANDROID && !UNITY_EDITOR
     private long MaxMemoryAllowed = 1800000000;
     #else
@@ -34,12 +34,12 @@ public class PerformanceController : MonoBehaviour
     void Start()
     {
        
-        renderingScaleSettingController = ScriptableObject.CreateInstance<RenderingScaleControlController>();
-        renderingScaleSettingController.Initialize();
-        sceneLoadRadiusSettingController = ScriptableObject.CreateInstance<ScenesLoadRadiusControlController>();
-        sceneLoadRadiusSettingController.Initialize();
+        // renderingScaleSettingController = ScriptableObject.CreateInstance<RenderingScaleControlController>();
+        // renderingScaleSettingController.Initialize();
+        // sceneLoadRadiusSettingController = ScriptableObject.CreateInstance<ScenesLoadRadiusControlController>();
+        // sceneLoadRadiusSettingController.Initialize();
         StartCoroutine(CheckPerformace());
-        Application.lowMemory += OnLowMemory;
+        // Application.lowMemory += OnLowMemory;
     }
    
 
@@ -48,7 +48,7 @@ public class PerformanceController : MonoBehaviour
     {
         
     }
-    private WaitForSeconds waitTimeCheck = new WaitForSeconds(1f);
+    private WaitForSeconds waitTimeCheck = new WaitForSeconds(3f);
     private IEnumerator CheckPerformace()
     {
         while (true)
@@ -65,19 +65,19 @@ public class PerformanceController : MonoBehaviour
 
             double fps =  1 / frameSpan.TotalSeconds*frameCount ;
             //Debug.Log($"frameTime Span {frameSpan.TotalMilliseconds/5}ms, fps {fps} , memory {System.GC.GetTotalMemory(false)} of max {Profiler.GetMonoHeapSize()}");
-            totalAllocatedMemoryLong = Profiler.GetTotalAllocatedMemoryLong();
-            monoUsedSizeLong = Profiler.GetMonoUsedSizeLong(); 
-            allocatedMemoryForGraphicsDriver = Profiler.GetAllocatedMemoryForGraphicsDriver();
-            totalUnusedReservedMemoryLong = Profiler.GetTotalUnusedReservedMemoryLong();
-            totalMemory = totalAllocatedMemoryLong+monoUsedSizeLong+allocatedMemoryForGraphicsDriver;
-            Debug.Log($"Performance: fps{fps}, Memory tot{totalMemory/1000000} ,alloc{totalAllocatedMemoryLong/1000000},mono{monoUsedSizeLong/1000000},gfx{allocatedMemoryForGraphicsDriver/1000000}, unusedres{totalUnusedReservedMemoryLong/1000000}");
-            if ( totalMemory > MaxMemoryAllowed) OnLowMemory();
-            if (totalMemory < (.73 * MaxMemoryAllowed))
-            {
-                RestoreSettings();
-            }
-            if(fps < 65) OnLowFrameRate();
-            else if (fps > 72) GoodFrameRate();
+            // totalAllocatedMemoryLong = Profiler.GetTotalAllocatedMemoryLong();
+            // monoUsedSizeLong = Profiler.GetMonoUsedSizeLong(); 
+            // allocatedMemoryForGraphicsDriver = Profiler.GetAllocatedMemoryForGraphicsDriver();
+            // totalUnusedReservedMemoryLong = Profiler.GetTotalUnusedReservedMemoryLong();
+            // totalMemory = totalAllocatedMemoryLong+monoUsedSizeLong+allocatedMemoryForGraphicsDriver;
+            // Debug.Log($"Performance: fps{fps}, Memory tot{totalMemory/1000000} ,alloc{totalAllocatedMemoryLong/1000000},mono{monoUsedSizeLong/1000000},gfx{allocatedMemoryForGraphicsDriver/1000000}, unusedres{totalUnusedReservedMemoryLong/1000000}");
+            // if ( totalMemory > MaxMemoryAllowed) OnLowMemory();
+            // if (totalMemory < (.73 * MaxMemoryAllowed))
+            // {
+            //     RestoreSettings();
+            // }
+            if(fps < 65) OnLowFrameRate((int)fps);
+            else if (fps > 70) GoodFrameRate();
         }
     }
     
@@ -97,7 +97,7 @@ public class PerformanceController : MonoBehaviour
         if (newVal <= 3){
             sceneLoadRadiusSettingController.UpdateSetting((newVal +1));
         }
-        Debug.Log($"memory good.  Changed paramaters: farclipplane {camera.farClipPlane}, LOS {newVal+1}, ");
+        //Debug.Log($"memory good.  Changed paramaters: farclipplane {camera.farClipPlane}, LOS {newVal+1}, ");
     }
     private void OnLowMemory()
     {
@@ -111,30 +111,30 @@ public class PerformanceController : MonoBehaviour
         Debug.Log($"Low memory reached.  Changed paramaters: farclipplane {camera.farClipPlane}, LOS 1, ");
     }
     
-    private void OnLowFrameRate()
+    private void OnLowFrameRate(int fps)
     {
-        if (camera.farClipPlane > 30)
-            camera.farClipPlane = camera.farClipPlane * .9f;
-        object newValue = renderingScaleSettingController.GetStoredValue();
-        float.TryParse(newValue.ToString(), out float newFloat);
-        if (newFloat > 0.4f)
-        {
-            renderingScaleSettingController.UpdateSetting(newFloat*0.9f);
-        }
-        Debug.Log($"Low FrameRate.  Changed paramaters: farclipplane {camera.farClipPlane}, renderscale {newFloat*1.1f} ");
+        if (camera.farClipPlane > 45)
+            camera.farClipPlane = Math.Max(45, camera.farClipPlane * (float)(fps/75));
+        // object newValue = renderingScaleSettingController.GetStoredValue();
+        // float.TryParse(newValue.ToString(), out float newFloat);
+        // if (newFloat > 0.8f)
+        // {
+        //     renderingScaleSettingController.UpdateSetting(Math.Max(0.8f, newFloat*(float)(fps/75)));
+        // }
+        //Debug.Log($"Low FrameRate.  Changed paramaters: farclipplane {camera.farClipPlane}, renderscale {newFloat*(float)(fps/75)} ");
 
     }
     private void GoodFrameRate()
     {
         if (camera.farClipPlane < 500)
             camera.farClipPlane = camera.farClipPlane * 1.15f;
-        object newValue = renderingScaleSettingController.GetStoredValue();
-        float.TryParse(newValue.ToString(), out float newFloat);
-        if (newFloat < 1f)
-        {
-            renderingScaleSettingController.UpdateSetting(newFloat*1.1f);
-        }
-        Debug.Log($"FrameRate Good.  Changed paramaters: farclipplane {camera.farClipPlane}, renderscale {newFloat*1.1f}, ");
+        // object newValue = renderingScaleSettingController.GetStoredValue();
+        // float.TryParse(newValue.ToString(), out float newFloat);
+        // if (newFloat < 1f)
+        // {
+        //     renderingScaleSettingController.UpdateSetting(Math.Min(1,(newFloat*1.15f)));
+        // }
+        //Debug.Log($"FrameRate Good.  Changed paramaters: farclipplane {camera.farClipPlane}, renderscale {newFloat*1.1f}, ");
        
     }
 }

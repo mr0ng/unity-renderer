@@ -166,8 +166,8 @@ namespace DCL.Controllers
                 RemoveAllEntitiesImmediate();
                 PoolManager.i.Cleanup(true, true);
                 DataStore.i.sceneWorldObjects.RemoveScene(sceneData.id);
-                Resources.UnloadUnusedAssets();
-                GC.Collect();
+                //Resources.UnloadUnusedAssets();
+                //GC.Collect();
             }
             else
             {
@@ -177,15 +177,15 @@ namespace DCL.Controllers
                     this.gameObject.SetActive(false);
 
                     RemoveAllEntities();
-                    Resources.UnloadUnusedAssets();
-                    GC.Collect();
+                    //Resources.UnloadUnusedAssets();
+                    //GC.Collect();
                 }
                 else
                 {
                     Destroy(this.gameObject);
                     DataStore.i.sceneWorldObjects.RemoveScene(sceneData.id);
-                    Resources.UnloadUnusedAssets();
-                    GC.Collect();
+                    //Resources.UnloadUnusedAssets();
+                    //GC.Collect();
                 }
             }
             
