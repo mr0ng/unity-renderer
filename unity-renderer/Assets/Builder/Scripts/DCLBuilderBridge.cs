@@ -665,6 +665,7 @@ namespace Builder
 
         private void SetupQualitySettings()
         {
+            Debug.Log("Quality settings updated");
             QualitySettings settings = new QualitySettings
             {
                 baseResolution = QualitySettings.BaseResolution.BaseRes_1080,

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using DCL.Components;
@@ -105,7 +105,7 @@ namespace DCL.Models
             {
                 if (r.material.shader.name.Contains("Universal Render Pipeline/Lit"))
                 {
-                    r.material.shader = unlit;
+                    //r.material.shader = unlit;
                 }
                 else if (r.material.shader.name.Contains("Hidden/InternalErrorShader"))
                 {
