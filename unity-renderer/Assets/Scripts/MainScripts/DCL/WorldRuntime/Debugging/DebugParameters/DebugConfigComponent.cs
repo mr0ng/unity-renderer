@@ -342,15 +342,18 @@ namespace DCL
             
             DCLWebview.gameObject.SetActive(true);
             DCLWebview.InitialUrl = webViewURL;
+            DCLWebview.WebView.Reload();
             DCLWebview.Initialized += (sender, eventArgs) => {
-                    Debug.Log($"main webview loading {webViewURL}");
+                
+                //    Debug.Log($"main webview loading {webViewURL}");
                     DCLWebview.WebView.LoadUrl(webViewURL);
                 };
 
             
             DCLWebview.transform.SetParent(canvas.transform, false);
             DCLWebview.InitialResolution = 350;
-
+            
+            
             DCLWebview.RemoteDebuggingEnabled = false;
             DCLWebview.LogConsoleMessages = false;
             DCLWebview.NativeOnScreenKeyboardEnabled = false;
@@ -359,6 +362,10 @@ namespace DCL
            
             urlInput.keyboardType = TouchScreenKeyboardType.URL;
             urlInput.contentType = TMP_InputField.ContentType.Alphanumeric;
+            #if UNITY_ANDROID && !UNITY_EDITOR
+            DCLWebview.transform.localPosition += 2*Vector3.down;
+            keyboardDCL.transform.localPosition += 2*Vector3.down;
+            #endif
             
         
             Debug.Log("Created WebView objects");

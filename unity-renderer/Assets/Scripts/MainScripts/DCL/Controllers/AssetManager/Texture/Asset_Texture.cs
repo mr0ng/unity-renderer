@@ -30,6 +30,8 @@ namespace DCL
             OnCleanup?.Invoke();
             PersistentAssetCache.RemoveImage(texture);
             Object.Destroy(texture);
+            texture = null;
+
         }
 
         public void Dispose() { Cleanup(); }
