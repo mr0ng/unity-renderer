@@ -167,6 +167,7 @@ namespace DCL
 
             CommonScriptableObjects.rendererState.OnChange -= OnRendererStateChange;
             Environment.i.platform.memoryManager.OnCriticalMemory -= CleanMarkedEntities;
+            
         }
     }
 }

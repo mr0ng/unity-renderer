@@ -22,7 +22,9 @@ public class PerformanceController : MonoBehaviour
     private long allocatedMemoryForGraphicsDriver;
     private long totalUnusedReservedMemoryLong;
     private long totalMemory;
+
     private int frameCount = 10;
+
     #if UNITY_ANDROID && !UNITY_EDITOR
     private long MaxMemoryAllowed = 1800000000;
     #else
@@ -39,7 +41,7 @@ public class PerformanceController : MonoBehaviour
         // sceneLoadRadiusSettingController = ScriptableObject.CreateInstance<ScenesLoadRadiusControlController>();
         // sceneLoadRadiusSettingController.Initialize();
         StartCoroutine(CheckPerformace());
-        // Application.lowMemory += OnLowMemory;
+
     }
    
 
@@ -48,7 +50,9 @@ public class PerformanceController : MonoBehaviour
     {
         
     }
-    private WaitForSeconds waitTimeCheck = new WaitForSeconds(3f);
+
+    private WaitForSeconds waitTimeCheck = new WaitForSeconds(4f);
+
     private IEnumerator CheckPerformace()
     {
         while (true)
@@ -70,49 +74,26 @@ public class PerformanceController : MonoBehaviour
             // allocatedMemoryForGraphicsDriver = Profiler.GetAllocatedMemoryForGraphicsDriver();
             // totalUnusedReservedMemoryLong = Profiler.GetTotalUnusedReservedMemoryLong();
             // totalMemory = totalAllocatedMemoryLong+monoUsedSizeLong+allocatedMemoryForGraphicsDriver;
+
             // Debug.Log($"Performance: fps{fps}, Memory tot{totalMemory/1000000} ,alloc{totalAllocatedMemoryLong/1000000},mono{monoUsedSizeLong/1000000},gfx{allocatedMemoryForGraphicsDriver/1000000}, unusedres{totalUnusedReservedMemoryLong/1000000}");
             // if ( totalMemory > MaxMemoryAllowed) OnLowMemory();
+
             // if (totalMemory < (.73 * MaxMemoryAllowed))
             // {
             //     RestoreSettings();
             // }
+
             if(fps < 65) OnLowFrameRate((int)fps);
             else if (fps > 70) GoodFrameRate();
         }
     }
     
     
-    private void RestoreSettings() { 
-        camera = Camera.main;
-        
-        //Move clipping plane further
-        // camera.farClipPlane = 300;
-        //
-        // float newValue = 1.0f;
-        // renderingScaleSettingController.UpdateSetting(newValue);
-        
-        
-        object newLOS = sceneLoadRadiusSettingController.GetStoredValue();
-        float.TryParse(newLOS.ToString(), out float newVal);
-        if (newVal <= 3){
-            sceneLoadRadiusSettingController.UpdateSetting((newVal +1));
-        }
-        //Debug.Log($"memory good.  Changed paramaters: farclipplane {camera.farClipPlane}, LOS {newVal+1}, ");
-    }
-    private void OnLowMemory()
-    {
-        camera = Camera.main;
-        //TODO: drop LOS, and immediately destroy further parcels.
-         
-        sceneLoadRadiusSettingController.UpdateSetting(1.0f);
-       
-        Resources.UnloadUnusedAssets();
-        GC.Collect();
-        Debug.Log($"Low memory reached.  Changed paramaters: farclipplane {camera.farClipPlane}, LOS 1, ");
-    }
+ 
     
     private void OnLowFrameRate(int fps)
     {
+
         if (camera.farClipPlane > 45)
             camera.farClipPlane = Math.Max(45, camera.farClipPlane * (float)(fps/75));
         // object newValue = renderingScaleSettingController.GetStoredValue();
@@ -123,9 +104,11 @@ public class PerformanceController : MonoBehaviour
         // }
         //Debug.Log($"Low FrameRate.  Changed paramaters: farclipplane {camera.farClipPlane}, renderscale {newFloat*(float)(fps/75)} ");
 
+       
     }
     private void GoodFrameRate()
     {
+        camera = Camera.main;
         if (camera.farClipPlane < 500)
             camera.farClipPlane = camera.farClipPlane * 1.15f;
         // object newValue = renderingScaleSettingController.GetStoredValue();

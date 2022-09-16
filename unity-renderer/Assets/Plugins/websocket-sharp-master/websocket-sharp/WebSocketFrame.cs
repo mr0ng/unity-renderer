@@ -38,6 +38,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using UnityEngine;
 
 namespace WebSocketSharp
 {
@@ -803,7 +804,7 @@ Extended Payload Length: {7}
                               {
                                   frame3.Unmask();
                               }
-
+                              
                               completed(frame3);
                           },
                           error

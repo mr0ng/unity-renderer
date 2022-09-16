@@ -48,6 +48,8 @@ using System.Net.Sockets;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
+using DCL;
+using UnityEngine;
 using WebSocketSharp.Net;
 using WebSocketSharp.Net.WebSockets;
 
@@ -1267,6 +1269,7 @@ namespace WebSocketSharp
 
             try
             {
+                _logger.Error($"websocket Closed {payloadData.Code}, {payloadData.Reason.ToString()}");
                 OnClose.Emit(this, e);
             }
             catch (Exception ex)
@@ -2033,6 +2036,7 @@ namespace WebSocketSharp
 
             try
             {
+                _logger.Error($"websocket Closed {code}, {reason.ToString()}");
                 OnClose.Emit(this, e);
             }
             catch (Exception ex)
@@ -2107,7 +2111,7 @@ namespace WebSocketSharp
             _stream = null;
             _context = null;
         }
-
+        private int _retryCountForSend = 0;
         private bool send(Opcode opcode, Stream stream)
         {
             lock (_forSend)
@@ -2126,7 +2130,15 @@ namespace WebSocketSharp
                     sent = send(opcode, stream, compressed);
                     if (!sent)
                     {
-                        error("A send has been interrupted.", null);
+                        if (_retryCountForSend < 15){
+                            _retryCountForSend ++;
+                            send(opcode,  stream);
+                        }
+                        else
+                        {
+                            _retryCountForConnect = 0;
+                            error("A send has been interrupted.", null);
+                        }
                     }
                 }
                 catch (Exception ex)
@@ -2277,7 +2289,7 @@ namespace WebSocketSharp
         private HttpResponse sendHandshakeRequest()
         {
             var req = createHandshakeRequest();
-            var res = sendHttpRequest(req, 90000);
+            var res = sendHttpRequest(req, 150000);
             if (res.IsUnauthorized)
             {
                 var chal = res.Headers["WWW-Authenticate"];
@@ -2307,7 +2319,7 @@ namespace WebSocketSharp
                     var authRes = new AuthenticationResponse(_authChallenge, _credentials, _nonceCount);
                     _nonceCount = authRes.NonceCount;
                     req.Headers["Authorization"] = authRes.ToString();
-                    res = sendHttpRequest(req, 15000);
+                    res = sendHttpRequest(req, 150000);
                 }
             }
 
@@ -2370,7 +2382,7 @@ namespace WebSocketSharp
         private void sendProxyConnectRequest()
         {
             var req = HttpRequest.CreateConnectRequest(_uri);
-            var res = sendHttpRequest(req, 90000);
+            var res = sendHttpRequest(req, 150000);
             if (res.IsProxyAuthenticationRequired)
             {
                 var chal = res.Headers["Proxy-Authenticate"];
@@ -2399,7 +2411,7 @@ namespace WebSocketSharp
 
                     var authRes = new AuthenticationResponse(authChal, _proxyCredentials, 0);
                     req.Headers["Proxy-Authorization"] = authRes.ToString();
-                    res = sendHttpRequest(req, 15000);
+                    res = sendHttpRequest(req, 150000);
                 }
 
                 if (res.IsProxyAuthenticationRequired)
@@ -2483,6 +2495,7 @@ namespace WebSocketSharp
                   {
                       if (!processReceivedFrame(frame) || _readyState == WebSocketState.Closed)
                       {
+                          _logger.Error($"Start receiving exited: {processReceivedFrame(frame)}, {_readyState}");
                           var exited = _receivingExited;
                           if (exited != null)
                           {
@@ -2669,6 +2682,7 @@ namespace WebSocketSharp
 
             try
             {
+                _logger.Error($"websocket Closed {payloadData.Code}, {payloadData.Reason.ToString()}");
                 OnClose.Emit(this, e);
             }
             catch (Exception ex)
