@@ -7,12 +7,22 @@ public class ToolTipBehavior : MonoBehaviour, IPointerEnterHandler, IPointerExit
 {
     [SerializeField]
     private GameObject _toolTip;
-    private float _waitTime = 0;
+    [SerializeField]
+    private GameObject _VRMenuVisuals;
 
-    private void Start()
+    void Start()
     {
         _toolTip.SetActive(false);
     }
+
+    /* void Update()
+     {
+         if (_VRMenuVisuals.activeInHierarchy == false)
+         {
+             _toolTip.SetActive(false);
+         }
+     } */
+
     public void OnPointerEnter(PointerEventData eventData)
     {
         ShowTip();

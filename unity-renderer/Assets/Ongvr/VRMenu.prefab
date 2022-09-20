@@ -324,6 +324,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _toolTip: {fileID: 1779394764694099517}
+  _VRMenuVisuals: {fileID: 8141916139541614596}
 --- !u!1 &347942805705161489
 GameObject:
   m_ObjectHideFlags: 0
@@ -1358,6 +1359,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _toolTip: {fileID: 666594598003481203}
+  _VRMenuVisuals: {fileID: 8141916139541614596}
 --- !u!1 &1520356865546654932
 GameObject:
   m_ObjectHideFlags: 0
@@ -2050,6 +2052,30 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+      - m_Target: {fileID: 8141916139541614596}
+        m_TargetAssemblyTypeName: UnityEngine.GameObject, UnityEngine
+        m_MethodName: SetActive
+        m_Mode: 6
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+      - m_Target: {fileID: 5090626451375394053}
+        m_TargetAssemblyTypeName: UnityEngine.GameObject, UnityEngine
+        m_MethodName: SetActive
+        m_Mode: 6
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
   Events: []
   resetOnDestroy: 0
   enabledOnStart: 1
@@ -2092,6 +2118,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _toolTip: {fileID: 5090626451375394053}
+  _VRMenuVisuals: {fileID: 8141916139541614596}
 --- !u!1 &3735072333816935878
 GameObject:
   m_ObjectHideFlags: 0
@@ -2432,6 +2459,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _toolTip: {fileID: 2431930334698979332}
+  _VRMenuVisuals: {fileID: 8141916139541614596}
 --- !u!1 &5090626451375394053
 GameObject:
   m_ObjectHideFlags: 0
@@ -2838,7 +2866,7 @@ GameObject:
   m_Component:
   - component: {fileID: 7050981516773811384}
   m_Layer: 5
-  m_Name: ToggleMute/Unmute
+  m_Name: OpenTaskbar
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -3558,7 +3586,7 @@ GameObject:
   - component: {fileID: 7052485222517137138}
   - component: {fileID: 6441887564344768213}
   m_Layer: 0
-  m_Name: Canvas
+  m_Name: Dock
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
