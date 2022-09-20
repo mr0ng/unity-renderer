@@ -394,7 +394,7 @@ public class ProfileHUDView : MonoBehaviour
 
     public void SetCardAsFullScreenMenuMode(bool isActive)
     {
-        buttonToggleMenu.gameObject.SetActive(!isActive);
+        buttonToggleMenu.gameObject.SetActive(!isActive && !DataStore.i.exploreV2.isOpen.Get());
         mainCanvas.sortingOrder = isActive ? 4 : 1;
     }
 }

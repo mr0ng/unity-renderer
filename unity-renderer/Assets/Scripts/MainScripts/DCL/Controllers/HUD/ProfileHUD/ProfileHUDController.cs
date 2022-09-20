@@ -44,7 +44,7 @@ public class ProfileHUDController : IHUD
 
 
         view = UnityEngine.Object.Instantiate(GetViewPrefab()).GetComponent<ProfileHUDView>();
-        view.name = "_ProfileHUD";
+        view.name = "_ProfileHUDVR";
 
         CommonScriptableObjects.builderInWorldNotNecessaryUIVisibilityStatus.OnChange += ChangeVisibilityForBuilderInWorld;
         DataStore.i.exploreV2.profileCardIsOpen.OnChange += SetAsFullScreenMenuMode;
@@ -97,7 +97,7 @@ public class ProfileHUDController : IHUD
 
     protected virtual GameObject GetViewPrefab()
     {
-        return Resources.Load<GameObject>("ProfileHUD");
+        return Resources.Load<GameObject>("ProfileHUDVR");
     }
 
     public void ChangeVisibilityForBuilderInWorld(bool current, bool previus) { view.gameObject.SetActive(current); }

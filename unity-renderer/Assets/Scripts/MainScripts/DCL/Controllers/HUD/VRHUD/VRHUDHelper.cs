@@ -53,7 +53,7 @@ public abstract class VRHUDHelper : MonoBehaviour
 
     public void Hide(Vector3 pos) => myTrans.position += pos;
 
-    public void Hide()
+    public virtual void Hide()
     {
         if (showHideAnimator)
             showHideAnimator.Hide();
@@ -64,7 +64,7 @@ public abstract class VRHUDHelper : MonoBehaviour
         myTrans.localPosition = Vector3.zero;
         myTrans.localRotation = Quaternion.identity;
     }
-    public void Show() 
+    public virtual void Show() 
     { 
         if (showHideAnimator)
             showHideAnimator.Show(true);
