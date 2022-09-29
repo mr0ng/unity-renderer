@@ -17,19 +17,24 @@ public class PerformanceController : MonoBehaviour
     private Camera camera;
     private SettingsControlController renderingScaleSettingController;
     private SettingsControlController sceneLoadRadiusSettingController;
-    private long totalAllocatedMemoryLong;
-    private long monoUsedSizeLong;
-    private long allocatedMemoryForGraphicsDriver;
-    private long totalUnusedReservedMemoryLong;
-    private long totalMemory;
+    // private long totalAllocatedMemoryLong;
+    // private long monoUsedSizeLong;
+    // private long allocatedMemoryForGraphicsDriver;
+    // private long totalUnusedReservedMemoryLong;
+    // private long totalMemory;
 
-    private int frameCount = 10;
+    [SerializeField] private int lowFPSThreshold = 60;
+    [SerializeField] private int acceptableFPSThreshold = 68;
+    [SerializeField] private int minimumClipPlaneDistance = 50;
+    [SerializeField] private int normalClipPlaneDistance = 1000;
+    
+    private int frameCount = 30;
 
-    #if UNITY_ANDROID && !UNITY_EDITOR
-    private long MaxMemoryAllowed = 1800000000;
-    #else
-    private long MaxMemoryAllowed = 5800000000;
-    #endif
+    // #if UNITY_ANDROID && !UNITY_EDITOR
+    // private long MaxMemoryAllowed = 1800000000;
+    // #else
+    // private long MaxMemoryAllowed = 5800000000;
+    // #endif
     // Start is called before the first frame update
    
     private UniversalRenderPipelineAsset lightweightRenderPipelineAsset = null;
@@ -51,7 +56,7 @@ public class PerformanceController : MonoBehaviour
         
     }
 
-    private WaitForSeconds waitTimeCheck = new WaitForSeconds(4f);
+    private WaitForSeconds waitTimeCheck = new WaitForSeconds(5f);
 
     private IEnumerator CheckPerformace()
     {
@@ -68,7 +73,7 @@ public class PerformanceController : MonoBehaviour
             TimeSpan frameSpan = (DateTime.Now - startTime);
 
             double fps =  1 / frameSpan.TotalSeconds*frameCount ;
-            //Debug.Log($"frameTime Span {frameSpan.TotalMilliseconds/5}ms, fps {fps} , memory {System.GC.GetTotalMemory(false)} of max {Profiler.GetMonoHeapSize()}");
+            Debug.Log($"frameTime Span {frameSpan.TotalMilliseconds/5}ms, fps {fps}");
             // totalAllocatedMemoryLong = Profiler.GetTotalAllocatedMemoryLong();
             // monoUsedSizeLong = Profiler.GetMonoUsedSizeLong(); 
             // allocatedMemoryForGraphicsDriver = Profiler.GetAllocatedMemoryForGraphicsDriver();
@@ -83,8 +88,8 @@ public class PerformanceController : MonoBehaviour
             //     RestoreSettings();
             // }
 
-            if(fps < 65) OnLowFrameRate((int)fps);
-            else if (fps > 70) GoodFrameRate();
+            if(fps < lowFPSThreshold) OnLowFrameRate((int)fps);
+            else if (fps > acceptableFPSThreshold) GoodFrameRate();
         }
     }
     
@@ -93,9 +98,9 @@ public class PerformanceController : MonoBehaviour
     
     private void OnLowFrameRate(int fps)
     {
-
-        if (camera.farClipPlane > 45)
-            camera.farClipPlane = Math.Max(45, camera.farClipPlane * (float)(fps/75));
+        camera = Camera.main;
+        if (camera.farClipPlane > minimumClipPlaneDistance)
+            camera.farClipPlane = Math.Max(minimumClipPlaneDistance, camera.farClipPlane * (float)(fps/acceptableFPSThreshold));
         // object newValue = renderingScaleSettingController.GetStoredValue();
         // float.TryParse(newValue.ToString(), out float newFloat);
         // if (newFloat > 0.8f)
@@ -109,7 +114,7 @@ public class PerformanceController : MonoBehaviour
     private void GoodFrameRate()
     {
         camera = Camera.main;
-        if (camera.farClipPlane < 500)
+        if (camera.farClipPlane < normalClipPlaneDistance)
             camera.farClipPlane = camera.farClipPlane * 1.15f;
         // object newValue = renderingScaleSettingController.GetStoredValue();
         // float.TryParse(newValue.ToString(), out float newFloat);

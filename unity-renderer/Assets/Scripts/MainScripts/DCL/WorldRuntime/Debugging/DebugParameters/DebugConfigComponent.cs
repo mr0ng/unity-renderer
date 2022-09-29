@@ -109,7 +109,8 @@ namespace DCL
         {
             if (sharedInstance == null)
                 sharedInstance = this;
-
+            DontDestroyOnLoad(this);
+            DontDestroyOnLoad(DCLWebview);
             DataStore.i.debugConfig.soloScene = debugConfig.soloScene;
             DataStore.i.debugConfig.soloSceneCoords = debugConfig.soloSceneCoords;
             DataStore.i.debugConfig.ignoreGlobalScenes = debugConfig.ignoreGlobalScenes;
@@ -166,6 +167,11 @@ namespace DCL
                 // ["network.http.referer.XOriginPolicy"] = "1",
                 
             });
+            
+#endif
+#if UNITY_ANDROID && !UNITY_EDITOR
+            DCLWebview.transform.parent.localPosition += new Vector3(0,-1,0);
+           
 #endif
 
         }
@@ -221,6 +227,7 @@ namespace DCL
             if (useCustomContentServer)
             {
                 RendereableAssetLoadHelper.useCustomContentServerUrl = true;
+                RendereableAssetLoadHelper.defaultLoadingType = RendereableAssetLoadHelper.LoadingType.ASSET_BUNDLE_WITH_GLTF_FALLBACK;
                 RendereableAssetLoadHelper.customContentServerUrl = customContentServerUrl;
             }
 
@@ -291,6 +298,7 @@ namespace DCL
             if (disableAssetBundles)
             {
                 debugString += "DISABLE_ASSET_BUNDLES&DISABLE_WEARABLE_ASSET_BUNDLES&";
+                RendereableAssetLoadHelper.defaultLoadingType = RendereableAssetLoadHelper.LoadingType.GLTF_ONLY;
             }
 
              if (builderInWorld)
@@ -331,6 +339,7 @@ namespace DCL
 
             webViewURL = $"{baseUrl}{debugString}{debugPanelString}position={startInCoords.x}%2C{startInCoords.y}&ws={DataStore.i.wsCommunication.url}";
             urlInput.text = webViewURL;
+            Debug.Log(webViewURL);
             var canvas = GameObject.Find("Canvas");
             //DontDestroyOnLoad(canvas);
             WebViewOptions opt = new WebViewOptions();
@@ -342,32 +351,32 @@ namespace DCL
             
             DCLWebview.gameObject.SetActive(true);
             DCLWebview.InitialUrl = webViewURL;
-            DCLWebview.WebView.Reload();
+            
+            //DCLWebview.WebView.Reload();
             DCLWebview.Initialized += (sender, eventArgs) => {
                 
-                //    Debug.Log($"main webview loading {webViewURL}");
+                    Debug.Log($"main webview loading {webViewURL}");
                     DCLWebview.WebView.LoadUrl(webViewURL);
-                };
+            };
 
             
             DCLWebview.transform.SetParent(canvas.transform, false);
             DCLWebview.InitialResolution = 350;
             
             
-            DCLWebview.RemoteDebuggingEnabled = false;
-            DCLWebview.LogConsoleMessages = false;
+            // DCLWebview.RemoteDebuggingEnabled = false;
+            // DCLWebview.LogConsoleMessages = false;
             DCLWebview.NativeOnScreenKeyboardEnabled = false;
             DCLWebview.Native2DModeEnabled = false;
 
            
             urlInput.keyboardType = TouchScreenKeyboardType.URL;
             urlInput.contentType = TMP_InputField.ContentType.Alphanumeric;
-            #if UNITY_ANDROID && !UNITY_EDITOR
-            DCLWebview.transform.localPosition += 2*Vector3.down;
-            keyboardDCL.transform.localPosition += 2*Vector3.down;
-            #endif
             
-        
+
+            DCLWebview.WebView.LoadProgressChanged += ( sender,  args) => { Debug.Log($"WebView LoadProgressChanged {args.Type.ToString()}, {sender.ToString()}");};
+            DCLWebview.WebView.PageLoadFailed+= ( sender,  args) => { Debug.Log($"WebView PageLoadFailed {args.ToString()}, {sender.ToString()}");};
+            DCLWebview.WebView.CloseRequested+= ( sender,  args) => { Debug.Log($"WebView CloseRequested {args.ToString()}, {sender.ToString()}");};
             Debug.Log("Created WebView objects");
             //_positionPrefabs();
             Debug.Log("finished positioning webview objects");
@@ -405,7 +414,7 @@ namespace DCL
         {
             Debug.Log("WebView Connected, hiding web browsers.");
             // _canvasWebViewPrefab.Visible = false;
-            // DCLWebview.transform.localPosition -= new Vector3(0, 10, 0);
+             DCLWebview.transform.localPosition += new Vector3(0, 1, 0);
             //_keyboard.WebViewPrefab.transform.localPosition -= new Vector3(0, 10, 0);
             keyboardOptions.gameObject.SetActive(false);
             keyboardDCL.gameObject.SetActive((false));
@@ -465,9 +474,9 @@ namespace DCL
         }
         public void PauseWebview()
         {
-            DCLWebview.WebView.Dispose();
+            //DCLWebview.WebView.Dispose();
         }
-       
+        
         private void OnDestroy()
         {
             DataStore.i.wsCommunication.communicationReady.OnChange -= OnCommunicationReadyChangedValue;

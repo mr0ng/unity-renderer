@@ -65,9 +65,15 @@ namespace DCL
 
         protected virtual void InitializeDataStore()
         {
+#if UNITY_ANDROID && !UNITY_EDITOR
             DataStore.i.textureConfig.gltfMaxSize.Set(512);
-            DataStore.i.textureConfig.generalMaxSize.Set(128);
+            DataStore.i.textureConfig.generalMaxSize.Set(2048);
+            DataStore.i.avatarConfig.useHologramAvatar.Set(true); 
+#else
+            DataStore.i.textureConfig.gltfMaxSize.Set(512);
+            DataStore.i.textureConfig.generalMaxSize.Set(2048);
             DataStore.i.avatarConfig.useHologramAvatar.Set(true);
+#endif
         }
 
         protected virtual void InitializeCommunication()

@@ -11,7 +11,8 @@ TestResults/
 Assets/InitTestScene*.unity
 Assets/InitTestScene*.unity.meta
 **/CurrentTestImages/
-
+unity-renderer/TestResources/VisualTests/
+unity-renderer/Assets/_Downloaded/
 .DS_Store
 .DS_Store?
 ._*

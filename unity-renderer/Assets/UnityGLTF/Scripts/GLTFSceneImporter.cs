@@ -81,8 +81,11 @@ namespace UnityGLTF
         /// <summary>
         /// Maximum LOD
         /// </summary>
+#if UNITY_ANDROID && !UNITY_EDITOR
         public int maximumLod = 300;
-
+        #else
+        public int maximumLod = 300;
+#endif
         /// <summary>
         /// The parent transform for the created GameObject
         /// </summary>
@@ -128,8 +131,11 @@ namespace UnityGLTF
         public bool ignoreMaterials = false;
 
         public bool useMaterialTransition { get => useMaterialTransitionValue && !renderingIsDisabled; set => useMaterialTransitionValue = value; }
-
+#if UNITY_ANDROID && !UNITY_EDITOR
         public int maxTextureSize = 512;
+        #else
+        public int maxTextureSize = 512;
+#endif
         private const float SAME_KEYFRAME_TIME_DELTA = 0.0001f;
 
         protected struct GLBStream

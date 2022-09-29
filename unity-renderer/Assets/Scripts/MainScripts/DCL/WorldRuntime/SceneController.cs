@@ -796,6 +796,7 @@ namespace DCL
                 UnloadParcelSceneExecute(list[i].Key);
             }
         }
+        //This was made to test quicker unloading of parcels that we have walked away from in VR.  Not currently used.
         public void UnloadSceneBeyondLOS(int LOS = 4)
         {
             var worldState = Environment.i.world.state;
