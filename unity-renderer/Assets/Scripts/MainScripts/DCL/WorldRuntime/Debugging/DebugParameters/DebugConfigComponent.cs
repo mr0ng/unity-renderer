@@ -1,20 +1,9 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Runtime.Remoting.Channels;
 using DCL.Components;
-using UnityEditor;
 using UnityEngine;
-using System.Threading.Tasks;
-using System.Timers;
-using Microsoft.MixedReality.Toolkit.Experimental.UI;
 using TMPro;
 using UnityEngine.UI;
-
-#if UNITY_ANDROID || UNITY_EDITOR
 using Vuplex.WebView;
 
-#endif
 namespace DCL
 {
     public class DebugConfigComponent : MonoBehaviour
@@ -361,19 +350,17 @@ namespace DCL
 
             
             DCLWebview.transform.SetParent(canvas.transform, false);
-            DCLWebview.InitialResolution = 350;
+            DCLWebview.Resolution = 350;
             
             
             // DCLWebview.RemoteDebuggingEnabled = false;
             // DCLWebview.LogConsoleMessages = false;
             DCLWebview.NativeOnScreenKeyboardEnabled = false;
             DCLWebview.Native2DModeEnabled = false;
-
-           
+            
             urlInput.keyboardType = TouchScreenKeyboardType.URL;
             urlInput.contentType = TMP_InputField.ContentType.Alphanumeric;
             
-
             DCLWebview.WebView.LoadProgressChanged += ( sender,  args) => { Debug.Log($"WebView LoadProgressChanged {args.Type.ToString()}, {sender.ToString()}");};
             DCLWebview.WebView.PageLoadFailed+= ( sender,  args) => { Debug.Log($"WebView PageLoadFailed {args.ToString()}, {sender.ToString()}");};
             DCLWebview.WebView.CloseRequested+= ( sender,  args) => { Debug.Log($"WebView CloseRequested {args.ToString()}, {sender.ToString()}");};
@@ -391,7 +378,7 @@ namespace DCL
            
             
             //rectTransform.anchoredPosition3D = Vector3.zero;
-            rectTransform.  offsetMin = new Vector2(-0.191f, -0.25f);
+            rectTransform.offsetMin = new Vector2(-0.191f, -0.25f);
             rectTransform.offsetMax = new Vector2(-0.809f, -0.75f);
             rectTransform.pivot = new Vector2(0.5f, 1);
             //rectTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, 520/150);
