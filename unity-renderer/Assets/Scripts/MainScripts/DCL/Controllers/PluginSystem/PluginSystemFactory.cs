@@ -25,7 +25,9 @@ namespace DCL
             //TODO: handle plugins that need to be converted to VR
            pluginSystem.Register<TransactionFeature>(() => new TransactionFeature());
             pluginSystem.Register<PreviewMenuPlugin>(() => new PreviewMenuPlugin());
-            //pluginSystem.Register<SkyboxController>(() => new SkyboxController());
+            #if (!UNITY_ANDROID)
+            pluginSystem.Register<SkyboxController>(() => new SkyboxController());
+#endif
             pluginSystem.Register<GotoPanelPlugin>(() => new GotoPanelPlugin());
             pluginSystem.Register<ExperiencesViewerFeature>(() => new ExperiencesViewerFeature());
             pluginSystem.Register<EmoteAnimationsPlugin>(() => new EmoteAnimationsPlugin());

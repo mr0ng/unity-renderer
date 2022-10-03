@@ -17,7 +17,7 @@ namespace DCL
         #else
         private const long MAX_GFX_MEMORY = 2500000;
 #endif
-        private const float TIME_FOR_NEW_MEMORY_CHECK = 30.0f;
+        private const float TIME_FOR_NEW_MEMORY_CHECK = 60.0f;
         private SettingsControlController sceneLoadRadiusSettingController;
         private Coroutine autoCleanupCoroutine;
 

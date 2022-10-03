@@ -28,7 +28,7 @@ public class PerformanceController : MonoBehaviour
     [SerializeField] private int minimumClipPlaneDistance = 50;
     [SerializeField] private int normalClipPlaneDistance = 1000;
     
-    private int frameCount = 30;
+    private int frameCount = 600;
 
     // #if UNITY_ANDROID && !UNITY_EDITOR
     // private long MaxMemoryAllowed = 1800000000;
@@ -56,7 +56,7 @@ public class PerformanceController : MonoBehaviour
         
     }
 
-    private WaitForSeconds waitTimeCheck = new WaitForSeconds(5f);
+    private WaitForSeconds waitTimeCheck = new WaitForSeconds(.5f);
 
     private IEnumerator CheckPerformace()
     {
@@ -73,7 +73,7 @@ public class PerformanceController : MonoBehaviour
             TimeSpan frameSpan = (DateTime.Now - startTime);
 
             double fps =  1 / frameSpan.TotalSeconds*frameCount ;
-            Debug.Log($"frameTime Span {frameSpan.TotalMilliseconds/5}ms, fps {fps}");
+            Debug.Log($"frameTime Span {frameSpan.TotalMilliseconds/frameCount}ms, fps {fps}");
             // totalAllocatedMemoryLong = Profiler.GetTotalAllocatedMemoryLong();
             // monoUsedSizeLong = Profiler.GetMonoUsedSizeLong(); 
             // allocatedMemoryForGraphicsDriver = Profiler.GetAllocatedMemoryForGraphicsDriver();
@@ -88,8 +88,8 @@ public class PerformanceController : MonoBehaviour
             //     RestoreSettings();
             // }
 
-            if(fps < lowFPSThreshold) OnLowFrameRate((int)fps);
-            else if (fps > acceptableFPSThreshold) GoodFrameRate();
+            //if(fps < lowFPSThreshold) OnLowFrameRate((int)fps);
+            //else if (fps > acceptableFPSThreshold) GoodFrameRate();
         }
     }
     

@@ -42,6 +42,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Net.Security;
 using System.Net.Sockets;
@@ -49,9 +50,9 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
 using DCL;
-using UnityEngine;
 using WebSocketSharp.Net;
 using WebSocketSharp.Net.WebSockets;
+using Debug = UnityEngine.Debug;
 
 namespace WebSocketSharp
 {
@@ -1270,6 +1271,7 @@ namespace WebSocketSharp
             try
             {
                 _logger.Error($"websocket Closed {payloadData.Code}, {payloadData.Reason.ToString()}");
+                Debug.LogError($"websocket Closed1 {payloadData.Code}, {payloadData.Reason.ToString()}");
                 OnClose.Emit(this, e);
             }
             catch (Exception ex)
@@ -1628,6 +1630,7 @@ namespace WebSocketSharp
         private void fatal(string message, ushort code)
         {
             var payload = new PayloadData(code, message);
+            Debug.Log($"CloseAsync1630 {code.ToString()}, {message.ToString()}");
             close(payload, !code.IsReserved(), false, false);
         }
 
@@ -1793,6 +1796,7 @@ namespace WebSocketSharp
         private bool processCloseFrame(WebSocketFrame frame)
         {
             var payload = frame.PayloadData;
+            Debug.Log($"CloseAsync1796 {payload.Code.ToString()}, {payload.Reason.ToString()}");
             close(payload, !payload.HasReservedCode, false, true);
 
             return false;
@@ -1927,6 +1931,7 @@ namespace WebSocketSharp
             }
 
             frame.Unmask();
+            
             return frame.IsFragment
                    ? processFragmentFrame(frame)
                    : frame.IsData
@@ -2037,6 +2042,7 @@ namespace WebSocketSharp
             try
             {
                 _logger.Error($"websocket Closed {code}, {reason.ToString()}");
+                Debug.LogError($"websocket Closed2 {code}, {reason.ToString()}");
                 OnClose.Emit(this, e);
             }
             catch (Exception ex)
@@ -2289,7 +2295,7 @@ namespace WebSocketSharp
         private HttpResponse sendHandshakeRequest()
         {
             var req = createHandshakeRequest();
-            var res = sendHttpRequest(req, 150000);
+            var res = sendHttpRequest(req, 250000);
             if (res.IsUnauthorized)
             {
                 var chal = res.Headers["WWW-Authenticate"];
@@ -2319,7 +2325,7 @@ namespace WebSocketSharp
                     var authRes = new AuthenticationResponse(_authChallenge, _credentials, _nonceCount);
                     _nonceCount = authRes.NonceCount;
                     req.Headers["Authorization"] = authRes.ToString();
-                    res = sendHttpRequest(req, 150000);
+                    res = sendHttpRequest(req, 250000);
                 }
             }
 
@@ -2382,7 +2388,7 @@ namespace WebSocketSharp
         private void sendProxyConnectRequest()
         {
             var req = HttpRequest.CreateConnectRequest(_uri);
-            var res = sendHttpRequest(req, 150000);
+            var res = sendHttpRequest(req, 250000);
             if (res.IsProxyAuthenticationRequired)
             {
                 var chal = res.Headers["Proxy-Authenticate"];
@@ -2411,7 +2417,7 @@ namespace WebSocketSharp
 
                     var authRes = new AuthenticationResponse(authChal, _proxyCredentials, 0);
                     req.Headers["Proxy-Authorization"] = authRes.ToString();
-                    res = sendHttpRequest(req, 150000);
+                    res = sendHttpRequest(req, 250000);
                 }
 
                 if (res.IsProxyAuthenticationRequired)
@@ -2495,7 +2501,8 @@ namespace WebSocketSharp
                   {
                       if (!processReceivedFrame(frame) || _readyState == WebSocketState.Closed)
                       {
-                          _logger.Error($"Start receiving exited: {processReceivedFrame(frame)}, {_readyState}");
+                          Debug.Log($"ReadFrame 2504 Start receiving exited {frame.IsClose},{frame.IsFragment},{frame.IsClose},{frame.ToString()}, _readyState{_readyState.ToString()}");
+                          _logger.Error($"Start receiving exited: processReceivedFrame(frame), {_readyState}");
                           var exited = _receivingExited;
                           if (exited != null)
                           {
@@ -2683,6 +2690,7 @@ namespace WebSocketSharp
             try
             {
                 _logger.Error($"websocket Closed {payloadData.Code}, {payloadData.Reason.ToString()}");
+                Debug.LogError($"websocket Closed3 {payloadData.Code}, {payloadData.Reason.ToString()}");
                 OnClose.Emit(this, e);
             }
             catch (Exception ex)
@@ -3400,7 +3408,7 @@ namespace WebSocketSharp
                 var msg = "MandatoryExtension cannot be used.";
                 throw new ArgumentException(msg, "code");
             }
-
+            Debug.Log($"CloseAsync846 {code.ToString()}");
             closeAsync((ushort)code, String.Empty);
         }
 
@@ -3515,7 +3523,7 @@ namespace WebSocketSharp
                 var msg = "Its size is greater than 123 bytes.";
                 throw new ArgumentOutOfRangeException("reason", msg);
             }
-
+            Debug.Log($"CloseAsync3478 {code.ToString()}, {reason.ToString()}");
             closeAsync(code, reason);
         }
 
@@ -3616,8 +3624,7 @@ namespace WebSocketSharp
                 var msg = "Its size is greater than 123 bytes.";
                 throw new ArgumentOutOfRangeException("reason", msg);
             }
-
-            closeAsync((ushort)code, reason);
+            Debug.Log($"CloseAsync3585 {code.ToString()}, {reason.ToString()}");            closeAsync((ushort)code, reason);
         }
 
         /// <summary>

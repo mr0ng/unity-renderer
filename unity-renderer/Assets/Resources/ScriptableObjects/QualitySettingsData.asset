@@ -17,7 +17,7 @@ MonoBehaviour:
   - displayName: Low
     baseResolution: 0
     antiAliasing: 1
-    renderScale: 0.9
+    renderScale: 1
     shadows: 0
     softShadows: 0
     shadowResolution: 256

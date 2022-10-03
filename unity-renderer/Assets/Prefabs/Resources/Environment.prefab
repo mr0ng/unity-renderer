@@ -1711,7 +1711,7 @@ PrefabInstance:
     - target: {fileID: 8346044500597020962, guid: b571419db9afc1e4390f8bd7394ca465,
         type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0
+      value: -1.9
       objectReference: {fileID: 0}
     - target: {fileID: 8346044500597020962, guid: b571419db9afc1e4390f8bd7394ca465,
         type: 3}
@@ -1757,6 +1757,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: FloorQuad
+      objectReference: {fileID: 0}
+    - target: {fileID: 8689919702245327768, guid: b571419db9afc1e4390f8bd7394ca465,
+        type: 3}
+      propertyPath: m_Layer
+      value: 10
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: b571419db9afc1e4390f8bd7394ca465, type: 3}

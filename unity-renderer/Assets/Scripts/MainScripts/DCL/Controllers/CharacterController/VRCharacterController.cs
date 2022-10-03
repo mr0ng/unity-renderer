@@ -8,11 +8,11 @@ public class VRCharacterController : MonoBehaviour
     [SerializeField]
     private BooleanVariable menuOpen;
     
-#if (UNITY_ANDROID && !UNITY_EDITOR)
-    private readonly Vector3 offset = new Vector3(0f, 0.55f, 0f);
-#else
+ //#if (UNITY_ANDROID && !UNITY_EDITOR)
+//     private readonly Vector3 offset = new Vector3(0f, 0.55f, 0f);
+// #else
     private readonly Vector3 offset = new Vector3(0f, -0.85f, 0f);
-#endif
+// #endif
     private Transform mixedRealityPlayspace;
 
     private void Start()

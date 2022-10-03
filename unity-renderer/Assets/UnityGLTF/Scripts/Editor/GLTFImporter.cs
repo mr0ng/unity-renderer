@@ -123,17 +123,22 @@ namespace UnityGLTF
             var loader = new GLTFSceneImporter(Path.GetFullPath(projectFilePath), gLTFRoot, fileLoader, null, stream);
             loader.addImagesToPersistentCaching = false;
             loader.addMaterialsToPersistentCaching = false;
-            loader.initialVisibility = true;
+            loader.initialVisibility = false;
             loader.useMaterialTransition = false;
+#if UNITY_ANDROID && ! UNITY_EDITOR
             loader.maxTextureSize = 512;
+#else
+            loader.maxTextureSize = 512;
+#endif
+            
             loader.maximumLod = _maximumLod;
-            loader.forceGPUOnlyMesh = false;
-            loader.forceGPUOnlyTex = false;
-            loader.forceSyncCoroutines = true;
+            loader.forceGPUOnlyMesh = true;
+            loader.forceGPUOnlyTex = true;
+            loader.forceSyncCoroutines = false;
             loader.ignoreMaterials = !_importMaterials;
 
             Task task = loader.LoadScene(CancellationToken.None);
-            bool result = task.Wait(TimeSpan.FromSeconds(30));
+            bool result = task.Wait(TimeSpan.FromSeconds(60));
                 
             switch (result)
             {

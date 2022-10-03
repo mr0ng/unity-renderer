@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using DCL.Components;
 using UnityEngine;
 using TMPro;
@@ -158,10 +159,10 @@ namespace DCL
             });
             
 #endif
-#if UNITY_ANDROID && !UNITY_EDITOR
-            DCLWebview.transform.parent.localPosition += new Vector3(0,-1,0);
-           
-#endif
+// #if UNITY_ANDROID && !UNITY_EDITOR
+//             DCLWebview.transform.parent.localPosition += new Vector3(0,-1,0);
+//            
+// #endif
 
         }
 
