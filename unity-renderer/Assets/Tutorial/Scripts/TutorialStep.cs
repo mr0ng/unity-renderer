@@ -29,6 +29,16 @@ namespace DCL.Tutorial
         internal bool blockSkipActions = false;
 
         internal bool letInstantiation = true;
+        private HUDCanvasCameraModeController hudCanvasCameraMode;
+
+        private void Awake()
+        {
+            var canvas = GetComponentInChildren<Canvas>();
+            if (canvas != null)
+                hudCanvasCameraMode = new HUDCanvasCameraModeController(canvas, DataStore.i.camera.hudsCamera);
+        }
+
+        private void OnDestroy() { hudCanvasCameraMode?.Dispose(); }
 
         /// <summary>
         /// Step initialization (occurs before OnStepExecute() execution).
@@ -60,7 +70,7 @@ namespace DCL.Tutorial
                     tutorialController.SetTeacherPosition(teacherPositionRef.position);
 
                     if (tutorialController.configuration.teacher != null &&
-                        tutorialController.configuration.teacher.isHiddenByAnAnimation)
+                        tutorialController.configuration.teacher.IsHiddenByAnimation)
                         tutorialController.configuration.teacher.PlayAnimation(TutorialTeacher.TeacherAnimation.Reset);
                 }
             }

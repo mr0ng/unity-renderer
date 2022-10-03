@@ -1,4 +1,5 @@
 using System;
+using DCL;
 using UnityEngine;
 
 public class UserProfileController : MonoBehaviour
@@ -56,16 +57,19 @@ public class UserProfileController : MonoBehaviour
 
     public void AddUserProfilesToCatalog(string payload)
     {
-        UserProfileModel[] items = JsonUtility.FromJson<UserProfileModel[]>(payload);
-        int count = items.Length;
-        for (int i = 0; i < count; ++i)
-        {
-            AddUserProfileToCatalog(items[i]);
-        }
+        var usersPayload = JsonUtility.FromJson<AddUserProfilesToCatalogPayload>(payload);
+        var users = usersPayload.users;
+        var count = users.Length;
+        
+        for (var i = 0; i < count; ++i)
+            AddUserProfileToCatalog(users[i]);
     }
 
     public void AddUserProfileToCatalog(UserProfileModel model)
     {
+        model.userId = model.userId.ToLower();
+        model.ethAddress = model.ethAddress?.ToLower();
+        
         if (!userProfilesCatalog.TryGetValue(model.userId, out UserProfile userProfile))
             userProfile = ScriptableObject.CreateInstance<UserProfile>();
 
@@ -84,7 +88,7 @@ public class UserProfileController : MonoBehaviour
         return null;
     }
 
-    public static UserProfile GetProfileByUserId(string targetUserId) { return userProfilesCatalogValue.Get(targetUserId); }
+    public static UserProfile GetProfileByUserId(string targetUserId) { return userProfilesCatalog.Get(targetUserId); }
 
     public void RemoveUserProfilesFromCatalog(string payload)
     {

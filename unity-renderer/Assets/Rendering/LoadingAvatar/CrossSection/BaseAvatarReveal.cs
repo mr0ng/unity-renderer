@@ -108,11 +108,11 @@ public class BaseAvatarReveal : MonoBehaviour, IBaseAvatarRevealer
         }
     }
 
-    public async UniTask StartAvatarRevealAnimation(bool instant, CancellationToken cancellationToken)
+    public async UniTask StartAvatarRevealAnimation(bool withTransition, CancellationToken cancellationToken)
     {
         try
         {
-            if (!instant)
+            if (!withTransition)
             {
                 SetFullRendered();
                 return;
@@ -120,7 +120,7 @@ public class BaseAvatarReveal : MonoBehaviour, IBaseAvatarRevealer
 
             isRevealing = true;
             animation.Play();
-            await UniTask.WaitUntil(() => !isRevealing, cancellationToken: cancellationToken);
+            await UniTask.WaitUntil(() => !isRevealing, cancellationToken: cancellationToken).AttachExternalCancellation(cancellationToken);
         }
         catch(OperationCanceledException)
         {
@@ -138,9 +138,10 @@ public class BaseAvatarReveal : MonoBehaviour, IBaseAvatarRevealer
     {
         meshRenderer.enabled = false;
         animation.Stop();
+        const float REVEALED_POSITION = -10;
         foreach (Material m in _materials)
         {
-            m.SetVector("_RevealPosition", new Vector3(0, -2.5f, 0));
+            m.SetVector("_RevealPosition", new Vector3(0, REVEALED_POSITION, 0));
         }
         _ghostMaterial.SetVector("_RevealPosition", new Vector3(0, 2.5f, 0));
         DisableParticleEffects();

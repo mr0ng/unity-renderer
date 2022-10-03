@@ -26,23 +26,23 @@ public class PlayerInfoCardHUDViewShould : IntegrationTestSuite_Legacy
         CreateMockWearableByRarity(WearableLiterals.ItemRarity.UNIQUE);
 
         userProfileController = TestUtils.CreateComponentWithGameObject<UserProfileController>("UserProfileController");
-        userProfileController.AddUserProfileToCatalog(new UserProfileModel { userId = "userId" });
+        userProfileController.AddUserProfileToCatalog(new UserProfileModel { userId = "userid" });
 
-        userProfile = UserProfileController.userProfilesCatalog.Get("userId");
+        userProfile = UserProfileController.userProfilesCatalog.Get("userid");
         userProfile.UpdateData(new UserProfileModel
         {
             userId = "userId",
             name = "username",
             description = "description",
-            email = "email",
-            inventory = new[]
-            {
-                WearableLiterals.ItemRarity.EPIC,
-                WearableLiterals.ItemRarity.LEGENDARY,
-                WearableLiterals.ItemRarity.MYTHIC,
-                WearableLiterals.ItemRarity.RARE,
-                WearableLiterals.ItemRarity.UNIQUE,
-            }
+            email = "email"
+        });
+        userProfile.SetInventory(new[]
+        {
+            WearableLiterals.ItemRarity.EPIC,
+            WearableLiterals.ItemRarity.LEGENDARY,
+            WearableLiterals.ItemRarity.MYTHIC,
+            WearableLiterals.ItemRarity.RARE,
+            WearableLiterals.ItemRarity.UNIQUE,
         });
     }
 

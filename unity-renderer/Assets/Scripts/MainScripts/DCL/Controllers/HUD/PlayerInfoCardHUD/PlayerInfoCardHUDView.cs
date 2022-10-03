@@ -58,6 +58,9 @@ public class PlayerInfoCardHUDView : MonoBehaviour
     private UnityAction<bool> toggleChangedDelegate => (x) => UpdateTabs();
 
     private MouseCatcher mouseCatcher;
+    private HUDCanvasCameraModeController hudCanvasCameraModeController;
+
+    private void Awake() { hudCanvasCameraModeController = new HUDCanvasCameraModeController(GetComponent<Canvas>(), DataStore.i.camera.hudsCamera); }
 
     public static PlayerInfoCardHUDView CreateView()
     {
@@ -162,7 +165,7 @@ public class PlayerInfoCardHUDView : MonoBehaviour
     }
 
     public void UpdateFriendshipInteraction(bool canUseFriendButton,
-        FriendsController.UserStatus status)
+        UserStatus status)
     {
         if (status == null)
         {
@@ -263,6 +266,7 @@ public class PlayerInfoCardHUDView : MonoBehaviour
 
     private void OnDestroy()
     {
+        hudCanvasCameraModeController?.Dispose();
         if (mouseCatcher != null)
             mouseCatcher.OnMouseDown -= OnPointerDown;
     }

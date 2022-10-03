@@ -1,13 +1,13 @@
 using DCL;
-using System.Collections;
-using System.Collections.Generic;
-using System.Reflection;
 using DCL.Camera;
-using DCL.Controllers;
+using DCL.CameraTool;
 using DCL.Helpers.NFT.Markets;
 using DCL.Rendering;
 using DCL.SettingsCommon;
 using NSubstitute;
+using System.Collections;
+using System.Collections.Generic;
+using System.Reflection;
 using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.TestTools;
@@ -32,6 +32,7 @@ public class IntegrationTestSuite_Legacy
 
         // TODO(Brian): Move these variants to a DataStore object to avoid having to reset them
         //              like this.
+        CommonScriptableObjects.allUIHidden.Set(false);
         CommonScriptableObjects.isFullscreenHUDOpen.Set(false);
         CommonScriptableObjects.rendererState.Set(true);
 
@@ -52,7 +53,7 @@ public class IntegrationTestSuite_Legacy
         result.Register<IMemoryManager>(() => Substitute.For<IMemoryManager>());
         result.Register<IParcelScenesCleaner>(() => Substitute.For<IParcelScenesCleaner>());
         result.Register<ICullingController>(() => Substitute.For<ICullingController>());
-        result.Register<ILastReadMessagesService>(() => Substitute.For<ILastReadMessagesService>());
+        result.Register<IEmotesCatalogService>(() => Substitute.For<IEmotesCatalogService>());
 
         result.Register<IServiceProviders>(
             () =>
@@ -101,6 +102,7 @@ public class IntegrationTestSuite_Legacy
 
         yield return TearDown_LegacySystems();
         DataStore.Clear();
+        ThumbnailsManager.Clear();
         TearDown_Memory();
 
         if (MapRenderer.i != null)
@@ -111,6 +113,12 @@ public class IntegrationTestSuite_Legacy
         Environment.Dispose();
 
         yield return null;
+        
+        NotificationScriptableObjects.UnloadAll();
+        AudioScriptableObjects.UnloadAll();
+        CommonScriptableObjects.UnloadAll();
+        
+        yield return null;
 
         GameObject[] gos = Object.FindObjectsOfType<GameObject>(true);
 
@@ -118,7 +126,7 @@ public class IntegrationTestSuite_Legacy
         {
             Object.Destroy(go);
         }
-
+        
         yield return null;
     }
 

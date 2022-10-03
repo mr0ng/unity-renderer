@@ -1,4 +1,4 @@
-using System;
+using JetBrains.Annotations;
 using UnityEngine;
 
 [RequireComponent(typeof(Animator))]
@@ -14,24 +14,13 @@ public class ShowHideAnimator : MonoBehaviour
     public bool disableAfterFadeOut;
     public string visibleParam = "visible";
 
-    public bool isVisible => animator.GetBool(visibleParamHash);
-
     private Animator animatorValue;
 
-    private Animator animator
-    {
-        get
-        {
-            if (animatorValue == null)
-            {
-                animatorValue = GetComponent<Animator>();
-            }
-
-            return animatorValue;
-        }
-    }
-
     private int? visibleParamHashValue = null;
+
+    public bool isVisible => animator.GetBool(visibleParamHash);
+
+    private Animator animator => animatorValue ??= GetComponent<Animator>();
 
     private int visibleParamHash
     {
@@ -43,6 +32,17 @@ public class ShowHideAnimator : MonoBehaviour
             return visibleParamHashValue.Value;
         }
     }
+
+    private void OnEnable()
+    {
+        if ( hideOnEnable )
+        {
+            Hide(true);
+        }
+    }
+
+    public event System.Action<ShowHideAnimator> OnWillFinishHide;
+    public event System.Action<ShowHideAnimator> OnWillFinishStart;
 
     public void Show(bool instant = false)
     {
@@ -66,16 +66,18 @@ public class ShowHideAnimator : MonoBehaviour
             animator.Update(10);
     }
 
+    [UsedImplicitly]
     public void AnimEvent_HideFinished()
     {
         OnWillFinishHide?.Invoke(this);
 
-        if (disableAfterFadeOut)
+        if (disableAfterFadeOut && gameObject != null)
         {
-            gameObject?.SetActive(false);
+            gameObject.SetActive(false);
         }
     }
 
+	[UsedImplicitly]
     public void AnimEvent_ShowFinished() { OnWillFinishStart?.Invoke(this); }
     
     public void AnimEvent_HideStarted() { OnStartHide?.Invoke(); }
@@ -89,4 +91,5 @@ public class ShowHideAnimator : MonoBehaviour
             Hide(true);
         }
     }
+
 }

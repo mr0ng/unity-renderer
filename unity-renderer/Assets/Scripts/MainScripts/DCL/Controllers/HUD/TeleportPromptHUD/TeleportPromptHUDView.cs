@@ -53,9 +53,11 @@ public class TeleportPromptHUDView : MonoBehaviour
 
     WebRequestAsyncOperation fetchParcelImageOp;
     Texture2D downloadedBanner;
+    private HUDCanvasCameraModeController hudCanvasCameraModeController;
 
     private void Awake()
     {
+        hudCanvasCameraModeController = new HUDCanvasCameraModeController(content.GetComponent<Canvas>(), DataStore.i.camera.hudsCamera);
         closeButton.onClick.AddListener(OnClosePressed);
         cancelButton.onClick.AddListener(OnClosePressed);
         continueButton.onClick.AddListener(OnTeleportPressed);
@@ -168,6 +170,7 @@ public class TeleportPromptHUDView : MonoBehaviour
 
     private void OnDestroy()
     {
+        hudCanvasCameraModeController?.Dispose();
         if (downloadedBanner != null)
         {
             UnityEngine.Object.Destroy(downloadedBanner);

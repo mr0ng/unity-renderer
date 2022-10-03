@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using DCL.Emotes;
 using UnityEngine;
 
 namespace DCL.EmotesWheel
@@ -14,7 +15,7 @@ namespace DCL.EmotesWheel
         private BaseVariable<bool> canStartMenuBeOpened => DataStore.i.exploreV2.isSomeModalOpen;
         private bool shortcutsCanBeUsed => !isStartMenuOpen.Get();
         private DataStore_EmotesCustomization emotesCustomizationDataStore => DataStore.i.emotesCustomization;
-        private BaseDictionary<(string bodyshapeId, string emoteId), AnimationClip> emoteAnimations => DataStore.i.emotes.animations;
+        private BaseDictionary<(string bodyshapeId, string emoteId), EmoteClipData> emoteAnimations => DataStore.i.emotes.animations;
 
         private UserProfile ownUserProfile => UserProfile.GetOwnUserProfile();
         private InputAction_Trigger closeWindow;
@@ -41,10 +42,11 @@ namespace DCL.EmotesWheel
         private InputAction_Trigger auxShortcut9InputAction;
         private UserProfile userProfile;
         private BaseDictionary<string, WearableItem> catalog;
+        private readonly IEmotesCatalogService emoteCatalog;
         private bool ownedWearablesAlreadyRequested = false;
         private BaseDictionary<string, EmoteWheelSlot> slotsInLoadingState = new BaseDictionary<string, EmoteWheelSlot>();
 
-        public EmotesWheelController(UserProfile userProfile, BaseDictionary<string, WearableItem> catalog)
+        public EmotesWheelController(UserProfile userProfile, BaseDictionary<string, WearableItem> catalog, IEmotesCatalogService emoteCatalog)
         {
             closeWindow = Resources.Load<InputAction_Trigger>("CloseWindow");
             closeWindow.OnTriggered += OnCloseWindowPressed;
@@ -62,6 +64,7 @@ namespace DCL.EmotesWheel
 
             this.userProfile = userProfile;
             this.catalog = catalog;
+            this.emoteCatalog = emoteCatalog;
             emotesCustomizationDataStore.equippedEmotes.OnSet += OnEquippedEmotesSet;
             OnEquippedEmotesSet(emotesCustomizationDataStore.equippedEmotes.Get());
             emoteAnimations.OnAdded += OnAnimationAdded;
@@ -91,30 +94,20 @@ namespace DCL.EmotesWheel
 
         private void UpdateEmoteSlots()
         {
-            if (catalog == null)
-                return;
-
             List<EmotesWheelView.EmoteSlotData> emotesToSet = new List<EmotesWheelView.EmoteSlotData>();
             foreach (EquippedEmoteData equippedEmoteData in emotesCustomizationDataStore.equippedEmotes.Get())
             {
                 if (equippedEmoteData != null)
                 {
-                    catalog.TryGetValue(equippedEmoteData.id, out WearableItem emoteItem);
+                    emoteCatalog.TryGetLoadedEmote(equippedEmoteData.id, out var emoteItem);
 
                     if (emoteItem != null)
                     {
-                        if (!emoteItem.data.tags.Contains(WearableLiterals.Tags.BASE_WEARABLE) && userProfile.GetItemAmount(emoteItem.id) == 0)
+                        emotesToSet.Add(new EmotesWheelView.EmoteSlotData
                         {
-                            emotesToSet.Add(null);
-                        }
-                        else
-                        {
-                            emotesToSet.Add(new EmotesWheelView.EmoteSlotData
-                            {
-                                emoteItem = emoteItem,
-                                thumbnailSprite = emoteItem.thumbnailSprite != null ? emoteItem.thumbnailSprite : equippedEmoteData.cachedThumbnail
-                            });
-                        }
+                            emoteItem = emoteItem,
+                            thumbnailSprite = emoteItem.thumbnailSprite != null ? emoteItem.thumbnailSprite : equippedEmoteData.cachedThumbnail
+                        });
                     }
                     else
                     {
@@ -131,10 +124,11 @@ namespace DCL.EmotesWheel
             foreach (EmoteWheelSlot slot in updatedWheelSlots)
             {
                 slot.SetAsLoading(false);
-                slotsInLoadingState.Remove(slot.emoteId);
-
                 if (string.IsNullOrEmpty(slot.emoteId))
                     continue;
+
+                slotsInLoadingState.Remove(slot.emoteId);
+
 
                 slot.SetAsLoading(true);
                 slotsInLoadingState.Add(slot.emoteId, slot);
@@ -143,7 +137,7 @@ namespace DCL.EmotesWheel
             }
         }
 
-        private void OnAnimationAdded((string bodyshapeId, string emoteId) values, AnimationClip animationClip) { RefreshSlotLoadingState(values.emoteId); }
+        private void OnAnimationAdded((string bodyshapeId, string emoteId) values, EmoteClipData emoteClipData) { RefreshSlotLoadingState(values.emoteId); }
 
         private void RefreshSlotLoadingState(string emoteId)
         {

@@ -8,6 +8,7 @@ using SignupHUD;
 using SocialFeaturesAnalytics;
 using System;
 using System.Collections.Generic;
+using DCL.Chat;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
@@ -241,7 +242,7 @@ public class HUDController : IHUDController
                     PublicChatChannelHud.OnClosed += HandlePublicChatChannelClosed;
                     taskbarHud?.AddPublicChatChannel(PublicChatChannelHud);
                     // TODO: this call should be removed when chat notifications are implemented
-                    taskbarHud?.OpenPublicChatChannel("general", false);
+                    taskbarHud?.OpenPublicChatChannel(ChatUtils.NEARBY_CHANNEL_ID, false);
                     PublicChatChannelHud.ActivatePreviewModeInstantly();
                 }
                 else
@@ -495,15 +496,15 @@ public class HUDController : IHUDController
         newModel.name = "FakePassport";
         newModel.description = "Fake Description for Testing";
         newModel.userId = "test-id";
-        newModel.inventory = new[]
+
+        UserProfileController.i.AddUserProfileToCatalog(newModel);
+        UserProfileController.GetProfileByUserId(newModel.userId).SetInventory(new[]
         {
             "dcl://halloween_2019/machete_headband_top_head",
             "dcl://halloween_2019/bee_suit_upper_body",
             "dcl://halloween_2019/bride_of_frankie_upper_body",
             "dcl://halloween_2019/creepy_nurse_upper_body",
-        };
-
-        UserProfileController.i.AddUserProfileToCatalog(newModel);
+        });
         Resources.Load<StringVariable>("CurrentPlayerInfoCardId").Set(newModel.userId);
     }
 #endif

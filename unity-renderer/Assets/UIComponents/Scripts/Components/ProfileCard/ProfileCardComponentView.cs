@@ -52,7 +52,7 @@ public interface IProfileCardComponentView
     void SetLoadingIndicatorVisible(bool isVisible);
 }
 
-public class ProfileCardComponentView : BaseComponentView, IProfileCardComponentView, IComponentModelConfig
+public class ProfileCardComponentView : BaseComponentView, IProfileCardComponentView, IComponentModelConfig<ProfileCardComponentModel>
 {
     [Header("Prefab References")]
     [SerializeField] internal Button button;
@@ -71,9 +71,9 @@ public class ProfileCardComponentView : BaseComponentView, IProfileCardComponent
             profileImage.OnLoaded += OnProfileImageLoaded;
     }
 
-    public void Configure(BaseComponentModel newModel)
+    public void Configure(ProfileCardComponentModel newModel)
     {
-        model = (ProfileCardComponentModel)newModel;
+        model = newModel;
         RefreshControl();
     }
 
@@ -172,8 +172,6 @@ public class ProfileCardComponentView : BaseComponentView, IProfileCardComponent
 
         if (profileAddress != null)
             profileAddress.gameObject.SetActive(!isClaimedName);
-
-        SetProfileName(model.profileName);
     }
 
     public void SetLoadingIndicatorVisible(bool isVisible) { profileImage.SetLoadingIndicatorVisible(isVisible); }

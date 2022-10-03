@@ -35,6 +35,7 @@ public class WearableItem
         public string[] tags;
         public string[] replaces;
         public string[] hides;
+        public bool loop;
     }
 
     public Data data;
@@ -200,7 +201,13 @@ public class WearableItem
 
     public bool DoesHide(string category, string bodyShape) => GetHidesList(bodyShape).Any(s => s == category);
 
-    public bool IsCollectible() { return !string.IsNullOrEmpty(rarity); }
+    public bool IsCollectible()
+    {
+        if (id == null)
+            return false;
+
+        return !id.StartsWith("urn:decentraland:off-chain:base-avatars:");
+    }
 
     public bool IsSkin() => data.category == WearableLiterals.Categories.SKIN;
 
@@ -280,6 +287,12 @@ public class WearableItem
     }
 
     public bool IsEmote() { return emoteDataV0 != null; }
+
+    public override string ToString() { return id; }
+}
+
+[Serializable]
+public class EmoteItem : WearableItem{
 }
 
 [Serializable]
