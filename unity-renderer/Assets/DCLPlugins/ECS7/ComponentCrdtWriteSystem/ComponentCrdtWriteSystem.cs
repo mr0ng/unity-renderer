@@ -76,26 +76,6 @@ public class ComponentCrdtWriteSystem : IDisposable
             {
                 crdt.timestamp = message.minTimeStamp;
             }
-			
-            sceneMessages.Enqueue(message);
-        }
-    }
-    
-    internal void ProcessMessages()
-    {
-        
-        if (queuedMessages.Count == 0)
-        {
-            return;
-        }
-
-        Queue<CRDTMessage> sceneMessages;
-
-        // we prioritize current scene's messages
-        string currentSceneId = CommonScriptableObjects.sceneID.Get();
-        if (!string.IsNullOrEmpty(currentSceneId) && queuedMessages.TryGetValue(currentSceneId, out sceneMessages))
-        {
-
 
             if (message.writeType.HasFlag(ECSComponentWriteType.SEND_TO_LOCAL))
 

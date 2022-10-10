@@ -14,7 +14,7 @@ namespace DCL
         private void Start()
         {
             myTrans = transform;
-            controller.ApplyHideModifier();
+            controller.ApplyHideAvatarModifier();
             //DCLCharacterController.i.OnUpdateFinish += OnUpdateFinish;
         }
         

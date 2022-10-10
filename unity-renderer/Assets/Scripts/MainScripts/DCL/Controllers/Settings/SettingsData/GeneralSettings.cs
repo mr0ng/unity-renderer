@@ -21,10 +21,14 @@ namespace DCL.SettingsCommon
         public bool showAvatarNames;
         public bool dynamicProceduralSkybox;
         public bool invertYAxis;
+        public bool useInternalBrowser;
         public float skyboxTime;
 
         [Tooltip("First person camera FOV")]
         [Range(50, 80)]
         public float firstPersonCameraFOV;
+        
+        
+        
     }
 }

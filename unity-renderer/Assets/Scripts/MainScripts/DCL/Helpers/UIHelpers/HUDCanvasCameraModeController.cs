@@ -24,7 +24,9 @@ public class HUDCanvasCameraModeController : IDisposable
     internal void UpdateCanvas(Camera newCamera, Camera oldCamera)
     {
         canvas.renderMode = newCamera == null ? RenderMode.ScreenSpaceOverlay : RenderMode.ScreenSpaceCamera;
-        canvas.worldCamera = newCamera;
+        #if !DCL_VR
+            canvas.worldCamera = newCamera; //disabled for vr to use raycast camera instead.
+        #endif
     }
 
     public void Dispose() { hudCameraVariable.OnChange -= UpdateCanvas; }

@@ -12,7 +12,7 @@ using UnityEngine.UI;
 
 public class ChatHUDView : BaseComponentView, IChatHUDComponentView
 {
-    private const string VIEW_PATH = "SocialBarV1/Chat";
+    private const string VIEW_PATH = "SocialBarV1/ChatHUDVR";
 
     public TMP_InputField inputField;
     public RectTransform chatEntriesContainer;

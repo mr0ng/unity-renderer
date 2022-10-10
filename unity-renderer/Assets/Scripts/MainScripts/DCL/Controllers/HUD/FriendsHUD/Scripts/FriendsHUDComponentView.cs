@@ -87,7 +87,7 @@ public class FriendsHUDComponentView : BaseComponentView, IFriendsHUDComponentVi
 
     public static FriendsHUDComponentView Create()
     {
-        var view = Instantiate(Resources.Load<GameObject>("SocialBarV1/FriendsHUD"))
+        var view = Instantiate(Resources.Load<GameObject>("SocialBarV1/FriendsHUDVR"))
             .GetComponent<FriendsHUDComponentView>();
         return view;
     }

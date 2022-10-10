@@ -177,7 +177,7 @@ PlayerSettings:
   AndroidTargetSdkVersion: 0
   AndroidPreferredInstallLocation: 0
   aotOptions: 
-  stripEngineCode: 1
+  stripEngineCode: 0
   iPhoneStrippingLevel: 0
   iPhoneScriptCallOptimization: 0
   ForceInternetPermission: 1
@@ -185,7 +185,7 @@ PlayerSettings:
   CreateWallpaper: 0
   APKExpansionFiles: 0
   keepLoadedShadersAlive: 1
-  StripUnusedMeshComponents: 1
+  StripUnusedMeshComponents: 0
   VertexChannelCompressionMask: 254
   iPhoneSdkVersion: 988
   iOSTargetOSVersionString: 11.0
@@ -471,7 +471,7 @@ PlayerSettings:
   enableCrashReportAPI: 0
   cameraUsageDescription: 
   locationUsageDescription: 
-  microphoneUsageDescription: 
+  microphoneUsageDescription: Chat
   bluetoothUsageDescription: 
   switchNMETAOverride: 
   switchNetLibKey: 
@@ -711,7 +711,7 @@ PlayerSettings:
   webGLDecompressionFallback: 0
   scriptingDefineSymbols:
     1: UNITY_POST_PROCESSING_STACK_V2;GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE;MRTK_GLTF_IMPORTER_OFF;VUPLEX_CCU;VUPLEX_MRTK;VUPLEX_OCULUS;VUPLEX_STANDALONE
-    7: UNITY_POST_PROCESSING_STACK_V2;VUPLEX_CCU;GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE;MRTK_GLTF_IMPORTER_OFF;VUPLEX_STANDALONE;VUPLEX_MRTK;VUPLEX_OCULUS
+    7: UNITY_POST_PROCESSING_STACK_V2;VUPLEX_CCU;GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE;MRTK_GLTF_IMPORTER_OFF;VUPLEX_STANDALONE;VUPLEX_MRTK;VUPLEX_OCULUS;DCL_VR
     13: UNITY_POST_PROCESSING_STACK_V2
     14: UNITY_POST_PROCESSING_STACK_V2
     19: UNITY_POST_PROCESSING_STACK_V2

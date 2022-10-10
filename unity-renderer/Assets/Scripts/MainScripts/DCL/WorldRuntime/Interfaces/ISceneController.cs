@@ -28,10 +28,6 @@ namespace DCL
         event Action OnSortScenes;
         event Action<IParcelScene, string> OnOpenExternalUrlRequest;
         event Action<IParcelScene> OnNewSceneAdded;
-//<<<<<<< HEAD
-        void UnloadSceneBeyondLOS(int i);
-//=======
         event Action<IParcelScene> OnSceneRemoved;
-//>>>>>>> upstream/dev
     }
 }

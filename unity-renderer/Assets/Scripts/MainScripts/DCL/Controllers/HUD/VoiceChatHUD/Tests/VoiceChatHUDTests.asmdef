@@ -17,7 +17,8 @@
         "IntegrationTestSuite",
         "BaseVariable",
         "PlayerModels",
-        "FeatureFlagData"
+        "FeatureFlagData",
+        "UnityEngine.UI"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

@@ -5524,7 +5524,6 @@ MonoBehaviour:
   model:
     isOnlineFriendsExpanded: 1
     isOfflineFriendsExpanded: 1
-    listByOnlineStatus: 0
   viewport: {fileID: 2828657937425296497}
   scroll: {fileID: 8156331471709598437}
   loadMoreEntriesContainer: {fileID: 6609162879917375590}

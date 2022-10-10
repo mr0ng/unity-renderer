@@ -11,7 +11,7 @@ using UnityEngine.UI;
 
 public class PlayerInfoCardHUDView : MonoBehaviour
 {
-    private const string PREFAB_PATH = "PlayerInfoCardHUD";
+    private const string PREFAB_PATH = "PlayerInfoCardHUDVR";
 
     public enum Tabs
     {

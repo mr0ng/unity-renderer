@@ -1,4 +1,5 @@
 using System;
+using DCL.CameraTool;
 using UnityEngine;
 
 namespace DCL.Camera

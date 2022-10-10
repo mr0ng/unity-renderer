@@ -28,8 +28,8 @@ public class UsersAroundListHUDController : IHUD
 
     public UsersAroundListHUDController(ISocialAnalytics socialAnalytics)
     {
-        UsersAroundListHUDListView view = Object.Instantiate(Resources.Load<GameObject>("UsersAroundListHUD")).GetComponent<UsersAroundListHUDListView>();
-        view.name = "_UsersAroundListHUD";
+        UsersAroundListHUDListView view = Object.Instantiate(Resources.Load<GameObject>("UsersAroundListHUDVR")).GetComponent<UsersAroundListHUDListView>();
+        view.name = "_UsersAroundListHUDVR";
         view.gameObject.SetActive(false);
         Initialize(view, socialAnalytics);
     }

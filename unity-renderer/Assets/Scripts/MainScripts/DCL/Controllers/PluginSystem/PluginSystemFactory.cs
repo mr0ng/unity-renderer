@@ -28,7 +28,7 @@ namespace DCL
             pluginSystem.Register<PreviewMenuPlugin>(() => new PreviewMenuPlugin());
             #if (!UNITY_ANDROID)
             pluginSystem.Register<SkyboxController>(() => new SkyboxController());
-#endif
+            #endif
             pluginSystem.Register<GotoPanelPlugin>(() => new GotoPanelPlugin());
             pluginSystem.Register<ExperiencesViewerFeature>(() => new ExperiencesViewerFeature());
             pluginSystem.Register<EmoteAnimationsPlugin>(() => new EmoteAnimationsPlugin());

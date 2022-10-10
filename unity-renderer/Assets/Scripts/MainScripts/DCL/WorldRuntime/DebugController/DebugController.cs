@@ -74,7 +74,7 @@ namespace DCL
 
         public void SetDebug()
         {
-            debugConfig.isDebugMode.Set(true);
+            debugConfig.isDebugMode.Set(false);
         }
 
         public void HideFPSPanel()

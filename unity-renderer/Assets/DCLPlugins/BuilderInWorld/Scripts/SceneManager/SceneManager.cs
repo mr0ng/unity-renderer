@@ -482,6 +482,7 @@ namespace DCL.Builder
 
         private void NewSceneReady(string id)
         {
+            Environment.i.world.blockersController.SetEnabled(true);
             if (sceneToEditId != id)
                 return;
 

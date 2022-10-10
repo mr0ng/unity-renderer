@@ -10,7 +10,7 @@ namespace DCL.HelpAndSupportHUD
 
         public event System.Action OnClose;
 
-        private const string PATH = "HelpAndSupportHUD";
+        private const string PATH = "HelpAndSupportHUDVR";
         private const string VIEW_OBJECT_NAME = "_HelpAndSupportHUD";
         private const string JOIN_DISCORD_URL = "https://dcl.gg/discord";
         private const string FAQ_URL = "https://docs.decentraland.org/decentraland/faq/";

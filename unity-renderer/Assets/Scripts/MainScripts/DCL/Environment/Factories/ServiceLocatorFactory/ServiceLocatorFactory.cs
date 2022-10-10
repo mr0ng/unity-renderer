@@ -22,7 +22,7 @@ namespace DCL
             result.Register<IUpdateEventHandler>(() => new UpdateEventHandler());
 
             // World runtime
-            //result.Register<IIdleChecker>(() => new IdleChecker());
+            result.Register<IIdleChecker>(() => new IdleChecker());
             result.Register<IAvatarsLODController>(() => new AvatarsLODController());
             result.Register<IFeatureFlagController>(() => new FeatureFlagController());
             result.Register<ISceneController>(() => new SceneController());

@@ -1,3 +1,4 @@
+using System;
 using JetBrains.Annotations;
 using UnityEngine;
 
@@ -41,8 +42,8 @@ public class ShowHideAnimator : MonoBehaviour
         }
     }
 
-    public event System.Action<ShowHideAnimator> OnWillFinishHide;
-    public event System.Action<ShowHideAnimator> OnWillFinishStart;
+
+
 
     public void Show(bool instant = false)
     {
@@ -84,12 +85,6 @@ public class ShowHideAnimator : MonoBehaviour
 
     public void AnimEvent_ShowStarted() { OnStartShow?.Invoke(); }
 
-    private void OnEnable()
-    {
-        if ( hideOnEnable )
-        {
-            Hide(true);
-        }
-    }
+
 
 }

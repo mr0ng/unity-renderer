@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Net.Sockets;
 using DCL;
 using UnityEngine;
+using WebSocketSharp;
 using WebSocketSharp.Server;
 
 public class WebSocketCommunication : IKernelCommunication
@@ -39,6 +40,7 @@ public class WebSocketCommunication : IKernelCommunication
         DataStore.i.wsCommunication.communicationReady.Set(true);
 
         updateCoroutine = CoroutineStarter.Start(ProcessMessages());
+        
     }
 
     public bool isServerReady => ws.IsListening;
@@ -91,6 +93,26 @@ public class WebSocketCommunication : IKernelCommunication
             ws.AddWebSocketService("/" + wssServiceId, () =>
             {
                 service = new DCLWebSocketService();
+                service.OnCloseEvent += () =>
+                {
+                    // StartServer(port,maxPort,withSSL);
+                    int j  = 0;
+                    while (service.ConnectionState == WebSocketState.Closing)
+                    {
+                        j++;
+                    }
+                    //ws.WebSocketServices.Clear();
+                    
+                    //ws = null;
+                    //ws.RemoveWebSocketService(service.ID);
+                    //Debug.Log($"count to close {j}");
+                
+                    DebugConfigComponent.i.ShowWebviewScreen();
+                    
+
+                };
+                
+                
                 OnWebSocketServiceAdded?.Invoke(service);
                 Debug.Log("WebSocketCommunication: Added DCLWebSocket Service");
                 return service;
@@ -118,24 +140,24 @@ public class WebSocketCommunication : IKernelCommunication
     }
 
 //<<<<<<< HEAD
-    public WebSocketCommunication(bool withSSL = false, int startPort = 5000, int endPort = 5100)
-    {
-        Debug.Log($"WebSocketCommunication: withSSL:{withSSL}, port {startPort}-{endPort}");
-        InitMessageTypeToBridgeName();
-        Debug.Log($"WebSocketCommunication: 1");
-        DCL.DataStore.i.debugConfig.isWssDebugMode = true;
-        Debug.Log($"WebSocketCommunication: 2");
-        string url = StartServer(startPort, endPort, withSSL);
-        
-        Debug.Log("WebSocketCommunication: 3started " + url);
-
-        DataStore.i.wsCommunication.url = url;
-
-        DataStore.i.wsCommunication.communicationReady.Set(true);
-        Debug.Log($"WebSocketCommunication: 4 start ProcessMessages");
-        updateCoroutine = CoroutineStarter.Start(ProcessMessages());
-        Debug.Log($"WebSocketCommunication: 5");
-    }
+    // public WebSocketCommunication(bool withSSL = false, int startPort = 5000, int endPort = 5100)
+    // {
+    //     Debug.Log($"WebSocketCommunication: withSSL:{withSSL}, port {startPort}-{endPort}");
+    //     InitMessageTypeToBridgeName();
+    //     Debug.Log($"WebSocketCommunication: 1");
+    //     DCL.DataStore.i.debugConfig.isWssDebugMode = true;
+    //     Debug.Log($"WebSocketCommunication: 2");
+    //     string url = StartServer(startPort, endPort, withSSL);
+    //     
+    //     Debug.Log("WebSocketCommunication: 3started " + url);
+    //
+    //     DataStore.i.wsCommunication.url = url;
+    //
+    //     DataStore.i.wsCommunication.communicationReady.Set(true);
+    //     Debug.Log($"WebSocketCommunication: 4 start ProcessMessages");
+    //     updateCoroutine = CoroutineStarter.Start(ProcessMessages());
+    //     Debug.Log($"WebSocketCommunication: 5");
+    // }
 
 //=======
 //>>>>>>> upstream/dev

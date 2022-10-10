@@ -767,20 +767,7 @@ namespace DCL
                 UnloadParcelSceneExecute(kvp.Key);
             }
         }
-        //This was made to test quicker unloading of parcels that we have walked away from in VR.  Not currently used.
-        public void UnloadSceneBeyondLOS(int LOS = 4)
-        {
-            var worldState = Environment.i.world.state;
-
-            var list = worldState.loadedScenes.ToArray();
-
-            for (int i = 0; i < list.Length; i++)
-            {
-                if (list[i].Value.distanceToPlayer > LOS && currentGridSceneCoordinate != new Vector2Int(EnvironmentSettings.MORDOR_SCALAR, EnvironmentSettings.MORDOR_SCALAR))
-                    UnloadParcelSceneExecute(list[i].Key);
-            }
-        }
-
+       
         public void LoadParcelScenes(string decentralandSceneJSON)
         {
             var queuedMessage = new QueuedSceneMessage()
@@ -915,6 +902,7 @@ namespace DCL
         public event Action OnSortScenes;
         public event Action<IParcelScene, string> OnOpenExternalUrlRequest;
         public event Action<IParcelScene> OnNewSceneAdded;
+        
         public event Action<IParcelScene> OnSceneRemoved;
         
         private Vector2Int currentGridSceneCoordinate = new Vector2Int(EnvironmentSettings.MORDOR_SCALAR, EnvironmentSettings.MORDOR_SCALAR);

@@ -19,8 +19,9 @@ public class ECS7TestScene : IParcelScene
     public void RemoveEntity(long id, bool removeImmediatelyFromEntitiesList = true) => _entityRemover(id);
     public Transform GetSceneTransform() => _go.transform;
     public ContentProvider contentProvider { get; } = new ContentProvider();
+    public int distanceToPlayer { get; set; }
 
-// INTERNAL CONFIG FOR MOCKING    
+    // INTERNAL CONFIG FOR MOCKING    
     internal GameObject _go;
     internal Func<long, ECS7TestEntity> _entityCreator;
     internal Action<long> _entityRemover;

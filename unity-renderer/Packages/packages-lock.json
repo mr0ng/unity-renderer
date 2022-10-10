@@ -21,6 +21,20 @@
       "dependencies": {},
       "hash": "50a67d8f419b6cea0398eff6c19cf0bbe11ed609"
     },
+    "com.decentraland.rpc-csharp": {
+      "version": "https://github.com/decentraland/rpc-csharp.git?path=rpc-csharp/src",
+      "depth": 0,
+      "source": "git",
+      "dependencies": {},
+      "hash": "31340a3706dda78916910dc2b925756fd3ee0ece"
+    },
+    "com.decentraland.webgl-ime-input": {
+      "version": "https://github.com/decentraland/webgl-ime-input.git",
+      "depth": 0,
+      "source": "git",
+      "dependencies": {},
+      "hash": "072527864133fedf7e4d6143df0b7cba84a9bb6c"
+    },
     "com.microsoft.mixedreality.openxr": {
       "version": "file:MixedReality/com.microsoft.mixedreality.openxr-1.2.1.tgz",
       "depth": 0,
@@ -63,20 +77,6 @@
       "dependencies": {
         "com.unity.textmeshpro": "2.1.4"
       }
-	},
-    "com.decentraland.rpc-csharp": {
-      "version": "https://github.com/decentraland/rpc-csharp.git?path=rpc-csharp/src",
-      "depth": 0,
-      "source": "git",
-      "dependencies": {},
-      "hash": "31340a3706dda78916910dc2b925756fd3ee0ece"
-    },
-    "com.decentraland.webgl-ime-input": {
-      "version": "https://github.com/decentraland/webgl-ime-input.git",
-      "depth": 0,
-      "source": "git",
-      "dependencies": {},
-      "hash": "072527864133fedf7e4d6143df0b7cba84a9bb6c"
     },
     "com.unity.2d.sprite": {
       "version": "1.0.0",
@@ -326,6 +326,16 @@
         "com.unity.modules.imgui": "1.0.0"
       }
     },
+    "com.unity.ui": {
+      "version": "1.0.0-preview.18",
+      "depth": 0,
+      "source": "registry",
+      "dependencies": {
+        "com.unity.modules.uielementsnative": "1.0.0",
+        "com.unity.textcore": "1.0.0-preview.3"
+      },
+      "url": "https://packages.unity.com"
+    },
     "com.unity.xr.arfoundation": {
       "version": "4.1.7",
       "depth": 1,
@@ -342,13 +352,6 @@
       "source": "registry",
       "dependencies": {
         "com.unity.subsystemregistration": "1.1.0"
-    "com.unity.ui": {
-      "version": "1.0.0-preview.18",
-      "depth": 0,
-      "source": "registry",
-      "dependencies": {
-        "com.unity.modules.uielementsnative": "1.0.0",
-        "com.unity.textcore": "1.0.0-preview.3"
       },
       "url": "https://packages.unity.com"
     },
@@ -409,6 +412,12 @@
       "source": "git",
       "dependencies": {},
       "hash": "90ffa399087521817ab03ce9213ec33b38e4492f"
+    },
+    "com.unity.modules.androidjni": {
+      "version": "1.0.0",
+      "depth": 0,
+      "source": "builtin",
+      "dependencies": {}
     },
     "com.unity.modules.animation": {
       "version": "1.0.0",

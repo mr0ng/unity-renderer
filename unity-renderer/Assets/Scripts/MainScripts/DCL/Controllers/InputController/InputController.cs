@@ -482,9 +482,12 @@ public class InputController : MonoBehaviour
         for (var i = 0; i < holdActions.Length; i++)
         {
             var action = holdActions[i];
-            
+
             if (action.isHoldBlocked != null && action.isHoldBlocked.Get())
+            {
+                Debug.Log($"{action.name} is hold blocked1");
                 continue;
+            }
             
             switch (action.GetDCLAction())
             {
@@ -572,7 +575,10 @@ public class InputController : MonoBehaviour
             var action = measurableActions[i];
             
             if (action.isMeasurableBlocked != null && action.isMeasurableBlocked.Get())
+            {
+                Debug.Log($"{action.name} is hold blocked2");
                 continue;
+            }
             
             switch (action.GetDCLAction())
             {

@@ -1,4 +1,5 @@
 using System;
+using System.Xml.Serialization.Configuration;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
@@ -62,6 +63,8 @@ public class TeleportPromptHUDView : MonoBehaviour
         cancelButton.onClick.AddListener(OnClosePressed);
         continueButton.onClick.AddListener(OnTeleportPressed);
         contentAnimator.OnWillFinishHide += (animator) => Hide();
+        content.SetActive((false));
+        contentAnimator.Hide();
     }
 
     public void Reset()

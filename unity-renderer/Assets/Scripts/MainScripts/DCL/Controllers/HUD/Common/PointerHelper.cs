@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using Microsoft.MixedReality.Toolkit;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using Debug = System.Diagnostics.Debug;
 
 public class PointerHelper : MonoBehaviour
 {
@@ -62,6 +63,7 @@ public class PointerHelper : MonoBehaviour
     
     private bool IsPointerOnUI(int layer)
     {
+        if(CoreServices.FocusProvider?.PrimaryPointer == null) return false;
         var target = CoreServices.FocusProvider?.PrimaryPointer.Result.CurrentPointerTarget;
         return target != null && target.layer == layer;
     }

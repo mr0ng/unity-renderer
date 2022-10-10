@@ -28,7 +28,8 @@ namespace DCL.SettingsCommon
             dynamicProceduralSkybox = false,
             invertYAxis = false,
             skyboxTime = 0.0f,
-            firstPersonCameraFOV = 60
+            firstPersonCameraFOV = 60,
+            useInternalBrowser = true
         };
 
         private AudioSettings defaultAudioSettings = new AudioSettings

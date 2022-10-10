@@ -325,17 +325,10 @@ namespace DCL
         /// </summary>
         private int CalculatePerformanceScore()
         {
-//<<<<<<< HEAD
-            float topFPS = Settings.i.qualitySettings.Data.fpsCap ? 72f : 90f;
-            float fpsScore = Mathf.Min(averageFPS / topFPS, 1); // from 0 to 1
-            float hiccupsScore = 1 - ((float) totalHiccupFrames / samples.Count); // from 0 to 1
-//=======
-            double desiredFrameTime = Settings.i.qualitySettings.Data.fpsCap ? 1000/30.0 : 1000/60.0;
+            double desiredFrameTime = Settings.i.qualitySettings.Data.fpsCap ? 1000/60.0 : 1000/78.0;
             double frameScore = Mathf.Min((float)(desiredFrameTime/ averageFrameTime), 1); // from 0 to 1
             double hiccupsScore = 1 - (float) totalHiccupFrames / samples.Count; // from 0 to 1
             double performanceScore = (frameScore + hiccupsScore) / 2 * 100; // scores sum / amount of scores * 100 to have a 0-100 scale
-//>>>>>>> upstream/dev
-
             return Mathf.RoundToInt((float)performanceScore * 100f) / 100;
         }
 
