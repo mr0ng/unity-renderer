@@ -426,7 +426,7 @@ namespace DCL
 
             while (true)
             {
-                maxTimeForDecode = CommonScriptableObjects.rendererState.Get() ? MAX_TIME_FOR_DECODE : float.MaxValue;
+                maxTimeForDecode = CommonScriptableObjects.rendererState.Get() ? MAX_TIME_FOR_DECODE : 5*MAX_TIME_FOR_DECODE;
 
                 if (chunksToDecode.Count > 0)
                 {
@@ -471,7 +471,7 @@ namespace DCL
                 {
                     if (chunksToDecode.Count > 0)
                     {
-                        ThreadedDecodeAndEnqueue(cancellationToken);
+                        TaskUtils.Run(async () => await(ThreadedDecodeAndEnqueue(cancellationToken))).Forget();
                     }
                 }
                 catch (Exception e)
@@ -482,17 +482,20 @@ namespace DCL
                 await UniTask.Yield();
             }
         }
-        private void ThreadedDecodeAndEnqueue(CancellationToken cancellationToken)
+        private async UniTask ThreadedDecodeAndEnqueue(CancellationToken cancellationToken)
         {
+            DateTime lastStart = DateTime.Now;
             while (chunksToDecode.TryDequeue(out string chunk))
             {
                 cancellationToken.ThrowIfCancellationRequested();
 
                 string[] payloads = chunk.Split(new [] { '\n' }, StringSplitOptions.RemoveEmptyEntries);
                 var count = payloads.Length;
-
+                
+                ;
                 for (int i = 0; i < count; i++)
                 {
+                    
                     var payload = payloads[i];
                     bool availableMessage = sceneMessagesPool.TryDequeue(out QueuedSceneMessage_Scene freeMessage);
 
@@ -503,6 +506,12 @@ namespace DCL
                     else
                     {
                         EnqueueSceneMessage(Decode(payload, new QueuedSceneMessage_Scene()));
+                    }
+                    if (DateTime.Now - lastStart > TimeSpan.FromMilliseconds(4))
+                    {
+                        await UniTask.Yield();
+                        lastStart = DateTime.Now;
+                        
                     }
                 }
             }

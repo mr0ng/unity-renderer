@@ -9,7 +9,7 @@ namespace DCL
 {
     public class ParcelScenesCleaner : IParcelScenesCleaner
     {
-        const float MAX_TIME_BUDGET = 0.01f;
+        const float MAX_TIME_BUDGET = 0.005f;
 
         private struct MarkedEntityInfo
         {

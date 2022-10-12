@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;   
@@ -12,9 +13,9 @@ public class ItemToggleContainer : MonoBehaviour
     private List<ItemToggle> items = new List<ItemToggle>();
     private int maxItems;
 
-    public void Setup(int newMaxItems)
+    public IEnumerator Setup(int newMaxItems)
     {
-        if (maxItems == newMaxItems) return;
+        if (maxItems == newMaxItems) yield break;
         maxItems = newMaxItems;
         
         var diff = maxItems - items.Count;
@@ -25,6 +26,7 @@ public class ItemToggleContainer : MonoBehaviour
             {
                 var newItemToggle = Instantiate(itemPrefab, itemContainer);
                 items.Add(newItemToggle);
+                yield return null;
             }
         }
 

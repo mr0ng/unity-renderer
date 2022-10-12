@@ -11,11 +11,11 @@ namespace DCL
     {
         public static bool VERBOSE = false;
         
-        private const float MAX_GLOBAL_MSG_BUDGET = 0.006f;
+        private const float MAX_GLOBAL_MSG_BUDGET = 0.008f;
         private const float MAX_SYSTEM_MSG_BUDGET_FOR_FAR_SCENES = 0.003f;
 
-        private const float GLTF_BUDGET_MAX = 0.023f;
-        private const float GLTF_BUDGET_MIN = 0.008f;
+        private const float GLTF_BUDGET_MAX = 0.036f;
+        private const float GLTF_BUDGET_MIN = 0.004f;
 
         public const string GLOBAL_MESSAGING_CONTROLLER = "global_messaging_controller";
 
@@ -285,7 +285,7 @@ namespace DCL
                 }
 
                 timeBudgetCounter =
-                    CommonScriptableObjects.rendererState.Get() ? MAX_GLOBAL_MSG_BUDGET : float.MaxValue;
+                    CommonScriptableObjects.rendererState.Get() ? MAX_GLOBAL_MSG_BUDGET : 3*MAX_GLOBAL_MSG_BUDGET;
 
                 for (int i = 0; i < busesToProcessCount; ++i)
                 {
@@ -298,6 +298,7 @@ namespace DCL
                     
                     if (ProcessBus(bus))
                         break;
+                    yield return null;
                 }
 
                 if (pendingInitMessagesCount == 0)

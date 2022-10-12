@@ -4,6 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using Cysharp.Threading.Tasks;
 using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -453,13 +454,14 @@ public class AvatarEditorHUDView : MonoBehaviour, IPointerDownHandler
             collectiblesItemSelector.RemoveWearable(wearableItem.id);
     }
 
-    public void RemoveAllWearables()
+    public async UniTask RemoveAllWearables()
     {
         using (var enumerator = selectorsByCategory.GetEnumerator())
         {
             while (enumerator.MoveNext())
             {
                 enumerator.Current.Value.RemoveAllWearables();
+                await UniTask.Yield();
             }
         }
 

@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using DCL.Components;
@@ -27,8 +27,7 @@ namespace DCL.Models
         }
 
         GameObject meshRootGameObjectValue;
-        //private Shader unlit = Shader.Find("Oculus/Unlit");
-       
+
         public IShape currentShape;
         public Renderer[] renderers;
         public MeshFilter[] meshFilters;
@@ -68,11 +67,9 @@ namespace DCL.Models
         
         public void UpdateRenderersCollection(Renderer[] renderers, MeshFilter[] meshFilters, Animation animation = null)
         {
-            //renderers = SwapShaders(renderers);
             if (meshRootGameObjectValue != null)
             {
                 this.renderers = renderers;
-                
                 this.meshFilters = meshFilters;
                 this.animation = animation;
 
@@ -94,54 +91,15 @@ namespace DCL.Models
             TextMeshPro[] tmpros = meshRootGameObjectValue.GetComponentsInChildren<TextMeshPro>(true);
             if (tmpros.Length > 0)
             {
-// <<<<<<< HEAD
-                // renderers = meshRootGameObjectValue.GetComponentsInChildren<Renderer>(true);
-                // //renderers = SwapShaders(renderers);
-                // meshFilters = meshRootGameObjectValue.GetComponentsInChildren<MeshFilter>(true);
-                // animation = meshRootGameObjectValue.GetComponentInChildren<Animation>();
-
-                // TextMeshPro[] tmpros = meshRootGameObjectValue.GetComponentsInChildren<TextMeshPro>(true);
-                // if (tmpros.Length > 0)
-                // {
-                    // renderers = renderers.Union(tmpros.Select(x => x.renderer)).ToArray();
-                    // meshFilters = meshFilters.Union(tmpros.Select(x => x.meshFilter)).ToArray();
-                // }
-
-                // RecalculateBounds();
-                // OnAnyUpdated?.Invoke();
-                // OnUpdated?.Invoke();
-// =======
                 renderers = renderers.Union(tmpros.Select(x => x.renderer)).ToArray();
                 meshFilters = meshFilters.Union(tmpros.Select(x => x.meshFilter)).ToArray();
-// >>>>>>> upstream/dev
             }
 
             RecalculateBounds();
             OnAnyUpdated?.Invoke();
             OnUpdated?.Invoke();
         }
-       
-        private Shader unlit = Shader.Find("Universal Render Pipeline/Unlit");
-       
-        public Renderer[] SwapShaders(Renderer[] renderers)
-        {
-            foreach (Renderer r in renderers)
-            {
-                if (r.material.shader.name.Contains("Universal Render Pipeline/Lit"))
-                {
-                    //r.material.shader = unlit;
-                }
-                else if (r.material.shader.name.Contains("Hidden/InternalErrorShader"))
-                {
-                    r.material.shader = unlit;
-                }
-                else
-                {
-                    Debug.Log( $"Shader in use: {r.material.shader.name}");
-                }
-            }
-            return renderers;
-        }
+
         public void RecalculateBounds()
         {   
             if ((renderers == null || renderers.Length == 0) && colliders.Count == 0)

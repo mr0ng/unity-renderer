@@ -95,7 +95,7 @@ public class ItemSelector : MonoBehaviour
 
     private void SetupWearablePagination()
     {
-        itemToggleContainer.Setup(maxVisibleWearables);
+        CoroutineUtils.RunCoroutineSync( itemToggleContainer.Setup(maxVisibleWearables));
         pageSelector.Setup(GetMaxPages());
         UpdateWearableList(lastPage);
     }

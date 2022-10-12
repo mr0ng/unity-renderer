@@ -30,7 +30,7 @@ namespace DCL
     /// </summary>
     public class AvatarMeshCombinerHelper : IAvatarMeshCombinerHelper
     {
-        private static bool VERBOSE = true;
+        private static bool VERBOSE = false;
         private static ILogger logger = new Logger(Debug.unityLogger.logHandler) { filterLogType = VERBOSE ? LogType.Log : LogType.Warning };
 
         public GameObject container { get; private set; }
@@ -120,7 +120,6 @@ namespace DCL
 
             if ( !output.isValid )
             {
-                Debug.LogError("AvatarMeshCombiner  Combine failed!");
                 logger.LogError("AvatarMeshCombiner", "Combine failed!");
                 return false;
             }

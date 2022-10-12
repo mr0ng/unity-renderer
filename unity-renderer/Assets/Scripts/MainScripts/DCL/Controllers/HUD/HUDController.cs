@@ -202,12 +202,14 @@ public class HUDController : IHUDController
                     settingsPanelHud.Initialize();
                 break;
             //TODO: handle HUDS that need to be converted to VR
-            // case HUDElementID.PLAYER_INFO_CARD:
-            //     CreateHudElement(configuration, hudElementId);
-            //     break;
-            // case HUDElementID.AIRDROPPING:
-            //     CreateHudElement(configuration, hudElementId);
-            //     break;
+            case HUDElementID.PLAYER_INFO_CARD:
+                CreateHudElement(configuration, hudElementId);
+                
+                break;
+            case HUDElementID.AIRDROPPING:
+                CreateHudElement(configuration, hudElementId);
+                
+                break;
             case HUDElementID.TERMS_OF_SERVICE:
                 CreateHudElement(configuration, hudElementId);
                 break;

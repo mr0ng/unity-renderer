@@ -50,6 +50,7 @@ namespace DCL
             if (!Configuration.EnvironmentSettings.RUNNING_TESTS)
             {
                 performanceMetricsController = new PerformanceMetricsController();
+          
                 SetupServices();
 
                 DataStore.i.HUDs.loadingHUD.visible.OnChange += OnLoadingScreenVisibleStateChange;
@@ -78,7 +79,7 @@ namespace DCL
             DataStore.i.textureConfig.gltfMaxSize.Set(TextureCompressionSettings.GLTF_TEX_MAX_SIZE_WEB);
             DataStore.i.textureConfig.generalMaxSize.Set(TextureCompressionSettings.GENERAL_TEX_MAX_SIZE_WEB);
 // >>>>>>> upstream/dev
-            DataStore.i.avatarConfig.useHologramAvatar.Set(false);
+            DataStore.i.avatarConfig.useHologramAvatar.Set(true);
 // #endif
         }
 

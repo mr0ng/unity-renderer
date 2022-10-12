@@ -28,7 +28,7 @@ public class PerformanceController : MonoBehaviour
     [SerializeField] private int minimumClipPlaneDistance = 50;
     [SerializeField] private int normalClipPlaneDistance = 1000;
     
-    private int frameCount = 600;
+    private int frameCount = 300;
 
     // #if UNITY_ANDROID && !UNITY_EDITOR
     // private long MaxMemoryAllowed = 1800000000;
@@ -56,13 +56,13 @@ public class PerformanceController : MonoBehaviour
         
     }
 
-    private WaitForSeconds waitTimeCheck = new WaitForSeconds(.5f);
+    private WaitForSeconds waitTimeCheck = new WaitForSeconds(0.5f);
 
     private IEnumerator CheckPerformace()
     {
         while (true)
         {
-            yield return waitTimeCheck;
+            //yield return waitTimeCheck;
             DateTime startTime = DateTime.Now;
             for (int i = 0; i < frameCount; i++)
             {
@@ -73,7 +73,7 @@ public class PerformanceController : MonoBehaviour
             TimeSpan frameSpan = (DateTime.Now - startTime);
 
             double fps =  1 / frameSpan.TotalSeconds*frameCount ;
-            Debug.Log($"frameTime Span {frameSpan.TotalMilliseconds/frameCount}ms, fps {fps}");
+            Debug.Log($"maxDownloads {DataStore.i.performance.maxDownloads.Get()}, fps {fps}");
             // totalAllocatedMemoryLong = Profiler.GetTotalAllocatedMemoryLong();
             // monoUsedSizeLong = Profiler.GetMonoUsedSizeLong(); 
             // allocatedMemoryForGraphicsDriver = Profiler.GetAllocatedMemoryForGraphicsDriver();
@@ -101,6 +101,7 @@ public class PerformanceController : MonoBehaviour
         camera = Camera.main;
         if (camera.farClipPlane > minimumClipPlaneDistance)
             camera.farClipPlane = Math.Max(minimumClipPlaneDistance, camera.farClipPlane * (float)(fps/acceptableFPSThreshold));
+        DataStore.i.performance.maxDownloads.Set(Math.Max(150, DataStore.i.performance.maxDownloads.Get()*(int)(fps/75)));
         // object newValue = renderingScaleSettingController.GetStoredValue();
         // float.TryParse(newValue.ToString(), out float newFloat);
         // if (newFloat > 0.8f)
@@ -116,6 +117,7 @@ public class PerformanceController : MonoBehaviour
         camera = Camera.main;
         if (camera.farClipPlane < normalClipPlaneDistance)
             camera.farClipPlane = camera.farClipPlane * 1.15f;
+        DataStore.i.performance.maxDownloads.Set(Math.Min(999, (int)(DataStore.i.performance.maxDownloads.Get()*1.15)));
         // object newValue = renderingScaleSettingController.GetStoredValue();
         // float.TryParse(newValue.ToString(), out float newFloat);
         // if (newFloat < 1f)

@@ -1,5 +1,8 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
+using Cysharp.Threading.Tasks;
+using DCL.Helpers;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
@@ -36,15 +39,22 @@ namespace DCL
 
             availableMarkers = new List<UserPositionMarker>(maxMarkers);
             usedMarkers = new List<UserPositionMarker>(maxMarkers);
+            
+            TaskUtils.Run(async () => await(InstantiateUserPositionMarkers(markerPrefab, overlayContainer))).Forget();
 
+        }
+
+        public async UniTask InstantiateUserPositionMarkers(UserMarkerObject markerPrefab, Transform overlayContainer)
+        {
             for (int i = 0; i < maxMarkers; i++)
             {
                 var marker = new UserPositionMarker(GameObject.Instantiate(markerPrefab, overlayContainer));
                 availableMarkers.Add(marker);
                 marker.SetActive(false);
+                
+                await UniTask.Yield();
             }
         }
-
         /// <summary>
         /// Set exclusion area. Markers inside this area will be hidden, to avoid overlapping with markers set with comms info for example.
         /// After set it will iterate through current markers to hide or show them respectively.

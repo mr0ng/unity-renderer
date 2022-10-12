@@ -129,7 +129,7 @@ namespace DCL.Configuration
 
     public static class TextureCompressionSettings
     {
-        public const int GLTF_TEX_MAX_SIZE_WEB = 512;
+        public const int GLTF_TEX_MAX_SIZE_WEB = 1024;
         public const int GENERAL_TEX_MAX_SIZE_WEB = 2048;
     }
 
@@ -201,7 +201,7 @@ namespace DCL.Configuration
 
     public static class MessageThrottlingSettings
     {
-        public static float SIXTY_FPS_TIME = 1.0f / 60.0f;
+        public static float SIXTY_FPS_TIME = 1.0f / 72.0f;
         public static float GLOBAL_FRAME_THROTTLING_TIME = SIXTY_FPS_TIME / 8.0f;
         public static float LOAD_PARCEL_SCENES_THROTTLING_TIME = SIXTY_FPS_TIME / 4.0f;
     }

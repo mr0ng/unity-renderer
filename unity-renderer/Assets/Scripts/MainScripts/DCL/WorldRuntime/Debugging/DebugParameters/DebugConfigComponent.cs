@@ -126,7 +126,11 @@ namespace DCL
             DataStore.i.debugConfig.ignoreGlobalScenes = debugConfig.ignoreGlobalScenes;
             DataStore.i.debugConfig.msgStepByStep = debugConfig.msgStepByStep;
             DataStore.i.performance.multithreading.Set(multithreaded);
-            if (disableGLTFDownloadThrottle) DataStore.i.performance.maxDownloads.Set(500);
+            #if UNITY_ANDROID && !UNITY_EDITOR
+            if (disableGLTFDownloadThrottle) DataStore.i.performance.maxDownloads.Set(999);
+            #else
+            if (disableGLTFDownloadThrottle) DataStore.i.performance.maxDownloads.Set(999);
+            #endif
             Texture.allowThreadedTextureCreation = multithreaded;
             // options.Initialized += (sender, eventArgs) =>
             // {
@@ -429,9 +433,9 @@ namespace DCL
                 if (DCLWebview.WebView!= null && DCLWebview.WebView.IsInitialized) { 
                     Debug.Log($"main webview loading {webViewURL}");
                     DCLWebview.WebView.LoadUrl(webViewURL);
-                    DCLWebview.WebView.LoadProgressChanged += ( sender,  args) => { Debug.Log($"WebView LoadProgressChanged {args.Type.ToString()}, {sender.ToString()}"); };
-                    DCLWebview.WebView.PageLoadFailed += ( sender,  args) => { Debug.Log($"WebView PageLoadFailed {args.ToString()}, {sender.ToString()}"); };
-                    DCLWebview.WebView.CloseRequested += ( sender,  args) => { Debug.Log($"WebView CloseRequested {args.ToString()}, {sender.ToString()}"); };}
+                    DCLWebview.WebView.LoadProgressChanged += ( sender,  args) => { Debug.Log($"WebView Status LoadProgressChanged {args.Type.ToString()}, {sender.ToString()}"); };
+                    DCLWebview.WebView.PageLoadFailed += ( sender,  args) => { Debug.Log($"WebView Status PageLoadFailed {args.ToString()}, {sender.ToString()}"); };
+                    DCLWebview.WebView.CloseRequested += ( sender,  args) => { Debug.Log($"WebView Status CloseRequested {args.ToString()}, {sender.ToString()}"); };}
                 else
                 {
                     DCLWebview.Initialized += (sender, eventArgs) =>
@@ -439,9 +443,9 @@ namespace DCL
 
                         Debug.Log($"main webview loading {webViewURL}");
                         DCLWebview.WebView.LoadUrl(webViewURL);
-                        DCLWebview.WebView.LoadProgressChanged += ( sender,  args) => { Debug.Log($"WebView LoadProgressChanged {args.Type.ToString()}, {sender.ToString()}"); };
-                        DCLWebview.WebView.PageLoadFailed += ( sender,  args) => { Debug.Log($"WebView PageLoadFailed {args.ToString()}, {sender.ToString()}"); };
-                        DCLWebview.WebView.CloseRequested += ( sender,  args) => { Debug.Log($"WebView CloseRequested {args.ToString()}, {sender.ToString()}"); };
+                        DCLWebview.WebView.LoadProgressChanged += ( sender,  args) => { Debug.Log($"WebView Status LoadProgressChanged {args.Type.ToString()}, {sender.ToString()}"); };
+                        DCLWebview.WebView.PageLoadFailed += ( sender,  args) => { Debug.Log($"WebView Status PageLoadFailed {args.ToString()}, {sender.ToString()}"); };
+                        DCLWebview.WebView.CloseRequested += ( sender,  args) => { Debug.Log($"WebView Status CloseRequested {args.ToString()}, {sender.ToString()}"); };
                     };
                 }
 
@@ -504,25 +508,26 @@ namespace DCL
              //DCLWebview.transform.localPosition += new Vector3(0, 1, 0);
             //_keyboard.WebViewPrefab.transform.localPosition -= new Vector3(0, 10, 0);
             startMenu.SetActive((false));
-             keyboardOptions.gameObject.SetActive(false);
-             keyboardDCL.gameObject.SetActive((false));
-             optionsWeview.gameObject.SetActive(false);
-            //  urlInput.gameObject.SetActive(false);
-            // reload.gameObject.SetActive((false));
-            // swapTabs.gameObject.SetActive((false));
-             DCLWebview.gameObject.SetActive(false);
-            //_keyboard.gameObject.SetActive(false);
+              keyboardOptions.gameObject.SetActive(false);
+              keyboardDCL.gameObject.SetActive((false));
+              optionsWeview.gameObject.SetActive(false);
+              urlInput.gameObject.SetActive(false);
+             reload.gameObject.SetActive((false));
+             swapTabs.gameObject.SetActive((false));
+              DCLWebview.gameObject.SetActive(false);
+            
 
         }
         public void ShowWebviewScreen()
         {
             startMenu.SetActive(true);
-            DCLWebview.gameObject.SetActive(true);
-            keyboardDCL.gameObject.SetActive((true));
+            browserMessage.text = "Network Communication Lost.\r\nRestart Application.\r\n Reduced Loading Radius Recommended In This Area";
+            //DCLWebview.gameObject.SetActive(true);
+            //keyboardDCL.gameObject.SetActive((true));
             //urlInput.gameObject.SetActive(false);
-            reload.gameObject.SetActive((true));
-            
-            
+            //reload.gameObject.SetActive((true));
+
+
         }
         public void SwapBrowserTabs()
         {
