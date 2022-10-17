@@ -176,6 +176,7 @@ namespace DCL.Skybox
             if (runtimeReflectionObj == null)
             {
                 runtimeReflectionObj = skyboxProbe.gameObject.AddComponent<ReflectionProbeRuntime>();
+                runtimeReflectionObj.followTransform = Camera.main.transform;
             }
 
             // Update resolution

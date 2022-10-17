@@ -49,7 +49,9 @@ namespace AvatarSystem
                 status = ILoader.Status.Loading;
                 await LoadBodyshape(settings, bodyshape, eyes, eyebrows, mouth, toCleanUp, ct);
                 await LoadWearables(wearables, settings, toCleanUp, ct);
-                SkinnedMeshRenderer skinnedContainer = bonesContainer == null ? bodyshapeLoader.upperBodyRenderer : bonesContainer;
+                SkinnedMeshRenderer skinnedContainer = (bonesContainer == null ) ? bodyshapeLoader.upperBodyRenderer : bonesContainer;
+                if (skinnedContainer.sharedMesh == null)
+                    skinnedContainer.sharedMesh = bodyshapeLoader.upperBodyRenderer.sharedMesh;
                 // Update Status accordingly
                 status = ComposeStatus(loaders);
                 if (status == ILoader.Status.Failed_Major)

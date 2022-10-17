@@ -26,7 +26,9 @@ namespace DCL
             //TODO: handle plugins that need to be converted to VR
            pluginSystem.Register<TransactionFeature>(() => new TransactionFeature());
             pluginSystem.Register<PreviewMenuPlugin>(() => new PreviewMenuPlugin());
-            #if (!UNITY_ANDROID)
+            #if (UNITY_ANDROID && !UNITY_EDITOR)
+            
+            #else
             pluginSystem.Register<SkyboxController>(() => new SkyboxController());
             #endif
             pluginSystem.Register<GotoPanelPlugin>(() => new GotoPanelPlugin());

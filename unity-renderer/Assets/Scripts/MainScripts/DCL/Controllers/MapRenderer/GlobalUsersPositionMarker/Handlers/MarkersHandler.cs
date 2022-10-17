@@ -40,19 +40,19 @@ namespace DCL
             availableMarkers = new List<UserPositionMarker>(maxMarkers);
             usedMarkers = new List<UserPositionMarker>(maxMarkers);
             
-            TaskUtils.Run(async () => await(InstantiateUserPositionMarkers(markerPrefab, overlayContainer))).Forget();
+            InstantiateUserPositionMarkers(markerPrefab, overlayContainer);
 
         }
 
-        public async UniTask InstantiateUserPositionMarkers(UserMarkerObject markerPrefab, Transform overlayContainer)
+        public void InstantiateUserPositionMarkers(UserMarkerObject markerPrefab, Transform overlayContainer)
         {
             for (int i = 0; i < maxMarkers; i++)
             {
                 var marker = new UserPositionMarker(GameObject.Instantiate(markerPrefab, overlayContainer));
                 availableMarkers.Add(marker);
                 marker.SetActive(false);
-                
-                await UniTask.Yield();
+
+               
             }
         }
         /// <summary>

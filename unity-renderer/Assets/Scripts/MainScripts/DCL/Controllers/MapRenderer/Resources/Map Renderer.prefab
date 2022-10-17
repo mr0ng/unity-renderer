@@ -92,7 +92,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0ef622d288be40f0a6bc111fe7b34eec, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  parcelHightlightScale: 1.25
+  parcelHightlightScale: 3
   ParcelHighlightButton: {fileID: 6163667187324786174}
   helper: {fileID: 8132205322374970040}
   highlight: {fileID: 405795037445436099}
@@ -133,7 +133,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cf4c6d058059d7148899e8866624c569, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  offset: {x: -15, y: -15, z: 0}
+  offset: {x: 0, y: -7, z: 0}
 --- !u!1 &3611584312677935203
 GameObject:
   m_ObjectHideFlags: 0

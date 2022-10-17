@@ -9,6 +9,7 @@ public class SignupHudHelper : VRHUDHelper
     protected override void Awake()
     {
         base.Awake();
+        myTrans = transform;
         view.OnSetVisibility += OnVisiblityChange;
         if (myTrans is RectTransform rect)
         {

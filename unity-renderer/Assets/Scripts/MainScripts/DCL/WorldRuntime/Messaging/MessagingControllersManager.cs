@@ -298,7 +298,12 @@ namespace DCL
                     
                     if (ProcessBus(bus))
                         break;
-                    yield return null;
+
+                    //todo:Clint work the yield frequency into the performance manager.) Reduce to throttle loading items, open up to allow faster loading and communication.
+                    if (CommonScriptableObjects.rendererState.Get() && (i % 15 == 0))
+                    {
+                        yield return null;
+                    }
                 }
 
                 if (pendingInitMessagesCount == 0)

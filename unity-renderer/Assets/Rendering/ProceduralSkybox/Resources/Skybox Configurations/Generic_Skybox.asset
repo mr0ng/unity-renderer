@@ -137,10 +137,8 @@ MonoBehaviour:
     m_Mode: 0
     m_NumColorKeys: 2
     m_NumAlphaKeys: 2
-  horizonPlaneHeight:
-  - percentage: 0
-    value: 0
-  horizonPlaneSmoothRange: {x: 0, y: 0}
+  horizonPlaneHeight: []
+  horizonPlaneSmoothRange: {x: 0, y: 0.021739125}
   horizonLightIntensity: 0
   ambientTrilight: 1
   ambientSkyColor:
@@ -296,7 +294,7 @@ MonoBehaviour:
   avatarEditorTintColor: {r: 0.745283, g: 0.68967444, b: 0.6433339, a: 1}
   avatarEditorLightDir: {x: 135, y: 85, z: 45}
   avatarEditorLightColor: {r: 1, g: 1, b: 1, a: 1}
-  useFog: 0
+  useFog: 1
   fogMode: 1
   fogColor:
     serializedVersion: 2
