@@ -5704,8 +5704,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2d411ff873492544e9c592396ba301f6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  sortingOrder: 0
-  showHideAnimator: {fileID: 0}
+  sortingOrder: 1
+  showHideAnimator: {fileID: 280088380982461574}
   view: {fileID: 8104384986104702797}
 --- !u!1 &4572852650187169043
 GameObject:

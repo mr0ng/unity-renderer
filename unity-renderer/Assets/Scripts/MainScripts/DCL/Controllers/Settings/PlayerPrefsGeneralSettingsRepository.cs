@@ -17,6 +17,7 @@ namespace DCL.SettingsCommon
         public const string INVERT_Y_AXIS = "InvertYAxis";
         public const string SKYBOX_TIME = "skyboxTime";
         public const string FIRST_PERSON_CAMERA_FOV = "firstPersonCameraFOV";
+        public const string USE_INTERNAL_BROWSER = "useInternalBrowser";
 
         private readonly IPlayerPrefsSettingsByKey settingsByKey;
         private readonly GeneralSettings defaultSettings;
@@ -59,6 +60,7 @@ namespace DCL.SettingsCommon
             settingsByKey.SetBool(INVERT_Y_AXIS, currentSettings.invertYAxis);
             settingsByKey.SetFloat(SKYBOX_TIME, currentSettings.skyboxTime);
             settingsByKey.SetFloat(FIRST_PERSON_CAMERA_FOV, currentSettings.firstPersonCameraFOV);
+            settingsByKey.SetBool(USE_INTERNAL_BROWSER,currentSettings.useInternalBrowser);
         }
 
         public bool HasAnyData() => !Data.Equals(defaultSettings);
@@ -82,6 +84,7 @@ namespace DCL.SettingsCommon
                 settings.invertYAxis = settingsByKey.GetBool(INVERT_Y_AXIS, defaultSettings.invertYAxis);
                 settings.skyboxTime = settingsByKey.GetFloat(SKYBOX_TIME, defaultSettings.skyboxTime);
                 settings.firstPersonCameraFOV = settingsByKey.GetFloat(FIRST_PERSON_CAMERA_FOV, defaultSettings.firstPersonCameraFOV);
+                settings.useInternalBrowser = settingsByKey.GetBool(USE_INTERNAL_BROWSER, defaultSettings.useInternalBrowser);
             }
             catch (Exception e)
             {

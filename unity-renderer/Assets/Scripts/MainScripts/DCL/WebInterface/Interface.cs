@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using DCL.CameraTool;
 using DCL.Helpers;
 using DCL.Models;
 using Newtonsoft.Json;
@@ -411,6 +412,25 @@ namespace DCL.Interface
         {
             public string userId;
         }
+        
+        [Serializable]
+        private class SendReportPlayerPayload
+        {
+            public string userId;
+            public string name;
+        }
+
+        [Serializable]
+        private class SendReportScenePayload
+        {
+            public string sceneId;
+        }
+
+        [Serializable]
+        private class SetHomeScenePayload
+        {
+            public string sceneId;
+        }
 
         [System.Serializable]
         public class SendUnblockPlayerPayload
@@ -465,6 +485,9 @@ namespace DCL.Interface
             public string processorType = SystemInfo.processorType;
             public int processorCount = SystemInfo.processorCount;
             public int systemMemorySize = SystemInfo.systemMemorySize;
+            
+            // TODO: remove useBinaryTransform after ECS7 is fully in prod
+            public bool useBinaryTransform = true;
         }
 
         [System.Serializable]
@@ -537,11 +560,18 @@ namespace DCL.Interface
             public float voiceChatVolume;
             public int voiceChatAllowCategory;
         }
+        
+        [Serializable]
+        public class UserRealmPayload
+        {
+            public string serverName;
+            public string layer;
+        }
 
         [System.Serializable]
         public class JumpInPayload
         {
-            public FriendsController.UserStatus.Realm realm = new FriendsController.UserStatus.Realm();
+            public UserRealmPayload realm = new UserRealmPayload();
             public Vector2 gridPosition;
         }
 
@@ -626,9 +656,25 @@ namespace DCL.Interface
         }
 
         [System.Serializable]
+        public class EmotesRequestFiltersPayload
+        {
+            public string ownedByUser;
+            public string[] emoteIds;
+            public string[] collectionIds;
+            public string thirdPartyId;
+        }
+
+        [System.Serializable]
         public class RequestWearablesPayload
         {
             public WearablesRequestFiltersPayload filters;
+            public string context;
+        }
+
+        [System.Serializable]
+        public class RequestEmotesPayload
+        {
+            public EmotesRequestFiltersPayload filters;
             public string context;
         }
 
@@ -681,6 +727,65 @@ namespace DCL.Interface
             public bool isPaused;
             public float time;
         }
+
+        [System.Serializable]
+        public class GetFriendsWithDirectMessagesPayload
+        {
+            public string userNameOrId;
+            public int limit;
+            public int skip;
+        }
+
+        [System.Serializable]
+        public class MarkMessagesAsSeenPayload
+        {
+            public string userId;
+        }
+
+        [System.Serializable]
+        public class GetPrivateMessagesPayload
+        {
+            public string userId;
+            public int limit;
+            public string fromMessageId;
+        }
+        
+        [Serializable]
+        public class FriendshipUpdateStatusMessage
+        {
+            public string userId;
+            public FriendshipAction action;
+        }
+        
+        public enum FriendshipAction
+        {
+            NONE,
+            APPROVED,
+            REJECTED,
+            CANCELLED,
+            REQUESTED_FROM,
+            REQUESTED_TO,
+            DELETED
+        }
+
+        [Serializable]
+        private class GetFriendsPayload
+        {
+            public string userNameOrId;
+            public int limit;
+            public int skip;
+        }
+        
+        [Serializable]
+        private class GetFriendRequestsPayload
+        {
+            public int sentLimit;
+            public int sentSkip;
+            public int receivedLimit;
+            public int receivedSkip;
+        }
+
+        public static event Action<string, byte[]> OnBinaryMessageFromEngine;
 
 #if UNITY_WEBGL && !UNITY_EDITOR
     /**
@@ -817,6 +922,7 @@ namespace DCL.Interface
         private static KillPortableExperiencePayload killPortableExperiencePayload = new KillPortableExperiencePayload();
         private static SetDisabledPortableExperiencesPayload setDisabledPortableExperiencesPayload = new SetDisabledPortableExperiencesPayload();
         private static RequestWearablesPayload requestWearablesPayload = new RequestWearablesPayload();
+        private static RequestEmotesPayload requestEmotesPayload = new RequestEmotesPayload();
         private static SearchENSOwnerPayload searchEnsOwnerPayload = new SearchENSOwnerPayload();
         private static HeadersPayload headersPayload = new HeadersPayload();
         private static AvatarStateBase avatarStatePayload = new AvatarStateBase();
@@ -825,6 +931,9 @@ namespace DCL.Interface
         private static UUIDEvent<EmptyPayload> onPointerHoverEnterEvent = new UUIDEvent<EmptyPayload>();
         private static UUIDEvent<EmptyPayload> onPointerHoverExitEvent = new UUIDEvent<EmptyPayload>();
         private static TimeReportPayload timeReportPayload = new TimeReportPayload();
+        private static GetFriendsWithDirectMessagesPayload getFriendsWithDirectMessagesPayload = new GetFriendsWithDirectMessagesPayload();
+        private static MarkMessagesAsSeenPayload markMessagesAsSeenPayload = new MarkMessagesAsSeenPayload();
+        private static GetPrivateMessagesPayload getPrivateMessagesPayload = new GetPrivateMessagesPayload();
 
         public static void SendSceneEvent<T>(string sceneId, string eventType, T payload)
         {
@@ -908,6 +1017,7 @@ namespace DCL.Interface
             SendSceneEvent(sceneId, "uuidEvent", onClickEvent);
         }
 
+        // TODO: Add sceneNumber to this response
         private static void ReportRaycastResult<T, P>(string sceneId, string queryId, string queryType, P payload) where T : RaycastResponse<P>, new() where P : RaycastHitInfo
         {
             T response = new T();
@@ -1302,9 +1412,30 @@ namespace DCL.Interface
 
         public static void StopIsolatedMode(IsolatedConfig config) { MessageFromEngine("StopIsolatedMode", JsonConvert.SerializeObject(config)); }
 
-        public static void SendReportScene(string sceneID) { SendMessage("ReportScene", sceneID); }
+        public static void SendReportScene(string sceneID)
+        {
+            SendMessage("ReportScene", new SendReportScenePayload
+            {
+                sceneId = sceneID
+            });
+        }
 
-        public static void SendReportPlayer(string playerName) { SendMessage("ReportPlayer", playerName); }
+        public static void SetHomeScene(string sceneID)
+        {
+            SendMessage("SetHomeScene", new SetHomeScenePayload
+            {
+                sceneId = sceneID
+            });
+        }
+
+        public static void SendReportPlayer(string playerId, string playerName)
+        {
+            SendMessage("ReportPlayer", new SendReportPlayerPayload
+            {
+                userId = playerId,
+                name = playerName
+            });
+        }
 
         public static void SendBlockPlayer(string userId)
         {
@@ -1338,6 +1469,10 @@ namespace DCL.Interface
             onAudioStreamingEvent.volume = volume;
             SendMessage("SetAudioStream", onAudioStreamingEvent);
         }
+
+        public static void JoinVoiceChat() { SendMessage("JoinVoiceChat"); }
+
+        public static void LeaveVoiceChat() { SendMessage("LeaveVoiceChat"); }
 
         public static void SendSetVoiceChatRecording(bool recording)
         {
@@ -1397,7 +1532,7 @@ namespace DCL.Interface
             SendMessage("SendChatMessage", sendChatMessageEvent);
         }
 
-        public static void UpdateFriendshipStatus(FriendsController.FriendshipUpdateStatusMessage message) { SendMessage("UpdateFriendshipStatus", message); }
+        public static void UpdateFriendshipStatus(FriendshipUpdateStatusMessage message) { SendMessage("UpdateFriendshipStatus", message); }
 
         public static void ScenesLoadingFeedback(LoadingFeedbackMessage message) { SendMessage("ScenesLoadingFeedback", message); }
 
@@ -1491,12 +1626,36 @@ namespace DCL.Interface
             SendMessage("RequestWearables", requestWearablesPayload);
         }
 
+        public static void RequestEmotes(
+            string ownedByUser,
+            string[] emoteIds,
+            string[] collectionIds,
+            string context)
+        {
+            requestEmotesPayload.filters = new EmotesRequestFiltersPayload()
+            {
+                ownedByUser = ownedByUser,
+                emoteIds = emoteIds,
+                collectionIds = collectionIds,
+                thirdPartyId = null
+            };
+
+            requestEmotesPayload.context = context;
+
+            SendMessage("RequestEmotes", requestEmotesPayload);
+        }
+
         public static void SearchENSOwner(string name, int maxResults)
         {
             searchEnsOwnerPayload.name = name;
             searchEnsOwnerPayload.maxResults = maxResults;
 
             SendMessage("SearchENSOwner", searchEnsOwnerPayload);
+        }
+
+        public static void RequestHomeCoordinates()
+        {
+            SendMessage("RequestHomeCoordinates");
         }
 
         public static void RequestUserProfile(string userId)
@@ -1584,6 +1743,62 @@ namespace DCL.Interface
             timeReportPayload.timeNormalizationFactor = timeNormalizationFactor;
             timeReportPayload.cycleTime = cycleTime;
             SendMessage("ReportDecentralandTime", timeReportPayload);
+        }
+
+        public static void GetFriendsWithDirectMessages(string userNameOrId, int limit, int skip)
+        {
+            getFriendsWithDirectMessagesPayload.userNameOrId = userNameOrId;
+            getFriendsWithDirectMessagesPayload.limit = limit;
+            getFriendsWithDirectMessagesPayload.skip = skip;
+            SendMessage("GetFriendsWithDirectMessages", getFriendsWithDirectMessagesPayload);
+        }
+
+        public static void MarkMessagesAsSeen(string userId)
+        {
+            markMessagesAsSeenPayload.userId = userId;
+            SendMessage("MarkMessagesAsSeen", markMessagesAsSeenPayload);
+        }
+
+        public static void GetPrivateMessages(string userId, int limit, string fromMessageId)
+        {
+            getPrivateMessagesPayload.userId = userId;
+            getPrivateMessagesPayload.limit = limit;
+            getPrivateMessagesPayload.fromMessageId = fromMessageId;
+            SendMessage("GetPrivateMessages", getPrivateMessagesPayload);
+        }
+
+        public static void GetUnseenMessagesByUser()
+        {
+            SendMessage("GetUnseenMessagesByUser");
+        }
+
+        public static void GetFriends(int limit, int skip)
+        {
+            SendMessage("GetFriends", new GetFriendsPayload
+            {
+                limit = limit,
+                skip = skip
+            });
+        }
+
+        public static void GetFriends(string usernameOrId, int limit)
+        {
+            SendMessage("GetFriends", new GetFriendsPayload
+            {
+                userNameOrId = usernameOrId,
+                limit = limit
+            });
+        }
+
+        public static void GetFriendRequests(int sentLimit, int sentSkip, int receivedLimit, int receivedSkip)
+        {
+            SendMessage("GetFriendRequests", new GetFriendRequestsPayload
+            {
+                receivedSkip = receivedSkip,
+                receivedLimit = receivedLimit,
+                sentSkip = sentSkip,
+                sentLimit = sentLimit
+            });
         }
     }
 }

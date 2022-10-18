@@ -176,6 +176,11 @@ namespace DCL
             return positionTracker.movePositions;
         }
 
+        public void SetAnimationCulling(bool enabled)
+        {
+            Environment.i.platform.cullingController.SetAnimationCulling(enabled);
+        }
+
         public void Dispose()
         {
             positionTracker.Dispose();

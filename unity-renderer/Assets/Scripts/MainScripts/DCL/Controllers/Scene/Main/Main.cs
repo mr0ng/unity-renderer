@@ -1,9 +1,11 @@
 using System;
 using System.Collections.Generic;
 using DCL.Components;
+using DCL.Configuration;
 using DCL.Controllers;
 using DCL.Helpers;
 using DCL.SettingsCommon;
+using DCL.VR;
 using RPC;
 using UnityEngine;
 using UnityEngine.Serialization;
@@ -22,10 +24,12 @@ namespace DCL
         public PoolableComponentFactory componentFactory;
 
         private PerformanceMetricsController performanceMetricsController;
-        protected IKernelCommunication kernelCommunication;
+        public IKernelCommunication kernelCommunication;
         public  WebSocketCommunication webSocketCommunication;
         protected PluginSystem pluginSystem;
-        
+        private Transform mixedRealityPlayspace;
+        private Transform cameraParent;
+        private bool isDisposed;
         protected virtual void Awake()
         {
             if (i != null)
@@ -35,7 +39,9 @@ namespace DCL
             }
 
             i = this;
-
+            mixedRealityPlayspace = VRPlaySpace.i.transform;
+            mixedRealityPlayspace.parent = cameraParent;
+            mixedRealityPlayspace.localPosition = new Vector3(0f, -0.85f, 0f);;
             if (!disableSceneDependencies)
                 InitializeSceneDependencies();
 
@@ -44,6 +50,7 @@ namespace DCL
             if (!Configuration.EnvironmentSettings.RUNNING_TESTS)
             {
                 performanceMetricsController = new PerformanceMetricsController();
+          
                 SetupServices();
 
                 DataStore.i.HUDs.loadingHUD.visible.OnChange += OnLoadingScreenVisibleStateChange;
@@ -56,24 +63,24 @@ namespace DCL
             InitializeDataStore();
             SetupPlugins();
             InitializeCommunication();
-
-            // TODO(Brian): This is a temporary fix to address elevators issue in the xmas event.
-            // We should re-enable this later as produces a performance regression.
-            if (!Configuration.EnvironmentSettings.RUNNING_TESTS)
-                Environment.i.platform.cullingController.SetAnimationCulling(false);
         }
 
         protected virtual void InitializeDataStore()
         {
-#if UNITY_ANDROID && !UNITY_EDITOR
-            DataStore.i.textureConfig.gltfMaxSize.Set(1024);
-            DataStore.i.textureConfig.generalMaxSize.Set(2048);
-            DataStore.i.avatarConfig.useHologramAvatar.Set(true); 
-#else
-            DataStore.i.textureConfig.gltfMaxSize.Set(2048);
-            DataStore.i.textureConfig.generalMaxSize.Set(2048);
+// <<<<<<< HEAD
+// #if UNITY_ANDROID && !UNITY_EDITOR
+            // DataStore.i.textureConfig.gltfMaxSize.Set(1024);
+            // DataStore.i.textureConfig.generalMaxSize.Set(2048);
+            // DataStore.i.avatarConfig.useHologramAvatar.Set(true); 
+// #else
+            // DataStore.i.textureConfig.gltfMaxSize.Set(2048);
+            // DataStore.i.textureConfig.generalMaxSize.Set(2048);
+// =======
+            DataStore.i.textureConfig.gltfMaxSize.Set(TextureCompressionSettings.GLTF_TEX_MAX_SIZE_WEB);
+            DataStore.i.textureConfig.generalMaxSize.Set(TextureCompressionSettings.GENERAL_TEX_MAX_SIZE_WEB);
+// >>>>>>> upstream/dev
             DataStore.i.avatarConfig.useHologramAvatar.Set(true);
-#endif
+// #endif
         }
 
         protected virtual void InitializeCommunication()
@@ -90,7 +97,8 @@ namespace DCL
             // {
             Debug.Log($"Main: starting WebSockeSSL");
             kernelCommunication = new WebSocketCommunication(DebugConfigComponent.i.webSocketSSL);
-                
+            // WebSocketCommunication kc = kernelCommunication as WebSocketCommunication;
+            //WebSocketCommunication.service.OnCloseEvent += RestartSocketServer;
             // }
 #endif
             RPCServerBuilder.BuildDefaultServer();
@@ -149,6 +157,7 @@ namespace DCL
 
         protected virtual void Dispose()
         {
+            isDisposed = true;
             DataStore.i.HUDs.loadingHUD.visible.OnChange -= OnLoadingScreenVisibleStateChange;
 
             DataStore.i.common.isApplicationQuitting.Set(true);
@@ -192,5 +201,14 @@ namespace DCL
         }
 
         protected virtual void CreateEnvironment() => MainSceneFactory.CreateEnvironment();
+        public virtual void RestartSocketServer()
+        {
+             if (isDisposed)
+                            return;
+            //DebugConfigComponent.i.ReloadPage();
+            //kernelCommunication.Dispose();
+            //InitializeCommunication();
+            DebugConfigComponent.i.ShowWebviewScreen();
+        }
     }
 }

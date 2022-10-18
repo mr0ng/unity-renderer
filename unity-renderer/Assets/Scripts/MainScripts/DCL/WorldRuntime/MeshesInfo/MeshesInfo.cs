@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using DCL.Components;
@@ -27,12 +27,11 @@ namespace DCL.Models
         }
 
         GameObject meshRootGameObjectValue;
-        //private Shader unlit = Shader.Find("Oculus/Unlit");
-       
+
         public IShape currentShape;
         public Renderer[] renderers;
         public MeshFilter[] meshFilters;
-        public List<Collider> colliders = new List<Collider>();
+        public HashSet<Collider> colliders = new HashSet<Collider>();
         public Animation animation { get; private set; }
 
         Vector3 lastBoundsCalculationPosition;
@@ -44,15 +43,22 @@ namespace DCL.Models
         {
             get
             {
-                if (meshRootGameObject.transform.position != lastBoundsCalculationPosition)
-                {
-                    mergedBoundsValue.center += meshRootGameObject.transform.position - lastBoundsCalculationPosition;
-                    lastBoundsCalculationPosition = meshRootGameObject.transform.position;
+                if (meshRootGameObject == null)
+                { 
+                    RecalculateBounds();   
                 }
+                else
+                {
+                    if (meshRootGameObject.transform.position != lastBoundsCalculationPosition)
+                    {
+                        mergedBoundsValue.center += meshRootGameObject.transform.position - lastBoundsCalculationPosition;
+                        lastBoundsCalculationPosition = meshRootGameObject.transform.position;
+                    }
 
-                if (meshRootGameObject.transform.lossyScale != lastBoundsCalculationScale ||
-                    meshRootGameObject.transform.rotation != lastBoundsCalculationRotation)
-                    RecalculateBounds();
+                    if (meshRootGameObject.transform.lossyScale != lastBoundsCalculationScale ||
+                        meshRootGameObject.transform.rotation != lastBoundsCalculationRotation)
+                        RecalculateBounds();   
+                }
 
                 return mergedBoundsValue;
             }
@@ -61,11 +67,9 @@ namespace DCL.Models
         
         public void UpdateRenderersCollection(Renderer[] renderers, MeshFilter[] meshFilters, Animation animation = null)
         {
-            //renderers = SwapShaders(renderers);
             if (meshRootGameObjectValue != null)
             {
                 this.renderers = renderers;
-                
                 this.meshFilters = meshFilters;
                 this.animation = animation;
 
@@ -77,57 +81,38 @@ namespace DCL.Models
 
         public void UpdateRenderersCollection()
         {
-            if (meshRootGameObjectValue != null)
-            {
-                renderers = meshRootGameObjectValue.GetComponentsInChildren<Renderer>(true);
-                //renderers = SwapShaders(renderers);
-                meshFilters = meshRootGameObjectValue.GetComponentsInChildren<MeshFilter>(true);
-                animation = meshRootGameObjectValue.GetComponentInChildren<Animation>();
-
-                TextMeshPro[] tmpros = meshRootGameObjectValue.GetComponentsInChildren<TextMeshPro>(true);
-                if (tmpros.Length > 0)
-                {
-                    renderers = renderers.Union(tmpros.Select(x => x.renderer)).ToArray();
-                    meshFilters = meshFilters.Union(tmpros.Select(x => x.meshFilter)).ToArray();
-                }
-
-                RecalculateBounds();
-                OnAnyUpdated?.Invoke();
-                OnUpdated?.Invoke();
-            }
-        }
-       
-        private Shader unlit = Shader.Find("Universal Render Pipeline/Unlit");
-       
-        public Renderer[] SwapShaders(Renderer[] renderers)
-        {
-            foreach (Renderer r in renderers)
-            {
-                if (r.material.shader.name.Contains("Universal Render Pipeline/Lit"))
-                {
-                    //r.material.shader = unlit;
-                }
-                else if (r.material.shader.name.Contains("Hidden/InternalErrorShader"))
-                {
-                    r.material.shader = unlit;
-                }
-                else
-                {
-                    Debug.Log( $"Shader in use: {r.material.shader.name}");
-                }
-            }
-            return renderers;
-        }
-        public void RecalculateBounds()
-        {
-            if (renderers == null || renderers.Length == 0)
+            if (meshRootGameObjectValue == null)
                 return;
+            
+            renderers = meshRootGameObjectValue.GetComponentsInChildren<Renderer>(true);
+            meshFilters = meshRootGameObjectValue.GetComponentsInChildren<MeshFilter>(true);
+            animation = meshRootGameObjectValue.GetComponentInChildren<Animation>();
 
-            lastBoundsCalculationPosition = meshRootGameObject.transform.position;
-            lastBoundsCalculationScale = meshRootGameObject.transform.lossyScale;
-            lastBoundsCalculationRotation = meshRootGameObject.transform.rotation;
+            TextMeshPro[] tmpros = meshRootGameObjectValue.GetComponentsInChildren<TextMeshPro>(true);
+            if (tmpros.Length > 0)
+            {
+                renderers = renderers.Union(tmpros.Select(x => x.renderer)).ToArray();
+                meshFilters = meshFilters.Union(tmpros.Select(x => x.meshFilter)).ToArray();
+            }
 
-            mergedBoundsValue = MeshesInfoUtils.BuildMergedBounds(renderers);
+            RecalculateBounds();
+            OnAnyUpdated?.Invoke();
+            OnUpdated?.Invoke();
+        }
+
+        public void RecalculateBounds()
+        {   
+            if ((renderers == null || renderers.Length == 0) && colliders.Count == 0)
+            {
+                mergedBoundsValue = new Bounds();
+                return;
+            }
+
+            lastBoundsCalculationPosition = meshRootGameObjectValue.transform.position;
+            lastBoundsCalculationScale = meshRootGameObjectValue.transform.lossyScale;
+            lastBoundsCalculationRotation = meshRootGameObjectValue.transform.rotation;
+
+            mergedBoundsValue = MeshesInfoUtils.BuildMergedBounds(renderers, colliders);
         }
 
         public void CleanReferences()

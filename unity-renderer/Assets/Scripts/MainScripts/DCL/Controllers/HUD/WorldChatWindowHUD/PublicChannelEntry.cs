@@ -1,9 +1,10 @@
-﻿using System;
+using System;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using static PublicChannelEntry;
 
-public class PublicChannelEntry : BaseComponentView, IComponentModelConfig
+public class PublicChannelEntry : BaseComponentView, IComponentModelConfig<PublicChannelEntryModel>
 {
     [SerializeField] internal Button openChatButton;
     [SerializeField] internal TMP_Text nameLabel;
@@ -11,7 +12,6 @@ public class PublicChannelEntry : BaseComponentView, IComponentModelConfig
     [SerializeField] internal UnreadNotificationBadge unreadNotifications;
     
     private IChatController chatController;
-    private ILastReadMessagesService lastReadMessagesService;
 
     public PublicChannelEntryModel Model => model;
 
@@ -28,23 +28,21 @@ public class PublicChannelEntry : BaseComponentView, IComponentModelConfig
         openChatButton.onClick.AddListener(() => OnOpenChat?.Invoke(this));
     }
 
-    public void Initialize(IChatController chatController,
-        ILastReadMessagesService lastReadMessagesService)
+    public void Initialize(IChatController chatController)
     {
         this.chatController = chatController;
-        this.lastReadMessagesService = lastReadMessagesService;
     }
 
-    public void Configure(BaseComponentModel newModel)
+    public void Configure(PublicChannelEntryModel newModel)
     {
-        model = (PublicChannelEntryModel) newModel;
+        model = newModel;
         RefreshControl();
     }
 
     public override void RefreshControl()
     {
         nameLabel.text = $"#{model.name}";
-        unreadNotifications.Initialize(chatController, model.channelId, lastReadMessagesService);
+        unreadNotifications.Initialize(chatController, model.channelId);
     }
 
     [Serializable]

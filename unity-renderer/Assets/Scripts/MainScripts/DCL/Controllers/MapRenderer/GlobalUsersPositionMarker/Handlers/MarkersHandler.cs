@@ -1,5 +1,8 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
+using Cysharp.Threading.Tasks;
+using DCL.Helpers;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
@@ -12,7 +15,7 @@ namespace DCL
     {
         internal readonly List<UserPositionMarker> availableMarkers;
         internal readonly List<UserPositionMarker> usedMarkers;
-        readonly Func<float, float, Vector3> coordToMapPosition;
+        readonly Func<Vector2Int, Vector2> coordToMapPosition;
 
         readonly ExclusionArea exclusionArea;
         readonly ScenesFilter scenesFilter;
@@ -26,7 +29,7 @@ namespace DCL
         /// <param name="overlayContainer">parent for markers</param>
         /// <param name="maxMarkers">max amount of markers (pool)</param>
         /// <param name="coordToMapPosFunc">function to transform coords to map position</param>
-        public MarkersHandler(UserMarkerObject markerPrefab, Transform overlayContainer, int maxMarkers, Func<float, float, Vector3> coordToMapPosFunc)
+        public MarkersHandler(UserMarkerObject markerPrefab, Transform overlayContainer, int maxMarkers, Func<Vector2Int, Vector2> coordToMapPosFunc)
         {
             this.maxMarkers = maxMarkers;
             this.coordToMapPosition = coordToMapPosFunc;
@@ -36,15 +39,22 @@ namespace DCL
 
             availableMarkers = new List<UserPositionMarker>(maxMarkers);
             usedMarkers = new List<UserPositionMarker>(maxMarkers);
+            
+            InstantiateUserPositionMarkers(markerPrefab, overlayContainer);
 
+        }
+
+        public void InstantiateUserPositionMarkers(UserMarkerObject markerPrefab, Transform overlayContainer)
+        {
             for (int i = 0; i < maxMarkers; i++)
             {
                 var marker = new UserPositionMarker(GameObject.Instantiate(markerPrefab, overlayContainer));
                 availableMarkers.Add(marker);
                 marker.SetActive(false);
+
+               
             }
         }
-
         /// <summary>
         /// Set exclusion area. Markers inside this area will be hidden, to avoid overlapping with markers set with comms info for example.
         /// After set it will iterate through current markers to hide or show them respectively.
@@ -94,9 +104,8 @@ namespace DCL
         {
             marker.name = $"UsersPositionMarker({parcelData.coords.x},{parcelData.coords.y})";
 
-            marker.localPosition = coordToMapPosition(
-                parcelData.coords.x + Random.Range(-0.5f, 0.5f),
-                parcelData.coords.y + Random.Range(-0.5f, 0.5f));
+            var coords = new Vector2(parcelData.coords.x + Random.Range(-0.5f, 0.5f), parcelData.coords.y + Random.Range(-0.5f, 0.5f));
+            marker.localPosition = coordToMapPosition(Vector2Int.RoundToInt(coords));
 
             marker.coords = parcelData.coords;
             marker.realmServer = parcelData.realmServer;

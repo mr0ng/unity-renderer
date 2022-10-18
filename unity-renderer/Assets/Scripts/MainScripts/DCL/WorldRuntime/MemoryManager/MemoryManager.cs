@@ -37,7 +37,7 @@ namespace DCL
             this.cleanupInterval = cleanupInterval;
             sceneLoadRadiusSettingController = ScriptableObject.CreateInstance<ScenesLoadRadiusControlController>();
             sceneLoadRadiusSettingController.Initialize();
-            autoCleanupCoroutine = CoroutineStarter.Start(AutoCleanup());
+            //autoCleanupCoroutine = CoroutineStarter.Start(AutoCleanup());
         }
 
         public MemoryManager()
@@ -47,7 +47,7 @@ namespace DCL
             this.cleanupInterval = TIME_FOR_NEW_MEMORY_CHECK;
             sceneLoadRadiusSettingController = ScriptableObject.CreateInstance<ScenesLoadRadiusControlController>();
             sceneLoadRadiusSettingController.Initialize();
-            autoCleanupCoroutine = CoroutineStarter.Start(AutoCleanup());
+            //autoCleanupCoroutine = CoroutineStarter.Start(AutoCleanup());
            
         }
 

@@ -25,7 +25,8 @@ namespace DCL.Tutorial
         public override void OnStepStart()
         {
             base.OnStepStart();
-
+            
+            CommonScriptableObjects.userMovementKeysBlocked.Set(true);
             CommonScriptableObjects.featureKeyTriggersBlocked.Set(true);
 
             titleText.text = titleText.text.Replace("{userName}", UserProfile.GetOwnUserProfile().userName);
@@ -45,7 +46,7 @@ namespace DCL.Tutorial
 
                 if (Environment.i != null && Environment.i.world != null)
                 {
-                    WebInterface.SendSceneExternalActionEvent(Environment.i.world.state.currentSceneId, "tutorial", "begin");
+                    WebInterface.SendSceneExternalActionEvent(Environment.i.world.state.GetCurrentSceneId(), "tutorial", "begin");
                 }
             }
         }
@@ -62,6 +63,8 @@ namespace DCL.Tutorial
         {
             base.OnStepFinished();
             tutorialController.SetTeacherCanvasSortingOrder(defaultTeacherCanvasSortOrder);
+            
+            CommonScriptableObjects.userMovementKeysBlocked.Set(false);
         }
 
         internal void OnOkButtonClick() { stepIsFinished = true; }

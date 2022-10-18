@@ -30,12 +30,12 @@ public class UserProfileModel
     public string name;
     public string email;
     public string description;
+    public string baseUrl;
     public ParcelsWithAccess[] parcelsWithAccess;
     public ulong created_at;
     public ulong updated_at;
-    public string version;
+    public int version;
     public AvatarModel avatar;
-    public string[] inventory;
     public Snapshots snapshots = new Snapshots();
     public UserProfileModel Clone() => (UserProfileModel)MemberwiseClone();
 
@@ -46,4 +46,16 @@ public class UserProfileModel
     public List<string> muted;
     public int tutorialStep;
     public bool hasClaimedName = false;
+
+
+    public string ComposeCorrectUrl(string url)
+    {
+        if (string.IsNullOrEmpty(url))
+            return url;
+
+        if (!url.StartsWith("Qm") && !url.StartsWith("ba"))
+            return url;
+
+        return baseUrl + url;
+    }
 }

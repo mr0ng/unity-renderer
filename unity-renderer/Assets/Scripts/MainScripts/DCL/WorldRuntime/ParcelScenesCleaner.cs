@@ -9,7 +9,7 @@ namespace DCL
 {
     public class ParcelScenesCleaner : IParcelScenesCleaner
     {
-        const float MAX_TIME_BUDGET = 0.01f;
+        const float MAX_TIME_BUDGET = 0.005f;
 
         private struct MarkedEntityInfo
         {
@@ -135,7 +135,7 @@ namespace DCL
 
             foreach (var scene in scenesToRemove)
             {
-                if (scene != null && !Environment.i.world.state.loadedScenes.ContainsKey(scene.sceneData.id))
+                if (scene != null && !Environment.i.world.state.ContainsScene(scene.sceneData.id))
                     Object.Destroy(scene.gameObject);
 
                 if (!immediate && DCLTime.realtimeSinceStartup - lastTime >= MAX_TIME_BUDGET)

@@ -33,7 +33,13 @@ namespace DCL
         public  BaseVariable<bool> isPreviewMenuActive = new BaseVariable<bool>();
         
         [System.NonSerialized]
-        public BaseDictionary<string, SceneSpawnPointsData> showSceneSpawnPoints = new BaseDictionary<string, SceneSpawnPointsData>();        
+        public BaseDictionary<string, SceneSpawnPointsData> showSceneSpawnPoints = new BaseDictionary<string, SceneSpawnPointsData>();
+
+        [System.NonSerialized]
+        public BaseVariable<bool> showSceneABDetectionLayer = new BaseVariable<bool>();
+        
+        [System.NonSerialized]
+        public BaseVariable<bool> showGlobalABDetectionLayer = new BaseVariable<bool>();
 
         /// <summary>
         /// True when WSS message pipeline is enabled
@@ -50,5 +56,8 @@ namespace DCL
         /// do Debug.Break() and log when processing each message
         /// </summary>
         public bool msgStepByStep = false;
+    
+
+        //public bool openInternalBrowser = true;
     }
 }

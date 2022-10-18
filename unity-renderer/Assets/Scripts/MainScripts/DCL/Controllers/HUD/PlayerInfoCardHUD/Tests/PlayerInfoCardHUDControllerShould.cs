@@ -233,15 +233,15 @@ public class PlayerInfoCardHUDControllerShould : IntegrationTestSuite_Legacy
                 userId = id,
                 name = $"name_{id}",
                 description = $"description_{id}",
-                email = $"email_{id}",
-                inventory = inventory
+                email = $"email_{id}"
             });
+        userProfile.SetInventory(inventory);
         return userProfile;
     }
 
     private void GivenFriendshipStatus(string userId, FriendshipStatus status)
     {
-        var friendStatus = new FriendsController.UserStatus
+        var friendStatus = new UserStatus
         {
             userId = userId,
             friendshipStatus = status

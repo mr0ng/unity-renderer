@@ -20,6 +20,8 @@ public class TeleportPromptHUDController : IHUD
         view = UnityEngine.Object.Instantiate(Resources.Load<GameObject>("TeleportPromptHUDVR")).GetComponent<TeleportPromptHUDView>();
         view.name = "_TeleportPromptHUD";
         view.content.SetActive(false);
+        view.contentAnimator.visibleParam = "invisible";
+        SetVisibility((false));
         view.OnTeleportEvent += OnTeleportPressed;
     }
 

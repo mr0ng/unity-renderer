@@ -33,7 +33,8 @@ namespace AvatarSystem
             avatarMeshCombiner.uploadMeshToGpu = true;
         }
 
-        public async UniTask Load(WearableItem bodyshape, WearableItem eyes, WearableItem eyebrows, WearableItem mouth, List<WearableItem> wearables, AvatarSettings settings, CancellationToken ct = default)
+        public async UniTask Load(WearableItem bodyshape, WearableItem eyes, WearableItem eyebrows, WearableItem mouth,
+            List<WearableItem> wearables, AvatarSettings settings, CancellationToken ct = default)
         {
             await Load(bodyshape, eyes, eyebrows, mouth, wearables, settings, null, ct);
         }
@@ -48,16 +49,24 @@ namespace AvatarSystem
                 status = ILoader.Status.Loading;
                 await LoadBodyshape(settings, bodyshape, eyes, eyebrows, mouth, toCleanUp, ct);
                 await LoadWearables(wearables, settings, toCleanUp, ct);
-                SkinnedMeshRenderer skinnedContainer = bonesContainer == null ? bodyshapeLoader.upperBodyRenderer : bonesContainer;
+                SkinnedMeshRenderer skinnedContainer = (bonesContainer == null ) ? bodyshapeLoader.upperBodyRenderer : bonesContainer;
+                if (skinnedContainer.sharedMesh == null)
+                    skinnedContainer.sharedMesh = bodyshapeLoader.upperBodyRenderer.sharedMesh;
                 // Update Status accordingly
                 status = ComposeStatus(loaders);
                 if (status == ILoader.Status.Failed_Major)
                     throw new Exception($"Couldnt load (nor fallback) wearables with required category: {string.Join(", ", ConstructRequiredFailedWearablesList(loaders.Values))}");
 
-                AvatarSystemUtils.CopyBones(skinnedContainer, loaders.Values.SelectMany(x => x.rendereable.renderers).OfType<SkinnedMeshRenderer>());
+
+                foreach (IWearableLoader wearableLoader in loaders.Values)
+                {
+                    wearableLoader.SetBones(skinnedContainer.rootBone, skinnedContainer.bones);
+                }
 
                 if (bodyshapeLoader.rendereable != null)
-                    AvatarSystemUtils.CopyBones(skinnedContainer, bodyshapeLoader.rendereable.renderers.OfType<SkinnedMeshRenderer>());
+                {
+                    bodyshapeLoader.SetBones(skinnedContainer.rootBone, skinnedContainer.bones);
+                }
 
                 (bool headVisible, bool upperBodyVisible, bool lowerBodyVisible, bool feetVisible) = AvatarSystemUtils.GetActiveBodyParts(settings.bodyshapeId, wearables);
 
@@ -189,6 +198,7 @@ namespace AvatarSystem
             bool success = avatarMeshCombiner.Combine(bonesContainer, allRenderers.ToArray());
             if (!success)
             {
+                Debug.LogError("Loader AvatarCombine failed!");
                 status = ILoader.Status.Failed_Major;
                 throw new Exception("Couldnt merge avatar");
             }

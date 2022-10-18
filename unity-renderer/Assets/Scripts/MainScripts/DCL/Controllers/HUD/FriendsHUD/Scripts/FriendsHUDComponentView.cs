@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using SocialFeaturesAnalytics;
 using UnityEngine;
@@ -55,8 +55,8 @@ public class FriendsHUDComponentView : BaseComponentView, IFriendsHUDComponentVi
     
     public event Action OnRequireMoreFriends
     {
-        add => friendsTab.OnRequireMoreFriends += value;
-        remove => friendsTab.OnRequireMoreFriends -= value;
+        add => friendsTab.OnRequireMoreEntries += value;
+        remove => friendsTab.OnRequireMoreEntries -= value;
     }
 
     public event Action OnRequireMoreFriendRequests
@@ -71,31 +71,37 @@ public class FriendsHUDComponentView : BaseComponentView, IFriendsHUDComponentVi
         remove => friendsTab.OnSearchRequested -= value;
     }
 
+    public event Action OnFriendListDisplayed;
+    public event Action OnRequestListDisplayed;
+
     public event Action OnClose;
 
     public RectTransform Transform => transform as RectTransform;
 
-    public bool ListByOnlineStatus
-    {
-        set => friendsTab.ListByOnlineStatus = value;
-    }
-
     public int FriendCount => friendsTab.Count;
     public int FriendRequestCount => friendRequestsTab.Count;
+    public int FriendRequestSentCount => friendRequestsTab.SentCount;
+    public int FriendRequestReceivedCount => friendRequestsTab.ReceivedCount;
+    public bool IsFriendListActive => friendsTab.gameObject.activeInHierarchy;
+    public bool IsRequestListActive => friendRequestsTab.gameObject.activeInHierarchy;
 
     public static FriendsHUDComponentView Create()
     {
-        var view = Instantiate(Resources.Load<GameObject>("SocialBarV1/FriendsHUD"))
+        var view = Instantiate(Resources.Load<GameObject>("SocialBarV1/FriendsHUDVR"))
             .GetComponent<FriendsHUDComponentView>();
         return view;
     }
     
     public void Initialize(IChatController chatController,
-        ILastReadMessagesService lastReadMessagesService,
         IFriendsController friendsController,
         ISocialAnalytics socialAnalytics)
     {
-        friendsTab.Initialize(chatController, lastReadMessagesService, friendsController, socialAnalytics);
+        friendsTab.Initialize(chatController, friendsController, socialAnalytics);
+    }
+
+    public void RefreshFriendsTab()
+    {
+        friendsTab.RefreshControl();
     }
 
     public override void Awake()
@@ -110,7 +116,6 @@ public class FriendsHUDComponentView : BaseComponentView, IFriendsHUDComponentVi
             Hide();
         });
 
-        friendsTab.Expand();
         friendRequestsTab.Expand();
     }
 
@@ -156,77 +161,23 @@ public class FriendsHUDComponentView : BaseComponentView, IFriendsHUDComponentVi
         gameObject.SetActive(false);
         AudioScriptableObjects.dialogClose.Play(true);
     }
-
-    public void Set(string userId,
-        FriendshipAction friendshipAction,
-        FriendEntryModel model)
+    
+    public void Set(string userId, FriendEntryModel model)
     {
-        switch (friendshipAction)
-        {
-            case FriendshipAction.NONE:
-                friendRequestsTab.Remove(userId);
-                friendsTab.Remove(userId);
-                break;
-            case FriendshipAction.APPROVED:
-                friendRequestsTab.Remove(userId);
-                friendsTab.Enqueue(userId, model);
-                break;
-            case FriendshipAction.REJECTED:
-                friendRequestsTab.Remove(userId);
-                friendsTab.Remove(userId);
-                break;
-            case FriendshipAction.CANCELLED:
-                friendRequestsTab.Remove(userId);
-                friendsTab.Remove(userId);
-                break;
-            case FriendshipAction.REQUESTED_FROM:
-                friendRequestsTab.Enqueue(userId, (FriendRequestEntryModel) model);
-                friendsTab.Remove(userId);
-                break;
-            case FriendshipAction.REQUESTED_TO:
-                friendRequestsTab.Enqueue(userId, (FriendRequestEntryModel) model);
-                friendsTab.Remove(userId);
-                break;
-            case FriendshipAction.DELETED:
-                friendRequestsTab.Remove(userId);
-                friendsTab.Remove(userId);
-                break;
-            default:
-                Debug.LogError($"FriendshipAction not supported: {friendshipAction}");
-                break;
-        }
+        friendRequestsTab.Remove(userId);
+        friendsTab.Enqueue(userId, model);
     }
-
-    public void Set(string userId, FriendshipStatus friendshipStatus, FriendEntryModel model)
+    
+    public void Remove(string userId)
     {
-        switch (friendshipStatus)
-        {
-            case FriendshipStatus.FRIEND:
-                friendsTab.Enqueue(userId, model);
-                friendRequestsTab.Remove(userId);
-                break;
-            case FriendshipStatus.NOT_FRIEND:
-                friendsTab.Remove(userId);
-                friendRequestsTab.Remove(userId);
-                break;
-            case FriendshipStatus.REQUESTED_TO:
-                friendsTab.Remove(userId);
-                friendRequestsTab.Enqueue(userId, (FriendRequestEntryModel) model);
-                break;
-            case FriendshipStatus.REQUESTED_FROM:
-                friendsTab.Remove(userId);
-                friendRequestsTab.Enqueue(userId, (FriendRequestEntryModel) model);
-                break;
-            default:
-                Debug.LogError($"FriendshipStatus not supported: {friendshipStatus}");
-                break;
-        }
+        friendRequestsTab.Remove(userId);
+        friendsTab.Remove(userId);
     }
-
-    public void Populate(string userId, FriendEntryModel model)
+    
+    public void Set(string userId, FriendRequestEntryModel model)
     {
-        friendsTab.Populate(userId, model);
-        friendRequestsTab.Populate(userId, (FriendRequestEntryModel) model);
+        friendRequestsTab.Enqueue(userId, model);
+        friendsTab.Remove(userId);
     }
 
     public bool IsActive() => gameObject.activeInHierarchy;
@@ -246,12 +197,12 @@ public class FriendsHUDComponentView : BaseComponentView, IFriendsHUDComponentVi
         friendRequestsTab.ShowRequestSuccessfullySentNotification();
     }
 
-    public void ShowMoreFriendsToLoadHint(int pendingFriendsCount) => friendsTab.ShowMoreFriendsToLoadHint(pendingFriendsCount);
+    public void ShowMoreFriendsToLoadHint(int hiddenCount) => friendsTab.ShowMoreFriendsToLoadHint(hiddenCount);
 
     public void HideMoreFriendsToLoadHint() => friendsTab.HideMoreFriendsToLoadHint();
 
-    public void ShowMoreRequestsToLoadHint(int pendingRequestsCount) =>
-        friendRequestsTab.ShowMoreFriendsToLoadHint(pendingRequestsCount);
+    public void ShowMoreRequestsToLoadHint(int hiddenCount) =>
+        friendRequestsTab.ShowMoreEntriesToLoadHint(hiddenCount);
 
     public void HideMoreRequestsToLoadHint() => friendRequestsTab.HideMoreFriendsToLoadHint();
 
@@ -262,6 +213,18 @@ public class FriendsHUDComponentView : BaseComponentView, IFriendsHUDComponentVi
     public void FilterFriends(Dictionary<string, FriendEntryModel> friends) => friendsTab.Filter(friends);
 
     public void ClearFriendFilter() => friendsTab.ClearFilter();
+    
+    public void UpdateBlockStatus(string userId, bool blocked)
+    {
+        UpdateBlockStatus(blocked, friendsTab.Get(userId));
+        UpdateBlockStatus(blocked, friendRequestsTab.Get(userId));
+    }
+
+    public void ClearAll()
+    {
+        friendsTab.Clear();
+        friendRequestsTab.Clear();
+    }
 
     public override void RefreshControl()
     {
@@ -286,14 +249,24 @@ public class FriendsHUDComponentView : BaseComponentView, IFriendsHUDComponentVi
         {
             friendsTab.Show();
             friendRequestsTab.Hide();
+            OnFriendListDisplayed?.Invoke();
         }
         else if (index == FRIENDS_REQUEST_TAB_INDEX)
         {
             friendsTab.Hide();
             friendRequestsTab.Show();
+            OnRequestListDisplayed?.Invoke();
         }
         else
             throw new IndexOutOfRangeException();
+    }
+    
+    private void UpdateBlockStatus(bool blocked, FriendEntryBase friendEntry)
+    {
+        if (friendEntry == null) return;
+        var friendModel = friendEntry.Model;
+        friendModel.blocked = blocked;
+        friendEntry.RefreshControl();
     }
 
     [Serializable]

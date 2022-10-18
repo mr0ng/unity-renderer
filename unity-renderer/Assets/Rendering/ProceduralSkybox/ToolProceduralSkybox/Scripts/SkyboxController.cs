@@ -102,11 +102,8 @@ namespace DCL.Skybox
 
             // Register for camera references
             DataStore.i.camera.transform.OnChange += AssignCameraReferences;
-            DataStore.i.camera.mainCamEnabled.OnChange += SkyboxCameraEnabled;
             AssignCameraReferences(DataStore.i.camera.transform.Get(), null);
         }
-
-        private void SkyboxCameraEnabled(bool current, bool previous) { skyboxCam.SetCameraEnabledState(current); }
 
         private void AssignCameraReferences(Transform currentTransform, Transform prevTransform)
         {
@@ -179,6 +176,7 @@ namespace DCL.Skybox
             if (runtimeReflectionObj == null)
             {
                 runtimeReflectionObj = skyboxProbe.gameObject.AddComponent<ReflectionProbeRuntime>();
+                runtimeReflectionObj.followTransform = Camera.main.transform;
             }
 
             // Update resolution
@@ -490,7 +488,6 @@ namespace DCL.Skybox
             DataStore.i.skyboxConfig.fixedTime.OnChange -= FixedTime_OnChange;
             DataStore.i.skyboxConfig.reflectionResolution.OnChange -= ReflectionResolution_OnChange;
             DataStore.i.camera.transform.OnChange -= AssignCameraReferences;
-            DataStore.i.camera.mainCamEnabled.OnChange -= SkyboxCameraEnabled;
 
             timeReporter.Dispose();
         }

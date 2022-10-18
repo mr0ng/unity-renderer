@@ -10,21 +10,26 @@ using UnityEngine.TestTools;
 public class FriendsHUDComponentViewShould
 {
     private FriendsHUDComponentView view;
-    
+    private GameObject friendsControllerGameObject;
+
     [SetUp]
     public void Setup()
     {
+        // we need to add friends controller because the badge internally uses FriendsController.i
+        friendsControllerGameObject = new GameObject("Main");
+        friendsControllerGameObject.AddComponent<FriendsController>();
         view = FriendsHUDComponentView.Create();
         var friendsController = Substitute.For<IFriendsController>();
-        friendsController.GetFriends().Returns(new Dictionary<string, FriendsController.UserStatus>());
-        view.Initialize(Substitute.For<IChatController>(), Substitute.For<ILastReadMessagesService>(),
+        friendsController.GetAllocatedFriends().Returns(new Dictionary<string, UserStatus>());
+        view.Initialize(Substitute.For<IChatController>(),
             friendsController, Substitute.For<ISocialAnalytics>());
     }
 
     [TearDown]
     public void TearDown()
     {
-        ((BaseComponentView) view).Dispose();
+        Object.Destroy(friendsControllerGameObject);
+        view.Dispose();
     }
 
     [Test]
@@ -130,7 +135,7 @@ public class FriendsHUDComponentViewShould
         GivenFriendListTabFocused();
         GivenApprovedFriend(userId);
         yield return null;
-        GivenRejectedFriend(userId);
+        GivenRemovedFriend(userId);
         yield return null;
         
         Assert.IsFalse(view.ContainsFriend(userId));
@@ -184,7 +189,7 @@ public class FriendsHUDComponentViewShould
         const string userId = "userId";
         
         GivenRequestTabFocused();
-        GivenCancelledRequest(userId);
+        GivenRemovedFriend(userId);
         yield return null;
         
         Assert.IsFalse(view.ContainsFriendRequest(userId));
@@ -202,7 +207,7 @@ public class FriendsHUDComponentViewShould
         const string userId = "userId";
         
         GivenFriendListTabFocused();
-        view.Set(userId, FriendshipStatus.FRIEND, new FriendEntryModel
+        view.Set(userId, new FriendEntryModel
         {
             blocked = false,
             coords = Vector2.one,
@@ -223,20 +228,12 @@ public class FriendsHUDComponentViewShould
     }
     
     [UnityTest]
-    public IEnumerator UpdateFriendshipStatusToNotFriend()
+    public IEnumerator RemoveFriendship()
     {
         const string userId = "userId";
         
         GivenFriendListTabFocused();
-        view.Set(userId, FriendshipStatus.NOT_FRIEND, new FriendEntryModel
-        {
-            blocked = false,
-            coords = Vector2.one,
-            avatarSnapshotObserver = Substitute.For<ILazyTextureObserver>(),
-            status = PresenceStatus.OFFLINE,
-            userId = userId,
-            userName = "name"
-        });
+        view.Remove(userId);
         yield return null;
         
         Assert.IsFalse(view.ContainsFriend(userId));
@@ -254,7 +251,7 @@ public class FriendsHUDComponentViewShould
         const string userId = "userId";
         
         GivenRequestTabFocused();
-        view.Set(userId, FriendshipStatus.REQUESTED_TO, new FriendRequestEntryModel
+        view.Set(userId, new FriendRequestEntryModel
         {
             blocked = false,
             coords = Vector2.one,
@@ -281,7 +278,7 @@ public class FriendsHUDComponentViewShould
         const string userId = "userId";
         
         GivenRequestTabFocused();
-        view.Set(userId, FriendshipStatus.REQUESTED_FROM, new FriendRequestEntryModel
+        view.Set(userId, new FriendRequestEntryModel
         {
             blocked = false,
             coords = Vector2.one,
@@ -305,41 +302,61 @@ public class FriendsHUDComponentViewShould
     [Test]
     public void ShowMoreFriendsToLoadHint()
     {
-        view.ShowMoreFriendsToLoadHint(5);
+        view.ShowMoreFriendsToLoadHint(3);
         
         Assert.IsTrue(view.friendsTab.loadMoreEntriesContainer.activeSelf);
-        Assert.AreEqual("5 friends hidden. Use the search bar to find them or click below to show more.", view.friendsTab.loadMoreEntriesLabel.text);
+        Assert.AreEqual("3 friends hidden. Use the search bar to find them or scroll down to show more.", view.friendsTab.loadMoreEntriesLabel.text);
     }
 
     [Test]
     public void ShowMoreRequestsToLoadHint()
     {
-        view.ShowMoreRequestsToLoadHint(3);
+        view.ShowMoreRequestsToLoadHint(7);
         
         Assert.IsTrue(view.friendRequestsTab.loadMoreEntriesContainer.activeSelf);
-        Assert.AreEqual("3 request hidden. Click below to show more.", view.friendRequestsTab.loadMoreEntriesLabel.text);
+        Assert.AreEqual("7 requests hidden. Scroll down to show more.", view.friendRequestsTab.loadMoreEntriesLabel.text);
     }
 
-    [Test]
-    public void RequireMoreFriendEntries()
+    [UnityTest]
+    public IEnumerator RequireMoreFriendEntries()
     {
         var called = false;
         view.OnRequireMoreFriends += () => called = true;
         GivenFriendListTabFocused();
+        GivenApprovedFriend("bleh");
+        view.ShowMoreFriendsToLoadHint(6);
+
+        // wait until queued entry is created
+        yield return null;
+
+        view.friendsTab.scroll.onValueChanged.Invoke(Vector2.zero);
         
-        view.friendsTab.loadMoreEntriesButton.onClick.Invoke();
+        Assert.IsFalse(called);
+        
+        // wait for the internal delay
+        yield return new WaitForSeconds(1.5f);
         
         Assert.IsTrue(called);
     }
     
-    [Test]
-    public void RequireMoreRequestEntries()
+    [UnityTest]
+    public IEnumerator RequireMoreRequestEntries()
     {
         var called = false;
         view.OnRequireMoreFriendRequests += () => called = true;
         GivenRequestTabFocused();
+        GivenFriendRequestReceived("bleh");
+        view.ShowMoreRequestsToLoadHint(5);
         
-        view.friendRequestsTab.loadMoreEntriesButton.onClick.Invoke();
+        // wait until queued entry is created
+        yield return null;
+        
+        view.friendRequestsTab.scroll.onValueChanged.Invoke(Vector2.zero);
+        
+        Assert.IsFalse(called);
+        
+        // wait for the internal delay
+        yield return new WaitForSeconds(1.5f);
         
         Assert.IsTrue(called);
     }
@@ -375,24 +392,10 @@ public class FriendsHUDComponentViewShould
         
         Assert.IsFalse(view.loadingSpinner.activeSelf);
     }
-    
-    private void GivenCancelledRequest(string userId)
-    {
-        view.Set(userId, FriendshipAction.CANCELLED, new FriendRequestEntryModel
-        {
-            blocked = false,
-            coords = Vector2.one,
-            avatarSnapshotObserver = Substitute.For<ILazyTextureObserver>(),
-            status = PresenceStatus.OFFLINE,
-            userId = userId,
-            userName = "name",
-            isReceived = false
-        });
-    }
 
     private void GivenSentFriendRequest(string userId)
     {
-        view.Set(userId, FriendshipAction.REQUESTED_TO, new FriendRequestEntryModel
+        view.Set(userId, new FriendRequestEntryModel
         {
             blocked = false,
             coords = Vector2.one,
@@ -406,7 +409,7 @@ public class FriendsHUDComponentViewShould
 
     private void GivenFriendRequestReceived(string userId)
     {
-        view.Set(userId, FriendshipAction.REQUESTED_FROM, new FriendRequestEntryModel
+        view.Set(userId, new FriendRequestEntryModel
         {
             blocked = false,
             coords = Vector2.one,
@@ -422,35 +425,11 @@ public class FriendsHUDComponentViewShould
 
     private void GivenFriendListTabFocused() => view.FocusTab(0);
 
-    private void GivenRejectedFriend(string userId)
-    {
-        view.Set(userId, FriendshipAction.REJECTED, new FriendEntryModel
-        {
-            blocked = false,
-            coords = Vector2.one,
-            avatarSnapshotObserver = Substitute.For<ILazyTextureObserver>(),
-            status = PresenceStatus.OFFLINE,
-            userId = userId,
-            userName = "name"
-        });
-    }
-
-    private void GivenRemovedFriend(string userId)
-    {
-        view.Set(userId, FriendshipAction.DELETED, new FriendEntryModel
-        {
-            blocked = false,
-            coords = Vector2.one,
-            avatarSnapshotObserver = Substitute.For<ILazyTextureObserver>(),
-            status = PresenceStatus.OFFLINE,
-            userId = userId,
-            userName = "name"
-        });
-    }
+    private void GivenRemovedFriend(string userId) => view.Remove(userId);
 
     private void GivenApprovedFriend(string userId)
     {
-        view.Set(userId, FriendshipAction.APPROVED, new FriendEntryModel
+        view.Set(userId, new FriendEntryModel
         {
             blocked = false,
             coords = Vector2.one,

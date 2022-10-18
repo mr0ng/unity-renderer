@@ -21,7 +21,7 @@ namespace UnityGLTF
 
         public static int queueCount;
 
-        private static readonly BaseVariable<int> maxSimultaneousDownloads = DataStore.i.performance.maxDownloads;
+        private static  BaseVariable<int> maxSimultaneousDownloads = DataStore.i.performance.maxDownloads;
         private static readonly DownloadQueueHandler downloadQueueHandler = new DownloadQueueHandler(maxSimultaneousDownloads.Get(), () => downloadingCount);
 
         public class Settings
@@ -103,6 +103,9 @@ namespace UnityGLTF
         private Settings settings;
 
         private  CancellationTokenSource ctokenSource;
+        
+        private const string GPU_ONLY_MESHES = "use_gpu_only_meshes_variant:enabled";
+
 
         public Action OnSuccess { get { return OnFinishedLoadingAsset; } set { OnFinishedLoadingAsset = value; } }
 
@@ -112,6 +115,12 @@ namespace UnityGLTF
         {
             this.webRequestController = webRequestController;
             this.throttlingCounter = throttlingCounter;
+            DataStore.i.performance.maxDownloads.OnChange += UpdateMaxDownloads;
+        }
+        private void UpdateMaxDownloads(int current, int previous)
+        {
+            maxSimultaneousDownloads = DataStore.i.performance.maxDownloads;
+            downloadQueueHandler.MaxDownloadCount = current;
         }
 
         public void LoadAsset(string baseUrl, string incomingURI = "", string idPrefix = "", bool loadEvenIfAlreadyLoaded = false, Settings settings = null, AssetIdConverter fileToHashConverter = null)
@@ -351,7 +360,7 @@ namespace UnityGLTF
             sceneImporter.initialVisibility = initialVisibility;
             sceneImporter.addMaterialsToPersistentCaching = addMaterialsToPersistentCaching;
 
-            sceneImporter.forceGPUOnlyMesh = false;
+            sceneImporter.forceGPUOnlyMesh = settings.forceGPUOnlyMesh && DataStore.i.featureFlags.flags.Get().IsFeatureEnabled(GPU_ONLY_MESHES);
 
             sceneImporter.OnMeshCreated += meshCreatedCallback;
             sceneImporter.OnRendererCreated += rendererCreatedCallback;
@@ -385,7 +394,8 @@ namespace UnityGLTF
                 return;
 #endif
             CleanUp();
-            
+
+            DataStore.i.performance.maxDownloads.OnChange -= UpdateMaxDownloads;
             if (state != State.COMPLETED)
             {
                 ctokenSource.Cancel();

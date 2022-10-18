@@ -50,7 +50,7 @@ namespace DCL
 
         public float timeBudget
         {
-            get => renderingIsDisabled ? float.MaxValue : timeBudgetValue;
+            get => renderingIsDisabled ? 3*timeBudgetValue: timeBudgetValue;
             set => timeBudgetValue = value;
         }
 

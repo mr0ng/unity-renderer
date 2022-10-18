@@ -1,5 +1,5 @@
 ﻿using DCL.Controllers;
-using DCL.Helpers;
+using DCL.Emotes;
 using DCL.Rendering;
 using UnityEngine;
 
@@ -22,7 +22,7 @@ namespace DCL
             result.Register<IUpdateEventHandler>(() => new UpdateEventHandler());
 
             // World runtime
-            //result.Register<IIdleChecker>(() => new IdleChecker());
+            result.Register<IIdleChecker>(() => new IdleChecker());
             result.Register<IAvatarsLODController>(() => new AvatarsLODController());
             result.Register<IFeatureFlagController>(() => new FeatureFlagController());
             result.Register<ISceneController>(() => new SceneController());
@@ -32,15 +32,12 @@ namespace DCL
             result.Register<IRuntimeComponentFactory>(() => new RuntimeComponentFactory());
 
             result.Register<IMessagingControllersManager>(() => new MessagingControllersManager());
+            result.Register<IEmotesCatalogService>(() => new EmotesCatalogService(EmotesCatalogBridge.GetOrCreate(), Resources.Load<EmbeddedEmotesSO>("EmbeddedEmotes").emotes));
+            result.Register<IApplicationFocusService>(() => new ApplicationFocusService());
 
             // HUD
             result.Register<IHUDFactory>(() => new HUDFactory());
             result.Register<IHUDController>(() => new HUDController());
-            result.Register<ILastReadMessagesService>(() => new LastReadMessagesService(
-                CommonScriptableObjects.lastReadChatMessages,
-                ChatController.i,
-                new DefaultPlayerPrefs(),
-                new UserProfileWebInterfaceBridge()));
 
             return result;
         }

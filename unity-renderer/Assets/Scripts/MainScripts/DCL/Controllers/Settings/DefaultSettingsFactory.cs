@@ -15,7 +15,7 @@ namespace DCL.SettingsCommon
         private GeneralSettings defaultGeneralSettings = new GeneralSettings
         {
             mouseSensitivity = 0.6f,
-            scenesLoadRadius = 4,
+            scenesLoadRadius = 3,
             avatarsLODDistance = 16,
             maxNonLODAvatars = DataStore_AvatarsLOD.DEFAULT_MAX_AVATAR,
             voiceChatVolume = 1,
@@ -28,7 +28,8 @@ namespace DCL.SettingsCommon
             dynamicProceduralSkybox = false,
             invertYAxis = false,
             skyboxTime = 0.0f,
-            firstPersonCameraFOV = 60
+            firstPersonCameraFOV = 60,
+            useInternalBrowser = true
         };
 
         private AudioSettings defaultAudioSettings = new AudioSettings

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using DCL.CameraTool;
 using UnityEngine;
 
 namespace DCL
@@ -67,14 +68,14 @@ namespace DCL
             lodControllers[id].Dispose();
             lodControllers.Remove(id);
         }
-        private int updateSkip = 0;
+        //private int updateSkip = 0;
         public void Update()
         {
             cameraPosition = CommonScriptableObjects.cameraPosition.Get();
             cameraForward = CommonScriptableObjects.cameraForward.Get();
-            updateSkip = (updateSkip + 1 ) % 15;
-            if (updateSkip != 0)
-                return;
+         //   updateSkip = (updateSkip + 1 ) % 15;
+         //   if (updateSkip != 0)
+         //       return;
             UpdateAllLODs(maxAvatars.Get(), maxImpostors.Get());
         }
 

@@ -16,7 +16,7 @@ MonoBehaviour:
   pointingExtent: 10
   pointingRaycastLayerMasks:
   - serializedVersion: 2
-    m_Bits: 33553187
+    m_Bits: 4176419
   debugDrawPointingRays: 1
   debugDrawPointingRayColors:
   - {r: 1, g: 0.58280706, b: 0, a: 1}
