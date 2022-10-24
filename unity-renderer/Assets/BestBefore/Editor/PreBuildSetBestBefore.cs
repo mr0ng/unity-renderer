@@ -16,10 +16,14 @@ using UnityEngine;
        public int callbackOrder { get { return 0; } }
     public void OnPreprocessBuild(BuildReport report)
     {
+        
         bestBefore = Camera.main.GetComponent<BestBefore.BestBefore>();
+        if (bestBefore == null || bestBefore.ExpirationMode != BestBefore.BestBefore.ExpirationModes.FixedDateFromBuild)
+            return;
+        
       // Do the preprocessing here
-          bestBefore.ExpirationMode = BestBefore.BestBefore.ExpirationModes.FixedDate;
-          
+
+          daysOut = bestBefore.DaysOut;
           DateTime today = DateTime.Today;
           DateTime future = today + TimeSpan.FromDays(daysOut);
           bestBefore.Year = future.Year;

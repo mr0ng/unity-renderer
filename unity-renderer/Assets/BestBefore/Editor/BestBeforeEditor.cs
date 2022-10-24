@@ -56,6 +56,7 @@ namespace BestBefore
             #endregion
 
             #region FIXED DATE
+            AddProperty( "DaysOut" );
             AddProperty( "Year" );
             AddProperty( "Month" );
             AddProperty( "Day" );
@@ -63,6 +64,15 @@ namespace BestBefore
             AddProperty( "Minute" );
             AddProperty( "Second" );
             #endregion
+            // #region FIXED DATE FROM BUILD
+            //
+            // AddProperty( "Year" );
+            // AddProperty( "Month" );
+            // AddProperty( "Day" );
+            // AddProperty( "Hour" );
+            // AddProperty( "Minute" );
+            // AddProperty( "Second" );
+            // #endregion
 
         }
 
@@ -104,6 +114,17 @@ namespace BestBefore
                 EditorGUILayout.LabelField( "Minute", bestBefore.Minute.ToString() );
                 EditorGUILayout.LabelField( "Second", bestBefore.Second.ToString() );
             }
+            else if ( bestBefore.ExpirationMode == BestBefore.ExpirationModes.FixedDateFromBuild)
+            {
+                EditorGUILayout.PropertyField(allProperties["DaysOut"]);
+                EditorGUILayout.PropertyField( allProperties["Year"] );
+                EditorGUILayout.PropertyField( allProperties["Month"] );
+                EditorGUILayout.PropertyField( allProperties["Day"] );
+                EditorGUILayout.PropertyField( allProperties["Hour"] );
+                EditorGUILayout.PropertyField( allProperties["Minute"] );
+                EditorGUILayout.PropertyField( allProperties["Second"] );
+            }
+            
             else
             {
                 EditorGUILayout.PropertyField( allProperties["Year"] );
