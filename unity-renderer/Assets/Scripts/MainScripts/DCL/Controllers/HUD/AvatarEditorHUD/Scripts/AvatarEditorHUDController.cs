@@ -632,7 +632,8 @@ public class AvatarEditorHUDController : IHUD
     private void ProcessCatalog(BaseDictionary<string, WearableItem> catalog)
     {
         wearablesByCategory.Clear();
-        TaskUtils.Run(async () => await(view.RemoveAllWearables())).Forget();
+        view.RemoveAllWearables();
+        
         bool hasSkin = false;
         bool hasCollectible = false;
         using (var iterator = catalog.Get().GetEnumerator())

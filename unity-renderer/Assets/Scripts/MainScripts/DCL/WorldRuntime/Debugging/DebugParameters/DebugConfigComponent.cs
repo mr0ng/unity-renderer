@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using DCL.Components;
+using DCL.Interface;
 using DCL.SettingsCommon;
 using UnityEngine;
 using TMPro;
@@ -16,6 +17,8 @@ namespace DCL
         [SerializeField] private GameObject startMenu;
         [SerializeField] private GameObject browserOptionsButton;
         [SerializeField] private TMP_Text browserMessage;
+        [SerializeField] private TMP_Text popupMessage;
+        [SerializeField] private GameObject popupMessageObj;
         [SerializeField] private CanvasWebViewPrefab DCLWebview;
         [SerializeField] private CanvasKeyboard keyboardDCL;
         [SerializeField] private CanvasWebViewPrefab optionsWeview;
@@ -31,7 +34,7 @@ namespace DCL
         {
             get
             {
-                if (sharedInstance == null)
+                if (sharedInstance == null || sharedInstance.isActiveAndEnabled)
                     sharedInstance = FindObjectOfType<DebugConfigComponent>();
 
                 return sharedInstance;
@@ -64,7 +67,7 @@ namespace DCL
 
 
         [Header("General Settings")] public bool OpenBrowserOnStart;
-        public bool OpenInternalBrowser;
+        public bool openInternalBrowser;
 
         public bool webSocketSSL = false;
 
@@ -118,6 +121,7 @@ namespace DCL
             DontDestroyOnLoad(this);
             DontDestroyOnLoad(DCLWebview);
             DataStore.i.debugConfig.soloScene = debugConfig.soloScene;
+            
             
             
             //debugConfig.openInternalBrowser = Settings.i.generalSettings.Data.useInternalBrowser;
@@ -194,11 +198,25 @@ namespace DCL
 
         private void Start()
         {
-            
-            DCLWebview.gameObject.SetActive((true));
-            optionsWeview.gameObject.SetActive(false);
-            keyboardOptions.gameObject.SetActive(false);
-            keyboardDCL.gameObject.SetActive(true);
+#if UNITY_ANDROID && !UNITY_EDITOR
+//don't have a method of using external browser on quest2.
+            openInternalBrowser = true;
+#endif
+            useInternalBrowser.isOn = openInternalBrowser;
+            WebInterface.openURLInternal = openInternalBrowser;
+            if (openInternalBrowser)
+            {
+                browserMessage.transform.parent.gameObject.SetActive(true);
+                DCLWebview.gameObject.SetActive((true));
+                keyboardDCL.gameObject.SetActive((true));
+            }
+            else
+            {
+                
+                DCLWebview.gameObject.SetActive((false));
+                keyboardDCL.gameObject.SetActive((false));
+                
+            }
             keyboardOptions.InputReceived += (sender, key) =>
             {
                 optionsWeview.WebView.HandleKeyboardInput(key.Value);
@@ -413,9 +431,12 @@ namespace DCL
             urlInput.text = webViewURL;
             Debug.Log(webViewURL);
             var canvas = GameObject.Find("Canvas");
+#if UNITY_ANDROID && !UNITY_EDITOR
+//don't have a method of using external browser on quest2.
+openInternalBrowser = true;
+#endif
 
-
-            if (useInternalBrowser.isOn)
+            if (openInternalBrowser)
             {
                 browserMessage.text = "Browser Loading";
                 //DontDestroyOnLoad(canvas);
@@ -426,24 +447,37 @@ namespace DCL
             opt.preferredPlugins  = new WebPluginType[] { WebPluginType.AndroidGecko};
 #endif
 
-                DCLWebview.gameObject.SetActive(true);
+               
                 DCLWebview.InitialUrl = webViewURL;
-
+                
                 //DCLWebview.WebView.Reload();
                 if (DCLWebview.WebView!= null && DCLWebview.WebView.IsInitialized) { 
+                   
+                   
+                    DCLWebview.gameObject.SetActive((true));
+                    keyboardDCL.gameObject.SetActive((true));
                     Debug.Log($"main webview loading {webViewURL}");
                     DCLWebview.WebView.LoadUrl(webViewURL);
-                    DCLWebview.WebView.LoadProgressChanged += ( sender,  args) => { Debug.Log($"WebView Status LoadProgressChanged {args.Type.ToString()}, {sender.ToString()}"); };
+                    DCLWebview.WebView.LoadProgressChanged += ( sender,  args) => {  
+                        browserMessage.transform.parent.gameObject.SetActive((false));
+                        Debug.Log($"WebView Status LoadProgressChanged {args.Type.ToString()}, {sender.ToString()}");
+                    };
                     DCLWebview.WebView.PageLoadFailed += ( sender,  args) => { Debug.Log($"WebView Status PageLoadFailed {args.ToString()}, {sender.ToString()}"); };
                     DCLWebview.WebView.CloseRequested += ( sender,  args) => { Debug.Log($"WebView Status CloseRequested {args.ToString()}, {sender.ToString()}"); };}
                 else
                 {
                     DCLWebview.Initialized += (sender, eventArgs) =>
                     {
-
+                        
+                        
+                        DCLWebview.gameObject.SetActive((true));
+                        keyboardDCL.gameObject.SetActive((true));
                         Debug.Log($"main webview loading {webViewURL}");
                         DCLWebview.WebView.LoadUrl(webViewURL);
-                        DCLWebview.WebView.LoadProgressChanged += ( sender,  args) => { Debug.Log($"WebView Status LoadProgressChanged {args.Type.ToString()}, {sender.ToString()}"); };
+                        DCLWebview.WebView.LoadProgressChanged += ( sender,  args) => {  
+                            browserMessage.transform.parent.gameObject.SetActive((false));
+                            Debug.Log($"WebView Status LoadProgressChanged {args.Type.ToString()}, {sender.ToString()}"); 
+                        };
                         DCLWebview.WebView.PageLoadFailed += ( sender,  args) => { Debug.Log($"WebView Status PageLoadFailed {args.ToString()}, {sender.ToString()}"); };
                         DCLWebview.WebView.CloseRequested += ( sender,  args) => { Debug.Log($"WebView Status CloseRequested {args.ToString()}, {sender.ToString()}"); };
                     };
@@ -451,7 +485,7 @@ namespace DCL
 
 
                 DCLWebview.transform.SetParent(canvas.transform, false);
-                DCLWebview.Resolution = 350;
+                DCLWebview.Resolution = 450;
 
 
                 // DCLWebview.RemoteDebuggingEnabled = false;
@@ -520,8 +554,8 @@ namespace DCL
         }
         public void ShowWebviewScreen()
         {
-            startMenu.SetActive(true);
-            browserMessage.text = "Network Communication Lost.\r\nRestart Application.\r\n Reduced Loading Radius Recommended In This Area";
+            popupMessageObj.SetActive(true);
+            popupMessage.text = "Network Communication Lost.\r\nRestart Application.\r\n Reduced Loading Radius Recommended In This Area";
             //DCLWebview.gameObject.SetActive(true);
             //keyboardDCL.gameObject.SetActive((true));
             //urlInput.gameObject.SetActive(false);
@@ -572,30 +606,31 @@ namespace DCL
         public void ToggleUseInternalBrowser()
         {
 
-            OpenInternalBrowser = useInternalBrowser.isOn;
-            if (useInternalBrowser.isOn)
-            {
-                DCLWebview.gameObject.SetActive(true);
-                keyboardDCL.gameObject.SetActive(true);
-                optionsWeview.gameObject.SetActive(false);
-                keyboardOptions.gameObject.SetActive(false);
-                OpenWebBrowser();
-            }
-            else
-            {
-                if (DCLWebview != null && DCLWebview.WebView != null)
-                {
-                    DCLWebview.WebView.LoadUrl("https://www.google.com/");
-                    //DCLWebview.WebView.StopLoad();
-                    //DCLWebview.WebView.Dispose();
-                    DCLWebview.gameObject.SetActive((false));
-                }
-                DCLWebview.gameObject.SetActive(false);
-                keyboardDCL.gameObject.SetActive(false);
-                optionsWeview.gameObject.SetActive(false);
-                keyboardOptions.gameObject.SetActive(false);
-                OpenWebBrowser();
-            }
+            openInternalBrowser = useInternalBrowser.isOn;
+            WebInterface.openURLInternal = openInternalBrowser;
+            // if (useInternalBrowser.isOn)
+            // {
+            //     DCLWebview.gameObject.SetActive(true);
+            //     keyboardDCL.gameObject.SetActive(true);
+            //     optionsWeview.gameObject.SetActive(false);
+            //     keyboardOptions.gameObject.SetActive(false);
+            //     OpenWebBrowser();
+            // }
+            // else
+            // {
+            //     if (DCLWebview != null && DCLWebview.WebView != null)
+            //     {
+            //         DCLWebview.WebView.LoadUrl("https://www.google.com/");
+            //         //DCLWebview.WebView.StopLoad();
+            //         //DCLWebview.WebView.Dispose();
+            //         DCLWebview.gameObject.SetActive((false));
+            //     }
+            //     DCLWebview.gameObject.SetActive(false);
+            //     keyboardDCL.gameObject.SetActive(false);
+            //     optionsWeview.gameObject.SetActive(false);
+            //     keyboardOptions.gameObject.SetActive(false);
+            //     OpenWebBrowser();
+            // }
             
         }
         

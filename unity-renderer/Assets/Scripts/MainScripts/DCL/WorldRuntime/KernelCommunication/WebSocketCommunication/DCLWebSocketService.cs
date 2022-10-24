@@ -86,6 +86,7 @@ public class DCLWebSocketService : WebSocketBehavior
 
     protected override void OnClose(CloseEventArgs e)
     {
+        
         Debug.LogError($"DCLWebSocketService: onClose {e.Reason}");
         base.OnClose(e);
         WebInterface.OnMessageFromEngine -= SendMessageToWeb;

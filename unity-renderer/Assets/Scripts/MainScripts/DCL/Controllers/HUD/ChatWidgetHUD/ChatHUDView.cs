@@ -15,6 +15,7 @@ public class ChatHUDView : BaseComponentView, IChatHUDComponentView
     private const string VIEW_PATH = "SocialBarV1/ChatHUDVR";
 
     public TMP_InputField inputField;
+    public Button submitButton;
     public RectTransform chatEntriesContainer;
     public ScrollRect scrollRect;
     public GameObject messageHoverPanel;
@@ -109,6 +110,10 @@ public class ChatHUDView : BaseComponentView, IChatHUDComponentView
     {
         base.Awake();
         inputField.onSubmit.AddListener(OnInputFieldSubmit);
+        submitButton.onClick.AddListener(() =>
+        {
+            if(inputField.text.Length > 0) inputField.onSubmit.Invoke(inputField.text);
+        });
         inputField.onSelect.AddListener(OnInputFieldSelect);
         inputField.onDeselect.AddListener(OnInputFieldDeselect);
         inputField.onValueChanged.AddListener(str => OnMessageUpdated?.Invoke(str));

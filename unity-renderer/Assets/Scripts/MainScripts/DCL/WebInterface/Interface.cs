@@ -5,6 +5,7 @@ using DCL.Helpers;
 using DCL.Models;
 using Newtonsoft.Json;
 using UnityEngine;
+using UnityEngine.UI;
 using Vuplex.WebView;
 using Ray = UnityEngine.Ray;
 
@@ -1364,45 +1365,49 @@ namespace DCL.Interface
         private static CanvasWebViewPrefab mainWebViewPrefab;
         private static bool isWebViewInitiated = false;
         private static GameObject _canvas;
+        public static bool openURLInternal = true;
         public static async void OpenURL(string url)
         {
 #if UNITY_WEBGL
             SendMessage("OpenWebURL", new OpenURLPayload { url = url });
             
-#elif UNITY_ANDROID 
+#else 
 
-            
-            if (!isWebViewInitiated)
+            if (openURLInternal)
             {
-                
-                CanvasKeyboard keyboardFocused;
-                _canvas = GameObject.Find("Canvas");
-                // Create a webview for the main content.
-                mainWebViewPrefab = CanvasWebViewPrefab.Instantiate();
-                mainWebViewPrefab.InitialUrl = url;
-                mainWebViewPrefab.Resolution = 400f;
-                mainWebViewPrefab.PixelDensity = 2;
-                mainWebViewPrefab.Native2DModeEnabled = false;
-                mainWebViewPrefab.transform.SetParent(_canvas.transform, false);
-            
-                var rectTransform = mainWebViewPrefab.transform as RectTransform;
-                rectTransform.anchoredPosition3D = Vector3.zero;
-                rectTransform.offsetMin = Vector2.zero;
-                rectTransform.offsetMax = Vector2.zero;
-                mainWebViewPrefab.transform.localPosition = new Vector3(0,1.5f,0);
-                mainWebViewPrefab.transform.localRotation = Quaternion.identity;
-                mainWebViewPrefab.transform.localScale = Vector3.one;
-                
-                //mainWebViewPrefab.WebView.Init(400, 300);
-                isWebViewInitiated = true;
+                if (!isWebViewInitiated)
+                {
+
+                    CanvasKeyboard keyboardFocused;
+                    _canvas = GameObject.Find("Canvas");
+                    // Create a webview for the main content.
+                    mainWebViewPrefab = CanvasWebViewPrefab.Instantiate();
+                    Button button = mainWebViewPrefab.GetComponentInChildren<Button>();
+                    button.gameObject.SetActive(true);
+                    mainWebViewPrefab.InitialUrl = url;
+                    mainWebViewPrefab.Resolution = 400f;
+                    mainWebViewPrefab.PixelDensity = 2;
+                    mainWebViewPrefab.Native2DModeEnabled = false;
+                    mainWebViewPrefab.transform.SetParent(_canvas.transform, false);
+
+                    var rectTransform = mainWebViewPrefab.transform as RectTransform;
+                    rectTransform.anchoredPosition3D = Vector3.zero;
+                    rectTransform.offsetMin = Vector2.zero;
+                    rectTransform.offsetMax = Vector2.zero;
+                    mainWebViewPrefab.transform.localPosition = new Vector3(0, 1.5f, 0);
+                    mainWebViewPrefab.transform.localRotation = Quaternion.identity;
+                    mainWebViewPrefab.transform.localScale = Vector3.one;
+
+                    //mainWebViewPrefab.WebView.Init(400, 300);
+                    isWebViewInitiated = true;
+                }
+                //mainWebViewPrefab.InitialUrl = url;
+                mainWebViewPrefab.gameObject.SetActive((true));
+                await mainWebViewPrefab.WaitUntilInitialized();
+                mainWebViewPrefab.WebView.LoadUrl(url);
             }
-            //mainWebViewPrefab.InitialUrl = url;
-            mainWebViewPrefab.gameObject.SetActive((true));
-            await mainWebViewPrefab.WaitUntilInitialized();
-            mainWebViewPrefab.WebView.LoadUrl(url);
-            
-#else
-            Application.OpenURL(url);
+            else
+                Application.OpenURL(url);
 #endif
         }
 

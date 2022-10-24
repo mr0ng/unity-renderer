@@ -32,6 +32,7 @@ namespace DCL
         private bool isDisposed;
         protected virtual void Awake()
         {
+            UnityThread.initUnityThread(true);
             if (i != null)
             {
                 Utils.SafeDestroy(this);
@@ -98,7 +99,7 @@ namespace DCL
             Debug.Log($"Main: starting WebSockeSSL");
             kernelCommunication = new WebSocketCommunication(DebugConfigComponent.i.webSocketSSL);
             // WebSocketCommunication kc = kernelCommunication as WebSocketCommunication;
-            //WebSocketCommunication.service.OnCloseEvent += RestartSocketServer;
+            // WebSocketCommunication.service.OnCloseEvent += RestartSocketServer;
             // }
 #endif
             RPCServerBuilder.BuildDefaultServer();
@@ -201,7 +202,7 @@ namespace DCL
         }
 
         protected virtual void CreateEnvironment() => MainSceneFactory.CreateEnvironment();
-        public virtual void RestartSocketServer()
+        public void RestartSocketServer()
         {
              if (isDisposed)
                             return;

@@ -129,7 +129,7 @@ namespace DCL.Configuration
 
     public static class TextureCompressionSettings
     {
-        public const int GLTF_TEX_MAX_SIZE_WEB = 1024;
+        public const int GLTF_TEX_MAX_SIZE_WEB = 2048;
         public const int GENERAL_TEX_MAX_SIZE_WEB = 2048;
     }
 

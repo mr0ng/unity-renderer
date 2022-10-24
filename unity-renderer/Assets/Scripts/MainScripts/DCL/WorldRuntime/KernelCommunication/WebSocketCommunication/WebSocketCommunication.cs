@@ -95,6 +95,7 @@ public class WebSocketCommunication : IKernelCommunication
                 service = new DCLWebSocketService();
                 service.OnCloseEvent += () =>
                 {
+                    
                     // StartServer(port,maxPort,withSSL);
                     int j  = 0;
                     while (service.ConnectionState == WebSocketState.Closing)
@@ -102,13 +103,17 @@ public class WebSocketCommunication : IKernelCommunication
                         j++;
                     }
                     //ws.WebSocketServices.Clear();
-                    
+                    // ws.Stop(); 
+                    // ws.Start();
+                    UnityThread.ExecuteInTimeBudgetCoroutine(() =>
+                    {
+                        DebugConfigComponent.i.ShowWebviewScreen();
+                    });
+                    //
+                    //ClosedMessageDisplay();
                     //ws = null;
                     //ws.RemoveWebSocketService(service.ID);
                     //Debug.Log($"count to close {j}");
-                
-                    DebugConfigComponent.i.ShowWebviewScreen();
-                    
 
                 };
                 
@@ -117,7 +122,9 @@ public class WebSocketCommunication : IKernelCommunication
                 Debug.Log("WebSocketCommunication: Added DCLWebSocket Service");
                 return service;
             });
+            ws.ReuseAddress = true;
             ws.Start();
+            
             Debug.Log("WebSocketCommunication: Start Called");
             
         }
@@ -161,6 +168,7 @@ public class WebSocketCommunication : IKernelCommunication
 
 //=======
 //>>>>>>> upstream/dev
+
     private void InitMessageTypeToBridgeName()
     {
         // Please, use `Bridges` as a bridge name, avoid adding messages here. The system will use `Bridges` as the default bridge name.

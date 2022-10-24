@@ -1270,6 +1270,10 @@ namespace WebSocketSharp
 
             try
             {
+                UnityThread.executeInUpdate(() =>
+                {
+                    DebugConfigComponent.i.ShowWebviewScreen();
+                });
                 _logger.Error($"websocket Closed {payloadData.Code}, {payloadData.Reason.ToString()}");
                 Debug.LogError($"websocket Closed1 {payloadData.Code}, {payloadData.Reason.ToString()}");
                 OnClose.Emit(this, e);
@@ -1795,10 +1799,11 @@ namespace WebSocketSharp
 
         private bool processCloseFrame(WebSocketFrame frame)
         {
+            
             var payload = frame.PayloadData;
             Debug.Log($"CloseAsync1796 {payload.Code.ToString()}, {payload.Reason.ToString()}");
             close(payload, !payload.HasReservedCode, false, true);
-
+            
             return false;
         }
 
