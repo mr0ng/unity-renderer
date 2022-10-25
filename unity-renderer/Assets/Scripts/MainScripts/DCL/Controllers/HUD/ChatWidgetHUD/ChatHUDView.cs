@@ -9,6 +9,9 @@ using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
+using System.Threading;
+using Cysharp.Threading.Tasks;
+using DG.Tweening;
 
 public class ChatHUDView : BaseComponentView, IChatHUDComponentView
 {
@@ -69,7 +72,8 @@ public class ChatHUDView : BaseComponentView, IChatHUDComponentView
         }
         remove
         {
-            if (!inputFieldSelectedListeners.ContainsKey(value)) return;
+            if (!inputFieldSelectedListeners.ContainsKey(value))
+                return;
             inputField.onSelect.RemoveListener(inputFieldSelectedListeners[value]);
             inputFieldSelectedListeners.Remove(value);
         }
@@ -85,7 +89,8 @@ public class ChatHUDView : BaseComponentView, IChatHUDComponentView
         }
         remove
         {
-            if (!inputFieldUnselectedListeners.ContainsKey(value)) return;
+            if (!inputFieldUnselectedListeners.ContainsKey(value))
+                return;
             inputField.onDeselect.RemoveListener(inputFieldUnselectedListeners[value]);
             inputFieldUnselectedListeners.Remove(value);
         }
@@ -93,12 +98,10 @@ public class ChatHUDView : BaseComponentView, IChatHUDComponentView
 
     public event Action OnPreviousChatInHistory;
     public event Action OnNextChatInHistory;
-
     public event Action<ChatMessage> OnSendMessage;
 
     public int EntryCount => entries.Count;
     public IChatEntryFactory ChatEntryFactory { get; set; }
-    public bool IsInputFieldSelected => inputField.isFocused;
 
     public static ChatHUDView Create()
     {
@@ -167,10 +170,6 @@ public class ChatHUDView : BaseComponentView, IChatHUDComponentView
             FocusInputField();
         SetInputFieldText(model.inputFieldText);
         SetFadeoutMode(model.enableFadeoutMode);
-        if (model.isInPreviewMode)
-            ActivatePreview();
-        else
-            DeactivatePreview();
         ClearAllEntries();
         foreach (var entry in model.entries)
             AddEntry(entry);
@@ -189,22 +188,6 @@ public class ChatHUDView : BaseComponentView, IChatHUDComponentView
         model.inputFieldText = text;
         inputField.text = text;
         inputField.MoveTextEnd(false);
-    }
-
-    public void ActivatePreview()
-    {
-        model.isInPreviewMode = true;
-
-        foreach (var entry in entries.Values)
-            entry.ActivatePreview();
-    }
-
-    public void DeactivatePreview()
-    {
-        model.isInPreviewMode = false;
-
-        foreach (var entry in entries.Values)
-            entry.DeactivatePreview();
     }
 
     public void FadeOutMessages()
@@ -240,9 +223,8 @@ public class ChatHUDView : BaseComponentView, IChatHUDComponentView
             chatEntry.SetFadeout(this.model.enableFadeoutMode);
             chatEntry.Populate(model);
 
-            if (model.messageType == ChatMessage.Type.PUBLIC
-                || model.messageType == ChatMessage.Type.PRIVATE)
-                chatEntry.OnPressRightButton += OnOpenContextMenu;
+            if (chatEntry.showUserName && model.subType.Equals(ChatEntryModel.SubType.RECEIVED))
+                chatEntry.OnUserNameClicked += OnOpenContextMenu;
 
             chatEntry.OnTriggerHover += OnMessageTriggerHover;
             chatEntry.OnTriggerHoverGoto += OnMessageCoordinatesTriggerHover;
@@ -257,9 +239,6 @@ public class ChatHUDView : BaseComponentView, IChatHUDComponentView
     {
         chatEntry.transform.SetParent(chatEntriesContainer, false);
         entries[messageId] = chatEntry;
-        
-        if (model.isInPreviewMode)
-            chatEntry.ActivatePreviewInstantly();
 
         SortEntries();
         UpdateLayout();
@@ -275,12 +254,14 @@ public class ChatHUDView : BaseComponentView, IChatHUDComponentView
         if (firstEntry == null) return;
         Destroy(firstEntry.gameObject);
         entries.Remove(firstEntry.Model.messageId);
+        UpdateLayout();
     }
 
     public override void Hide(bool instant = false)
     {
         base.Hide(instant);
-        if (contextMenu == null) return;
+        if (contextMenu == null)
+            return;
         contextMenu.Hide();
         confirmationDialog.Hide();
     }
@@ -296,6 +277,7 @@ public class ChatHUDView : BaseComponentView, IChatHUDComponentView
         foreach (var entry in entries.Values)
             Destroy(entry.gameObject);
         entries.Clear();
+        UpdateLayout();
     }
 
     private bool IsEntryVisible(ChatEntry entry)
@@ -327,20 +309,15 @@ public class ChatHUDView : BaseComponentView, IChatHUDComponentView
         OnSendMessage?.Invoke(currentMessage);
     }
 
-    private void OnInputFieldSelect(string message)
-    {
-        AudioScriptableObjects.inputFieldFocus.Play(true);
-    }
+    private void OnInputFieldSelect(string message) { AudioScriptableObjects.inputFieldFocus.Play(true); }
 
-    private void OnInputFieldDeselect(string message)
-    {
-        AudioScriptableObjects.inputFieldUnfocus.Play(true);
-    }
+    private void OnInputFieldDeselect(string message) { AudioScriptableObjects.inputFieldUnfocus.Play(true); }
 
     private void OnOpenContextMenu(DefaultChatEntry chatEntry)
     {
         chatEntry.DockContextMenu((RectTransform) contextMenu.transform);
-        contextMenu.transform.parent = transform;
+        contextMenu.transform.parent = transform.parent;
+        contextMenu.transform.SetAsLastSibling();
         contextMenu.Show(chatEntry.Model.senderId);
     }
 
@@ -414,7 +391,6 @@ public class ChatHUDView : BaseComponentView, IChatHUDComponentView
     [Serializable]
     private struct Model
     {
-        public bool isInPreviewMode;
         public bool isInputFieldFocused;
         public string inputFieldText;
         public bool enableFadeoutMode;

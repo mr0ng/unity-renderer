@@ -18,7 +18,8 @@
         "BaseVariable",
         "PlayerModels",
         "FeatureFlagData",
-        "UnityEngine.UI"
+        "UnityEngine.UI",
+        "MouseCatcher"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
