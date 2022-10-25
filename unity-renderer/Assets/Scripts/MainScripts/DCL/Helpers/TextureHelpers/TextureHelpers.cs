@@ -16,6 +16,7 @@ public static class TextureHelpers
 
         Texture2D dstTex = Resize(source, (int) (width * factor), 
             (int) (height * factor), linear, useGPUCopy);
+        Debug.Log($"TextureHelperClamp {source.name}, {factor}, {dstTex.width}, {dstTex.height}");
 
         if (Application.isPlaying)
             Object.Destroy(source);
@@ -40,6 +41,7 @@ public static class TextureHelpers
         newHeight = Mathf.Max(1, newHeight);
         
         // RenderTexture default format is ARGB32
+        Debug.Log($"creating new texture2D, {newWidth},{newHeight}");
         Texture2D nTex = new Texture2D(newWidth, newHeight, TextureFormat.ARGB32, 1, linear);
         nTex.filterMode = source.filterMode;
         nTex.wrapMode = source.wrapMode;

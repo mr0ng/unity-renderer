@@ -1,3 +1,4 @@
+#define DCL_VR
 using System;
 using DCL;
 using TMPro;
@@ -16,7 +17,11 @@ public class LoadingHUDView : MonoBehaviour
 
     public static LoadingHUDView CreateView()
     {
+        #if DCL_VR
+        LoadingHUDView view = Instantiate(Resources.Load<GameObject>("LoadingHUDVR")).GetComponent<LoadingHUDView>();
+        #else
         LoadingHUDView view = Instantiate(Resources.Load<GameObject>("LoadingHUD")).GetComponent<LoadingHUDView>();
+        #endif
         view.gameObject.name = "_LoadingHUD";
         return view;
     }
