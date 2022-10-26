@@ -47,7 +47,7 @@ namespace DCL.SettingsPanelHUD
 
         public bool isOpen { get; private set; }
 
-        private const string PATH = "SettingsPanelHUDVR";
+        private const string PATH = "SettingsPanelHUD";
         private const float WORLD_PREVIEW_MIN_WIDTH_TO_BE_SHOWED = 200f;
         private const float WORLD_PREVIEW_ORIGINAL_WIDTH = 400f;
         private const float WORLD_PREVIEW_ORIGINAL_HEIGHT = 250f;
