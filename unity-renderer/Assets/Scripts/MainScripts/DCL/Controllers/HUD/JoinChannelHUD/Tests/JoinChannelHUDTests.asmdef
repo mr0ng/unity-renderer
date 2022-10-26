@@ -11,7 +11,9 @@
         "ChatController",
         "BaseVariable",
         "SocialAnalytics",
-        "IService"
+        "IService",
+        "UnityEditor.UI",
+        "UnityEngine.UI"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

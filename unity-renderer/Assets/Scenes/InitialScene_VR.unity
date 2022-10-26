@@ -933,9 +933,9 @@ MonoBehaviour:
     ignoreGlobalScenes: 0
     msgStepByStep: 0
   OpenBrowserOnStart: 1
-  openInternalBrowser: 0
+  openInternalBrowser: 1
   webSocketSSL: 0
-  kernelVersion: 
+  kernelVersion: 1.0.0-3313963638.commit-2565ebb
   useCustomContentServer: 0
   customContentServerUrl: http://localhost:1338/
   baseUrlMode: 3
@@ -1107,7 +1107,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1721790662}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: e849c7210fdc7a64b9e0de2e56bb404c, type: 3}
   m_Name: 
@@ -1352,13 +1352,13 @@ MonoBehaviour:
   Hours: 0
   Minutes: 0
   Seconds: 0
+  DaysOut: 40
   Year: 2022
-  Month: 11
-  Day: 30
+  Month: 12
+  Day: 5
   Hour: 0
   Minute: 0
   Second: 0
-  DaysOut: 40
 --- !u!114 &1755198069
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3701,7 +3701,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 92.865, y: 0}
   m_SizeDelta: {x: 0, y: 46}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &3616591237603156634

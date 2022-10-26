@@ -1457,7 +1457,7 @@ namespace DCL.Interface
                     _canvas = GameObject.Find("Canvas");
                     // Create a webview for the main content.
                     mainWebViewPrefab = CanvasWebViewPrefab.Instantiate();
-                    Button button = mainWebViewPrefab.GetComponentInChildren<Button>();
+                    Button button = mainWebViewPrefab.transform.Find("Button").GetComponent<Button>();
                     button.gameObject.SetActive(true);
                     mainWebViewPrefab.InitialUrl = url;
                     mainWebViewPrefab.Resolution = 400f;

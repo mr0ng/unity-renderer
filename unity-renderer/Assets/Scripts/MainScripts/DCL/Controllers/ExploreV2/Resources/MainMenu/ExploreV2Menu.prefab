@@ -832,6 +832,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 060893a08eeb00e44b3de73f05c91bfc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  showHideAnimator: {fileID: 0}
   featureContainer: {fileID: 5751071792576697628}
 --- !u!1 &1412257013043304071
 GameObject:
@@ -1212,6 +1213,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 060893a08eeb00e44b3de73f05c91bfc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  showHideAnimator: {fileID: 0}
   featureContainer: {fileID: 4087236033123927791}
 --- !u!1 &2897782016983537351
 GameObject:
@@ -1965,6 +1967,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b106271e087adb64bac5a7b0138b4969, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  showHideAnimator: {fileID: 0}
   realmSelectorModalPrefab: {fileID: 6536855017403514623, guid: 84f718f114b0a754aa99abab2dc20992,
     type: 3}
   sectionSelector: {fileID: 8087733458050873985}
@@ -1991,7 +1994,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c2741530f002f7841bf417201957881e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  sortingOrder: 0
+  sortingOrder: 1
   showHideAnimator: {fileID: 0}
   submenu: 0
 --- !u!1 &3827417907366463804
@@ -4076,6 +4079,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 060893a08eeb00e44b3de73f05c91bfc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  showHideAnimator: {fileID: 0}
   featureContainer: {fileID: 6612260169227893004}
 --- !u!1 &7575046895280997040
 GameObject:
@@ -4461,6 +4465,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 060893a08eeb00e44b3de73f05c91bfc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  showHideAnimator: {fileID: 0}
   featureContainer: {fileID: 6357805202596411794}
 --- !u!1 &7901760682275034533
 GameObject:
@@ -4746,6 +4751,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 060893a08eeb00e44b3de73f05c91bfc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  showHideAnimator: {fileID: 0}
   featureContainer: {fileID: 8319504516856779982}
 --- !u!1 &8428837407125496152
 GameObject:
