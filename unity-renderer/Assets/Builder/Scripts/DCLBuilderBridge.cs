@@ -657,7 +657,7 @@ namespace Builder
             Debug.Log("Quality settings updated");
             QualitySettings settings = new QualitySettings
             {
-                baseResolution = QualitySettings.BaseResolution.BaseRes_1080,
+                baseResolution = QualitySettings.BaseResolution.BaseRes_Normal,
                 antiAliasing = UnityEngine.Rendering.Universal.MsaaQuality._2x,
                 renderScale = 1,
                 shadows = true,

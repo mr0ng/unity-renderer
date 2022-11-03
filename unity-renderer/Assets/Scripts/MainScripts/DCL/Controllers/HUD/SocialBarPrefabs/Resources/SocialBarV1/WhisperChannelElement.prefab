@@ -1255,8 +1255,6 @@ GameObject:
   m_Component:
   - component: {fileID: 5191408291402297711}
   - component: {fileID: 8915626932228566300}
-  - component: {fileID: 4296681968524082037}
-  - component: {fileID: 1017499001181736634}
   m_Layer: 5
   m_Name: WhisperChannelElement
   m_TagString: Untagged
@@ -1304,6 +1302,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3f7efb3e4bd35ca42a8aab7742bcd442, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  showHideAnimator: {fileID: 0}
   openChatButton: {fileID: 6166453594750622226}
   model:
     userId: 
@@ -1323,35 +1322,6 @@ MonoBehaviour:
   onlineStatusContainer: {fileID: 5811804064744196431}
   offlineStatusContainer: {fileID: 8107356904502252134}
   userContextMenuPositionReference: {fileID: 1314382267237426187}
---- !u!114 &4296681968524082037
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8898853324366724050}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f82e017250d074fa2a218204a7281cb0, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  targetObjects:
-  - {fileID: 3702741273044731059}
---- !u!114 &1017499001181736634
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8898853324366724050}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c2741530f002f7841bf417201957881e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  sortingOrder: 0
-  showHideAnimator: {fileID: 0}
-  submenu: 0
 --- !u!1 &8929287110965387129
 GameObject:
   m_ObjectHideFlags: 0
@@ -1656,7 +1626,7 @@ PrefabInstance:
     - target: {fileID: 4429308612254855752, guid: 0a008e464c70e3744b62a048a23c72f5,
         type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: -30
+      value: -26
       objectReference: {fileID: 0}
     - target: {fileID: 4429308612254855752, guid: 0a008e464c70e3744b62a048a23c72f5,
         type: 3}

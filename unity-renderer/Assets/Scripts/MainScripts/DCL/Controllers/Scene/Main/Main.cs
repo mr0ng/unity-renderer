@@ -1,14 +1,13 @@
-using System;
-using System.Collections.Generic;
+using DCL.Chat;
 using DCL.Components;
 using DCL.Configuration;
 using DCL.Controllers;
 using DCL.Helpers;
+using DCL.Interface;
 using DCL.SettingsCommon;
 using DCL.VR;
 using RPC;
 using UnityEngine;
-using UnityEngine.Serialization;
 
 namespace DCL
 {
@@ -47,7 +46,7 @@ namespace DCL
 
             Settings.CreateSharedInstance(new DefaultSettingsFactory());
 
-            if (!Configuration.EnvironmentSettings.RUNNING_TESTS)
+            if (!EnvironmentSettings.RUNNING_TESTS)
             {
                 performanceMetricsController = new PerformanceMetricsController();
           
@@ -67,20 +66,11 @@ namespace DCL
 
         protected virtual void InitializeDataStore()
         {
-// <<<<<<< HEAD
-// #if UNITY_ANDROID && !UNITY_EDITOR
-            // DataStore.i.textureConfig.gltfMaxSize.Set(1024);
-            // DataStore.i.textureConfig.generalMaxSize.Set(2048);
-            // DataStore.i.avatarConfig.useHologramAvatar.Set(true); 
-// #else
-            // DataStore.i.textureConfig.gltfMaxSize.Set(2048);
-            // DataStore.i.textureConfig.generalMaxSize.Set(2048);
-// =======
+
             DataStore.i.textureConfig.gltfMaxSize.Set(TextureCompressionSettings.GLTF_TEX_MAX_SIZE_WEB);
             DataStore.i.textureConfig.generalMaxSize.Set(TextureCompressionSettings.GENERAL_TEX_MAX_SIZE_WEB);
-// >>>>>>> upstream/dev
             DataStore.i.avatarConfig.useHologramAvatar.Set(true);
-// #endif
+
         }
 
         protected virtual void InitializeCommunication()
@@ -91,15 +81,13 @@ namespace DCL
             Debug.Log($"Main: starting NativeBridgeCommunication");
             kernelCommunication = new NativeBridgeCommunication(Environment.i.world.sceneController);
 #else
-            // TODO(Brian): Remove this branching once we finish migrating all tests out of the
-            //              IntegrationTestSuite_Legacy base class.
-            // if (!Configuration.EnvironmentSettings.RUNNING_TESTS)
-            // {
-            Debug.Log($"Main: starting WebSockeSSL");
-            kernelCommunication = new WebSocketCommunication(DebugConfigComponent.i.webSocketSSL);
-            // WebSocketCommunication kc = kernelCommunication as WebSocketCommunication;
-            //WebSocketCommunication.service.OnCloseEvent += RestartSocketServer;
-            // }
+  // }
+
+            if (!EnvironmentSettings.RUNNING_TESTS)
+            {
+                kernelCommunication = new WebSocketCommunication(DebugConfigComponent.i.webSocketSSL);
+            }
+
 #endif
             RPCServerBuilder.BuildDefaultServer();
         }
@@ -131,10 +119,10 @@ namespace DCL
             // it is used by the kernel to signal "EngineReady" or something like that
             // to prevent race conditions like "SceneController is not an object",
             // aka sending events before unity is ready
-            DCL.Interface.WebInterface.SendSystemInfoReport();
+            WebInterface.SendSystemInfoReport();
 
             // We trigger the Decentraland logic once everything is initialized.
-            DCL.Interface.WebInterface.StartDecentraland();
+            WebInterface.StartDecentraland();
         }
 
         protected virtual void Update()
@@ -164,7 +152,7 @@ namespace DCL
 
             pluginSystem?.Dispose();
 
-            if (!Configuration.EnvironmentSettings.RUNNING_TESTS)
+            if (!EnvironmentSettings.RUNNING_TESTS)
                 Environment.Dispose();
             
             kernelCommunication?.Dispose();
