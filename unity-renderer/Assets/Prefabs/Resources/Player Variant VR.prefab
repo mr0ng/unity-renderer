@@ -27,6 +27,11 @@ PrefabInstance:
       propertyPath: m_Lens.m_SensorSize.x
       value: 1.6896
       objectReference: {fileID: 0}
+    - target: {fileID: 326638022695552861, guid: b0965b55b892d438da492708ea09799c,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 326638022910643306, guid: b0965b55b892d438da492708ea09799c,
         type: 3}
       propertyPath: m_LocalRotation.w
@@ -161,6 +166,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Lens.m_SensorSize.x
       value: 1.9906734
+      objectReference: {fileID: 0}
+    - target: {fileID: 326638024485685081, guid: b0965b55b892d438da492708ea09799c,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 954399581682607488, guid: b0965b55b892d438da492708ea09799c,
         type: 3}
