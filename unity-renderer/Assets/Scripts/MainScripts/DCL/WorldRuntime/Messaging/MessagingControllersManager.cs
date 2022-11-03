@@ -286,6 +286,7 @@ namespace DCL
 
                 timeBudgetCounter =
                     CommonScriptableObjects.rendererState.Get() ? MAX_GLOBAL_MSG_BUDGET : 3*MAX_GLOBAL_MSG_BUDGET;
+                UnityThread.timeBudgetPerFrame = CommonScriptableObjects.rendererState.Get() ? 0.01f : 0.2f;
 
                 for (int i = 0; i < busesToProcessCount; ++i)
                 {
@@ -300,10 +301,10 @@ namespace DCL
                         break;
 
                     //todo:Clint work the yield frequency into the performance manager.) Reduce to throttle loading items, open up to allow faster loading and communication.
-                    if (CommonScriptableObjects.rendererState.Get() && (i % 15 == 0))
-                    {
-                        yield return null;
-                    }
+                     if (CommonScriptableObjects.rendererState.Get() && (i % 15 == 0))
+                     {
+                         yield return null;
+                     }
                 }
 
                 if (pendingInitMessagesCount == 0)
@@ -335,7 +336,7 @@ namespace DCL
             RefreshControllerEnabledState(bus.owner);
 
             timeBudgetCounter -= Time.realtimeSinceStartup - startTime;
-
+            
             if (timeBudgetCounter <= 0)
                 return true;
 

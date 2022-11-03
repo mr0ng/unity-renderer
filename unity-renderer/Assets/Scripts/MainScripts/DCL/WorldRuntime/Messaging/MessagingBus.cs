@@ -165,8 +165,9 @@ namespace DCL
 
             float startTime = Time.realtimeSinceStartup;
 
-            while (enabled && pendingMessagesCount > 0 && Time.realtimeSinceStartup - startTime < timeBudget)
+            while (enabled && pendingMessagesCount > 0 )//&& Time.realtimeSinceStartup - startTime < timeBudget)
             {
+                
                 LinkedListNode<QueuedSceneMessage> pendingMessagesFirst;
 
                 lock (pendingMessages)
@@ -234,24 +235,32 @@ namespace DCL
 
                         break;
                     case QueuedSceneMessage.Type.LOAD_PARCEL:
-                        handler.LoadParcelScenesExecute(m.message);
-                        ProfilingEvents.OnMessageWillDequeue?.Invoke("LoadScene");
-
+                        UnityThread.ExecuteInTimeBudgetCoroutine(() =>
+                        {
+                            handler.LoadParcelScenesExecute(m.message);
+                            ProfilingEvents.OnMessageWillDequeue?.Invoke("LoadScene");
+                        });
                         break;
                     case QueuedSceneMessage.Type.UNLOAD_PARCEL:
-                        handler.UnloadParcelSceneExecute(m.message);
-                        ProfilingEvents.OnMessageWillDequeue?.Invoke("UnloadScene");
-
+                        UnityThread.ExecuteInTimeBudgetCoroutine(() =>
+                        {
+                            handler.UnloadParcelSceneExecute(m.message);
+                            ProfilingEvents.OnMessageWillDequeue?.Invoke("UnloadScene");
+                        });
                         break;
                     case QueuedSceneMessage.Type.UPDATE_PARCEL:
-                        handler.UpdateParcelScenesExecute(m.message);
-                        ProfilingEvents.OnMessageWillDequeue?.Invoke("UpdateScene");
-
+                        UnityThread.ExecuteInTimeBudgetCoroutine(() =>
+                        {
+                            handler.UpdateParcelScenesExecute(m.message);
+                            ProfilingEvents.OnMessageWillDequeue?.Invoke("UpdateScene");
+                        });
                         break;
                     case QueuedSceneMessage.Type.UNLOAD_SCENES:
-                        handler.UnloadAllScenes();
-                        ProfilingEvents.OnMessageWillDequeue?.Invoke("UnloadAllScenes");
-
+                        UnityThread.ExecuteInTimeBudgetCoroutine(() =>
+                        {
+                            handler.UnloadAllScenes();
+                            ProfilingEvents.OnMessageWillDequeue?.Invoke("UnloadAllScenes");
+                        });
                         break;
                 }
 
