@@ -1455,6 +1455,7 @@ namespace DCL.Interface
 
                     CanvasKeyboard keyboardFocused;
                     _canvas = GameObject.Find("Canvas");
+                    _canvas.layer = 0;
                     // Create a webview for the main content.
                     mainWebViewPrefab = CanvasWebViewPrefab.Instantiate();
                     Button button = mainWebViewPrefab.transform.Find("Button").GetComponent<Button>();
