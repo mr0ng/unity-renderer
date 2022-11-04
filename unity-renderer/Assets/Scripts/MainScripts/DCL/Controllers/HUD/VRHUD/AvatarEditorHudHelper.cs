@@ -8,6 +8,8 @@ public class AvatarEditorHudHelper : VRHUDHelper
     private BaseVariable<bool> dataStoreIsOpen = DataStore.i.exploreV2.isOpen;
     protected override void SetupHelper()
     {
+        transform.GetComponent<Canvas>().worldCamera = Camera.main;
+        
         view.OnSetVisibility += OnVisiblityChange;
     }
     private void OnVisiblityChange(bool visible)

@@ -79,7 +79,7 @@ public interface IBaseComponentView : IPointerEnterHandler, IPointerExitHandler,
     void OnScreenSizeChanged();
 }
 
-public interface IComponentModelConfig<T> where T: BaseComponentModel
+public interface IComponentModelConfig<T> where T : BaseComponentModel
 {
     /// <summary>
     /// Fill the model and updates the component with this data.
@@ -91,10 +91,10 @@ public interface IComponentModelConfig<T> where T: BaseComponentModel
 public abstract class BaseComponentView : MonoBehaviour, IBaseComponentView
 {
     internal BaseComponentModel baseModel;
-    internal ShowHideAnimator showHideAnimator;
+    public ShowHideAnimator showHideAnimator;
 
     public virtual bool isVisible { get; private set; }
-    private bool isDestroyed = false;
+    protected bool isDestroyed = false;
 
     public event Action<bool> onFocused;
     public bool isFocused { get; private set; }
@@ -151,16 +151,19 @@ public abstract class BaseComponentView : MonoBehaviour, IBaseComponentView
         onFocused?.Invoke(false);
     }
 
-    public virtual void OnScreenSizeChanged() 
+    public virtual void OnScreenSizeChanged()
     {
+        if (myTrans == null)
+            myTrans = transform;
         myTrans.localRotation = Quaternion.identity; 
     }
 
     public virtual void Dispose()
     {
         DataStore.i.screen.size.OnChange -= OnScreenSizeModified;
+
         if (!isDestroyed)
-            Destroy(gameObject);
+            DestroyImmediate(gameObject);
     }
 
     public virtual void OnPointerEnter(PointerEventData eventData) { OnFocus(); }

@@ -13,9 +13,9 @@ public class ItemToggleContainer : MonoBehaviour
     private List<ItemToggle> items = new List<ItemToggle>();
     private int maxItems;
 
-    public IEnumerator Setup(int newMaxItems)
+    public void Setup(int newMaxItems)
     {
-        if (maxItems == newMaxItems) yield break;
+        if (maxItems == newMaxItems) return;
         maxItems = newMaxItems;
         
         var diff = maxItems - items.Count;
@@ -26,7 +26,7 @@ public class ItemToggleContainer : MonoBehaviour
             {
                 var newItemToggle = Instantiate(itemPrefab, itemContainer);
                 items.Add(newItemToggle);
-                yield return null;
+              
             }
         }
 

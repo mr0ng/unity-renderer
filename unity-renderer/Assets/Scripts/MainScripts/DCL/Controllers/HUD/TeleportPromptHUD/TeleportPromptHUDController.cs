@@ -19,33 +19,31 @@ public class TeleportPromptHUDController : IHUD
     {
         view = UnityEngine.Object.Instantiate(Resources.Load<GameObject>("TeleportPromptHUDVR")).GetComponent<TeleportPromptHUDView>();
         view.name = "_TeleportPromptHUD";
-        view.content.SetActive(false);
-        view.contentAnimator.visibleParam = "invisible";
-        SetVisibility((false));
+        view.content.GetComponent<Canvas>().enabled = false;
         view.OnTeleportEvent += OnTeleportPressed;
     }
 
     public void SetVisibility(bool visible)
     {
-        
         if (view.contentAnimator.isVisible && !visible)
         {
             view.contentAnimator.Hide();
         }
         else if (!view.contentAnimator.isVisible && visible)
         {
-            view.content.SetActive(true);
+            view.content.GetComponent<Canvas>().enabled = true;
             view.contentAnimator.Show();
+            view.SetVisibility((true));
             AudioScriptableObjects.fadeIn.Play(true);
-            view.SetVisibility(visible);
         }
     }
 
     public void RequestTeleport(string teleportDataJson)
     {
+        #if !DCL_VR
         if (view.contentAnimator.isVisible)
             return;
-
+        #endif
         Utils.UnlockCursor();
 
         view.Reset();
@@ -109,17 +107,17 @@ public class TeleportPromptHUDController : IHUD
         switch (teleportData.destination)
         {
             case TELEPORT_COMMAND_CROWD:
-                WebInterface.GoToCrowd();
+                DCL.Environment.i.world.teleportController.GoToCrowd();
                 break;
             case TELEPORT_COMMAND_MAGIC:
-                WebInterface.GoToMagic();
+                DCL.Environment.i.world.teleportController.GoToMagic();
                 break;
             default:
                 int x, y;
                 string[] coordSplit = teleportData.destination.Split(',');
                 if (coordSplit.Length == 2 && int.TryParse(coordSplit[0], out x) && int.TryParse(coordSplit[1], out y))
                 {
-                    WebInterface.GoTo(x, y);
+                    DCL.Environment.i.world.teleportController.Teleport(x, y);
                 }
 
                 break;

@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Net.Sockets;
 using DCL;
 using UnityEngine;
+using UnityEngine.Rendering;
 using WebSocketSharp;
 using WebSocketSharp.Server;
 
@@ -77,7 +78,8 @@ public class WebSocketCommunication : IKernelCommunication
                     },
                     KeepClean = false
                 };
-   
+                ws.AllowForwardedRequest = true;
+                ws.ReuseAddress = true;
                 Debug.Log("WebSocketCommunication: SSL used");
             }
             else
@@ -88,26 +90,40 @@ public class WebSocketCommunication : IKernelCommunication
                 wssServerUrl = $"ws://localhost:{port}/";
 #endif
                 ws = new WebSocketServer(wssServerUrl);
+                ws.AllowForwardedRequest = true;
+                ws.ReuseAddress = true;
             }
 
             ws.AddWebSocketService("/" + wssServiceId, () =>
             {
                 service = new DCLWebSocketService();
+                service.OriginValidator = val =>
+                {
+                    Debug.Log($"originValidator: {val}");
+                    return  true;
+                };
                 service.OnCloseEvent += () =>
                 {
-                    // StartServer(port,maxPort,withSSL);
-                    int j  = 0;
-                    while (service.ConnectionState == WebSocketState.Closing)
-                    {
-                        j++;
-                    }
+                    // DataStore.i.wsCommunication.communicationReady.Set(false);
+                    
+                    ws.Stop();
+                    ws.WebSocketServices.Clear();
+                    
                     //ws.WebSocketServices.Clear();
                     
-                    //ws = null;
-                    //ws.RemoveWebSocketService(service.ID);
-                    //Debug.Log($"count to close {j}");
-                
-                    DebugConfigComponent.i.ShowWebviewScreen();
+                    queuedMessages.Clear();
+                    //service.Context.WebSocket.Connect();
+                   
+                   
+                    service = null;
+                    ws = null;
+                    requestStop = false;
+                    queuedMessagesDirty = false;
+                    
+                   
+                    UnityThread.executeCoroutine(
+                        RestartCommunication(port, maxPort, withSSL)
+                    );
                     
 
                 };
@@ -117,7 +133,9 @@ public class WebSocketCommunication : IKernelCommunication
                 Debug.Log("WebSocketCommunication: Added DCLWebSocket Service");
                 return service;
             });
+            ws.ReuseAddress = true;
             ws.Start();
+            
             Debug.Log("WebSocketCommunication: Start Called");
             
         }
@@ -137,6 +155,29 @@ public class WebSocketCommunication : IKernelCommunication
 
         string wssUrl = wssServerUrl + wssServiceId;
         return wssUrl;
+    }
+
+    private IEnumerator RestartCommunication(int port, int maxPort, bool withSSL)
+    {
+        yield return new WaitForSeconds(3);
+        DataStore.i.wsCommunication.communicationReady.Set(false);
+        DataStore.i.common.isApplicationQuitting.Set(false);
+        //
+        // yield return new WaitForSeconds(3);
+        // InitMessageTypeToBridgeName();
+        //
+        // DCL.DataStore.i.debugConfig.isWssDebugMode = true;
+        // string url = StartServer(port + 1, maxPort, withSSL);
+        // Debug.Log("WebSocket Server URL: " + url);
+        //
+        // DataStore.i.wsCommunication.url = url;
+        //
+        // DataStore.i.wsCommunication.communicationReady.Set(true);
+        // if(updateCoroutine == null);
+        // updateCoroutine = CoroutineStarter.Start(ProcessMessages());
+        //
+        yield return new WaitForSeconds(1);
+        DebugConfigComponent.i.ShowWebviewScreen();
     }
 
 //<<<<<<< HEAD
@@ -166,9 +207,9 @@ public class WebSocketCommunication : IKernelCommunication
         // Please, use `Bridges` as a bridge name, avoid adding messages here. The system will use `Bridges` as the default bridge name.
         messageTypeToBridgeName["SetDebug"] = "Main";
         messageTypeToBridgeName["SetSceneDebugPanel"] = "Main";
+        messageTypeToBridgeName["SetMemoryUsage"] = "Main";
         messageTypeToBridgeName["ShowFPSPanel"] = "Main";
         messageTypeToBridgeName["HideFPSPanel"] = "Main";
-        messageTypeToBridgeName["DetectABs"] = "Main";
         messageTypeToBridgeName["SetEngineDebugPanel"] = "Main";
         messageTypeToBridgeName["SendSceneMessage"] = "Main";
         messageTypeToBridgeName["LoadParcelScenes"] = "Main";
@@ -222,9 +263,17 @@ public class WebSocketCommunication : IKernelCommunication
         messageTypeToBridgeName["UpdateTotalFriends"] = "Main";
         messageTypeToBridgeName["InitializeChat"] = "Main";
         messageTypeToBridgeName["AddChatMessages"] = "Main";
-        messageTypeToBridgeName["UpdateTotalUnseenMessages"] = "Main";
         messageTypeToBridgeName["UpdateUserUnseenMessages"] = "Main";
+        messageTypeToBridgeName["UpdateTotalUnseenMessages"] = "Main";
+        messageTypeToBridgeName["UpdateChannelInfo"] = "Main";
+        messageTypeToBridgeName["JoinChannelConfirmation"] = "Main";
+        messageTypeToBridgeName["JoinChannelError"] = "Main";
+        messageTypeToBridgeName["LeaveChannelError"] = "Main";
+        messageTypeToBridgeName["MuteChannelError"] = "Main";
+        messageTypeToBridgeName["UpdateTotalUnseenMessagesByChannel"] = "Main";
+        messageTypeToBridgeName["UpdateChannelMembers"] = "Main";
         messageTypeToBridgeName["UpdateHomeScene"] = "Main";
+        messageTypeToBridgeName["UpdateChannelSearchResults"] = "Main";
 
         messageTypeToBridgeName["Teleport"] = "CharacterController";
 

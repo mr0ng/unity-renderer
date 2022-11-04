@@ -55,6 +55,7 @@ namespace DCL.Camera
                 return;
             CommonScriptableObjects.cameraForward.Set(camTrans.forward);
             CommonScriptableObjects.cameraRight.Set(camTrans.right);
+            CommonScriptableObjects.cameraPosition.Set(camTrans.position);
         }
         
         private void DisableCamera()

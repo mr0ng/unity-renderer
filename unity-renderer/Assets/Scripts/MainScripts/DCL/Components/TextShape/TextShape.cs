@@ -75,9 +75,12 @@ namespace DCL.Components
             
             Environment.i.platform.updateEventHandler.AddListener(IUpdateEventHandler.EventType.Update, OnUpdate);
         }
-
+        private int updateSkip = 0;
         private void OnUpdate()
         {
+            updateSkip = (updateSkip + 1 ) % 5;
+            if (updateSkip != 0)
+                return;
             if (cachedModel.billboard && mainCamera != null)
             {
                 transform.forward = mainCamera.transform.forward;

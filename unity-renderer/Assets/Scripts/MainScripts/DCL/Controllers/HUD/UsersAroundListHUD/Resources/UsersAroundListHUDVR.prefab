@@ -1062,7 +1062,7 @@ Canvas:
   m_OverridePixelPerfect: 0
   m_SortingBucketNormalizedSize: 0
   m_AdditionalShaderChannelsFlag: 25
-  m_SortingLayerID: 337625371
+  m_SortingLayerID: -1524345185
   m_SortingOrder: 2
   m_TargetDisplay: 0
 --- !u!114 &1247891530875598981
@@ -1151,7 +1151,7 @@ MonoBehaviour:
   hideOnEnable: 0
   animSpeedFactor: 1
   disableAfterFadeOut: 1
-  visibleParam: visible
+  canvasGroup: {fileID: 0}
 --- !u!114 &726579319
 MonoBehaviour:
   m_ObjectHideFlags: 0

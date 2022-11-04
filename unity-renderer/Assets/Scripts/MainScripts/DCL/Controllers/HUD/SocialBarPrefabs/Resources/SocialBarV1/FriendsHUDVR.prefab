@@ -187,12 +187,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 059b9387050d4b8ca2a2d26ac6678bb9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  showHideAnimator: {fileID: 0}
   toggleOnAwake: 0
   toggleButton: {fileID: 5592600324281357203}
   toggleButtonIcon: {fileID: 785311375320442670}
+  toggleImage: {fileID: 0}
   containerRectTransform: {fileID: 2685875329589298684}
   model:
     isToggled: 0
+  disabledColor: {r: 0, g: 0, b: 0, a: 0}
 --- !u!1 &1254078438727084028
 GameObject:
   m_ObjectHideFlags: 0
@@ -1086,12 +1089,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 059b9387050d4b8ca2a2d26ac6678bb9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  showHideAnimator: {fileID: 0}
   toggleOnAwake: 0
   toggleButton: {fileID: 5965760825162736646}
   toggleButtonIcon: {fileID: 6133099415743954957}
+  toggleImage: {fileID: 0}
   containerRectTransform: {fileID: 5388870294229674507}
   model:
     isToggled: 0
+  disabledColor: {r: 0, g: 0, b: 0, a: 0}
 --- !u!1 &1892857139166499295
 GameObject:
   m_ObjectHideFlags: 0
@@ -1456,12 +1462,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 059b9387050d4b8ca2a2d26ac6678bb9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  showHideAnimator: {fileID: 0}
   toggleOnAwake: 0
   toggleButton: {fileID: 2447796031126903298}
   toggleButtonIcon: {fileID: 8757459088797710354}
+  toggleImage: {fileID: 0}
   containerRectTransform: {fileID: 7045797406674951202}
   model:
     isToggled: 0
+  disabledColor: {r: 0, g: 0, b: 0, a: 0}
 --- !u!1 &2117697466914609427
 GameObject:
   m_ObjectHideFlags: 0
@@ -1945,6 +1954,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 83977bfcaf8a4f9e8264ec66da4e9955, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  showHideAnimator: {fileID: 0}
   container: {fileID: 5388870294229674507}
   toggleButton: {fileID: 373866519491885297}
   emptyStateContainer: {fileID: 8537544344321641430}
@@ -2042,6 +2052,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 83977bfcaf8a4f9e8264ec66da4e9955, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  showHideAnimator: {fileID: 0}
   container: {fileID: 2685875329589298684}
   toggleButton: {fileID: 7937953728643343186}
   emptyStateContainer: {fileID: 2932016852410142984}
@@ -2715,6 +2726,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 83977bfcaf8a4f9e8264ec66da4e9955, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  showHideAnimator: {fileID: 0}
   container: {fileID: 1520276654379897518}
   toggleButton: {fileID: 5903951418833045856}
   emptyStateContainer: {fileID: 7518954543782797184}
@@ -3135,7 +3147,7 @@ MonoBehaviour:
   hideOnEnable: 1
   animSpeedFactor: 1
   disableAfterFadeOut: 1
-  visibleParam: visible
+  canvasGroup: {fileID: 0}
 --- !u!225 &4067661993170474033
 CanvasGroup:
   m_ObjectHideFlags: 0
@@ -3570,12 +3582,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 059b9387050d4b8ca2a2d26ac6678bb9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  showHideAnimator: {fileID: 0}
   toggleOnAwake: 0
   toggleButton: {fileID: 4895769189733774511}
   toggleButtonIcon: {fileID: 4912498087487786613}
+  toggleImage: {fileID: 0}
   containerRectTransform: {fileID: 2956868879258149217}
   model:
     isToggled: 0
+  disabledColor: {r: 0, g: 0, b: 0, a: 0}
 --- !u!1 &3898748473909555357
 GameObject:
   m_ObjectHideFlags: 0
@@ -3867,6 +3882,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e6f6dc1daa2a4a9eba4965ec1f299c2a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  showHideAnimator: {fileID: 0}
   enabledHeader: {fileID: 8579114478575497482}
   disabledHeader: {fileID: 3898748473909555357}
   emptyStateContainer: {fileID: 5212587496370905453}
@@ -3891,6 +3907,7 @@ MonoBehaviour:
     isSentRequestsExpanded: 1
   loadMoreEntriesContainer: {fileID: 6342758938988184109}
   loadMoreEntriesLabel: {fileID: 1478818838962374348}
+  loadMoreEntriesSpinner: {fileID: 0}
 --- !u!114 &8753975561464095813
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4471,7 +4488,6 @@ GameObject:
   - component: {fileID: 1818421760890632532}
   - component: {fileID: 7297809386921154479}
   - component: {fileID: 4172132928529370227}
-  - component: {fileID: -585050820612989134}
   m_Layer: 5
   m_Name: FriendsHUDVR
   m_TagString: Untagged
@@ -4549,7 +4565,7 @@ MonoBehaviour:
   hideOnEnable: 0
   animSpeedFactor: 1
   disableAfterFadeOut: 1
-  visibleParam: visible
+  canvasGroup: {fileID: 0}
 --- !u!114 &7297809386921154479
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4574,6 +4590,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 710f088536a64db2ae594d186c6b75d9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  showHideAnimator: {fileID: 0}
   loadingSpinner: {fileID: 1933096059089960218}
   closeButton: {fileID: 4252606234690962432}
   friendsTabFocusButton: {fileID: 6399830310190429734}
@@ -4584,21 +4601,6 @@ MonoBehaviour:
     focusedTabIndex: 0
     isLoadingSpinnerActive: 0
     visible: 1
---- !u!114 &-585050820612989134
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5177587120558323899}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c2741530f002f7841bf417201957881e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  sortingOrder: 0
-  showHideAnimator: {fileID: 1818421760890632532}
-  submenu: 0
 --- !u!1 &5182781192964575901
 GameObject:
   m_ObjectHideFlags: 0
@@ -5286,6 +5288,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 83977bfcaf8a4f9e8264ec66da4e9955, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  showHideAnimator: {fileID: 0}
   container: {fileID: 7045797406674951202}
   toggleButton: {fileID: 7718659493326908491}
   emptyStateContainer: {fileID: 4449845025364482421}
@@ -5383,6 +5386,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 83977bfcaf8a4f9e8264ec66da4e9955, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  showHideAnimator: {fileID: 0}
   container: {fileID: 2956868879258149217}
   toggleButton: {fileID: 4450009473169016410}
   emptyStateContainer: {fileID: 7434414195762192513}
@@ -5513,6 +5517,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b7becfd9f74a455aa4e9142b359f6a62, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  showHideAnimator: {fileID: 0}
   enabledHeader: {fileID: 7840493675238110429}
   disabledHeader: {fileID: 1651495028025547457}
   emptyStateContainer: {fileID: 4488091510661529766}
@@ -5523,18 +5528,22 @@ MonoBehaviour:
     list: {fileID: 1601438812487812336}
     countText: {fileID: 4232341704070456539}
     headerContainer: {fileID: 3778124598785868284}
+    currentAvatarSnapshotIndex: 0
   offlineFriendsList:
     list: {fileID: 6803596437606588523}
     countText: {fileID: 5003485521969263545}
     headerContainer: {fileID: 1781201262405527982}
+    currentAvatarSnapshotIndex: 0
   allFriendsList:
     list: {fileID: 2746461878533739154}
     countText: {fileID: 9099417614628500159}
     headerContainer: {fileID: 7275749481290054228}
+    currentAvatarSnapshotIndex: 0
   searchResultsFriendList:
     list: {fileID: 8119811926097462098}
     countText: {fileID: 9068831802301151896}
     headerContainer: {fileID: 6649166646200030936}
+    currentAvatarSnapshotIndex: 0
   searchBar: {fileID: 3868216263017426092}
   contextMenuPanel: {fileID: 2931223222951668588}
   model:
@@ -5544,6 +5553,7 @@ MonoBehaviour:
   scroll: {fileID: 8156331471709598437}
   loadMoreEntriesContainer: {fileID: 6609162879917375590}
   loadMoreEntriesLabel: {fileID: 8681017483429738826}
+  loadMoreEntriesSpinner: {fileID: 0}
 --- !u!114 &5628837750012038765
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5973,7 +5983,7 @@ MonoBehaviour:
   hideOnEnable: 1
   animSpeedFactor: 1
   disableAfterFadeOut: 1
-  visibleParam: visible
+  canvasGroup: {fileID: 0}
 --- !u!95 &3066963666085168230
 Animator:
   serializedVersion: 3
@@ -6262,7 +6272,7 @@ MonoBehaviour:
   hideOnEnable: 1
   animSpeedFactor: 1
   disableAfterFadeOut: 1
-  visibleParam: visible
+  canvasGroup: {fileID: 0}
 --- !u!225 &677004714673614688
 CanvasGroup:
   m_ObjectHideFlags: 0
@@ -6404,7 +6414,7 @@ MonoBehaviour:
   hideOnEnable: 1
   animSpeedFactor: 1
   disableAfterFadeOut: 1
-  visibleParam: visible
+  canvasGroup: {fileID: 0}
 --- !u!225 &2921991981707547102
 CanvasGroup:
   m_ObjectHideFlags: 0
@@ -6514,12 +6524,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 059b9387050d4b8ca2a2d26ac6678bb9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  showHideAnimator: {fileID: 0}
   toggleOnAwake: 0
   toggleButton: {fileID: 1679038678423576560}
   toggleButtonIcon: {fileID: 4217389430651739752}
+  toggleImage: {fileID: 0}
   containerRectTransform: {fileID: 1520276654379897518}
   model:
     isToggled: 0
+  disabledColor: {r: 0, g: 0, b: 0, a: 0}
 --- !u!114 &1679038678423576560
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6961,12 +6974,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 059b9387050d4b8ca2a2d26ac6678bb9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  showHideAnimator: {fileID: 0}
   toggleOnAwake: 0
   toggleButton: {fileID: 3229716358315704817}
   toggleButtonIcon: {fileID: 6005648469340967272}
+  toggleImage: {fileID: 0}
   containerRectTransform: {fileID: 1642083635416739197}
   model:
     isToggled: 0
+  disabledColor: {r: 0, g: 0, b: 0, a: 0}
 --- !u!114 &3229716358315704817
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -7950,6 +7966,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 83977bfcaf8a4f9e8264ec66da4e9955, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  showHideAnimator: {fileID: 0}
   container: {fileID: 1642083635416739197}
   toggleButton: {fileID: 2331136153996073199}
   emptyStateContainer: {fileID: 7465124535262851782}
@@ -12199,12 +12216,6 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: db08434be6dadc943b7e258f41869504, type: 3}
---- !u!224 &2300296188125642922 stripped
-RectTransform:
-  m_CorrespondingSourceObject: {fileID: 8158256326675281976, guid: db08434be6dadc943b7e258f41869504,
-    type: 3}
-  m_PrefabInstance: {fileID: 7988182691528456338}
-  m_PrefabAsset: {fileID: 0}
 --- !u!114 &3868216263017426092 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 6590195516862157886, guid: db08434be6dadc943b7e258f41869504,
@@ -12217,6 +12228,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ae27d568eb9f4364ca12bdb6e11d0f52, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!224 &2300296188125642922 stripped
+RectTransform:
+  m_CorrespondingSourceObject: {fileID: 8158256326675281976, guid: db08434be6dadc943b7e258f41869504,
+    type: 3}
+  m_PrefabInstance: {fileID: 7988182691528456338}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &9142658550218571320
 PrefabInstance:
   m_ObjectHideFlags: 0

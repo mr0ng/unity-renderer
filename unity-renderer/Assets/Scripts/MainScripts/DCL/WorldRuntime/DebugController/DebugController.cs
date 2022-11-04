@@ -60,13 +60,11 @@ namespace DCL
             {
                 Debug.unityLogger.logEnabled = true;
                 Debug.Log("Client logging ENABLED");
-                ShowFPSPanel();
             }
             else
             {
                 Debug.Log("Client logging DISABLED");
                 Debug.unityLogger.logEnabled = false;
-                HideFPSPanel();
             }
 
             OnDebugModeSet?.Invoke();
@@ -85,6 +83,11 @@ namespace DCL
         public void ShowFPSPanel()
         {
             isFPSPanelVisible.Set(true);
+        }
+        
+        public void ToggleFPSPanel()
+        {
+            isFPSPanelVisible.Set(!isFPSPanelVisible.Get());
         }
 
         public void ShowInfoPanel(string network, string realm)
@@ -180,6 +183,7 @@ namespace DCL
         {
             Environment.i.platform.cullingController.SetAnimationCulling(enabled);
         }
+       
 
         public void Dispose()
         {

@@ -5522,7 +5522,7 @@ Canvas:
   m_OverridePixelPerfect: 0
   m_SortingBucketNormalizedSize: 0
   m_AdditionalShaderChannelsFlag: 25
-  m_SortingLayerID: 337625371
+  m_SortingLayerID: -1524345185
   m_SortingOrder: 2
   m_TargetDisplay: 0
 --- !u!114 &3158957676492487125
@@ -5547,7 +5547,7 @@ MonoBehaviour:
   m_FallbackScreenDPI: 96
   m_DefaultSpriteDPI: 96
   m_DynamicPixelsPerUnit: 1
-  m_PresetInfoIsWorld: 0
+  m_PresetInfoIsWorld: 1
 --- !u!114 &3436536536684411656
 MonoBehaviour:
   m_ObjectHideFlags: 0

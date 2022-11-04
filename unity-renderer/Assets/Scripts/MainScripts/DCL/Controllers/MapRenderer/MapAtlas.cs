@@ -1,6 +1,7 @@
 using System.Collections;
 using DCL.Helpers;
 using System.Collections.Generic;
+using DCL.Helpers;
 using UnityEngine;
 
 namespace DCL
@@ -56,13 +57,9 @@ namespace DCL
         [ContextMenu("Force Update Culling")]
         public void UpdateCulling()
         {
-            using (var it = chunks.GetEnumerator())
-            {
-                while (it.MoveNext())
-                {
-                    it.Current.Value.UpdateCulling();
-                }
-            }
+            using var it = chunks.GetEnumerator();
+            while (it.MoveNext())
+                it.Current.Value.UpdateCulling();
         }
         public void InitializeChunks()
         {

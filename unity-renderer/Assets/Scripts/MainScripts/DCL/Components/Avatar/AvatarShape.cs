@@ -366,7 +366,7 @@ namespace DCL
         {
             if (!currentActiveModifiers.ContainsKey(AvatarModifierAreaID.HIDE_AVATAR))
             {
-                avatar.AddVisibilityConstrain(VISIBILITY_CONSTRAINT_HIDE_AREA);
+                avatar.AddVisibilityConstraint(VISIBILITY_CONSTRAINT_HIDE_AREA);
                 onPointerDown.gameObject.SetActive(false);
                 playerNameContainer.SetActive(false);
                 stickersControllers.ToggleHideArea(true);
@@ -465,7 +465,7 @@ namespace DCL
             if(isInsideBoundaries)
                 avatar.RemoveVisibilityConstrain(VISIBILITY_CONSTRAINT_OUTSIDE_SCENE_BOUNDS);
             else
-                avatar.AddVisibilityConstrain(VISIBILITY_CONSTRAINT_OUTSIDE_SCENE_BOUNDS);
+                avatar.AddVisibilityConstraint(VISIBILITY_CONSTRAINT_OUTSIDE_SCENE_BOUNDS);
             
             onPointerDown.gameObject.SetActive(isInsideBoundaries);
             playerNameContainer.SetActive(isInsideBoundaries);

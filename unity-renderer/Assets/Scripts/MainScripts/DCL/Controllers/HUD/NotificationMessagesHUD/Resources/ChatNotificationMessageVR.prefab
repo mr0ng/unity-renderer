@@ -391,7 +391,6 @@ GameObject:
   - component: {fileID: 8527431793237977755}
   - component: {fileID: 3384717086197043513}
   - component: {fileID: 6661278415341880864}
-  - component: {fileID: 6106826006269771944}
   m_Layer: 5
   m_Name: ChatNotificationMessageVR
   m_TagString: Untagged
@@ -453,21 +452,38 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 59ca7b41e62b34acb94e03ef57780a16, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  showHideAnimator: {fileID: 0}
   button: {fileID: 8916603609239170272}
   notificationMessage: {fileID: 5362621604388217969}
   notificationHeader: {fileID: 8843727763408434147}
+  notificationSender: {fileID: 0}
   notificationTimestamp: {fileID: 9112808225028901382}
   image: {fileID: 179125349042078575}
+  imageBackground: {fileID: 0}
+  multiNotificationBackground: {fileID: 0}
+  firstSeparator: {fileID: 0}
+  secondSeparator: {fileID: 0}
   isPrivate: 0
+  backgroundTransform: {fileID: 0}
+  messageContainerTransform: {fileID: 0}
+  header: {fileID: 0}
+  content: {fileID: 0}
   model:
     maxHeaderCharacters: 30
     maxContentCharacters: 50
+    maxSenderCharacters: 0
     message: Test shorter
     time: 12:33
     messageHeader: '#long-channel-description-that-will-reseize'
+    messageSender: 
     isPrivate: 0
     imageUri: 
     notificationTargetId: 
+  privateColor: {r: 0, g: 0, b: 0, a: 0}
+  publicColor: {r: 0, g: 0, b: 0, a: 0}
+  standardColor: {r: 0, g: 0, b: 0, a: 0}
+  channelColors: []
+  shouldAnimateFocus: 1
   notificationTargetId: 
 --- !u!114 &6661278415341880864
 MonoBehaviour:
@@ -493,21 +509,6 @@ MonoBehaviour:
   m_Spacing: {x: 0, y: 0}
   m_Constraint: 0
   m_ConstraintCount: 2
---- !u!114 &6106826006269771944
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3972828621546220855}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c2741530f002f7841bf417201957881e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  sortingOrder: 0
-  showHideAnimator: {fileID: 0}
-  submenu: 0
 --- !u!1 &4375288843613507760
 GameObject:
   m_ObjectHideFlags: 0
