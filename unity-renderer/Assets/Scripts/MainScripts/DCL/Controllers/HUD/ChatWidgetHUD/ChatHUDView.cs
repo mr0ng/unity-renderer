@@ -15,7 +15,7 @@ using DG.Tweening;
 
 public class ChatHUDView : BaseComponentView, IChatHUDComponentView
 {
-    private const string VIEW_PATH = "SocialBarV1/ChatHUDVR";
+    private const string VIEW_PATH = "SocialBarV1/ChatHUD";
 
     public TMP_InputField inputField;
     public RectTransform chatEntriesContainer;
