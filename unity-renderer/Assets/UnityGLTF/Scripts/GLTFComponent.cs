@@ -39,11 +39,8 @@ namespace UnityGLTF
         public bool UseStream = false;
         public bool UseVisualFeedback = true;
         private bool addMaterialsToPersistentCaching = true;
-#if UNITY_ANDROID && !UNITY_EDITOR
+
         public int MaximumLod = 300;
-        #else
-        public int MaximumLod = 300;
-        #endif
         public int Timeout = 8;
         public Material LoadingTextureMaterial;
         public GLTFSceneImporter.ColliderType Collider = GLTFSceneImporter.ColliderType.None;
@@ -75,7 +72,7 @@ namespace UnityGLTF
         [SerializeField] private int RetryCount = 10;
         [SerializeField] private float RetryTimeout = 2.0f;
         [SerializeField] public Shader shaderOverride = null;
-        private bool initialVisibility = false;
+        private bool initialVisibility = true;
         private AssetIdConverter fileToHashConverter;
 
         private enum State

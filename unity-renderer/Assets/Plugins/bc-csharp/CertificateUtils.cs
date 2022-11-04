@@ -72,7 +72,9 @@ public class CertificateUtils
         ISignatureFactory signatureFactory = new Asn1SignatureFactory("SHA512WITHRSA", issuerPrivKey, random);
         // The Certificate Generator
         var certificateGenerator = new X509V3CertificateGenerator();
+      
         certificateGenerator.AddExtension(X509Extensions.SubjectAlternativeName, false, new GeneralNames(new GeneralName[] { new GeneralName(GeneralName.DnsName, "localhost"), new GeneralName(GeneralName.DnsName, "127.0.0.1") }));
+            
         certificateGenerator.AddExtension(X509Extensions.ExtendedKeyUsage, true, new ExtendedKeyUsage((new ArrayList() { new DerObjectIdentifier("1.3.6.1.5.5.7.3.1") })));
 
         // Serial Number

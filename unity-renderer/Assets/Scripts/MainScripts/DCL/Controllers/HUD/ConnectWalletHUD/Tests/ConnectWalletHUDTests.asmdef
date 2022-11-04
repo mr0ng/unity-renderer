@@ -10,7 +10,9 @@
         "DataStore",
         "BaseVariable",
         "UserProfile",
-        "BrowserBridge"
+        "BrowserBridge",
+        "UnityEditor.UI",
+        "UnityEngine.UI"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

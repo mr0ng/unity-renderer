@@ -6,7 +6,7 @@ using UnityEngine.UI;
 public abstract class VRHUDHelper : MonoBehaviour
 {
     [SerializeField]
-    private int sortingOrder;
+    public int sortingOrder;
     [SerializeField]
     protected ShowHideAnimator showHideAnimator;
     

@@ -428,7 +428,7 @@ namespace DCL.Skybox
         private int updateSkip =  0;
         public void Update()
         {
-            updateSkip = (updateSkip + 1 ) % 25;
+            updateSkip = (updateSkip + 1 ) % 5;
             if (updateSkip != 0)
                 return;
             if (!DataStore.i.skyboxConfig.disableReflection.Get() && skyboxProbe != null && !probeParented)

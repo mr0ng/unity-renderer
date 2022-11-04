@@ -459,14 +459,14 @@ public class AvatarEditorHUDView : MonoBehaviour, IAvatarEditorHUDView, IPointer
             collectiblesItemSelector.RemoveWearable(wearableItem.id);
     }
 
-    public async UniTask RemoveAllWearables()
+    public void RemoveAllWearables()
     {
         using (var enumerator = selectorsByCategory.GetEnumerator())
         {
             while (enumerator.MoveNext())
             {
                 enumerator.Current.Value.RemoveAllWearables();
-                await UniTask.Yield();
+                
             }
         }
 

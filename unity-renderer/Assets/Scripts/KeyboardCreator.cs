@@ -51,7 +51,11 @@ namespace DCL.Interface
             canvasKeyboard.SetActive(true);
         }
 
-        private void HandleSubmit(object sender, EventArgs e) { tmpInputField.text = keyboard.InputField.text; }
+        private void HandleSubmit(object sender, EventArgs e)
+        {
+            tmpInputField.text = keyboard.InputField.text;
+            tmpInputField.onSubmit.Invoke(tmpInputField.text);
+        }
 
         private void CleanUpEvents() { keyboard.OnTextSubmitted -= HandleSubmit; }
 

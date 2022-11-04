@@ -19,33 +19,31 @@ public class TeleportPromptHUDController : IHUD
     {
         view = UnityEngine.Object.Instantiate(Resources.Load<GameObject>("TeleportPromptHUDVR")).GetComponent<TeleportPromptHUDView>();
         view.name = "_TeleportPromptHUD";
-        view.content.SetActive(false);
-        view.contentAnimator.visibleParam = "invisible";
-        SetVisibility((false));
+        view.content.GetComponent<Canvas>().enabled = false;
         view.OnTeleportEvent += OnTeleportPressed;
     }
 
     public void SetVisibility(bool visible)
     {
-        
         if (view.contentAnimator.isVisible && !visible)
         {
             view.contentAnimator.Hide();
         }
         else if (!view.contentAnimator.isVisible && visible)
         {
-            view.content.SetActive(true);
+            view.content.GetComponent<Canvas>().enabled = true;
             view.contentAnimator.Show();
+            view.SetVisibility((true));
             AudioScriptableObjects.fadeIn.Play(true);
-            view.SetVisibility(visible);
         }
     }
 
     public void RequestTeleport(string teleportDataJson)
     {
+        #if !DCL_VR
         if (view.contentAnimator.isVisible)
             return;
-
+        #endif
         Utils.UnlockCursor();
 
         view.Reset();

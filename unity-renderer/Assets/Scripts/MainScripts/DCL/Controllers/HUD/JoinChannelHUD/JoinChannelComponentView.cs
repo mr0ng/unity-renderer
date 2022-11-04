@@ -66,7 +66,7 @@ public class JoinChannelComponentView : BaseComponentView, IJoinChannelComponent
 
     internal static JoinChannelComponentView Create()
     {
-        JoinChannelComponentView joinChannelComponenView = Instantiate(Resources.Load<GameObject>("JoinChannelHUD")).GetComponent<JoinChannelComponentView>();
+        JoinChannelComponentView joinChannelComponenView = Instantiate(Resources.Load<GameObject>("JoinChannelHUDVR")).GetComponent<JoinChannelComponentView>();
         joinChannelComponenView.name = "_JoinChannelHUD";
 
         return joinChannelComponenView;

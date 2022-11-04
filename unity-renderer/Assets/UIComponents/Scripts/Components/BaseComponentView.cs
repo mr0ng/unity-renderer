@@ -151,8 +151,10 @@ public abstract class BaseComponentView : MonoBehaviour, IBaseComponentView
         onFocused?.Invoke(false);
     }
 
-    public virtual void OnScreenSizeChanged() 
+    public virtual void OnScreenSizeChanged()
     {
+        if (myTrans == null)
+            myTrans = transform;
         myTrans.localRotation = Quaternion.identity; 
     }
 
@@ -161,7 +163,7 @@ public abstract class BaseComponentView : MonoBehaviour, IBaseComponentView
         DataStore.i.screen.size.OnChange -= OnScreenSizeModified;
 
         if (!isDestroyed)
-            Destroy(gameObject);
+            DestroyImmediate(gameObject);
     }
 
     public virtual void OnPointerEnter(PointerEventData eventData) { OnFocus(); }

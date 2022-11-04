@@ -39,7 +39,7 @@ namespace DCL.Guests.HUD.ConnectWallet
 
         internal static ConnectWalletComponentView Create()
         {
-            ConnectWalletComponentView connectWalletComponenView = Instantiate(Resources.Load<GameObject>("ConnectWalletHUD")).GetComponent<ConnectWalletComponentView>();
+            ConnectWalletComponentView connectWalletComponenView = Instantiate(Resources.Load<GameObject>("ConnectWalletHUDVR")).GetComponent<ConnectWalletComponentView>();
             connectWalletComponenView.name = "_ConnectWalletHUD";
 
             return connectWalletComponenView;

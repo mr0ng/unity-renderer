@@ -233,7 +233,7 @@ MonoBehaviour:
   hideOnEnable: 1
   animSpeedFactor: 1
   disableAfterFadeOut: 1
-  visibleParam: visible
+  canvasGroup: {fileID: 0}
 --- !u!225 &3780168063368641655
 CanvasGroup:
   m_ObjectHideFlags: 0
@@ -475,7 +475,7 @@ Canvas:
   m_OverridePixelPerfect: 0
   m_SortingBucketNormalizedSize: 0
   m_AdditionalShaderChannelsFlag: 25
-  m_SortingLayerID: 337625371
+  m_SortingLayerID: -1524345185
   m_SortingOrder: 2
   m_TargetDisplay: 0
 --- !u!114 &3910513141747989263
@@ -556,6 +556,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2d2a8f325ca4bc446ac88ded5883a6be, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  fullScreenWindowContainer: {fileID: 0}
   taskbarAnimator: {fileID: 0}
   leftWindowContainer: {fileID: 0}
   altSectionContainer: {fileID: 0}
@@ -698,7 +699,7 @@ MonoBehaviour:
   hideOnEnable: 1
   animSpeedFactor: 1
   disableAfterFadeOut: 1
-  visibleParam: visible
+  canvasGroup: {fileID: 0}
 --- !u!225 &6963289166787637093
 CanvasGroup:
   m_ObjectHideFlags: 0
@@ -824,7 +825,7 @@ MonoBehaviour:
   hideOnEnable: 1
   animSpeedFactor: 1
   disableAfterFadeOut: 1
-  visibleParam: visible
+  canvasGroup: {fileID: 0}
 --- !u!225 &4154397406666923584
 CanvasGroup:
   m_ObjectHideFlags: 0
@@ -979,7 +980,7 @@ MonoBehaviour:
   hideOnEnable: 1
   animSpeedFactor: 3
   disableAfterFadeOut: 0
-  visibleParam: visible
+  canvasGroup: {fileID: 0}
 --- !u!225 &1148879838524058590
 CanvasGroup:
   m_ObjectHideFlags: 0
@@ -1285,7 +1286,7 @@ MonoBehaviour:
   hideOnEnable: 1
   animSpeedFactor: 1
   disableAfterFadeOut: 1
-  visibleParam: visible
+  canvasGroup: {fileID: 0}
 --- !u!225 &3055933824706421102
 CanvasGroup:
   m_ObjectHideFlags: 0
@@ -1758,7 +1759,7 @@ MonoBehaviour:
   hideOnEnable: 1
   animSpeedFactor: 3
   disableAfterFadeOut: 0
-  visibleParam: visible
+  canvasGroup: {fileID: 0}
 --- !u!225 &8357114210037777751
 CanvasGroup:
   m_ObjectHideFlags: 0
@@ -2558,7 +2559,7 @@ MonoBehaviour:
   hideOnEnable: 1
   animSpeedFactor: 3
   disableAfterFadeOut: 0
-  visibleParam: visible
+  canvasGroup: {fileID: 0}
 --- !u!225 &5115656452107625585
 CanvasGroup:
   m_ObjectHideFlags: 0
@@ -2832,7 +2833,7 @@ MonoBehaviour:
   hideOnEnable: 1
   animSpeedFactor: 1
   disableAfterFadeOut: 1
-  visibleParam: visible
+  canvasGroup: {fileID: 0}
 --- !u!225 &1720866129025826401
 CanvasGroup:
   m_ObjectHideFlags: 0
@@ -2958,7 +2959,7 @@ MonoBehaviour:
   hideOnEnable: 1
   animSpeedFactor: 1
   disableAfterFadeOut: 1
-  visibleParam: visible
+  canvasGroup: {fileID: 0}
 --- !u!225 &2520987673837798194
 CanvasGroup:
   m_ObjectHideFlags: 0
@@ -3485,7 +3486,7 @@ MonoBehaviour:
   hideOnEnable: 1
   animSpeedFactor: 1
   disableAfterFadeOut: 1
-  visibleParam: visible
+  canvasGroup: {fileID: 0}
 --- !u!225 &5241220848663238409
 CanvasGroup:
   m_ObjectHideFlags: 0
@@ -4521,7 +4522,7 @@ MonoBehaviour:
   hideOnEnable: 1
   animSpeedFactor: 3
   disableAfterFadeOut: 0
-  visibleParam: visible
+  canvasGroup: {fileID: 0}
 --- !u!225 &610610056336299114
 CanvasGroup:
   m_ObjectHideFlags: 0

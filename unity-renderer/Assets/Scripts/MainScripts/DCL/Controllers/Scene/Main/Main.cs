@@ -31,6 +31,7 @@ namespace DCL
         private bool isDisposed;
         protected virtual void Awake()
         {
+            UnityThread.initUnityThread(true);
             if (i != null)
             {
                 Utils.SafeDestroy(this);
@@ -51,7 +52,7 @@ namespace DCL
                 performanceMetricsController = new PerformanceMetricsController();
           
                 SetupServices();
-
+                DataStore.i.wsCommunication.communicationReady.OnChange += RestartSocketServer;
                 DataStore.i.HUDs.loadingHUD.visible.OnChange += OnLoadingScreenVisibleStateChange;
             }
             
@@ -81,13 +82,10 @@ namespace DCL
             Debug.Log($"Main: starting NativeBridgeCommunication");
             kernelCommunication = new NativeBridgeCommunication(Environment.i.world.sceneController);
 #else
-  // }
-
             if (!EnvironmentSettings.RUNNING_TESTS)
             {
                 kernelCommunication = new WebSocketCommunication(DebugConfigComponent.i.webSocketSSL);
             }
-
 #endif
             RPCServerBuilder.BuildDefaultServer();
         }
@@ -189,14 +187,23 @@ namespace DCL
         }
 
         protected virtual void CreateEnvironment() => MainSceneFactory.CreateEnvironment();
-        public virtual void RestartSocketServer()
+        public void RestartSocketServer(bool current, bool previous)
         {
-             if (isDisposed)
+             if (current)
                             return;
             //DebugConfigComponent.i.ReloadPage();
-            //kernelCommunication.Dispose();
-            //InitializeCommunication();
-            DebugConfigComponent.i.ShowWebviewScreen();
+          //  kernelCommunication.Dispose();
+            //SetupPlugins();
+            
+            
+            InitializeCommunication();
+            //DebugConfigComponent.i.ShowWebviewScreen();
+            DCL.Interface.WebInterface.SendSystemInfoReport();
+            SetupServices();
+            InitializeSceneDependencies();
+            InitializeDataStore();
+            // We trigger the Decentraland logic once everything is initialized.
+            DCL.Interface.WebInterface.StartDecentraland();
         }
     }
 }

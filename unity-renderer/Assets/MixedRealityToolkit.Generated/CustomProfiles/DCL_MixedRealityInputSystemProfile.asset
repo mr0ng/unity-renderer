@@ -54,7 +54,7 @@ MonoBehaviour:
         Microsoft.MixedReality.Toolkit.Providers.XRSDK.WindowsMixedReality
     componentName: XR SDK Windows Mixed Reality Device Manager
     priority: 0
-    runtimePlatform: 9
+    runtimePlatform: 15
     deviceManagerProfile: {fileID: 0}
   - componentType:
       reference: Microsoft.MixedReality.Toolkit.XRSDK.Oculus.Input.OculusXRSDKDeviceManager,
@@ -69,7 +69,7 @@ MonoBehaviour:
         Microsoft.MixedReality.Toolkit.Providers.OpenXR
     componentName: OpenXR XRSDK Device Manager
     priority: 0
-    runtimePlatform: 49
+    runtimePlatform: 55
     deviceManagerProfile: {fileID: 0}
   focusProviderType:
     reference: Microsoft.MixedReality.Toolkit.Input.FocusProvider, Microsoft.MixedReality.Toolkit.Services.InputSystem

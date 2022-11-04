@@ -948,6 +948,7 @@ namespace WebSocketSharp.Server
                               );
 
                               processRequest(ctx);
+                              Debug.Log($"ProcessRequest: {ctx.Host}, {ctx.RequestUri.AbsoluteUri}");
                           }
                           catch (Exception ex)
                           {
@@ -1031,6 +1032,7 @@ namespace WebSocketSharp.Server
                 try
                 {
                     startReceiving();
+                    Debug.Log($"StartReceiving");
                 }
                 catch
                 {
@@ -1055,6 +1057,7 @@ namespace WebSocketSharp.Server
             try
             {
                 _listener.Start();
+                Debug.Log($"Listener Started: {_listener.LocalEndpoint.ToString()}, {_listener.ToString()}, {_listener}");
             }
             catch (Exception ex)
             {
@@ -1063,9 +1066,14 @@ namespace WebSocketSharp.Server
                 throw new InvalidOperationException(msg, ex);
             }
             Debug.Log("WebSocketServer: Listener Started");
+            if (_receiveThread != null)
+            {
+                _receiveThread.Abort();
+            }
             _receiveThread = new Thread(new ThreadStart(receiveRequest));
             _receiveThread.IsBackground = true;
             _receiveThread.Start();
+            Debug.Log($"ReceiveRequest Started.");
         }
 
         private void stop(ushort code, string reason)
@@ -1116,6 +1124,7 @@ namespace WebSocketSharp.Server
                 try
                 {
                     stopReceiving(5000);
+                    Debug.Log($"StopReceiving");
                 }
                 catch
                 {
@@ -1148,6 +1157,7 @@ namespace WebSocketSharp.Server
             try
             {
                 _listener.Stop();
+                Debug.Log($"Listener stopped");
             }
             catch (Exception ex)
             {
@@ -1176,7 +1186,7 @@ namespace WebSocketSharp.Server
 
             return false;
             }
-
+            Debug.Log($"WS: TryCreateURI: {result.AbsoluteUri}");
             return true;
         }
 

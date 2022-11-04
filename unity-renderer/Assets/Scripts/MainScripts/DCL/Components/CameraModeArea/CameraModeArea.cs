@@ -113,7 +113,7 @@ namespace DCL.Components
         private int updateSkip =  0;
         internal void Update()
         {
-            updateSkip = (updateSkip + 1 ) % 17;
+            updateSkip = (updateSkip + 1 ) % 5;
             if (updateSkip != 0)
                 return;
             bool playerInside = IsPlayerInsideArea();

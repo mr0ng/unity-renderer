@@ -19,6 +19,7 @@ public class ECS7TestScene : IParcelScene
     public void RemoveEntity(long id, bool removeImmediatelyFromEntitiesList = true) => _entityRemover(id);
     public Transform GetSceneTransform() => _go.transform;
     public ContentProvider contentProvider { get; } = new ContentProvider();
+    public int distanceToPlayer { get; set; }
     public bool isPersistent { set; get; } = false;
 
 // INTERNAL CONFIG FOR MOCKING    

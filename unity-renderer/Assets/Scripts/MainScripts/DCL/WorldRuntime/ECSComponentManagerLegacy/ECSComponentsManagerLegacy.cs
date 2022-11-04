@@ -504,7 +504,7 @@ namespace DCL
             }
             else
             {
-                Debug.LogError($"Unknown disposableComponent {id}", scene.GetSceneTransform());
+                Debug.LogError($"Unknown disposableComponent {id}, {json}", scene.GetSceneTransform());
             }
 
             return null;

@@ -1,5 +1,4 @@
 using System;
-using System.Xml.Serialization.Configuration;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
@@ -8,7 +7,7 @@ using DCL;
 
 public class TeleportPromptHUDView : MonoBehaviour
 {
-    [SerializeField] internal GameObject content;
+    [SerializeField] public GameObject content;
     [SerializeField] internal ShowHideAnimator contentAnimator;
 
     [Header("Images")]
@@ -63,8 +62,10 @@ public class TeleportPromptHUDView : MonoBehaviour
         cancelButton.onClick.AddListener(OnClosePressed);
         continueButton.onClick.AddListener(OnTeleportPressed);
         contentAnimator.OnWillFinishHide += (animator) => Hide();
-        content.SetActive((false));
+        
         contentAnimator.Hide();
+        OnSetVisibility?.Invoke(false);
+        content.GetComponent<Canvas>().enabled = false;
     }
 
     public void Reset()
@@ -85,18 +86,21 @@ public class TeleportPromptHUDView : MonoBehaviour
 
     public void ShowTeleportToMagic()
     {
+        OnSetVisibility?.Invoke(true);
         containerMagic.SetActive(true);
         imageGotoMagic.gameObject.SetActive(true);
     }
 
     public void ShowTeleportToCrowd()
     {
+        OnSetVisibility?.Invoke(true);
         containerCrowd.SetActive(true);
         imageGotoCrowd.gameObject.SetActive(true);
     }
 
     public void ShowTeleportToCoords(string coords, string sceneName, string sceneCreator, string previewImageUrl)
     {
+        OnSetVisibility?.Invoke(true);
         containerCoords.SetActive(true);
         containerScene.SetActive(true);
 
@@ -113,7 +117,6 @@ public class TeleportPromptHUDView : MonoBehaviour
         textEventInfo.text = eventStatus;
         textEventName.text = eventName;
         textEventAttendees.text = string.Format("+{0}", attendeesCount);
-        
     }
     public void SetVisibility(bool visible)
     {
@@ -121,8 +124,8 @@ public class TeleportPromptHUDView : MonoBehaviour
     }
     private void Hide()
     {
-        content.SetActive(false);
-
+        content.GetComponent<Canvas>().enabled = false;
+        SetVisibility((false));
         if (fetchParcelImageOp != null)
             fetchParcelImageOp.Dispose();
 
@@ -160,7 +163,7 @@ public class TeleportPromptHUDView : MonoBehaviour
         contentAnimator.Hide(true);
         OnSetVisibility?.Invoke(false);
         AudioScriptableObjects.dialogClose.Play(true);
-        transform.position += 20*Vector3.down;
+        //transform.position += 20*Vector3.down;
     }
 
     private void OnTeleportPressed()
@@ -168,7 +171,7 @@ public class TeleportPromptHUDView : MonoBehaviour
         OnTeleportEvent?.Invoke();
         OnSetVisibility?.Invoke(false);
         contentAnimator.Hide(true);
-        transform.position += 20*Vector3.down;
+        //transform.position += 20*Vector3.down;
     }
 
     private void OnDestroy()

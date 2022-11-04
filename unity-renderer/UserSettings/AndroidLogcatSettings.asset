@@ -1,5 +1,5 @@
 {
-    "m_SelectedDeviceId": "1WMHH824K30346",
+    "m_SelectedDeviceId": "10.0.0.38:5555",
     "m_SelectedPackage": {
         "deviceId": "",
         "name": "",
@@ -24,6 +24,12 @@
             "deviceId": "1WMHH824K30346",
             "name": "com.oculus.shellenv",
             "processId": 2036,
+            "exited": false
+        },
+        {
+            "deviceId": "10.0.0.38:5555",
+            "name": "com.Decentraland.DecentralandVR",
+            "processId": 9980,
             "exited": false
         }
     ],

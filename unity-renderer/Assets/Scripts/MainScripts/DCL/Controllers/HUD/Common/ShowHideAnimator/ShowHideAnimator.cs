@@ -7,6 +7,8 @@ public class ShowHideAnimator : MonoBehaviour
 
     public event System.Action<ShowHideAnimator> OnWillFinishHide;
     public event System.Action<ShowHideAnimator> OnWillFinishStart;
+    //added for ease of triggering VR panel placement.
+    public event System.Action<bool> OnSetVisibility;
 
     public bool hideOnEnable = true;
     public float animSpeedFactor = 1.0f;
@@ -37,11 +39,14 @@ public class ShowHideAnimator : MonoBehaviour
 
     public void Show(bool instant = false)
     {
+       
         canvasGroup.blocksRaycasts = true;
 
         //When instant, we use duration 0 instead of just modifying the canvas group to mock the old animator behaviour which needs a frame.
         var duration = instant ? 0 : BASE_DURATION * animSpeedFactor;
         canvasGroup.DOKill();
+        if (OnSetVisibility != null)
+            OnSetVisibility.Invoke(true);
         canvasGroup.DOFade(1, duration)
                    .SetEase(Ease.InOutQuad)
                    .OnComplete(() => OnWillFinishStart?.Invoke(this))
@@ -61,11 +66,12 @@ public class ShowHideAnimator : MonoBehaviour
                    .OnComplete(() =>
                    {
                        OnWillFinishHide?.Invoke(this);
-
+                       OnSetVisibility.Invoke(false);
                        if (disableAfterFadeOut && gameObject != null)
                        {
                            gameObject.SetActive(false);
                        }
+                       
                    })
                    .SetLink(canvasGroup.gameObject, LinkBehaviour.KillOnDestroy)
                    .SetLink(canvasGroup.gameObject, LinkBehaviour.KillOnDisable);

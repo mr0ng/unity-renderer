@@ -4,11 +4,11 @@ using System.Text.RegularExpressions;
 using DCL;
 using DCL.Helpers;
 
-using Microsoft.MixedReality.Toolkit.Experimental.UI;
+// using Microsoft.MixedReality.Toolkit.Experimental.UI;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-using Vuplex.WebView;
+// using Vuplex.WebView;
 
 namespace SignupHUD
 {

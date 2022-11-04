@@ -16,7 +16,7 @@ public class LoadingHUDView : MonoBehaviour
 
     public static LoadingHUDView CreateView()
     {
-        LoadingHUDView view = Instantiate(Resources.Load<GameObject>("LoadingHUD")).GetComponent<LoadingHUDView>();
+        LoadingHUDView view = Instantiate(Resources.Load<GameObject>("LoadingHUDVR")).GetComponent<LoadingHUDView>();
         view.gameObject.name = "_LoadingHUD";
         return view;
     }

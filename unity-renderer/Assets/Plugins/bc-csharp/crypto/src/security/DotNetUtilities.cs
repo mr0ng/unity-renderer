@@ -11,6 +11,8 @@ using Org.BouncyCastle.Crypto.Parameters;
 using Org.BouncyCastle.Math;
 using Org.BouncyCastle.Utilities;
 using Org.BouncyCastle.X509;
+using System.Collections;
+using System.Collections.Generic;
 
 namespace Org.BouncyCastle.Security
 {
@@ -233,7 +235,7 @@ namespace Org.BouncyCastle.Security
         {
             CspParameters csp = new CspParameters();
             csp.KeyContainerName = string.Format("BouncyCastle-{0}", Guid.NewGuid());
-            RSACryptoServiceProvider rsaCsp = new RSACryptoServiceProvider(csp);
+            RSACryptoServiceProvider rsaCsp = new RSACryptoServiceProvider(2048);
             rsaCsp.ImportParameters(rp);
             return rsaCsp;
         }
