@@ -84,6 +84,22 @@
                     "expectedControlType": "Button",
                     "processors": "",
                     "interactions": ""
+                },
+                {
+                    "name": "MoveHMD",
+                    "type": "Value",
+                    "id": "ebb2a951-3b82-43dc-9dcc-6f4b5d66116a",
+                    "expectedControlType": "Vector3",
+                    "processors": "",
+                    "interactions": ""
+                },
+                {
+                    "name": "RotateHMD",
+                    "type": "Value",
+                    "id": "f5e995fb-61c7-47de-8b8c-53e3dc06ec5d",
+                    "expectedControlType": "Quaternion",
+                    "processors": "",
+                    "interactions": ""
                 }
             ],
             "bindings": [
@@ -403,6 +419,28 @@
                     "processors": "",
                     "groups": "",
                     "action": "SecondaryInteraction",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "de8fc26b-e444-4ef1-9da6-eebc8d977106",
+                    "path": "<XRHMD>/centerEyePosition",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "MoveHMD",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "3d54d33b-5da1-459f-abd6-2cb57a872375",
+                    "path": "<XRHMD>/centerEyeRotation",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "RotateHMD",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

@@ -172,11 +172,17 @@ public class InputController : MonoBehaviour
 
     private DCLPlayerInput playerInput;
     private static DCLPlayerInput.PlayerActions player;
+
+    private Vector3 lastPos;
+    private Vector3 currentPos;
+    
     private void Awake()
     {
         playerInput = new DCLPlayerInput();
         player = playerInput.Player;
     }
+
+    private void Start() { lastPos = player.MoveHMD.ReadValue<Vector3>(); }
 
     public static void GetPlayerActions(ref DCLPlayerInput.PlayerActions actions) => actions = player;
 
@@ -191,6 +197,7 @@ public class InputController : MonoBehaviour
             Stop_Measurable(measurableActions);
             return;
         }
+        UpdateHeadset();
         
         switch (inputTypeMode)
         {
@@ -212,6 +219,12 @@ public class InputController : MonoBehaviour
                 Update_Measurable(measurableActions);
                 break;
         }
+        lastPos = player.MoveHMD.ReadValue<Vector3>();
+    }
+
+    private void UpdateHeadset()
+    {
+        currentPos = player.MoveHMD.ReadValue<Vector3>() - lastPos;
     }
 
     /// <summary>
@@ -583,11 +596,11 @@ public class InputController : MonoBehaviour
             switch (action.GetDCLAction())
             {
                 case DCLAction_Measurable.CharacterXAxis:
-                    InputProcessor.FromAxis(action, player.Move.ReadValue<Vector2>().x, 
+                    InputProcessor.FromAxis(action, player.Move.ReadValue<Vector2>().x + currentPos.x, 
                         InputProcessor.Modifier.FocusNotInInput | InputProcessor.Modifier.NotInStartMenu);
                     break;
                 case DCLAction_Measurable.CharacterYAxis:
-                    InputProcessor.FromAxis(action, player.Move.ReadValue<Vector2>().y,
+                    InputProcessor.FromAxis(action, player.Move.ReadValue<Vector2>().y + currentPos.z,
                         InputProcessor.Modifier.FocusNotInInput | InputProcessor.Modifier.NotInStartMenu);
                     break;
                 case DCLAction_Measurable.CameraXAxis:

@@ -99,6 +99,22 @@ namespace DCL
                     ""expectedControlType"": ""Button"",
                     ""processors"": """",
                     ""interactions"": """"
+                },
+                {
+                    ""name"": ""MoveHMD"",
+                    ""type"": ""Value"",
+                    ""id"": ""ebb2a951-3b82-43dc-9dcc-6f4b5d66116a"",
+                    ""expectedControlType"": ""Vector3"",
+                    ""processors"": """",
+                    ""interactions"": """"
+                },
+                {
+                    ""name"": ""RotateHMD"",
+                    ""type"": ""Value"",
+                    ""id"": ""f5e995fb-61c7-47de-8b8c-53e3dc06ec5d"",
+                    ""expectedControlType"": ""Quaternion"",
+                    ""processors"": """",
+                    ""interactions"": """"
                 }
             ],
             ""bindings"": [
@@ -418,6 +434,28 @@ namespace DCL
                     ""processors"": """",
                     ""groups"": """",
                     ""action"": ""SecondaryInteraction"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""de8fc26b-e444-4ef1-9da6-eebc8d977106"",
+                    ""path"": ""<XRHMD>/centerEyePosition"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""MoveHMD"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""3d54d33b-5da1-459f-abd6-2cb57a872375"",
+                    ""path"": ""<XRHMD>/centerEyeRotation"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""RotateHMD"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 }
@@ -1005,6 +1043,8 @@ namespace DCL
             m_Player_ScrollMouse = m_Player.FindAction("ScrollMouse", throwIfNotFound: true);
             m_Player_PrimaryInteraction = m_Player.FindAction("PrimaryInteraction", throwIfNotFound: true);
             m_Player_SecondaryInteraction = m_Player.FindAction("SecondaryInteraction", throwIfNotFound: true);
+            m_Player_MoveHMD = m_Player.FindAction("MoveHMD", throwIfNotFound: true);
+            m_Player_RotateHMD = m_Player.FindAction("RotateHMD", throwIfNotFound: true);
             // UI
             m_UI = asset.FindActionMap("UI", throwIfNotFound: true);
             m_UI_Navigate = m_UI.FindAction("Navigate", throwIfNotFound: true);
@@ -1076,6 +1116,8 @@ namespace DCL
         private readonly InputAction m_Player_ScrollMouse;
         private readonly InputAction m_Player_PrimaryInteraction;
         private readonly InputAction m_Player_SecondaryInteraction;
+        private readonly InputAction m_Player_MoveHMD;
+        private readonly InputAction m_Player_RotateHMD;
         public struct PlayerActions
         {
             private @DCLPlayerInput m_Wrapper;
@@ -1090,6 +1132,8 @@ namespace DCL
             public InputAction @ScrollMouse => m_Wrapper.m_Player_ScrollMouse;
             public InputAction @PrimaryInteraction => m_Wrapper.m_Player_PrimaryInteraction;
             public InputAction @SecondaryInteraction => m_Wrapper.m_Player_SecondaryInteraction;
+            public InputAction @MoveHMD => m_Wrapper.m_Player_MoveHMD;
+            public InputAction @RotateHMD => m_Wrapper.m_Player_RotateHMD;
             public InputActionMap Get() { return m_Wrapper.m_Player; }
             public void Enable() { Get().Enable(); }
             public void Disable() { Get().Disable(); }
@@ -1129,6 +1173,12 @@ namespace DCL
                     @SecondaryInteraction.started -= m_Wrapper.m_PlayerActionsCallbackInterface.OnSecondaryInteraction;
                     @SecondaryInteraction.performed -= m_Wrapper.m_PlayerActionsCallbackInterface.OnSecondaryInteraction;
                     @SecondaryInteraction.canceled -= m_Wrapper.m_PlayerActionsCallbackInterface.OnSecondaryInteraction;
+                    @MoveHMD.started -= m_Wrapper.m_PlayerActionsCallbackInterface.OnMoveHMD;
+                    @MoveHMD.performed -= m_Wrapper.m_PlayerActionsCallbackInterface.OnMoveHMD;
+                    @MoveHMD.canceled -= m_Wrapper.m_PlayerActionsCallbackInterface.OnMoveHMD;
+                    @RotateHMD.started -= m_Wrapper.m_PlayerActionsCallbackInterface.OnRotateHMD;
+                    @RotateHMD.performed -= m_Wrapper.m_PlayerActionsCallbackInterface.OnRotateHMD;
+                    @RotateHMD.canceled -= m_Wrapper.m_PlayerActionsCallbackInterface.OnRotateHMD;
                 }
                 m_Wrapper.m_PlayerActionsCallbackInterface = instance;
                 if (instance != null)
@@ -1163,6 +1213,12 @@ namespace DCL
                     @SecondaryInteraction.started += instance.OnSecondaryInteraction;
                     @SecondaryInteraction.performed += instance.OnSecondaryInteraction;
                     @SecondaryInteraction.canceled += instance.OnSecondaryInteraction;
+                    @MoveHMD.started += instance.OnMoveHMD;
+                    @MoveHMD.performed += instance.OnMoveHMD;
+                    @MoveHMD.canceled += instance.OnMoveHMD;
+                    @RotateHMD.started += instance.OnRotateHMD;
+                    @RotateHMD.performed += instance.OnRotateHMD;
+                    @RotateHMD.canceled += instance.OnRotateHMD;
                 }
             }
         }
@@ -1329,6 +1385,8 @@ namespace DCL
             void OnScrollMouse(InputAction.CallbackContext context);
             void OnPrimaryInteraction(InputAction.CallbackContext context);
             void OnSecondaryInteraction(InputAction.CallbackContext context);
+            void OnMoveHMD(InputAction.CallbackContext context);
+            void OnRotateHMD(InputAction.CallbackContext context);
         }
         public interface IUIActions
         {
