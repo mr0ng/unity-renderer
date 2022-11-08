@@ -31,14 +31,17 @@ namespace DCL.Camera
         private readonly Vector3 offset = new Vector3(0f, -1f, 0f);
         private Transform myTrans;
         private Transform camTrans;
-
+        private Vector3 cameraDifferenceRot;
+        private Vector3 lastCameraRot;
         private bool smoothRotate;
-
+        
+        [SerializeField]
+        private float rotationThreshold = 0.001f;
         void Start()
         {
             myTrans = transform;
             camTrans = UnityEngine.Camera.main.transform;
-            
+            lastCameraRot = camTrans.localEulerAngles;
             CommonScriptableObjects.cameraBlocked.OnChange += CameraBlockedOnchange;
             controller.SetCameraMode(CameraMode.ModeId.FirstPerson);
             cameraChangeAction.isTriggerBlocked = CommonScriptableObjects.cameraBlocked;
@@ -53,6 +56,16 @@ namespace DCL.Camera
             DisableCamera();
             if (!camTrans.hasChanged)
                 return;
+            var localEulerAngles = camTrans.localEulerAngles;
+            cameraDifferenceRot = localEulerAngles-lastCameraRot  ;
+            if (cameraDifferenceRot.y > rotationThreshold || cameraDifferenceRot.y < -rotationThreshold) {
+                //transform.localEulerAngles += new Vector3(0, cameraDifferenceRot.y, 0);
+                camTrans.parent.localEulerAngles -= new Vector3(0,  cameraDifferenceRot.y, 0);
+                
+                myTrans.eulerAngles += new Vector3(0f, cameraDifferenceRot.y, 0f);
+                //CommonScriptableObjects.characterForward.Set(CommonScriptableObjects.characterForward.Get() + new Vector3(0, cameraDifferenceRot.y, 0));
+                lastCameraRot = localEulerAngles;
+            }
             CommonScriptableObjects.cameraForward.Set(camTrans.forward);
             CommonScriptableObjects.cameraRight.Set(camTrans.right);
             CommonScriptableObjects.cameraPosition.Set(camTrans.position);
@@ -83,9 +96,9 @@ namespace DCL.Camera
             lastTurned = DateTime.Now;
         }
 
-        private void SmoothRotate(float value)
+        public void SmoothRotate(float value)
         {
-            myTrans.eulerAngles += new Vector3(0f, value * rotation * Time.deltaTime, 0f);
+            myTrans.eulerAngles += new Vector3(0f, value * 1.3f * rotation * Time.deltaTime, 0f);
         }
 
         private void FollowCharacter(float deltaTime)

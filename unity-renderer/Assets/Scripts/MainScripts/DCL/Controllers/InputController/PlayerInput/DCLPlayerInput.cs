@@ -241,17 +241,6 @@ namespace DCL
                 },
                 {
                     ""name"": """",
-                    ""id"": ""8c8e490b-c610-4785-884f-f04217b23ca4"",
-                    ""path"": ""<Mouse>/delta"",
-                    ""interactions"": """",
-                    ""processors"": ""ScaleVector2(x=0.25,y=0.25)"",
-                    ""groups"": ""Keyboard&Mouse"",
-                    ""action"": ""Look"",
-                    ""isComposite"": false,
-                    ""isPartOfComposite"": false
-                },
-                {
-                    ""name"": """",
                     ""id"": ""143bb1cd-cc10-4eca-a2f0-a3664166fe91"",
                     ""path"": ""<Gamepad>/rightTrigger"",
                     ""interactions"": """",
@@ -340,6 +329,17 @@ namespace DCL
                 },
                 {
                     ""name"": """",
+                    ""id"": ""7b0f9a1a-e815-45bb-a8ef-bb603119982d"",
+                    ""path"": ""<WMRSpatialController>/menu"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""XR"",
+                    ""action"": ""OpenMenu"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
                     ""id"": ""e272afb7-774a-43e7-a1c7-a0d8e2f3011e"",
                     ""path"": ""<Keyboard>/space"",
                     ""interactions"": """",
@@ -376,7 +376,7 @@ namespace DCL
                     ""id"": ""3960d723-8ee3-426c-8c42-42bc2aaaba57"",
                     ""path"": ""<XRController>{LeftHand}/thumbstickClicked"",
                     ""interactions"": """",
-                    ""processors"": """",
+                    ""processors"": ""AxisDeadzone"",
                     ""groups"": ""XR"",
                     ""action"": ""Walk"",
                     ""isComposite"": false,
@@ -384,11 +384,22 @@ namespace DCL
                 },
                 {
                     ""name"": """",
-                    ""id"": ""67f9a255-200f-4cb9-a4b1-f96279eb3ff4"",
-                    ""path"": ""<Mouse>/scroll/y"",
+                    ""id"": ""ba175abe-7e03-4096-bec6-3ea7247c721f"",
+                    ""path"": ""<OculusTouchController>/thumbstick/y"",
                     ""interactions"": """",
                     ""processors"": """",
-                    ""groups"": ""Keyboard&Mouse"",
+                    ""groups"": ""XR"",
+                    ""action"": ""ScrollMouse"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""dfac5b16-7750-479c-b4f4-1158b8049794"",
+                    ""path"": ""<WMRSpatialController>{LeftHand}/joystick/y"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
                     ""action"": ""ScrollMouse"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false

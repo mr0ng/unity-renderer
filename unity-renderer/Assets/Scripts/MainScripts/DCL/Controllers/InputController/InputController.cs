@@ -175,6 +175,8 @@ public class InputController : MonoBehaviour
 
     private Vector3 lastPos;
     private Vector3 currentPos;
+    private Vector3 lastRot;
+    private Vector3 currentRot;
     
     private void Awake()
     {
@@ -182,7 +184,11 @@ public class InputController : MonoBehaviour
         player = playerInput.Player;
     }
 
-    private void Start() { lastPos = player.MoveHMD.ReadValue<Vector3>(); }
+    private void Start()
+    {
+        lastPos = player.MoveHMD.ReadValue<Vector3>();
+        lastRot = player.RotateHMD.ReadValue<Vector3>();
+    }
 
     public static void GetPlayerActions(ref DCLPlayerInput.PlayerActions actions) => actions = player;
 
@@ -219,12 +225,28 @@ public class InputController : MonoBehaviour
                 Update_Measurable(measurableActions);
                 break;
         }
-        lastPos = player.MoveHMD.ReadValue<Vector3>();
+        
     }
 
     private void UpdateHeadset()
     {
-        currentPos = player.MoveHMD.ReadValue<Vector3>() - lastPos;
+        var newPos = player.MoveHMD.ReadValue<Vector3>();
+         if ((newPos - lastPos).magnitude > 0.2f || (newPos - lastPos).magnitude < -0.2f)
+        {
+            currentPos = newPos - lastPos;
+             lastPos = newPos;
+        }
+        else currentPos = Vector3.zero;
+        
+        
+        // var newRot = player.RotateHMD.ReadValue<Quaternion>();
+        // if (newRot.eulerAngles.y - currentRot.y > 1 || newRot.eulerAngles.y - currentRot.y < -1 )
+        // {
+        //     currentRot = (newRot.eulerAngles - lastRot);
+        //     lastRot = newRot.eulerAngles;
+        // }
+        
+        
     }
 
     /// <summary>
@@ -608,8 +630,8 @@ public class InputController : MonoBehaviour
                         InputProcessor.Modifier.NeedsPointerLocked | InputProcessor.Modifier.RequiresPointer);
                     break;
                 case DCLAction_Measurable.CameraYAxis:
-                    InputProcessor.FromAxis(action, player.Look.ReadValue<Vector2>().y
-                        , InputProcessor.Modifier.NeedsPointerLocked | InputProcessor.Modifier.RequiresPointer);
+                    InputProcessor.FromAxis(action, player.Look.ReadValue<Vector2>().y,
+                        InputProcessor.Modifier.NeedsPointerLocked | InputProcessor.Modifier.RequiresPointer);
                     break;
                 case DCLAction_Measurable.MouseWheel:
                     InputProcessor.FromAxis(action, player.ScrollMouse.ReadValue<float>(), modifiers: InputProcessor.Modifier.FocusNotInInput);
