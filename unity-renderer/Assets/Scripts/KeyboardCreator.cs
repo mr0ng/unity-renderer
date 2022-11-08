@@ -46,7 +46,7 @@ namespace DCL.Interface
             SetupEvents();
             keyboard.PresentKeyboard(NonNativeKeyboard.LayoutType.URL);
             var rawForward = CommonScriptableObjects.cameraForward.Get();
-            keyboardTrans.position = CommonScriptableObjects.cameraPosition.Get() + (.7f * rawForward) + new UnityEngine.Vector3(0, 0.3f, 0);
+            keyboardTrans.position = CommonScriptableObjects.cameraPosition.Get() + (.7f * rawForward) + new UnityEngine.Vector3(0, -0.2f, 0);
             keyboardTrans.forward = new UnityEngine.Vector3(rawForward.x, 0, rawForward.z);
             canvasKeyboard.SetActive(true);
         }
