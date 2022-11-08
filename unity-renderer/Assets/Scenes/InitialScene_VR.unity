@@ -15,7 +15,7 @@ RenderSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 9
   m_Fog: 1
-  m_FogColor: {r: 0.20016389, g: 0.042113498, b: 0.26644543, a: 1}
+  m_FogColor: {r: 0.6226415, g: 0.62181926, b: 0.53746885, a: 1}
   m_FogMode: 1
   m_FogDensity: 0.0001
   m_LinearFogStart: 0
@@ -859,12 +859,12 @@ MonoBehaviour:
     ignoreGlobalScenes: 0
     msgStepByStep: 0
   OpenBrowserOnStart: 1
-  openInternalBrowser: 0
-  webSocketSSL: 1
+  openInternalBrowser: 1
+  webSocketSSL: 0
   kernelVersion: 1.0.0-3387732730.commit-bc98547
   useCustomContentServer: 0
   customContentServerUrl: http://localhost:1338/
-  baseUrlMode: 1
+  baseUrlMode: 0
   customURL: https://play.decentraland.org/?
   network: 0
   realm: baldr
@@ -1199,7 +1199,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1755198060}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: bf98dd1206224111a38765365e98e207, type: 3}
   m_Name: 
@@ -3372,10 +3372,10 @@ RectTransform:
   m_Father: {fileID: 7058951490178360952}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 52.559998, y: 0}
-  m_SizeDelta: {x: 0, y: 46}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 52.559998, y: -23}
+  m_SizeDelta: {x: 105.119995, y: 46}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &2319710138708974715
 MonoBehaviour:
@@ -4265,7 +4265,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &6348621793503279722
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4366,10 +4366,10 @@ RectTransform:
   m_Father: {fileID: 2231213592301267450}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 84.119995, y: -23}
+  m_SizeDelta: {x: 22, y: 22}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &6531718931476454098
 CanvasRenderer:
@@ -4543,10 +4543,10 @@ RectTransform:
   m_Father: {fileID: 2231213592301267450}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 37.559998, y: -23}
+  m_SizeDelta: {x: 55.12, y: 19.14}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!64 &7646246280471728659
 MeshCollider:

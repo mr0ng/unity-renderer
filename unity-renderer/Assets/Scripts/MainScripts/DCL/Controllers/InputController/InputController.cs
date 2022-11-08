@@ -248,9 +248,9 @@ public class InputController : MonoBehaviour
                         break;
 
                     //Disable until the fine-tuning is ready
-                    if (ENABLE_THIRD_PERSON_CAMERA)
-                        InputProcessor.FromKey(action, KeyCode.V,
-                            modifiers: InputProcessor.Modifier.FocusNotInInput);
+                    // if (ENABLE_THIRD_PERSON_CAMERA)
+                    //     InputProcessor.FromKey(action, KeyCode.V,
+                    //         modifiers: InputProcessor.Modifier.FocusNotInInput);
                     break;
                 case DCLAction_Trigger.CursorUnlock:
                     InputProcessor.FromMouseButtonUp(action, 1, InputProcessor.Modifier.NeedsPointerLocked);
@@ -524,8 +524,8 @@ public class InputController : MonoBehaviour
                     break;
                 case DCLAction_Hold.FreeCameraMode:
                     //Disable until the fine-tuning is ready
-                    if (ENABLE_THIRD_PERSON_CAMERA)
-                        InputProcessor.FromKey(action, KeyCode.Y, InputProcessor.Modifier.NeedsPointerLocked);
+                    // if (ENABLE_THIRD_PERSON_CAMERA)
+                    //     InputProcessor.FromKey(action, KeyCode.Y, InputProcessor.Modifier.NeedsPointerLocked);
                     break;
                 case DCLAction_Hold.VoiceChatRecording:
                     // Push to talk functionality only triggers if no modifier key is pressed

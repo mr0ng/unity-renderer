@@ -6,6 +6,7 @@ using UnityEngine;
 using TMPro;
 using UnityEngine.UI;
 using Vuplex.WebView;
+using QualitySettings = UnityEngine.QualitySettings;
 
 namespace DCL
 {
@@ -198,10 +199,28 @@ namespace DCL
 
         private void Start()
         {
+            if (!Debug.isDebugBuild)
+            {
+                
 #if UNITY_ANDROID && !UNITY_EDITOR
 //don't have a method of using external browser on quest2.
-            openInternalBrowser = true;
+                openInternalBrowser = true;
+                webSocketSSL = false;
+                baseUrlMode = BaseUrl.ZONE;
+                parcelRadiusToLoad = 3;
+                
+                
+#else
+                openInternalBrowser = false;
+                webSocketSSL = true;
+                baseUrlMode = BaseUrl.ORG;
+                parcelRadiusToLoad = 4;
+                
+                
 #endif
+                startInCoords = Vector2.zero;
+                disableAssetBundles = true;
+            }
             useInternalBrowser.isOn = openInternalBrowser;
             WebInterface.openURLInternal = openInternalBrowser;
             if (openInternalBrowser)
