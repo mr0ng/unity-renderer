@@ -58,14 +58,12 @@ namespace DCL.Camera
                 return;
             var localEulerAngles = camTrans.localEulerAngles;
             cameraDifferenceRot = localEulerAngles-lastCameraRot  ;
-            if (cameraDifferenceRot.y > rotationThreshold || cameraDifferenceRot.y < -rotationThreshold) {
-                //transform.localEulerAngles += new Vector3(0, cameraDifferenceRot.y, 0);
-                camTrans.parent.localEulerAngles -= new Vector3(0,  cameraDifferenceRot.y, 0);
-                
-                myTrans.eulerAngles += new Vector3(0f, cameraDifferenceRot.y, 0f);
-                //CommonScriptableObjects.characterForward.Set(CommonScriptableObjects.characterForward.Get() + new Vector3(0, cameraDifferenceRot.y, 0));
-                lastCameraRot = localEulerAngles;
-            }
+            //remove off angle from camera parent
+            camTrans.parent.localEulerAngles = new Vector3(0,  -localEulerAngles.y, 0);
+            //add to CharacterController
+            myTrans.eulerAngles += new Vector3(0f, cameraDifferenceRot.y, 0f);
+            lastCameraRot = localEulerAngles;
+            
             CommonScriptableObjects.cameraForward.Set(camTrans.forward);
             CommonScriptableObjects.cameraRight.Set(camTrans.right);
             CommonScriptableObjects.cameraPosition.Set(camTrans.position);

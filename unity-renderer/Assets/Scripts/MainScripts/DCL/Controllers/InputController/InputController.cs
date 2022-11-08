@@ -203,8 +203,7 @@ public class InputController : MonoBehaviour
             Stop_Measurable(measurableActions);
             return;
         }
-        UpdateHeadset();
-        
+       
         switch (inputTypeMode)
         {
             case InputTypeMode.OFF:
@@ -228,26 +227,7 @@ public class InputController : MonoBehaviour
         
     }
 
-    private void UpdateHeadset()
-    {
-        var newPos = player.MoveHMD.ReadValue<Vector3>();
-         if ((newPos - lastPos).magnitude > 0.2f || (newPos - lastPos).magnitude < -0.2f)
-        {
-            currentPos = newPos - lastPos;
-             lastPos = newPos;
-        }
-        else currentPos = Vector3.zero;
-        
-        
-        // var newRot = player.RotateHMD.ReadValue<Quaternion>();
-        // if (newRot.eulerAngles.y - currentRot.y > 1 || newRot.eulerAngles.y - currentRot.y < -1 )
-        // {
-        //     currentRot = (newRot.eulerAngles - lastRot);
-        //     lastRot = newRot.eulerAngles;
-        // }
-        
-        
-    }
+    
 
     /// <summary>
     /// Map the trigger actions to inputs + modifiers and check if their events must be triggered
@@ -618,11 +598,12 @@ public class InputController : MonoBehaviour
             switch (action.GetDCLAction())
             {
                 case DCLAction_Measurable.CharacterXAxis:
-                    InputProcessor.FromAxis(action, player.Move.ReadValue<Vector2>().x + currentPos.x, 
+                    InputProcessor.FromAxis(action, player.Move.ReadValue<Vector2>().x , 
                         InputProcessor.Modifier.FocusNotInInput | InputProcessor.Modifier.NotInStartMenu);
+                    
                     break;
                 case DCLAction_Measurable.CharacterYAxis:
-                    InputProcessor.FromAxis(action, player.Move.ReadValue<Vector2>().y + currentPos.z,
+                    InputProcessor.FromAxis(action, player.Move.ReadValue<Vector2>().y ,
                         InputProcessor.Modifier.FocusNotInInput | InputProcessor.Modifier.NotInStartMenu);
                     break;
                 case DCLAction_Measurable.CameraXAxis:

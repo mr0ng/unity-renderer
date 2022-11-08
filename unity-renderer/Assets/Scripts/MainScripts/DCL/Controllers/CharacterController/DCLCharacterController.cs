@@ -18,6 +18,7 @@ public class DCLCharacterController : MonoBehaviour
     public float jumpForce = 12f;
     public float movementSpeed = 8f;
     public float runningSpeedMultiplier = 2f;
+    public float moveThreshold = 0.25f;
 
     public DCLCharacterPosition characterPosition;
 
@@ -63,6 +64,7 @@ public class DCLCharacterController : MonoBehaviour
     Vector3 groundLastPosition;
     Quaternion groundLastRotation;
     bool jumpButtonPressed = false;
+    private Vector3 lastReportPosition = Vector3.zero;
 
     [Header("InputActions")]
     public InputAction_Hold jumpAction;
@@ -531,8 +533,16 @@ public class DCLCharacterController : MonoBehaviour
     void ReportMovement()
     {
         float height = 0.875f;
-
+        
+        //don't report movements under threshold for HMD movements.  Too small make the avatar jitter and not step. 
+        //position of hmd calculated in VRCharacterController. Rotation Calculated in VRCameraController.
         var reportPosition = characterPosition.worldPosition + (Vector3.up * height);
+        if (Mathf.Abs((reportPosition - lastReportPosition).magnitude) < moveThreshold)
+        {
+            reportPosition = lastReportPosition;
+        }
+        else lastReportPosition = reportPosition;
+     
         var compositeRotation = Quaternion.LookRotation(characterForward.HasValue() ? characterForward.Get().Value : cameraForward.Get());
         var playerHeight = height + (characterController.height / 2);
         var cameraRotation = Quaternion.LookRotation(cameraForward.Get());
