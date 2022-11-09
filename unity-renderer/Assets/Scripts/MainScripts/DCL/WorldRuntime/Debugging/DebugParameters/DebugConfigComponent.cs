@@ -243,6 +243,7 @@ namespace DCL
             keyboardDCL.InputReceived += (sender, key) =>
             {
                 DCLWebview.WebView.HandleKeyboardInput(key.Value);
+                
             };
         
             lock (DataStore.i.wsCommunication.communicationReady)
