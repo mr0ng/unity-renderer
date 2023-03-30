@@ -62,12 +62,12 @@ namespace Tests
         public void CreateEntity()
         {
             const int ENTITY_ID = 42;
-            ECS7TestScene scene = testUtils.CreateScene("temptation");
+            ECS7TestScene scene = testUtils.CreateScene(666);
             CRDTExecutor executor = new CRDTExecutor(scene, componentsManager);
             CRDTMessage addComponentMessage = new CRDTMessage()
             {
-                key1 = ENTITY_ID,
-                key2 = (int)ComponentIds.COMPONENT_STRING,
+                entityId = ENTITY_ID,
+                componentId = (int)ComponentIds.COMPONENT_STRING,
                 data = "tigre"
             };
 
@@ -85,20 +85,20 @@ namespace Tests
         public void RemoveEntity()
         {
             const int ENTITY_ID = 42;
-            ECS7TestScene scene = testUtils.CreateScene("temptation");
+            ECS7TestScene scene = testUtils.CreateScene(666);
             CRDTExecutor executor = new CRDTExecutor(scene, componentsManager);
 
             CRDTMessage addComponentMessage = new CRDTMessage()
             {
-                key1 = ENTITY_ID,
-                key2 = (int)ComponentIds.COMPONENT_STRING,
+                entityId = ENTITY_ID,
+                componentId = (int)ComponentIds.COMPONENT_STRING,
                 data = "",
                 timestamp = 0
             };
             CRDTMessage removeComponentMessage = new CRDTMessage()
             {
-                key1 = ENTITY_ID,
-                key2 = (int)ComponentIds.COMPONENT_STRING,
+                entityId = ENTITY_ID,
+                componentId = (int)ComponentIds.COMPONENT_STRING,
                 data = null,
                 timestamp = 1
             };
@@ -120,20 +120,20 @@ namespace Tests
         public void NotRemoveEntityIfHasComponentLeft()
         {
             const int ENTITY_ID = 42;
-            ECS7TestScene scene = testUtils.CreateScene("temptation");
+            ECS7TestScene scene = testUtils.CreateScene(666);
             CRDTExecutor executor = new CRDTExecutor(scene, componentsManager);
 
             CRDTMessage addComponentString = new CRDTMessage()
             {
-                key1 = ENTITY_ID,
-                key2 = (int)ComponentIds.COMPONENT_STRING,
+                entityId = ENTITY_ID,
+                componentId = (int)ComponentIds.COMPONENT_STRING,
                 data = "",
                 timestamp = 0
             };
             CRDTMessage addComponentInt = new CRDTMessage()
             {
-                key1 = ENTITY_ID,
-                key2 = (int)ComponentIds.COMPONENT_INT,
+                entityId = ENTITY_ID,
+                componentId = (int)ComponentIds.COMPONENT_INT,
                 data = 1,
                 timestamp = 0
             };
@@ -148,15 +148,15 @@ namespace Tests
 
             CRDTMessage removeComponentString = new CRDTMessage()
             {
-                key1 = ENTITY_ID,
-                key2 = (int)ComponentIds.COMPONENT_STRING,
+                entityId = ENTITY_ID,
+                componentId = (int)ComponentIds.COMPONENT_STRING,
                 data = null,
                 timestamp = 1
             };
             CRDTMessage removeComponentInt = new CRDTMessage()
             {
-                key1 = ENTITY_ID,
-                key2 = (int)ComponentIds.COMPONENT_INT,
+                entityId = ENTITY_ID,
+                componentId = (int)ComponentIds.COMPONENT_INT,
                 data = null,
                 timestamp = 1
             };
@@ -177,20 +177,20 @@ namespace Tests
         public void RemoveComponentsIfEntityRemoved()
         {
             const int ENTITY_ID = 42;
-            ECS7TestScene scene = testUtils.CreateScene("temptation");
+            ECS7TestScene scene = testUtils.CreateScene(666);
             CRDTExecutor executor = new CRDTExecutor(scene, componentsManager);
 
             CRDTMessage addComponentString = new CRDTMessage()
             {
-                key1 = ENTITY_ID,
-                key2 = (int)ComponentIds.COMPONENT_STRING,
+                entityId = ENTITY_ID,
+                componentId = (int)ComponentIds.COMPONENT_STRING,
                 data = "",
                 timestamp = 0
             };
             CRDTMessage addComponentInt = new CRDTMessage()
             {
-                key1 = ENTITY_ID,
-                key2 = (int)ComponentIds.COMPONENT_INT,
+                entityId = ENTITY_ID,
+                componentId = (int)ComponentIds.COMPONENT_INT,
                 data = 1,
                 timestamp = 0
             };
@@ -209,7 +209,7 @@ namespace Tests
         [Test]
         public void TestSanityCheck()
         {
-            ECS7TestScene scene = testUtils.CreateScene("temptation");
+            ECS7TestScene scene = testUtils.CreateScene(666);
 
             IDCLEntity entity = null;
             scene.entities.TryGetValue(0, out entity);

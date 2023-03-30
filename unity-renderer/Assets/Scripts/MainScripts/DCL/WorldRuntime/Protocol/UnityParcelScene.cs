@@ -8,11 +8,13 @@ namespace DCL.Models
     public struct CreateGlobalSceneMessage
     {
         public string id;
+        public int sceneNumber;
         public string name;
         public string baseUrl;
         public List<ContentServerUtils.MappingPair> contents;
         public string icon;
         public bool isPortableExperience;
+        public bool sdk7;
     }
 
     [Serializable]
@@ -27,7 +29,11 @@ namespace DCL.Models
         public class UnityParcelScene
         {
             public static bool VERBOSE = false;
+
+            // We can't remove this string id since it's used for mapping portable experience ids to their wearables...
             public string id;
+
+            public int sceneNumber;
             public string baseUrl;
             public string baseUrlBundles;
 
@@ -35,6 +41,9 @@ namespace DCL.Models
 
             public Vector2Int basePosition;
             public Vector2Int[] parcels;
+
+            // Indicates if it's a sdk7 scene
+            public bool sdk7 = false;
         }
     }
 }

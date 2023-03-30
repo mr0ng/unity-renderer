@@ -11,8 +11,8 @@ TestResults/
 Assets/InitTestScene*.unity
 Assets/InitTestScene*.unity.meta
 **/CurrentTestImages/
-unity-renderer/TestResources/VisualTests/
-unity-renderer/Assets/_Downloaded/
+UserSettings/
+
 .DS_Store
 .DS_Store?
 ._*
@@ -68,3 +68,4 @@ unity-renderer/Assets/Scripts/MainScripts/DCL/KernelConfiguration/KernelConfigTy
 unity-renderer/Assets/Scripts/MainScripts/DCL/Components/LoadableShapes/NFTShape/Materials/OriginalNFTFrame.mat
 unity-renderer/Assets/Vuplex*
 unity-renderer/MemoryCaptures/**
+unity-renderer/Builds

@@ -1,7 +1,7 @@
-using System.Collections.Generic;
 using DCL.Controllers;
 using DCL.ECSRuntime;
 using DCL.Models;
+using UnityEngine;
 
 namespace DCL.CRDT
 {
@@ -10,9 +10,7 @@ namespace DCL.CRDT
         private readonly IParcelScene ownerScene;
         private readonly ECSComponentsManager ecsManager;
 
-        private bool sceneAdded = false;
         private bool disposed = false;
-        private readonly IList<IParcelScene> loadedScenes;
 
         public CRDTProtocol crdtProtocol { get; }
 
@@ -21,13 +19,20 @@ namespace DCL.CRDT
             ownerScene = scene;
             crdtProtocol = new CRDTProtocol();
             ecsManager = componentsManager;
-            loadedScenes = DataStore.i.ecs7.scenes;
         }
 
         public void Dispose()
         {
+#if UNITY_EDITOR
+            if (disposed)
+                Debug.LogWarning("CRDTExecutor::Dispose Called while disposed");
+#endif
+
+            if (disposed)
+                return;
+
             disposed = true;
-            loadedScenes.Remove(ownerScene);
+
             using (var entities = ownerScene.entities.Values.GetEnumerator())
             {
                 while (entities.MoveNext())
@@ -41,27 +46,30 @@ namespace DCL.CRDT
 
         public void Execute(CRDTMessage crdtMessage)
         {
-            if (!sceneAdded)
+#if UNITY_EDITOR
+            if (disposed)
+                Debug.LogWarning("CRDTExecutor::Execute Called while disposed");
+#endif
+
+            CRDTProtocol.EntityComponentData storedMessage = crdtProtocol.GetState(crdtMessage.entityId, crdtMessage.componentId);
+            CRDTProtocol.ProcessMessageResultType resultType = crdtProtocol.ProcessMessage(crdtMessage);
+
+            // If the message change the state
+            if (resultType == CRDTProtocol.ProcessMessageResultType.StateUpdatedData ||
+                resultType == CRDTProtocol.ProcessMessageResultType.StateUpdatedTimestamp ||
+                resultType == CRDTProtocol.ProcessMessageResultType.EntityWasDeleted)
             {
-                sceneAdded = true;
-                loadedScenes.Add(ownerScene);
+                ExecuteWithoutStoringState(crdtMessage.entityId, crdtMessage.componentId, crdtMessage.data);
             }
-
-            CRDTMessage storedMessage = crdtProtocol.GetState(crdtMessage.key1, crdtMessage.key2);
-            CRDTMessage resultMessage = crdtProtocol.ProcessMessage(crdtMessage);
-
-            // messages are the same so state didn't change
-            if (storedMessage == resultMessage)
-            {
-                return;
-            }
-            
-
-            ExecuteWithoutStoringState(crdtMessage.key1, crdtMessage.key2, crdtMessage.data);
         }
 
         public void ExecuteWithoutStoringState(long entityId, int componentId, object data)
         {
+#if UNITY_EDITOR
+            if (disposed)
+                Debug.LogWarning("CRDTExecutor::ExecuteWithoutStoringState Called while disposed");
+#endif
+
             if (disposed)
                 return;
 

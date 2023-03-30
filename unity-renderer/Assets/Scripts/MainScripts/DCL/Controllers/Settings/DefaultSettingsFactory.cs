@@ -14,19 +14,20 @@ namespace DCL.SettingsCommon
 
         private GeneralSettings defaultGeneralSettings = new GeneralSettings
         {
+            leftMouseButtonCursorLock = true,
             mouseSensitivity = 0.6f,
+            invertYAxis = false,
             scenesLoadRadius = 3,
             avatarsLODDistance = 16,
             maxNonLODAvatars = DataStore_AvatarsLOD.DEFAULT_MAX_AVATAR,
             voiceChatVolume = 1,
             voiceChatAllow = GeneralSettings.VoiceChatAllow.ALL_USERS,
-            namesOpacity = 0.5f,
+            namesOpacity = 1f,
             profanityChatFiltering = true,
             nightMode = false,
             hideUI = false,
             showAvatarNames = true,
-            dynamicProceduralSkybox = false,
-            invertYAxis = false,
+            dynamicProceduralSkybox = false, //VR for Quest 2 native
             skyboxTime = 0.0f,
             firstPersonCameraFOV = 60,
             useInternalBrowser = true

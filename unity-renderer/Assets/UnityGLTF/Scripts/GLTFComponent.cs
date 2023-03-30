@@ -100,9 +100,7 @@ namespace UnityGLTF
         private Settings settings;
 
         private  CancellationTokenSource ctokenSource;
-        
-        private const string GPU_ONLY_MESHES = "use_gpu_only_meshes_variant:enabled";
-
+        private bool scheduledToCleanUp;
 
         public Action OnSuccess { get { return OnFinishedLoadingAsset; } set { OnFinishedLoadingAsset = value; } }
 
@@ -312,7 +310,7 @@ namespace UnityGLTF
                         else
                             OnFailedLoadingAsset?.Invoke(new Exception($"GLTF state finished as: {state}"));
                     }
-                    
+
                     CleanUp();
                     Destroy(loadingPlaceholder);
                     Destroy(this);
@@ -350,14 +348,13 @@ namespace UnityGLTF
             sceneImporter.SceneParent = gameObject.transform;
             sceneImporter.Collider = Collider;
             sceneImporter.maximumLod = MaximumLod;
-            sceneImporter.useMaterialTransition = UseVisualFeedback;
             sceneImporter.maxTextureSize = DataStore.i.textureConfig.gltfMaxSize.Get();
             sceneImporter.CustomShaderName = shaderOverride ? shaderOverride.name : null;
             sceneImporter.LoadingTextureMaterial = LoadingTextureMaterial;
             sceneImporter.initialVisibility = initialVisibility;
             sceneImporter.addMaterialsToPersistentCaching = addMaterialsToPersistentCaching;
 
-            sceneImporter.forceGPUOnlyMesh = settings.forceGPUOnlyMesh && DataStore.i.featureFlags.flags.Get().IsFeatureEnabled(GPU_ONLY_MESHES);
+            sceneImporter.forceGPUOnlyMesh = settings.forceGPUOnlyMesh;
 
             sceneImporter.OnMeshCreated += meshCreatedCallback;
             sceneImporter.OnRendererCreated += rendererCreatedCallback;
@@ -401,6 +398,8 @@ namespace UnityGLTF
         }
         private void CleanUp()
         {
+            scheduledToCleanUp = true;
+
             if (state == State.QUEUED)
             {
                 DequeueDownload();
@@ -431,7 +430,7 @@ namespace UnityGLTF
 
         float IDownloadQueueElement.GetSqrDistance()
         {
-            if (mainCamera == null || transform == null)
+            if (scheduledToCleanUp || mainCamera == null || transform == null)
                 return float.MaxValue;
 
             Vector3 cameraPosition = mainCamera.transform.position;

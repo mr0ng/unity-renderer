@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using DCL.Chat;
+using DCL.ProfanityFiltering;
 
 public class ChatHUDController : IDisposable
 {
@@ -119,8 +120,6 @@ public class ChatHUDController : IDisposable
     public void SetInputFieldText(string setInputText) => view.SetInputFieldText(setInputText);
     
     public void UnfocusInputField() => view.UnfocusInputField();
-
-    public void FadeOutMessages() => view.FadeOutMessages();
 
 
     private ChatEntryModel ChatMessageToChatEntry(ChatMessage message)

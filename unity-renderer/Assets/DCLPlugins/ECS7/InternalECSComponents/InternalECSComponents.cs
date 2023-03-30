@@ -9,12 +9,15 @@ public class InternalECSComponents : IDisposable, IInternalECSComponents
 
     public IInternalECSComponent<InternalTexturizable> texturizableComponent { get; }
     public IInternalECSComponent<InternalMaterial> materialComponent { get; }
+    public IInternalECSComponent<InternalVideoMaterial> videoMaterialComponent { get; }
+    public IInternalECSComponent<InternalVideoPlayer> videoPlayerComponent { get; }
     public IInternalECSComponent<InternalColliders> onPointerColliderComponent { get; }
     public IInternalECSComponent<InternalColliders> physicColliderComponent { get; }
     public IInternalECSComponent<InternalInputEventResults> inputEventResultsComponent { get; }
     public IInternalECSComponent<InternalRenderers> renderersComponent { get; }
     public IInternalECSComponent<InternalVisibility> visibilityComponent { get; }
     public IInternalECSComponent<InternalUiContainer> uiContainerComponent { get; }
+    public IInternalECSComponent<InternalUIInputResults> uiInputResultsComponent { get; }
 
     public InternalECSComponents(ECSComponentsManager componentsManager, ECSComponentsFactory componentsFactory)
     {
@@ -77,6 +80,28 @@ public class InternalECSComponents : IDisposable, IInternalECSComponents
             componentsFactory,
             () => new UiContainerHandler(() => uiContainerComponent),
             scheduledWrite);
+
+        uiInputResultsComponent = new InternalECSComponent<InternalUIInputResults>(
+            InternalECSComponentsId.UI_INPUT_EVENTS_RESULT,
+            componentsManager,
+            componentsFactory,
+            null,
+            scheduledWrite
+        );
+
+        videoPlayerComponent = new InternalECSComponent<InternalVideoPlayer>(
+            InternalECSComponentsId.VIDEO_PLAYER,
+            componentsManager,
+            componentsFactory,
+            null,
+            scheduledWrite);
+
+        videoMaterialComponent = new InternalECSComponent<InternalVideoMaterial>(
+            InternalECSComponentsId.VIDEO_MATERIAL,
+            componentsManager,
+            componentsFactory,
+            null,
+            scheduledWrite);
     }
 
     public void Dispose()
@@ -89,6 +114,8 @@ public class InternalECSComponents : IDisposable, IInternalECSComponents
         physicColliderComponent.Dispose();
         renderersComponent.Dispose();
         inputEventResultsComponent.Dispose();
+        videoPlayerComponent.Dispose();
+        videoMaterialComponent.Dispose();
     }
 
     public void WriteSystemUpdate()

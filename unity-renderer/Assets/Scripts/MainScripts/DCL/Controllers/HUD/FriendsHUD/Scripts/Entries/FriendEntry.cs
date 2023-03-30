@@ -1,12 +1,12 @@
-using System;
+using DCL.Social.Friends;
 using SocialFeaturesAnalytics;
+using System;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class FriendEntry : FriendEntryBase
 {
     public event Action<FriendEntry> OnWhisperClick;
-    public event Action<FriendEntry> OnJumpInClick;
 
     [SerializeField] internal JumpInButton jumpInButton;
     [SerializeField] internal Button whisperButton;
@@ -34,11 +34,6 @@ public class FriendEntry : FriendEntryBase
         this.chatController = chatController;
         this.friendsController = friendsController;
         this.socialAnalytics = socialAnalytics;
-    }
-
-    private void Start()
-    {
-        jumpInButton.OnClick += () => OnJumpInClick?.Invoke(this);
     }
 
     public override void Populate(FriendEntryModel model)

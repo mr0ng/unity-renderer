@@ -6,14 +6,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using AvatarSystem;
+using Cysharp.Threading.Tasks;
 using DCL.Configuration;
 using DCL.Controllers;
 using DCL.Emotes;
 using DCL.Helpers;
 using DCL.Models;
-using GPUSkinning;
+using System.Threading.Tasks;
 using UnityEngine;
-using Avatar = AvatarSystem.Avatar;
 using LOD = AvatarSystem.LOD;
 
 namespace DCL
@@ -36,6 +36,7 @@ namespace DCL
         [SerializeField] private GameObject armatureContainer;
 
         [SerializeField] internal AvatarOnPointerDown onPointerDown;
+        [SerializeField] internal AvatarOutlineOnHoverEvent outlineOnHover;
         [SerializeField] internal GameObject playerNameContainer;
         internal IPlayerName playerName;
         internal IAvatarReporterController avatarReporterController;
@@ -56,13 +57,16 @@ namespace DCL
         private ILazyTextureObserver currentLazyObserver;
         private bool isGlobalSceneAvatar = true;
         private BaseRefCounter<AvatarModifierAreaID> currentActiveModifiers;
-
+        private IUserProfileBridge userProfileBridge;
+        private Service<IEmotesCatalogService> emotesCatalogService;
         public override string componentName => "avatarShape";
 
         private void Awake()
         {
             model = new AvatarModel();
             currentPlayerInfoCardId = Resources.Load<StringVariable>(CURRENT_PLAYER_ID);
+            // TODO: user profile bridge should be retrieved from the service locator
+            userProfileBridge = new UserProfileWebInterfaceBridge();
 
             if (DataStore.i.avatarConfig.useHologramAvatar.Get())
                 avatar = GetAvatarWithHologram();
@@ -81,38 +85,32 @@ namespace DCL
             DataStore.i.sceneBoundariesChecker?.Add(entity,this);
         }
 
-        private Avatar GetStandardAvatar()
+        private IAvatar GetStandardAvatar()
         {
-            Visibility visibility = new Visibility();
-            LOD avatarLOD = new LOD(avatarContainer, visibility, avatarMovementController);
-            AvatarAnimatorLegacy animator = GetComponentInChildren<AvatarAnimatorLegacy>();
-            return new Avatar(
-                new AvatarCurator(new WearableItemResolver(), Environment.i.serviceLocator.Get<IEmotesCatalogService>()),
-                new Loader(new WearableLoaderFactory(), avatarContainer, new AvatarMeshCombinerHelper()),
-                animator,
-                visibility,
-                avatarLOD,
-                new SimpleGPUSkinning(),
-                new GPUSkinningThrottler(),
-                new EmoteAnimationEquipper(animator, DataStore.i.emotes));
+            var visibility = new Visibility();
+
+            return Environment.i.serviceLocator.Get<IAvatarFactory>()
+                              .CreateAvatar(
+                                   avatarContainer,
+                                   GetComponentInChildren<AvatarAnimatorLegacy>(),
+                                   new LOD(avatarContainer, visibility, avatarMovementController),
+                                   visibility
+                               );
         }
 
-        private AvatarWithHologram GetAvatarWithHologram()
+        private IAvatar GetAvatarWithHologram()
         {
             Visibility visibility = new Visibility();
-            LOD avatarLOD = new LOD(avatarContainer, visibility, avatarMovementController);
-            AvatarAnimatorLegacy animator = GetComponentInChildren<AvatarAnimatorLegacy>();
-            BaseAvatar baseAvatar = new BaseAvatar(avatarRevealContainer, armatureContainer, avatarLOD);
-            return new AvatarWithHologram(
-                    baseAvatar,
-                    new AvatarCurator(new WearableItemResolver(), Environment.i.serviceLocator.Get<IEmotesCatalogService>()),
-                    new Loader(new WearableLoaderFactory(), avatarContainer, new AvatarMeshCombinerHelper()),
-                    animator,
-                    visibility,
-                    avatarLOD,
-                    new SimpleGPUSkinning(),
-                    new GPUSkinningThrottler(),
-                    new EmoteAnimationEquipper(animator, DataStore.i.emotes));
+
+            return Environment.i.serviceLocator.Get<IAvatarFactory>()
+                              .CreateAvatarWithHologram(
+                                   avatarContainer,
+                                   avatarRevealContainer,
+                                   armatureContainer,
+                                   GetComponentInChildren<AvatarAnimatorLegacy>(),
+                                   new LOD(avatarContainer, visibility, avatarMovementController),
+                                   visibility
+                               );
         }
 
         private void Start()
@@ -133,7 +131,7 @@ namespace DCL
         {
             if(entity != null)
                 DataStore.i.sceneBoundariesChecker?.Remove(entity,this);
-            
+
             Cleanup();
 
             if (poolableObject != null && poolableObject.isInsidePool)
@@ -142,9 +140,7 @@ namespace DCL
 
         public override IEnumerator ApplyChanges(BaseModel newModel)
         {
-            isGlobalSceneAvatar = scene.sceneData.id == EnvironmentSettings.AVATAR_GLOBAL_SCENE_ID;
-            
-            DisablePassport();
+            isGlobalSceneAvatar = scene.sceneData.sceneNumber == EnvironmentSettings.AVATAR_GLOBAL_SCENE_NUMBER;
 
             var model = (AvatarModel) newModel;
 
@@ -182,8 +178,9 @@ namespace DCL
             if (avatar.status != IAvatar.Status.Loaded || needsLoading)
             {
                 HashSet<string> emotes = new HashSet<string>(currentAvatar.emotes.Select(x => x.urn));
-                var embeddedEmotesSo = Resources.Load<EmbeddedEmotesSO>("EmbeddedEmotes");
-                var embeddedEmoteIds = embeddedEmotesSo.emotes.Select(x => x.id);
+                UniTask<EmbeddedEmotesSO>.Awaiter embeddedEmotesTask = emotesCatalogService.Ref.GetEmbeddedEmotes().GetAwaiter();
+                yield return new WaitUntil(() => embeddedEmotesTask.IsCompleted);
+                var embeddedEmoteIds = embeddedEmotesTask.GetResult().emotes.Select(x => x.id);
                 //here we add emote ids to both new and old emote loading flow to merge the results later
                 //because some users might have emotes as wearables and others only as emotes
                 foreach (var emoteId in embeddedEmoteIds)
@@ -203,10 +200,11 @@ namespace DCL
                 loadingCts = new CancellationTokenSource();
                 if (DataStore.i.avatarConfig.useHologramAvatar.Get())
                 {
-                    playerName.SetName(model.name);
+                    UserProfile profile = userProfileBridge.Get(model.id);
+                    playerName.SetName(model.name, profile?.hasClaimedName ?? false, profile?.isGuest ?? false);
                     playerName.Show(true);
                 }
-                
+
                 avatar.Load(wearableItems, emotes.ToList(), new AvatarSettings
                 {
                     playerName = model.name,
@@ -229,6 +227,11 @@ namespace DCL
             onPointerDown.OnPointerExitReport -= PlayerPointerExit;
             onPointerDown.OnPointerExitReport += PlayerPointerExit;
 
+            outlineOnHover.OnPointerEnterReport -= PlayerPointerEnter;
+            outlineOnHover.OnPointerEnterReport += PlayerPointerEnter;
+            outlineOnHover.OnPointerExitReport -= PlayerPointerExit;
+            outlineOnHover.OnPointerExitReport += PlayerPointerExit;
+
             UpdatePlayerStatus(model);
 
             onPointerDown.Initialize(
@@ -236,17 +239,17 @@ namespace DCL
                 {
                     type = OnPointerDown.NAME,
                     button = WebInterface.ACTION_BUTTON.POINTER.ToString(),
-                    hoverText = "view profile"
+                    hoverText = "View Profile"
                 },
                 entity, player
             );
+
+            outlineOnHover.Initialize(new OnPointerDown.Model(), entity, player.avatar);
 
             avatarCollider.gameObject.SetActive(true);
 
             everythingIsLoaded = true;
             OnAvatarShapeUpdated?.Invoke(entity, this);
-
-            EnablePasssport();
 
             onPointerDown.SetColliderEnabled(isGlobalSceneAvatar);
             onPointerDown.SetOnClickReportEnabled(isGlobalSceneAvatar);
@@ -266,8 +269,15 @@ namespace DCL
             currentLazyObserver.AddListener(avatar.SetImpostorTexture);
         }
 
-        private void PlayerPointerExit() { playerName?.SetForceShow(false); }
-        private void PlayerPointerEnter() { playerName?.SetForceShow(true); }
+        private void PlayerPointerExit()
+        {
+            playerName?.SetForceShow(false);
+        }
+
+        private void PlayerPointerEnter()
+        {
+            playerName?.SetForceShow(true);
+        }
 
         private void UpdatePlayerStatus(AvatarModel model)
         {
@@ -302,7 +312,7 @@ namespace DCL
                 if (isGlobalSceneAvatar)
                 {
                     // TODO: Note: This is having a problem, sometimes the users has been detected as new 2 times and it shouldn't happen
-                    // we should investigate this 
+                    // we should investigate this
                     if (otherPlayers.ContainsKey(player.id))
                         otherPlayers.Remove(player.id);
                     otherPlayers.Add(player.id, player);
@@ -310,7 +320,7 @@ namespace DCL
                 avatarReporterController.ReportAvatarRemoved();
             }
 
-            avatarReporterController.SetUp(entity.scene.sceneData.id, player.id);
+            avatarReporterController.SetUp(entity.scene.sceneData.sceneNumber, player.id);
 
             float height = AvatarSystemUtils.AVATAR_Y_OFFSET + avatar.extents.y;
 
@@ -318,8 +328,12 @@ namespace DCL
 
             player.playerName.SetIsTalking(model.talking);
             player.playerName.SetYOffset(Mathf.Max(MINIMUM_PLAYERNAME_HEIGHT, height));
+
             if (isNameDirty)
-                player.playerName.SetName(model.name);
+            {
+                UserProfile profile = userProfileBridge.Get(model.id);
+                player.playerName.SetName(model.name, profile?.hasClaimedName ?? false, profile?.isGuest ?? false);
+            }
         }
 
         private void Update()
@@ -385,7 +399,7 @@ namespace DCL
                 stickersControllers.ToggleHideArea(false);
             }
         }
-        
+
         public void ApplyHidePassportModifier()
         {
             if (!currentActiveModifiers.ContainsKey(AvatarModifierAreaID.DISABLE_PASSPORT))
@@ -394,7 +408,7 @@ namespace DCL
             }
             currentActiveModifiers.AddRefCount(AvatarModifierAreaID.DISABLE_PASSPORT);
         }
-        
+
         public void RemoveHidePassportModifier()
         {
             currentActiveModifiers.RemoveRefCount(AvatarModifierAreaID.DISABLE_PASSPORT);
@@ -447,6 +461,8 @@ namespace DCL
             onPointerDown.OnPointerDownReport -= PlayerClicked;
             onPointerDown.OnPointerEnterReport -= PlayerPointerEnter;
             onPointerDown.OnPointerExitReport -= PlayerPointerExit;
+            outlineOnHover.OnPointerEnterReport -= PlayerPointerEnter;
+            outlineOnHover.OnPointerExitReport -= PlayerPointerExit;
 
             if (entity != null)
             {
@@ -456,7 +472,7 @@ namespace DCL
 
             avatarReporterController.ReportAvatarRemoved();
         }
-        
+
         public void UpdateOutOfBoundariesState(bool isInsideBoundaries)
         {
             if (scene.isPersistent)
@@ -466,7 +482,7 @@ namespace DCL
                 avatar.RemoveVisibilityConstrain(VISIBILITY_CONSTRAINT_OUTSIDE_SCENE_BOUNDS);
             else
                 avatar.AddVisibilityConstraint(VISIBILITY_CONSTRAINT_OUTSIDE_SCENE_BOUNDS);
-            
+
             onPointerDown.gameObject.SetActive(isInsideBoundaries);
             playerNameContainer.SetActive(isInsideBoundaries);
             stickersControllers.ToggleHideArea(!isInsideBoundaries);

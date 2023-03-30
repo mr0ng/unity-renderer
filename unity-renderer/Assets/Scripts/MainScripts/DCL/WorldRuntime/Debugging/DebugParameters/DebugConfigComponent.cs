@@ -13,6 +13,7 @@ namespace DCL
     public class DebugConfigComponent : MonoBehaviour
     {
         private static DebugConfigComponent sharedInstance;
+// <<<<<<< HEAD
         
         
         [SerializeField] private GameObject startMenu;
@@ -31,6 +32,10 @@ namespace DCL
         private string webViewURL = "";
         private bool isMainTab = true;
         
+// =======
+        private readonly DataStoreRef<DataStore_LoadingScreen> dataStoreLoadingScreen;
+
+// >>>>>>> upstream/release/20230227
         public static DebugConfigComponent i
         {
             get
@@ -99,15 +104,20 @@ namespace DCL
         public bool multithreaded = false;
 
         public bool soloScene = true;
+
+        public bool disableAssetBundles = false;
+        public bool enableGLTFast = false;
+
         public bool enableDebugMode = false;
 
         public DebugPanel debugPanelMode = DebugPanel.Off;
 
-        
+
         [Header("Performance")]
         public bool disableGLTFDownloadThrottle = false;
         public bool runPerformanceMeterToolDuringLoading = false;
         private PerformanceMeterController performanceMeterController;
+
 
         private void Awake()
         {
@@ -289,18 +299,29 @@ namespace DCL
             {
                 CommonScriptableObjects.forcePerformanceMeter.Set(true);
                 performanceMeterController = new PerformanceMeterController();
-                performanceMeterController.StartSampling(999);
-                CommonScriptableObjects.rendererState.OnChange += OnRendererStateChanged;
+
+                dataStoreLoadingScreen.Ref.decoupledLoadingHUD.visible.OnChange += StartSampling;
+                dataStoreLoadingScreen.Ref.loadingHUD.visible.OnChange += StartSampling;
+                CommonScriptableObjects.rendererState.OnChange += EndSampling;
             }
         }
-        private void OnRendererStateChanged(bool current, bool previous)
+
+        private void StartSampling(bool current, bool previous)
         {
-            CommonScriptableObjects.rendererState.OnChange -= OnRendererStateChanged;
+            dataStoreLoadingScreen.Ref.decoupledLoadingHUD.visible.OnChange -= StartSampling;
+            dataStoreLoadingScreen.Ref.loadingHUD.visible.OnChange -= StartSampling;
+            performanceMeterController.StartSampling(999);
+        }
+        private void EndSampling(bool current, bool previous)
+        {
+            CommonScriptableObjects.rendererState.OnChange -= EndSampling;
             performanceMeterController.StopSampling();
         }
 
         private void OpenWebBrowser()
         {
+
+#if (UNITY_EDITOR)
             string baseUrl = "";
             string debugString = "";
 
@@ -334,7 +355,7 @@ namespace DCL
             {
                 baseUrl = "http://play.decentraland.zone/?";
             }
-         
+
             switch (network)
             {
                 case Network.GOERLI:
@@ -342,7 +363,7 @@ namespace DCL
                     break;
                 case Network.MAINNET:
                     debugString = "NETWORK=mainnet&";
-                    break; 
+                    break;
             }
 
             if (!string.IsNullOrEmpty(kernelVersion))
@@ -375,11 +396,16 @@ namespace DCL
                 debugString += "DISABLE_ASSET_BUNDLES&DISABLE_WEARABLE_ASSET_BUNDLES&";
             }
 
+            if (enableGLTFast)
+            {
+                debugString += "ENABLE_GLTFAST&";
+            }
+
             if (enableDebugMode)
             {
                 debugString += "DEBUG_MODE&";
             }
-            
+
             if (!string.IsNullOrEmpty(realm))
             {
                 debugString += $"realm={realm}&";
@@ -659,7 +685,6 @@ openInternalBrowser = true;
         
 
         private void OnDestroy() { DataStore.i.wsCommunication.communicationReady.OnChange -= OnCommunicationReadyChangedValue; }
-       
 
         private void QuitGame()
         {
@@ -674,5 +699,4 @@ openInternalBrowser = true;
         
    
     }
-    
 }

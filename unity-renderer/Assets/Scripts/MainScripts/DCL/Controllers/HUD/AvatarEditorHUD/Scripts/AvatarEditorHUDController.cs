@@ -9,6 +9,7 @@ using System.Linq;
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using DCL.Emotes;
+using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
@@ -44,7 +45,7 @@ public class AvatarEditorHUDController : IHUD
     BaseVariable<bool> exploreV2IsOpen => DataStore.i.exploreV2.isOpen;
     DataStore_EmotesCustomization emotesCustomizationDataStore => DataStore.i.emotesCustomization;
     DataStore_FeatureFlag featureFlagsDataStore => DataStore.i.featureFlags;
-    
+
     private readonly DataStore_FeatureFlag featureFlags;
 
     private readonly Dictionary<string, List<WearableItem>> wearablesByCategory = new Dictionary<string, List<WearableItem>>();
@@ -81,6 +82,8 @@ public class AvatarEditorHUDController : IHUD
     public event Action OnOpen;
     public event Action OnClose;
 
+    public Service<IEmotesCatalogService> emotesCatalogService;
+
     public AvatarEditorHUDController(DataStore_FeatureFlag featureFlags, IAnalytics analytics)
     {
         this.featureFlags = featureFlags;
@@ -88,14 +91,14 @@ public class AvatarEditorHUDController : IHUD
         this.newUserExperienceAnalytics = new NewUserExperienceAnalytics(analytics);
     }
 
-    public void Initialize(UserProfile userProfile, 
+    public void Initialize(UserProfile userProfile,
         BaseDictionary<string, WearableItem> catalog,
         bool bypassUpdateAvatarPreview = false
         )
     {
         this.userProfile = userProfile;
         this.bypassUpdateAvatarPreview = bypassUpdateAvatarPreview;
-      
+
         view = AvatarEditorHUDView.Create(this);
 
         view.skinsFeatureContainer.SetActive(true);
@@ -118,6 +121,13 @@ public class AvatarEditorHUDController : IHUD
 
         view.SetSectionActive(AvatarEditorHUDView.EMOTES_SECTION_INDEX, false);
 
+        InitializeAsyncEmoteController();
+    }
+
+    private async void InitializeAsyncEmoteController()
+    {
+        EmbeddedEmotesSO embeddedEmotesSo = await emotesCatalogService.Ref.GetEmbeddedEmotes();
+
         emotesCustomizationComponentController = CreateEmotesController();
         IEmotesCustomizationComponentView emotesSectionView = emotesCustomizationComponentController.Initialize(
             DataStore.i.emotesCustomization,
@@ -125,7 +135,7 @@ public class AvatarEditorHUDController : IHUD
             DataStore.i.exploreV2,
             DataStore.i.HUDs);
         //Initialize with embedded emotes
-        emotesCustomizationComponentController.SetEmotes(EmbeddedEmotesSO.Provide().emotes.ToArray());
+        emotesCustomizationComponentController.SetEmotes(embeddedEmotesSo.emotes);
         emotesSectionView.viewTransform.SetParent(view.emotesSection.transform, false);
         view.SetSectionActive(AvatarEditorHUDView.EMOTES_SECTION_INDEX, true);
 
@@ -143,8 +153,8 @@ public class AvatarEditorHUDController : IHUD
 
         view.SetThirdPartyCollectionsVisibility(isThirdPartyCollectionsEnabled);
 
-        this.avatarEditorHUDAnimationController = new AvatarEditorHUDAnimationController(view, view.characterPreviewController);
-        
+        this.avatarEditorHUDAnimationController = new AvatarEditorHUDAnimationController(view);
+
         Environment.i.serviceLocator.Get<IApplicationFocusService>().OnApplicationFocus += OnApplicationFocus;
     }
 
@@ -162,16 +172,16 @@ public class AvatarEditorHUDController : IHUD
         this.catalog.OnAdded += OnAdditionalWearableAdded;
         this.catalog.OnRemoved += OnAdditionalWearableRemoved;
     }
-    
+
     private void OnAdditionalWearableRemoved(string s, WearableItem item)
     {
-        RemoveWearable(s, item); 
+        RemoveWearable(s, item);
         view.RefreshSelectorsSize();
     }
-    
+
     private void OnAdditionalWearableAdded(string id, WearableItem item)
     {
-        AddWearable(id, item); 
+        AddWearable(id, item);
         view.RefreshSelectorsSize();
     }
 
@@ -180,17 +190,17 @@ public class AvatarEditorHUDController : IHUD
         LoadUserProfile(userProfile, false);
         QueryNftCollections(userProfile.userId);
     }
-    
+
     private void LoadOwnedWereables(UserProfile userProfile)
     {
         //If there is no userID we dont fetch owned wearabales
         if(string.IsNullOrEmpty(userProfile.userId))
             return;
-        
+
         // If wearables are loaded, we are in wearable cooldown, we dont fetch again owned wearables
         if (AreWearablesAlreadyLoaded() && IsWearableUpdateInCooldown())
             return;
-        
+
         lastTimeOwnedWearablesChecked = Time.realtimeSinceStartup;
 
         loadingWearables = true;
@@ -198,7 +208,7 @@ public class AvatarEditorHUDController : IHUD
                          .Then((ownedWearables) =>
                          {
                              ownedWearablesAlreadyLoaded = true;
-                             //Prior profile V1 emotes must be retrieved along the wearables, onwards they will be requested separatedly 
+                             //Prior profile V1 emotes must be retrieved along the wearables, onwards they will be requested separatedly
                              this.userProfile.SetInventory(ownedWearables.Select(x => x.id).Concat(thirdPartyWearablesLoaded).ToArray());
                              LoadUserProfile(userProfile, true);
                              if (userProfile != null && userProfile.avatar != null)
@@ -217,6 +227,7 @@ public class AvatarEditorHUDController : IHUD
                              }
                              else
                              {
+                                 LoadUserProfile(userProfile, true);
                                  NotificationsController.i.ShowNotification(new Model
                                  {
                                      message = LOADING_OWNED_WEARABLES_ERROR_MESSAGE,
@@ -255,15 +266,16 @@ public class AvatarEditorHUDController : IHUD
         var emotesCatalog = Environment.i.serviceLocator.Get<IEmotesCatalogService>();
         try
         {
-            var embeddedEmotes = Resources.Load<EmbeddedEmotesSO>("EmbeddedEmotes").emotes;
+            EmbeddedEmotesSO embeddedEmoteTask = await emotesCatalogService.Ref.GetEmbeddedEmotes();
+            var embeddedEmotes = embeddedEmoteTask.emotes;
             var emotes = await emotesCatalog.RequestOwnedEmotesAsync(userProfile.userId, ct);
             var emotesList = emotes == null ? embeddedEmotes.Cast<WearableItem>().ToList() : emotes.Concat(embeddedEmotes).ToList();
             var emotesFilter = new HashSet<string>();
             foreach (var e in emotesList)
                 emotesFilter.Add(e.id);
-            
-            if(loadingWearables)
-                await UniTask.WaitWhile(() => loadingWearables, cancellationToken: ct);
+
+            if (loadingWearables)
+                await UniTaskUtils.WaitForBoolean(ref loadingWearables, false, cancellationToken: ct);
 
             if (emotesLoadedAsWearables != null)
             {
@@ -277,7 +289,7 @@ public class AvatarEditorHUDController : IHUD
 
                 emotesLoadedAsWearables = null;
             }
-            
+
             emotesCustomizationDataStore.UnequipMissingEmotes(emotesList);
             emotesCustomizationComponentController.SetEmotes(emotesList.ToArray());
 
@@ -383,10 +395,10 @@ public class AvatarEditorHUDController : IHUD
         view.SetIsWeb3(userProfile.hasConnectedWeb3);
 
         ProcessCatalog(this.catalog);
-        
+
         if (avatarIsDirty)
             return;
-        
+
         EquipBodyShape(bodyShape);
         EquipSkinColor(userProfile.avatar.skinColor);
         EquipHairColor(userProfile.avatar.hairColor);
@@ -479,11 +491,11 @@ public class AvatarEditorHUDController : IHUD
             {
                 if (IsTryingToReplaceSkin(wearable))
                     UnequipWearable(model.GetWearable(Categories.SKIN));
-                
+
                 var sameCategoryEquipped = model.GetWearable(wearable.data.category);
                 if (sameCategoryEquipped != null)
                     UnequipWearable(sameCategoryEquipped);
-                
+
                 EquipWearable(wearable);
             }
         }
@@ -648,10 +660,10 @@ public class AvatarEditorHUDController : IHUD
                 if (iterator.Current.Value.IsEmote())
                     continue;
 
-                if (iterator.Current.Value.IsFromThirdPartyCollection 
+                if (iterator.Current.Value.IsFromThirdPartyCollection
                     && !thirdPartyCollectionsActive.Contains(iterator.Current.Value.ThirdPartyCollectionId))
                     continue;
-                        
+
                 AddWearable(iterator.Current.Key, iterator.Current.Value);
                 hasSkin = iterator.Current.Value.IsSkin() || hasSkin;
                 hasCollectible = iterator.Current.Value.IsCollectible() || hasCollectible;
@@ -666,7 +678,7 @@ public class AvatarEditorHUDController : IHUD
     {
         if (!wearable.data.tags.Contains(WearableLiterals.Tags.BASE_WEARABLE) && userProfile.GetItemAmount(id) == 0)
             return;
-        
+
         if (!wearablesByCategory.ContainsKey(wearable.data.category))
             wearablesByCategory.Add(wearable.data.category, new List<WearableItem>());
 
@@ -849,7 +861,7 @@ public class AvatarEditorHUDController : IHUD
         emotesCustomizationComponentController.onEmoteEquipped -= OnEmoteEquipped;
         emotesCustomizationComponentController.onEmoteUnequipped -= OnEmoteUnequipped;
         emotesCustomizationComponentController.onEmoteSell -= OnRedirectToEmoteSelling;
-        
+
         avatarEditorHUDAnimationController.Dispose();
         Environment.i.serviceLocator.Get<IApplicationFocusService>().OnApplicationFocus -= OnApplicationFocus;
 
@@ -883,24 +895,24 @@ public class AvatarEditorHUDController : IHUD
             var equippedEmote = emotesCustomizationDataStore.unsavedEquippedEmotes[i];
             if (equippedEmote == null)
                 continue;
-            
+
             emoteEntries.Add(new AvatarModel.AvatarEmoteEntry { slot = i, urn = equippedEmote.id });
         }
-        
-        avatarModel.emotes = emoteEntries; 
-        
+
+        avatarModel.emotes = emoteEntries;
+
         SendNewEquippedWearablesAnalytics(userProfile.avatar.wearables, avatarModel.wearables);
         emotesCustomizationDataStore.equippedEmotes.Set(emotesCustomizationDataStore.unsavedEquippedEmotes.Get());
 
         WebInterface.SendSaveAvatar(avatarModel, face256Snapshot, bodySnapshot, DataStore.i.common.isSignUpFlow.Get());
         userProfile.OverrideAvatar(avatarModel, face256Snapshot);
-        
+
         if (DataStore.i.common.isSignUpFlow.Get())
         {
             DataStore.i.HUDs.signupVisible.Set(true);
             newUserExperienceAnalytics.AvatarEditSuccessNux();
         }
-        
+
         avatarIsDirty = false;
         SetVisibility(false);
     }
@@ -934,7 +946,7 @@ public class AvatarEditorHUDController : IHUD
         if (!current && avatarIsDirty)
         {
             avatarIsDirty = false;
-            
+
             LoadUserProfile(userProfile, true);
 
             emotesCustomizationComponentController.RestoreEmoteSlots();
@@ -998,7 +1010,7 @@ public class AvatarEditorHUDController : IHUD
                     if (!userProfile.ContainsInInventory(wearable.id))
                     {
                         userProfile.AddToInventory(wearable.id);
-                        
+
                         if (!thirdPartyWearablesLoaded.Contains(wearable.id))
                             thirdPartyWearablesLoaded.Add(wearable.id);
                     }
@@ -1056,14 +1068,14 @@ public class AvatarEditorHUDController : IHUD
                    && skin.DoesHide(wearable.data.category, model.bodyShape.id);
         });
     }
-    
+
     private bool ShouldShowReplaceOtherWearablesToast(WearableItem wearable)
     {
         if (IsTryingToReplaceSkin(wearable)) return true;
         var toReplace = GetWearablesReplacedBy(wearable);
         if (wearable == null || toReplace.Count == 0) return false;
         if (model.wearables.Contains(wearable)) return false;
-        
+
         // NOTE: why just 1?
         if (toReplace.Count == 1)
         {
@@ -1144,12 +1156,12 @@ public class AvatarEditorHUDController : IHUD
     {
         return Time.realtimeSinceStartup < lastTimeOwnedWearablesChecked + ownedWearableEmotesRequestRetryTime;
     }
-    
+
     private bool IsEmotesUpdateInCooldown()
     {
         return Time.realtimeSinceStartup < lastTimeOwnedEmotesChecked + ownedWearableEmotesRequestRetryTime;
     }
-    
+
     private bool AreWearablesAlreadyLoaded()
     {
         return ownedWearablesAlreadyLoaded || ownedWearablesRemainingRequests <= 0;

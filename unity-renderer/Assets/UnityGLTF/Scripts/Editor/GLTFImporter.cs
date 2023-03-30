@@ -20,7 +20,9 @@ using Object = UnityEngine.Object;
 
 namespace UnityGLTF
 {
-    [ScriptedImporter(1, new[] { "glb", "gltf" })]
+
+    // Disabled because we are using gltfast now
+    //[ScriptedImporter(1, new[] { "glb", "gltf" })]
     public class GLTFImporter : ScriptedImporter
     {
         [SerializeField] private bool _removeEmptyRootObjects = true;
@@ -123,8 +125,8 @@ namespace UnityGLTF
             var loader = new GLTFSceneImporter(Path.GetFullPath(projectFilePath), gLTFRoot, fileLoader, null, stream);
             loader.addImagesToPersistentCaching = false;
             loader.addMaterialsToPersistentCaching = false;
-            loader.initialVisibility = false;
-            loader.useMaterialTransition = false;
+            loader.initialVisibility = true;
+            // loader.useMaterialTransition = false;
 #if UNITY_ANDROID && ! UNITY_EDITOR
             loader.maxTextureSize = 512;
 #else

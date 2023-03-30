@@ -28,10 +28,15 @@ namespace DCL
         public override void Cleanup()
         {
             OnCleanup?.Invoke();
+            OnCleanup = null;
+
             PersistentAssetCache.RemoveImage(texture);
             Object.Destroy(texture);
-            texture = null;
+            if (this.texture != null) 
+                Object.Destroy(this.texture);
+            this.texture = null;
 
+            dependencyAsset = null;
         }
 
         public void Dispose() { Cleanup(); }

@@ -4,7 +4,10 @@ using System.Collections.Generic;
 using System.Net.Sockets;
 using DCL;
 using UnityEngine;
-using UnityEngine.Rendering;
+// <<<<<<< HEAD
+// using UnityEngine.Rendering;
+// =======
+// >>>>>>> upstream/release/20230227
 using WebSocketSharp;
 using WebSocketSharp.Server;
 
@@ -48,7 +51,7 @@ public class WebSocketCommunication : IKernelCommunication
     public void Dispose() { ws.Stop(); }
     public static event Action<DCLWebSocketService> OnWebSocketServiceAdded;
 
-    private string StartServer(int port, int maxPort, bool withSSL)
+    private string StartServer(int port, int maxPort, bool withSSL, bool verbose = false)
     {
         Debug.Log($"WebSocketCommunication: StartServer 1");
         if (port > maxPort)
@@ -134,6 +137,12 @@ public class WebSocketCommunication : IKernelCommunication
                 return service;
             });
             ws.ReuseAddress = true;
+
+            if (verbose)
+            {
+                ws.Log.Level = LogLevel.Debug;
+                ws.Log.Output += OnWebSocketLog;
+            }
             ws.Start();
             
             Debug.Log("WebSocketCommunication: Start Called");
@@ -155,6 +164,24 @@ public class WebSocketCommunication : IKernelCommunication
 
         string wssUrl = wssServerUrl + wssServiceId;
         return wssUrl;
+    }
+    private void OnWebSocketLog(LogData logData, string message)
+    {
+        switch (logData.Level)
+        {
+            case LogLevel.Debug:
+                Debug.Log($"[WebSocket] {logData.Message}");
+                break;
+            case LogLevel.Warn:
+                Debug.LogWarning($"[WebSocket] {logData.Message}");
+                break;
+            case LogLevel.Error:
+                Debug.LogError($"[WebSocket] {logData.Message}");
+                break;
+            case LogLevel.Fatal:
+                Debug.LogError($"[WebSocket] {logData.Message}");
+                break;
+        }
     }
 
     private IEnumerator RestartCommunication(int port, int maxPort, bool withSSL)
@@ -214,6 +241,7 @@ public class WebSocketCommunication : IKernelCommunication
         messageTypeToBridgeName["SendSceneMessage"] = "Main";
         messageTypeToBridgeName["LoadParcelScenes"] = "Main";
         messageTypeToBridgeName["UnloadScene"] = "Main";
+        messageTypeToBridgeName["UnloadSceneV2"] = "Main";
         messageTypeToBridgeName["Reset"] = "Main";
         messageTypeToBridgeName["CreateGlobalScene"] = "Main";
         messageTypeToBridgeName["BuilderReady"] = "Main";
@@ -233,7 +261,6 @@ public class WebSocketCommunication : IKernelCommunication
         messageTypeToBridgeName["UpdateFriendshipStatus"] = "Main";
         messageTypeToBridgeName["UpdateUserPresence"] = "Main";
         messageTypeToBridgeName["FriendNotFound"] = "Main";
-        messageTypeToBridgeName["AddMessageToChatWindow"] = "Main";
         messageTypeToBridgeName["UpdateMinimapSceneInformation"] = "Main";
         messageTypeToBridgeName["UpdateHotScenesList"] = "Main";
         messageTypeToBridgeName["SetRenderProfile"] = "Main";
@@ -258,22 +285,9 @@ public class WebSocketCommunication : IKernelCommunication
         messageTypeToBridgeName["AddFriendsWithDirectMessages"] = "Main";
         messageTypeToBridgeName["AddFriends"] = "Main";
         messageTypeToBridgeName["AddFriendRequests"] = "Main";
-        messageTypeToBridgeName["UpdateTotalUnseenMessagesByUser"] = "Main";
         messageTypeToBridgeName["UpdateTotalFriendRequests"] = "Main";
         messageTypeToBridgeName["UpdateTotalFriends"] = "Main";
-        messageTypeToBridgeName["InitializeChat"] = "Main";
-        messageTypeToBridgeName["AddChatMessages"] = "Main";
-        messageTypeToBridgeName["UpdateUserUnseenMessages"] = "Main";
-        messageTypeToBridgeName["UpdateTotalUnseenMessages"] = "Main";
-        messageTypeToBridgeName["UpdateChannelInfo"] = "Main";
-        messageTypeToBridgeName["JoinChannelConfirmation"] = "Main";
-        messageTypeToBridgeName["JoinChannelError"] = "Main";
-        messageTypeToBridgeName["LeaveChannelError"] = "Main";
-        messageTypeToBridgeName["MuteChannelError"] = "Main";
-        messageTypeToBridgeName["UpdateTotalUnseenMessagesByChannel"] = "Main";
-        messageTypeToBridgeName["UpdateChannelMembers"] = "Main";
         messageTypeToBridgeName["UpdateHomeScene"] = "Main";
-        messageTypeToBridgeName["UpdateChannelSearchResults"] = "Main";
 
         messageTypeToBridgeName["Teleport"] = "CharacterController";
 

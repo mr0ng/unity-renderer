@@ -1,7 +1,12 @@
+using Cysharp.Threading.Tasks;
 using DCL;
 using DCL.Camera;
 using DCL.CameraTool;
+using DCL.Configuration;
+using DCL.Emotes;
 using DCL.Helpers.NFT.Markets;
+using DCL.ProfanityFiltering;
+using DCL.Providers;
 using DCL.Rendering;
 using DCL.SettingsCommon;
 using NSubstitute;
@@ -16,7 +21,7 @@ using UnityEngine.TestTools;
 public class IntegrationTestSuite_Legacy
 {
     private const string VISUAL_TEST_CUBEMAP_PATH = "Assets/Scripts/Tests/VisualTests/Textures/VisualTest Reflection.png";
-    
+
     /// <summary>
     /// Use this as a parent for your dynamically created gameobjects in tests
     /// so they are cleaned up automatically in the teardown
@@ -24,12 +29,12 @@ public class IntegrationTestSuite_Legacy
     private GameObject runtimeGameObjectsRoot;
 
     private List<GameObject> legacySystems = new List<GameObject>();
+    private AddressableResourceProvider addressableResourceProvider;
 
     [UnitySetUp]
     protected virtual IEnumerator SetUp()
     {
-        DCL.Configuration.EnvironmentSettings.RUNNING_TESTS = true;
-        DCL.Configuration.ParcelSettings.VISUAL_LOADING_ENABLED = false;
+        EnvironmentSettings.RUNNING_TESTS = true;
         AssetPromiseKeeper_GLTF.i.throttlingCounter.enabled = false;
         PoolManager.enablePrewarm = false;
 
@@ -57,6 +62,12 @@ public class IntegrationTestSuite_Legacy
         result.Register<IParcelScenesCleaner>(() => Substitute.For<IParcelScenesCleaner>());
         result.Register<ICullingController>(() => Substitute.For<ICullingController>());
         result.Register<IEmotesCatalogService>(() => Substitute.For<IEmotesCatalogService>());
+        result.Register<IProfanityFilter>(() =>
+        {
+            IProfanityFilter profanityFilter = Substitute.For<IProfanityFilter>();
+            profanityFilter.Filter(Arg.Any<string>()).Returns(info => UniTask.FromResult(info[0].ToString()));
+            return profanityFilter;
+        });
 
         result.Register<IServiceProviders>(
             () =>
@@ -69,7 +80,18 @@ public class IntegrationTestSuite_Legacy
                 return mockedProviders;
             });
 
+        IEmotesCatalogService emotesCatalogService = Substitute.For<IEmotesCatalogService>();
+        emotesCatalogService.GetEmbeddedEmotes().Returns(GetEmbeddedEmotesSO());
+        result.Register<IEmotesCatalogService>(() => emotesCatalogService);
+
         return result;
+    }
+
+    private async UniTask<EmbeddedEmotesSO> GetEmbeddedEmotesSO()
+    {
+        EmbeddedEmotesSO embeddedEmotes = ScriptableObject.CreateInstance<EmbeddedEmotesSO>();
+        embeddedEmotes.emotes = new EmbeddedEmote[] { };
+        return embeddedEmotes;
     }
 
     protected virtual List<GameObject> SetUp_LegacySystems()
@@ -85,7 +107,7 @@ public class IntegrationTestSuite_Legacy
 
         foreach ( var go in legacySystems )
         {
-            UnityEngine.Object.Destroy(go);
+            Object.Destroy(go);
         }
 
         yield return null;
@@ -116,11 +138,11 @@ public class IntegrationTestSuite_Legacy
         Environment.Dispose();
 
         yield return null;
-        
+
         NotificationScriptableObjects.UnloadAll();
         AudioScriptableObjects.UnloadAll();
         CommonScriptableObjects.UnloadAll();
-        
+
         yield return null;
 
         GameObject[] gos = Object.FindObjectsOfType<GameObject>(true);
@@ -129,7 +151,7 @@ public class IntegrationTestSuite_Legacy
         {
             Object.Destroy(go);
         }
-        
+
         yield return null;
     }
 

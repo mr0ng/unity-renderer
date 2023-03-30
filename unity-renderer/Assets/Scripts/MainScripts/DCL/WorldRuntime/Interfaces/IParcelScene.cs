@@ -22,6 +22,7 @@ namespace DCL.Controllers
         ContentProvider contentProvider { get; }
         int distanceToPlayer { get; set; }
         bool isPersistent { get; }
+        bool isPortableExperience { get; }
         bool isTestScene { get; }
         float loadingProgress { get; }
         string GetSceneName();
@@ -37,5 +38,6 @@ namespace DCL.Controllers
         void GetWaitingComponentsDebugInfo();
         void SetEntityParent(long entityId, long parentId);
         void RemoveEntity(long id, bool removeImmediatelyFromEntitiesList = true);
+        bool IsInitMessageDone();
     }
 }

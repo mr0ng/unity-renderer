@@ -24,7 +24,7 @@ public class DCLCharacterController : MonoBehaviour
 
     [Header("Collisions")]
     public LayerMask groundLayers;
-    
+
     [Header("Additional Camera Layers")]
     public LayerMask cameraLayers;
 
@@ -105,7 +105,7 @@ public class DCLCharacterController : MonoBehaviour
     public event System.Action OnJump;
     public event System.Action OnHitGround;
     public event System.Action<float> OnMoved;
-    
+
     void Awake()
     {
         if (i != null)
@@ -230,7 +230,7 @@ public class DCLCharacterController : MonoBehaviour
         var payload = Utils.FromJsonWithNulls<Vector3>(teleportPayload);
         dataStorePlayer.lastTeleportPosition.Set(payload, notifyEvent: true);
     }
-    
+
     private void Teleport(Vector3 newPosition, Vector3 prevPosition)
     {
         ResetGround();
@@ -418,7 +418,12 @@ public class DCLCharacterController : MonoBehaviour
 
             //NOTE(Kinerius) CameraStateTPS rotates the character between frames so we add the difference.
             //               if we dont do this, the character wont rotate when moving, only when the platform rotates
-            CommonScriptableObjects.characterForward.Set(newCharacterForward + lastFrameDifference);
+            var newForward = newCharacterForward + lastFrameDifference;
+
+            if (newForward is { x: 0, y: 0, z: 0 })
+                newForward = Vector3.forward;
+
+            CommonScriptableObjects.characterForward.Set(newForward);
         }
 
         Transform transformHit = CastGroundCheckingRays();

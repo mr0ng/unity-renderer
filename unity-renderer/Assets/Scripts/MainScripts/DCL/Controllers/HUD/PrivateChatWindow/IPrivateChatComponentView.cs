@@ -1,3 +1,4 @@
+using DCL.Social.Friends;
 using SocialFeaturesAnalytics;
 using System;
 using UnityEngine;
@@ -12,7 +13,7 @@ public interface IPrivateChatComponentView
     event Action OnRequireMoreMessages;
     event Action OnClickOverWindow;
 
-    
+
     IChatHUDComponentView ChatHUD { get; }
     bool IsActive { get; }
     RectTransform Transform { get; }

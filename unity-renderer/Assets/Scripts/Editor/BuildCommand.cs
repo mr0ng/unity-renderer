@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using UnityEditor;
+using UnityEditor.AddressableAssets;
+using UnityEditor.AddressableAssets.Settings;
 using UnityEditor.Build.Reporting;
 
 static class BuildCommand
@@ -139,6 +141,11 @@ static class BuildCommand
 
     static void PerformBuild()
     {
+        Console.WriteLine(":: Building addressables");
+
+        AddressableAssetSettings.CleanPlayerContent(
+            AddressableAssetSettingsDefaultObject.Settings.ActivePlayerDataBuilder);
+        AddressableAssetSettings.BuildPlayerContent();
         Console.WriteLine(":: Performing build");
 
         var buildTarget = GetBuildTarget();
@@ -150,11 +157,6 @@ static class BuildCommand
         {
             PlayerSettings.WebGL.emscriptenArgs = " --profiling-funcs ";
         }
-        else if (buildTarget == BuildTarget.StandaloneOSX)
-        {
-            Console.WriteLine(":: Set OSXUniversal Architecture to x64");
-            EditorUserBuildSettings.SetPlatformSettings("OSXUniversal", "Architecture", "x64");
-        }
 
         var buildSummary = BuildPipeline.BuildPlayer(GetEnabledScenes(), fixedBuildPath, buildTarget, GetBuildOptions());
         Console.WriteLine(":: Done with build process");
@@ -164,4 +166,5 @@ static class BuildCommand
             throw new Exception("The build was not successful");
         }
     }
+
 }

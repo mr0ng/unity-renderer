@@ -2,6 +2,9 @@ using System.Collections;
 using DCL;
 using DCL.Chat;
 using DCL.Helpers;
+using DCL.Social.Chat;
+using DCl.Social.Friends;
+using DCL.Social.Friends;
 using NUnit.Framework;
 using UnityEngine;
 using NSubstitute;
@@ -12,24 +15,19 @@ namespace Tests
     public class HUDControllerShould : IntegrationTestSuite_Legacy
     {
         private IHUDController hudController;
-        private FriendsController friendsController;
-        private ChatController chatController;
 
         protected override IEnumerator SetUp()
         {
             yield return base.SetUp();
-            
-            friendsController = TestUtils.CreateComponentWithGameObject<FriendsController>("FriendsController");
-            chatController = TestUtils.CreateComponentWithGameObject<ChatController>("ChatController");
-            hudController = new HUDController(new HUDFactory());
+
+            FriendsController.CreateSharedInstance(Substitute.For<IFriendsApiBridge>());
+            hudController = new HUDController(new DataStore_FeatureFlag(), new HUDFactory());
             hudController.Initialize();
             yield return null;
         }
 
         protected override IEnumerator TearDown()
         {
-            Object.Destroy(chatController.gameObject);
-            Object.Destroy(friendsController.gameObject);
             hudController.Dispose();
             yield return base.TearDown();
         }

@@ -1,40 +1,31 @@
 # Decentraland Unity Renderer
 
-This repository contains the Unity part of [decentraland explorer](https://play.decentraland.org). This component works alongside Kernel to produce an Explorer build.
+This repository contains the reference implementation of the [decentraland explorer](https://play.decentraland.org). It includes two main big components, located in the folders:
 
-## Before you start
-
-1. [Contribution Guidelines](.github/CONTRIBUTING.md)
-2. [Coding Guidelines](docs/style-guidelines.md)
-3. [Code Review Standards](docs/code-review-standards.md)
-4. [Architecture](https://github.com/decentraland/architecture)
+* `unity-renderer` which contains the main 3D experience and UI
+* `browser-interface` to connect to the different aspects requiring of a web browser, such as connection with a wallet and WebRTC communications
 
 # Running the Explorer
 
 ## Main Dependencies
 
-This repo requires `git lfs` to track images and other binary files. https://git-lfs.github.com/ .
-So, before anything make sure you have it installed by typing:
+* Install images and binary files using `git lfs` ([git-lfs.github.com](https://git-lfs.github.com/)). These can be installed from bash or PowerShell by typing:
 
     git lfs install
     git lfs pull
 
----
-
-## Debug using Unity
-
-Take this path if you intend to contribute on features without the need of modifying Kernel.
-This is the recommended path for artists.
+* The [Unity](https://unity.com) engine and IDE, currently using version 2021.3.14f1
+* [node.js](https://nodejs.com), version 16 or later
 
 ### Steps
 
-1. Download and install Unity 2020.3.34f1
+1. Download and install Unity 2021.3.14f1
 2. Open the scene named `InitialScene`
 3. Within the scene, select the `DebugConfig` GameObject.
 4. On `DebugConfig` inspector, make sure that `Base url mode` is set to `Custom`
    and `Base url custom` is set to `https://play.decentraland.zone/?`
 5. Run the Initial Scene in the Unity editor
-6. A browser tab with `explorer` should open automatically and steal your focus, don't close it!. Login with your wallet, go back to Unity and explorer should start running on the `Game View`.
+6. A browser tab with `explorer` should open automatically and steal your focus, don't close it! Login with your wallet, go back to Unity and explorer should start running on the `Game View`.
 7. As you can see, `DebugConfig` has other special options like the starting position, etc. You are welcome to use them as you see fit, but you'll have to close the tab and restart the scene for them to make effect.
 
 ### Troubleshooting
@@ -55,19 +46,22 @@ Then, on the Unity editor, click on `Assets > Reimport All`
 
 To test against a build made on this repository, you can use a link with this format:
 
-    https://play.decentraland.zone/?renderer-branch=<branch-name>
+    https://play.decentraland.zone/?explorer-branch=<branch-name>
 
 Note that using this approach, the Unity builds will run against kernel `master` HEAD.
 
 If you want to test your Unity branch against a specific kernel branch, you'll have to use the `renderer` url param like this:
 
-    https://play.decentraland.zone/?renderer-branch=<branch-name>&kernel-branch=<kernel-branch-name>
+    https://play.decentraland.zone/?explorer-branch=<branch-name>&kernel-branch=<kernel-branch-name>
 
 If the CI for both branches succeeds, you can browse to the generated link and test your changes. Bear in mind that any push will kick the CI. There's no need to create a pull request.
 
----
+# Links for Contributors
 
-<a name="advanced-debugging-scenarios"></a>
+1. [Contribution Guidelines](.github/CONTRIBUTING.md)
+2. [Coding Guidelines](docs/style-guidelines.md)
+3. [Code Review Standards](docs/code-review-standards.md)
+4. [Architecture](https://github.com/decentraland/architecture)
 
 # Advanced debugging scenarios
 
@@ -75,7 +69,7 @@ If the CI for both branches succeeds, you can browse to the generated link and t
 
 Use this approach when working on any features that need both Kernel and Unity modifications, and you need to watch Unity code changes fast without the need of injecting a wasm targeted build in the browser.
 
-When the steps are followed, you will be able to test your changes with just pressing the "Play" button within Unity. This will open a tab running the local Kernel build and Unity will connect to it using websocket.
+When the steps are followed, you will be able to test your changes by just pressing the "Play" button within Unity. This will open a tab running the local Kernel build and Unity will connect to it using websocket.
 
 This is the most useful debugging scenario for advanced feature implementation.
 
@@ -108,7 +102,7 @@ Alternatively you can go through these 2 steps after step 3 and load the build l
 1. Make sure you have the [explorer website repository](https://github.com/decentraland/explorer-website) cloned.
 2. Make sure you have the local website up and running by executing `npm run start:linked` in the cloned repo directory (`npm i` first just in case).
 3. When the WebGL build finishes, copy all the files inside the resulting `/build` folder (`unity.loader.js` is not necessary as we use a modified loader) and paste them inside `explorer-website/node_modules/@dcl/unity-renderer`.
-4. Access using using `localhost:3000`
+4. Access using `localhost:3000`
 
 ### Troubleshooting
 

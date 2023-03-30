@@ -8,6 +8,10 @@ namespace ECSSystems.InputSenderSystem
 {
     public static class ECSInputSenderSystem
     {
+        // Entities' number as buffer for PointerEventResult, the range is [MIN_ENTITY_TARGET, MAX_ENTITY_TARGET]
+        private const long MIN_ENTITY_TARGET = 32;
+        private const long MAX_ENTITY_TARGET = 64;
+
         private class State
         {
             public IInternalECSComponent<InternalInputEventResults> inputResultComponent;
@@ -37,8 +41,13 @@ namespace ECSSystems.InputSenderSystem
                 if (!model.dirty)
                     continue;
 
+                inputResults[i].value.model.lastEntity++;
+                if (inputResults[i].value.model.lastEntity < MIN_ENTITY_TARGET || inputResults[i].value.model.lastEntity >= MAX_ENTITY_TARGET)
+                {
+                    inputResults[i].value.model.lastEntity = MIN_ENTITY_TARGET;
+                }
+
                 var scene = inputResults[i].value.scene;
-                var entity = inputResults[i].value.entity;
 
                 PBPointerEventsResult result = new PBPointerEventsResult();
                 result.Commands.Capacity = model.events.Count;
@@ -49,16 +58,16 @@ namespace ECSSystems.InputSenderSystem
                 {
                     result.Commands.Add(new PBPointerEventsResult.Types.PointerCommand()
                     {
-                        Analog = inputEvent.analog,
                         Button = inputEvent.button,
                         Hit = inputEvent.hit,
                         State = inputEvent.type,
                         Timestamp = inputEvent.timestamp
                     });
                 }
+                model.events.Clear();
 
-                writer.PutComponent(scene.sceneData.id,
-                    entity.entityId,
+                writer.PutComponent(scene.sceneData.sceneNumber,
+                    inputResults[i].value.model.lastEntity,
                     ComponentID.POINTER_EVENTS_RESULT,
                     result,
                     ECSComponentWriteType.SEND_TO_SCENE | ECSComponentWriteType.WRITE_STATE_LOCALLY);

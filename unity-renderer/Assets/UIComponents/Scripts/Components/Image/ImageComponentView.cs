@@ -109,10 +109,10 @@ public class ImageComponentView : BaseComponentView, IImageComponentView, ICompo
 
 
         DestroyInterntally(currentSprite);
-        
+
         base.Dispose();
     }
-    
+
     private static void DestroyInterntally(Object obj)
     {
 #if UNITY_EDITOR
@@ -193,11 +193,11 @@ public class ImageComponentView : BaseComponentView, IImageComponentView, ICompo
         image.enabled = !isVisible;
         loadingIndicator.SetActive(isVisible);
     }
-    
+
     internal void OnImageObserverUpdated(Texture2D texture)
     {
         DestroyInterntally(currentSprite);
-        
+
         currentSprite = texture != null ? Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), vector2oneHalf, 100, 0, SpriteMeshType.FullRect, Vector4.one, false) : null;
 
         SetImage(currentSprite, false);

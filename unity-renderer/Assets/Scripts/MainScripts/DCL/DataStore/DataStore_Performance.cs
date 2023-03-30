@@ -4,5 +4,6 @@ namespace DCL
     {
         public readonly BaseVariable<bool> multithreading = new BaseVariable<bool>(true);
         public readonly BaseVariable<int> maxDownloads = new BaseVariable<int>(20);
+        public readonly BaseVariable<int> concurrentABRequests = new ();
     }
 }

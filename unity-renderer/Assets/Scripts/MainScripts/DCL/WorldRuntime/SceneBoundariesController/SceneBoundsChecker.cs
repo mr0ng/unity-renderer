@@ -8,9 +8,11 @@ namespace DCL.Controllers
 {
     public class SceneBoundsChecker : ISceneBoundsChecker
     {
+        private const float NERFED_TIME_BUDGET = 0.5f / 1000f;
+        private const float RECHECK_BUDGET = 0.5f;
         public event Action<IDCLEntity, bool> OnEntityBoundsCheckerStatusChanged;
         public bool enabled => entitiesCheckRoutine != null;
-        public float timeBetweenChecks { get; set; } = 0.5f;
+        public float timeBetweenChecks { get; set; } = RECHECK_BUDGET;
         public int entitiesToCheckCount => entitiesToCheck.Count;
 
         private const bool VERBOSE = false;
@@ -22,6 +24,11 @@ namespace DCL.Controllers
         private Coroutine entitiesCheckRoutine = null;
         private float lastCheckTime;
 
+        private Service<IMessagingControllersManager> messagingManagerService;
+        private IMessagingControllersManager messagingManager => messagingManagerService.Ref;
+
+        private bool isNerfed;
+
         public void Initialize()
         {
             Start();
@@ -30,6 +37,7 @@ namespace DCL.Controllers
         public SceneBoundsChecker(ISceneBoundsFeedbackStyle feedbackStyle = null)
         {
             this.feedbackStyle = feedbackStyle ?? new SceneBoundsFeedbackStyle_Simple();
+            isNerfed = DataStore.i.featureFlags.flags.Get().IsFeatureEnabled("NERF_SBC");
         }
 
         public void SetFeedbackStyle(ISceneBoundsFeedbackStyle feedbackStyle)
@@ -46,18 +54,20 @@ namespace DCL.Controllers
 
         // TODO: Improve MessagingControllersManager.i.timeBudgetCounter usage once we have the centralized budget controller for our immortal coroutines
         private IEnumerator CheckEntities()
-        {   
+        {
             while (true)
             {
+                // Kinerius: Since the nerf can skip the process a lot faster than before, we need faster rechecks
+                var finalTimeBetweenChecks = isNerfed ? NERFED_TIME_BUDGET : timeBetweenChecks;
+
                 float elapsedTime = Time.realtimeSinceStartup - lastCheckTime;
-                if ((entitiesToCheck.Count > 0) && (timeBetweenChecks <= 0f || elapsedTime >= timeBetweenChecks))
+                if ((entitiesToCheck.Count > 0) && (finalTimeBetweenChecks <= 0f || elapsedTime >= finalTimeBetweenChecks))
                 {
-                    //TODO(Brian): Remove later when we implement a centralized way of handling time budgets
-                    var messagingManager = Environment.i.messaging.manager as MessagingControllersManager;
+                    var timeBudget = NERFED_TIME_BUDGET;
 
                     void processEntitiesList(HashSet<IDCLEntity> entities)
                     {
-                        if (messagingManager != null && messagingManager.timeBudgetCounter <= 0f)
+                        if (IsTimeBudgetDepleted(timeBudget))
                         {
                             if(VERBOSE)
                                 logger.Verbose("Time budget reached, escaping entities processing until next iteration... ");
@@ -67,7 +77,7 @@ namespace DCL.Controllers
                         using HashSet<IDCLEntity>.Enumerator iterator = entities.GetEnumerator();
                         while (iterator.MoveNext())
                         {
-                            if (messagingManager != null && messagingManager.timeBudgetCounter <= 0f)
+                            if (IsTimeBudgetDepleted(timeBudget))
                             {
                                 if(VERBOSE)
                                     logger.Verbose("Time budget reached, escaping entities processing until next iteration... ");
@@ -80,14 +90,20 @@ namespace DCL.Controllers
                             checkedEntities.Add(iterator.Current);
 
                             float finishTime = Time.realtimeSinceStartup;
+                            float usedTimeBudget = finishTime - startTime;
 
-                            if ( messagingManager != null )
-                                messagingManager.timeBudgetCounter -= (finishTime - startTime);
+                            if (!isNerfed)
+                            {
+                                if ( messagingManager != null )
+                                    messagingManager.timeBudgetCounter -= usedTimeBudget;
+                            }
+
+                            timeBudget -= usedTimeBudget;
                         }
                     }
 
                     processEntitiesList(entitiesToCheck);
-                    
+
                     // As we can't modify the hashset while traversing it, we keep track of the entities that should be removed afterwards
                     using (var iterator = checkedEntities.GetEnumerator())
                     {
@@ -96,7 +112,7 @@ namespace DCL.Controllers
                             RemoveEntity(iterator.Current, removeIfPersistent: false, resetState: false);
                         }
                     }
-                    
+
                     if(VERBOSE)
                         logger.Verbose($"Finished checking entities: checked entities {checkedEntities.Count}; entitiesToCheck left: {entitiesToCheck.Count}");
 
@@ -108,6 +124,7 @@ namespace DCL.Controllers
                 yield return null;
             }
         }
+        private bool IsTimeBudgetDepleted(float timeBudget) { return isNerfed ? timeBudget <= 0f : messagingManager != null && messagingManager.timeBudgetCounter <= 0f; }
 
         public void Restart()
         {
@@ -153,9 +170,9 @@ namespace DCL.Controllers
                 if (!isPersistent && !entity.isInsideSceneOuterBoundaries)
                     return;
             }
-    
+
             entitiesToCheck.Add(entity);
-            
+
             if (isPersistent)
                 persistentEntities.Add(entity);
         }
@@ -167,7 +184,7 @@ namespace DCL.Controllers
 
             entitiesToCheck.Remove(entity);
             persistentEntities.Remove(entity);
-            
+
             if(resetState)
                 SetMeshesAndComponentsInsideBoundariesState(entity, true);
         }
@@ -204,34 +221,30 @@ namespace DCL.Controllers
             else
                 EvaluateEntityPosition(entity, onlyOuterBoundsCheck);
         }
-        
+
         private void EvaluateMeshBounds(IDCLEntity entity, bool onlyOuterBoundsCheck = false)
         {
-            // TODO: Can we cache the MaterialTransitionController somewhere to avoid this GetComponent() call?
-            // If the mesh is being loaded we should skip the evaluation (it will be triggered again later when the loading finishes)
-            if (entity.meshRootGameObject.GetComponent<MaterialTransitionController>()) // the object's MaterialTransitionController is destroyed when it finishes loading
-                return;
-
             var loadWrapper = Environment.i.world.state.GetLoaderForEntity(entity);
             if (loadWrapper != null && !loadWrapper.alreadyLoaded)
                 return;
-            
-            entity.isInsideSceneOuterBoundaries = entity.scene.IsInsideSceneOuterBoundaries(entity.meshesInfo.mergedBounds);
-            
+
+            entity.UpdateOuterBoundariesStatus(entity.scene.IsInsideSceneOuterBoundaries(entity.meshesInfo.mergedBounds));
+
+
             if (!entity.isInsideSceneOuterBoundaries)
                 SetMeshesAndComponentsInsideBoundariesState(entity, false);
 
             if (onlyOuterBoundsCheck)
                 return;
-                
+
             SetMeshesAndComponentsInsideBoundariesState(entity, IsEntityMeshInsideSceneBoundaries(entity));
         }
-        
+
         private void EvaluateEntityPosition(IDCLEntity entity, bool onlyOuterBoundsCheck = false)
         {
             Vector3 entityGOPosition = entity.gameObject.transform.position;
-            entity.isInsideSceneOuterBoundaries = entity.scene.IsInsideSceneOuterBoundaries(entityGOPosition);
-            
+            entity.UpdateOuterBoundariesStatus(entity.scene.IsInsideSceneOuterBoundaries(entityGOPosition));
+
             if (!entity.isInsideSceneOuterBoundaries)
             {
                 SetComponentsInsideBoundariesValidState(entity, false);
@@ -240,7 +253,7 @@ namespace DCL.Controllers
 
             if (onlyOuterBoundsCheck)
                 return;
-            
+
             bool isInsideBoundaries = entity.scene.IsInsideSceneBoundaries(entityGOPosition + CommonScriptableObjects.worldOffset.Get());
             SetComponentsInsideBoundariesValidState(entity, isInsideBoundaries);
             SetEntityInsideBoundariesState(entity, isInsideBoundaries);
@@ -249,15 +262,15 @@ namespace DCL.Controllers
         private void EvaluateAvatarMeshBounds(IDCLEntity entity, bool onlyOuterBoundsCheck = false)
         {
             Vector3 entityGOPosition = entity.gameObject.transform.position;
-            
-            // Heuristic using the entity scale for the size of the avatar bounds, otherwise we should configure the 
-            // entity's meshRootGameObject, etc. after its GPU skinning runs and use the regular entity mesh evaluation 
+
+            // Heuristic using the entity scale for the size of the avatar bounds, otherwise we should configure the
+            // entity's meshRootGameObject, etc. after its GPU skinning runs and use the regular entity mesh evaluation
             Bounds avatarBounds = new Bounds();
             avatarBounds.center = entityGOPosition;
             avatarBounds.size = entity.gameObject.transform.lossyScale;
-            
-            entity.isInsideSceneOuterBoundaries = entity.scene.IsInsideSceneOuterBoundaries(avatarBounds);
-            
+
+            entity.UpdateOuterBoundariesStatus(entity.scene.IsInsideSceneOuterBoundaries(avatarBounds));
+
             if (!entity.isInsideSceneOuterBoundaries)
             {
                 SetComponentsInsideBoundariesValidState(entity, false);
@@ -266,7 +279,7 @@ namespace DCL.Controllers
 
             if (onlyOuterBoundsCheck)
                 return;
-            
+
             bool isInsideBoundaries = entity.scene.IsInsideSceneBoundaries(avatarBounds);
             SetComponentsInsideBoundariesValidState(entity, isInsideBoundaries);
             SetEntityInsideBoundariesState(entity, isInsideBoundaries);
@@ -276,8 +289,8 @@ namespace DCL.Controllers
         {
             if (entity.isInsideSceneBoundaries == isInsideBoundaries)
                 return;
-            
-            entity.isInsideSceneBoundaries = isInsideBoundaries;
+
+            entity.UpdateInsideBoundariesStatus(isInsideBoundaries);
             OnEntityBoundsCheckerStatusChanged?.Invoke(entity, isInsideBoundaries);
         }
 
@@ -291,14 +304,14 @@ namespace DCL.Controllers
 
         public bool IsEntityMeshInsideSceneBoundaries(IDCLEntity entity)
         {
-            if (entity.meshesInfo == null 
-                || entity.meshesInfo.meshRootGameObject == null 
+            if (entity.meshesInfo == null
+                || entity.meshesInfo.meshRootGameObject == null
                 || entity.meshesInfo.mergedBounds == null)
                 return false;
 
             // 1st check (full mesh AABB)
             bool isInsideBoundaries = entity.scene.IsInsideSceneBoundaries(entity.meshesInfo.mergedBounds);
-            
+
             // 2nd check (submeshes & colliders AABB)
             if (!isInsideBoundaries)
             {
@@ -307,7 +320,7 @@ namespace DCL.Controllers
 
             return isInsideBoundaries;
         }
-        
+
         private bool AreSubmeshesInsideBoundaries(IDCLEntity entity)
         {
             for (int i = 0; i < entity.meshesInfo.renderers.Length; i++)
@@ -342,7 +355,7 @@ namespace DCL.Controllers
             SetEntityMeshesInsideBoundariesState(entity.meshesInfo, isInsideBoundaries);
             SetEntityCollidersInsideBoundariesState(entity.meshesInfo, isInsideBoundaries);
             SetComponentsInsideBoundariesValidState(entity, isInsideBoundaries);
-            
+
             // Should always be set last as entity.isInsideSceneBoundaries is checked to avoid re-running code unnecessarily
             SetEntityInsideBoundariesState(entity, isInsideBoundaries);
         }
@@ -356,11 +369,11 @@ namespace DCL.Controllers
         {
             if (meshesInfo == null || meshesInfo.colliders.Count == 0 || !meshesInfo.currentShape.HasCollisions())
                 return;
-            
+
             foreach (Collider collider in meshesInfo.colliders)
             {
                 if (collider == null) continue;
-                
+
                 if (collider.enabled != isInsideBoundaries)
                     collider.enabled = isInsideBoundaries;
             }
@@ -370,10 +383,10 @@ namespace DCL.Controllers
         {
             if(entity.isInsideSceneBoundaries == isInsideBoundaries || !DataStore.i.sceneBoundariesChecker.componentsCheckSceneBoundaries.ContainsKey(entity.entityId))
                 return;
-            
+
             foreach (IOutOfSceneBoundariesHandler component in DataStore.i.sceneBoundariesChecker.componentsCheckSceneBoundaries[entity.entityId])
             {
-                component.UpdateOutOfBoundariesState(isInsideBoundaries);   
+                component.UpdateOutOfBoundariesState(isInsideBoundaries);
             }
         }
     }

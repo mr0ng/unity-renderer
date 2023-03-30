@@ -5,6 +5,8 @@ using NSubstitute.Extensions;
 using NUnit.Framework;
 using SocialFeaturesAnalytics;
 using System.Collections.Generic;
+using DCl.Social.Friends;
+using DCL.Social.Friends;
 using UnityEngine;
 using static DCL.SettingsCommon.GeneralSettings;
 
@@ -70,7 +72,7 @@ public class VoiceChatWindowControllerShould
         if (isVisible)
             voiceChatWindowComponentView.Received(1).Show();
         else
-            voiceChatWindowComponentView.Received(1).Hide();
+            voiceChatWindowComponentView.ReceivedWithAnyArgs(1).Hide();
     }
 
     [Test]
@@ -141,7 +143,7 @@ public class VoiceChatWindowControllerShould
         voiceChatWindowController.CloseView();
 
         // Assert
-        voiceChatWindowComponentView.Received(1).Hide();
+        voiceChatWindowComponentView.ReceivedWithAnyArgs(1).Hide();
     }
 
     [Test]
@@ -199,8 +201,8 @@ public class VoiceChatWindowControllerShould
         // Arrange
         string testPlayerId = "playerId4";
         string testPlayerName = "Test Player";
-        Player testPlayer = new Player 
-        { 
+        Player testPlayer = new Player
+        {
             id = testPlayerId,
             name = testPlayerName
         };

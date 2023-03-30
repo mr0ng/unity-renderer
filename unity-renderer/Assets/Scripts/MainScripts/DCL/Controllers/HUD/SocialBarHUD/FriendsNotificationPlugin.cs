@@ -1,5 +1,6 @@
 ﻿using DCL;
 using DCL.Helpers;
+using DCL.Social.Friends;
 
 public class FriendsNotificationPlugin : IPlugin
 {

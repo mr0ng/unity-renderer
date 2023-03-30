@@ -18,6 +18,8 @@ namespace DCL.SettingsCommon
         public const string SKYBOX_TIME = "skyboxTime";
         public const string FIRST_PERSON_CAMERA_FOV = "firstPersonCameraFOV";
         public const string USE_INTERNAL_BROWSER = "useInternalBrowser";
+        public const string SHOW_AVATAR_NAMES = "showAvatarNames";
+        public const string CAMERA_MOVEMENT_MODE = "cameraMovementMode";
 
         private readonly IPlayerPrefsSettingsByKey settingsByKey;
         private readonly GeneralSettings defaultSettings;
@@ -25,9 +27,7 @@ namespace DCL.SettingsCommon
 
         public event Action<GeneralSettings> OnChanged;
 
-        public PlayerPrefsGeneralSettingsRepository(
-            IPlayerPrefsSettingsByKey settingsByKey,
-            GeneralSettings defaultSettings)
+        public PlayerPrefsGeneralSettingsRepository(IPlayerPrefsSettingsByKey settingsByKey, GeneralSettings defaultSettings)
         {
             this.settingsByKey = settingsByKey;
             this.defaultSettings = defaultSettings;
@@ -61,6 +61,8 @@ namespace DCL.SettingsCommon
             settingsByKey.SetFloat(SKYBOX_TIME, currentSettings.skyboxTime);
             settingsByKey.SetFloat(FIRST_PERSON_CAMERA_FOV, currentSettings.firstPersonCameraFOV);
             settingsByKey.SetBool(USE_INTERNAL_BROWSER,currentSettings.useInternalBrowser);
+            settingsByKey.SetBool(SHOW_AVATAR_NAMES, currentSettings.showAvatarNames);
+            settingsByKey.SetBool(CAMERA_MOVEMENT_MODE, currentSettings.leftMouseButtonCursorLock);
         }
 
         public bool HasAnyData() => !Data.Equals(defaultSettings);
@@ -85,6 +87,8 @@ namespace DCL.SettingsCommon
                 settings.skyboxTime = settingsByKey.GetFloat(SKYBOX_TIME, defaultSettings.skyboxTime);
                 settings.firstPersonCameraFOV = settingsByKey.GetFloat(FIRST_PERSON_CAMERA_FOV, defaultSettings.firstPersonCameraFOV);
                 settings.useInternalBrowser = settingsByKey.GetBool(USE_INTERNAL_BROWSER, defaultSettings.useInternalBrowser);
+                settings.showAvatarNames = settingsByKey.GetBool(SHOW_AVATAR_NAMES, defaultSettings.showAvatarNames);
+                settings.leftMouseButtonCursorLock = settingsByKey.GetBool(CAMERA_MOVEMENT_MODE, defaultSettings.leftMouseButtonCursorLock);
             }
             catch (Exception e)
             {

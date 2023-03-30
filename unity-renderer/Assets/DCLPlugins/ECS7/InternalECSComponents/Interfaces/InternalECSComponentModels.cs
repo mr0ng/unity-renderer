@@ -1,5 +1,7 @@
+using DCL.Components.Video.Plugin;
 using System.Collections.Generic;
 using DCL.ECSComponents;
+using System;
 using UnityEngine;
 using UnityEngine.UIElements;
 using RaycastHit = DCL.ECSComponents.RaycastHit;
@@ -21,6 +23,42 @@ namespace DCL.ECS7.InternalComponents
     {
         public Material material = null;
         public bool castShadows = true;
+    }
+
+    public class InternalVideoMaterial : InternalComponent
+    {
+        public readonly struct VideoTextureData
+        {
+            public readonly long videoId;
+            public readonly int textureType;
+
+            public VideoTextureData(long videoId, int textureType)
+            {
+                this.videoId = videoId;
+                this.textureType = textureType;
+            }
+        }
+
+        public Material material = null;
+        public IList<VideoTextureData> videoTextureDatas;
+    }
+
+    public class InternalVideoPlayer : InternalComponent
+    {
+        public readonly struct MaterialAssigned
+        {
+            public readonly Material material;
+            public readonly int textureType;
+
+            public MaterialAssigned(Material material, int textureType)
+            {
+                this.material = material;
+                this.textureType = textureType;
+            }
+        }
+
+        public WebVideoPlayer videoPlayer = null;
+        public IList<MaterialAssigned> assignedMaterials;
     }
 
     public class InternalColliders : InternalComponent
@@ -46,11 +84,11 @@ namespace DCL.ECS7.InternalComponents
             public RaycastHit hit;
             public PointerEventType type;
             public int timestamp;
-            public float analog;
         }
 
         public Queue<EventData> events;
         public int lastTimestamp;
+        public long lastEntity;
     }
 
     public class InternalUiContainer : InternalComponent
@@ -59,5 +97,12 @@ namespace DCL.ECS7.InternalComponents
         public readonly HashSet<int> components = new HashSet<int>();
         public VisualElement parentElement;
         public long parentId;
+        public long rigthOf;
+        public bool shouldSort;
+
+        public InternalUiContainer(long entityId)
+        {
+            rootElement.name += $"(Id: {entityId})";
+        }
     }
 }

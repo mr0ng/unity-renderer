@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using DCL.Interface;
+using DCL.ProfanityFiltering;
 using SocialFeaturesAnalytics;
 using UnityEngine;
 using Channel = DCL.Chat.Channels.Channel;
@@ -33,6 +34,9 @@ namespace DCL.Chat.HUD
         private string channelId;
         private Channel channel;
         private ChatMessage oldestMessage;
+        private bool showOnlyOnlineMembersOnPublicChannels => !dataStore.featureFlags.flags.Get().IsFeatureEnabled("matrix_presence_disabled");
+
+        private bool isVisible;
 
         public event Action OnPressBack;
         public event Action OnClosed;
@@ -55,7 +59,7 @@ namespace DCL.Chat.HUD
             this.profanityFilter = profanityFilter;
         }
 
-        public void Initialize(IChatChannelWindowView view = null)
+        public void Initialize(IChatChannelWindowView view = null, bool isVisible = true)
         {
             view ??= ChatChannelComponentView.Create();
             View = view;
@@ -80,6 +84,9 @@ namespace DCL.Chat.HUD
             toggleChatTrigger.OnTriggered += HandleChatInputTriggered;
 
             channelMembersHUDController = new ChannelMembersHUDController(view.ChannelMembersHUD, chatController, userProfileBridge);
+
+            SetVisibility(isVisible);
+            this.isVisible = isVisible;
         }
 
         public void Setup(string channelId)
@@ -97,16 +104,21 @@ namespace DCL.Chat.HUD
 
         public void SetVisibility(bool visible)
         {
+            if(isVisible == visible)
+                return;
+
+            isVisible = visible;
+
             SetVisiblePanelList(visible);
-            
+
             if (visible)
             {
                 ClearChatControllerListeners();
-                
+
                 chatController.OnAddMessage += HandleMessageReceived;
                 chatController.OnChannelLeft += HandleChannelLeft;
                 chatController.OnChannelUpdated += HandleChannelUpdated;
-                
+
                 if (channelMembersHUDController.IsVisible)
                     channelMembersHUDController.SetAutomaticReloadingActive(true);
 
@@ -136,7 +148,7 @@ namespace DCL.Chat.HUD
                 View.Hide();
             }
 
-            dataStore.channels.channelToBeOpenedFromLink.Set(null, notifyEvent: false);
+            dataStore.channels.channelToBeOpened.Set(null, notifyEvent: false);
         }
 
         public void Dispose()
@@ -147,7 +159,7 @@ namespace DCL.Chat.HUD
                 mouseCatcher.OnMouseLock -= Hide;
 
             toggleChatTrigger.OnTriggered -= HandleChatInputTriggered;
-            
+
             chatHudController.OnSendMessage -= HandleSendChatMessage;
             chatHudController.OnMessageSentBlockedBySpam -= HandleMessageBlockedBySpam;
 
@@ -192,29 +204,35 @@ namespace DCL.Chat.HUD
             }
 
             chatController.Send(message);
-            socialAnalytics.SendMessageSentToChannel(channel.Name, message.body.Length, "channel");
         }
 
-        private void HandleMessageReceived(ChatMessage message)
+        private void HandleMessageReceived(ChatMessage[] messages)
         {
-            if (!IsMessageFomCurrentChannel(message)) return;
+            var messageLogUpdated = false;
 
-            UpdateOldestMessage(message);
+            foreach (var message in messages)
+            {
+                if (!IsMessageFomCurrentChannel(message)) continue;
 
-            message.isChannelMessage = true;
-            // TODO: right now the channel history is disabled, but we must find a workaround to support history + max message limit allocation for performance reasons
-            // one approach could be to increment the max amount of messages depending on how many pages you loaded from the history
-            // for example: 1 page = 30 messages, 2 pages = 60 messages, and so on..
-            chatHudController.AddChatMessage(message, limitMaxEntries: true);
+                UpdateOldestMessage(message);
 
-            if (View.IsActive)
+                message.isChannelMessage = true;
+                // TODO: right now the channel history is disabled, but we must find a workaround to support history + max message limit allocation for performance reasons
+                // one approach could be to increment the max amount of messages depending on how many pages you loaded from the history
+                // for example: 1 page = 30 messages, 2 pages = 60 messages, and so on..
+                chatHudController.AddChatMessage(message, limitMaxEntries: true);
+
+                View?.SetLoadingMessagesActive(false);
+                View?.SetOldMessagesLoadingActive(false);
+
+                messageLogUpdated = true;
+            }
+
+            if (View.IsActive && messageLogUpdated)
             {
                 // The messages from 'channelId' are marked as read if the channel window is currently open
                 MarkChannelMessagesAsRead();
             }
-
-            View?.SetLoadingMessagesActive(false);
-            View?.SetOldMessagesLoadingActive(false);
         }
 
         private void UpdateOldestMessage(ChatMessage message)
@@ -348,9 +366,10 @@ namespace DCL.Chat.HUD
         private PublicChatModel ToPublicChatModel(Channel channel)
         {
             return new PublicChatModel(channelId, channel.Name, channel.Description,
-                channel.Joined, channel.MemberCount, channel.Muted);
+                channel.Joined, channel.MemberCount, channel.Muted,
+                showOnlyOnlineMembersOnPublicChannels);
         }
-        
+
         private void ClearChatControllerListeners()
         {
             if (chatController == null) return;
@@ -364,7 +383,7 @@ namespace DCL.Chat.HUD
             chatHudController.FocusInputField();
             MarkChannelMessagesAsRead();
         }
-        
+
         private void HandleMessageBlockedBySpam(ChatMessage message)
         {
             chatHudController.AddChatMessage(new ChatEntryModel

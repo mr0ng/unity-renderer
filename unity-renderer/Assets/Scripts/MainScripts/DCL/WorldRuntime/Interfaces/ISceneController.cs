@@ -12,16 +12,16 @@ namespace DCL
         void Update();
         void LateUpdate();
         void SendSceneMessage(string payload);
-        event Action<string> OnReadyScene;
-        void SendSceneReady(string sceneId);
-        void ActivateBuilderInWorldEditScene();
-        void DeactivateBuilderInWorldEditScene();
+        event Action<int> OnReadyScene;
+        void SendSceneReady(int sceneNumber);
         void UpdateParcelScenesExecute(LoadParcelScenesMessage.UnityParcelScene scene);
-        void UnloadScene(string sceneKey);
+
+        void LoadUnityParcelScene(LoadParcelScenesMessage.UnityParcelScene sceneToLoad);
+        void UnloadScene(int sceneNumber);
         void LoadParcelScenes(string JSONScenePayload);
         void UpdateParcelScenes(string JSONScenePayload);
         void UnloadAllScenesQueued();
-        void CreateGlobalScene(string json);
+        void CreateGlobalScene(CreateGlobalSceneMessage globalScene);
         void IsolateScene(IParcelScene sceneToActive);
         void ReIntegrateIsolatedScene();
 

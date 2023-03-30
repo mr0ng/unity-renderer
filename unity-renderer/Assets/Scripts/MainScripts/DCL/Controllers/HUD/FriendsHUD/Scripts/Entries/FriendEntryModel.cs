@@ -1,4 +1,5 @@
 ﻿using DCL.Helpers;
+using DCL.Social.Friends;
 using UnityEngine;
 
 public class FriendEntryModel
@@ -16,7 +17,7 @@ public class FriendEntryModel
     public FriendEntryModel()
     {
     }
-    
+
     public FriendEntryModel(FriendEntryModel model)
     {
         userId = model.userId;

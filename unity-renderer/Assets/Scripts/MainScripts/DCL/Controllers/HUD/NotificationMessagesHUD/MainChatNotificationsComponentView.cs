@@ -1,10 +1,9 @@
+using Cysharp.Threading.Tasks;
+using DCL.Helpers;
+using DG.Tweening;
 using System;
 using System.Collections.Generic;
 using System.Threading;
-using Cysharp.Threading.Tasks;
-using DCL.Helpers;
-using DCL.Interface;
-using DG.Tweening;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -15,22 +14,24 @@ namespace DCL.Chat.Notifications
     {
         [SerializeField] private RectTransform chatEntriesContainer;
         [SerializeField] private GameObject chatNotification;
+        [SerializeField] private GameObject friendRequestNotification;
         [SerializeField] private ScrollRect scrollRectangle;
         [SerializeField] private Button notificationButton;
         [SerializeField] private ShowHideAnimator panelAnimator;
         [SerializeField] private ShowHideAnimator scrollbarAnimator;
 
         private const string NOTIFICATION_POOL_NAME_PREFIX = "NotificationEntriesPool_";
+        private const string FRINED_REQUEST_NOTIFICATION_POOL_NAME_PREFIX = "FriendRequestNotificationEntriesPool_";
         private const int MAX_NOTIFICATION_ENTRIES = 30;
 
-        public event Action<string> OnClickedNotification;
+        public event Action<string> OnClickedChatMessage;
+        public event IMainChatNotificationsComponentView.ClickedNotificationDelegate OnClickedFriendRequest;
         public event Action<bool> OnResetFade;
         public event Action<bool> OnPanelFocus;
 
         internal readonly Queue<PoolableObject> poolableQueue = new Queue<PoolableObject>();
 
-        internal readonly Queue<ChatNotificationMessageComponentView> notificationQueue =
-            new Queue<ChatNotificationMessageComponentView>();
+        internal readonly Queue<BaseComponentView> notificationQueue = new Queue<BaseComponentView>();
 
         private readonly Vector2 notificationOffset = new Vector2(0, -56);
 
@@ -40,7 +41,6 @@ namespace DCL.Chat.Notifications
         private int notificationCount = 1;
         private TMP_Text notificationMessage;
         private CancellationTokenSource animationCancellationToken = new CancellationTokenSource();
-        private BaseVariable<string> openedChat => DataStore.i.HUDs.openedChat;
 
         public static MainChatNotificationsComponentView Create()
         {
@@ -58,7 +58,6 @@ namespace DCL.Chat.Notifications
 
         public override void Show(bool instant = false)
         {
-            openedChat.Set("");
             gameObject.SetActive(true);
         }
 
@@ -95,7 +94,7 @@ namespace DCL.Chat.Notifications
 
         public void ShowNotifications()
         {
-            foreach (ChatNotificationMessageComponentView notification in notificationQueue)
+            foreach (BaseComponentView notification in notificationQueue)
             {
                 notification.Show();
             }
@@ -103,7 +102,7 @@ namespace DCL.Chat.Notifications
 
         public void HideNotifications()
         {
-            foreach (ChatNotificationMessageComponentView notification in notificationQueue)
+            foreach (BaseComponentView notification in notificationQueue)
             {
                 notification.Hide();
             }
@@ -189,6 +188,48 @@ namespace DCL.Chat.Notifications
             CheckNotificationCountAndRelease();
         }
 
+        public void AddNewFriendRequestNotification(FriendRequestNotificationModel model)
+        {
+            entryPool = GetFriendRequestNotificationEntryPool();
+            var newNotification = entryPool.Get();
+
+            var entry = newNotification.gameObject.GetComponent<FriendRequestNotificationComponentView>();
+            poolableQueue.Enqueue(newNotification);
+            notificationQueue.Enqueue(entry);
+
+            entry.OnClickedNotification -= ClickedOnFriendRequest;
+            entry.onFocused -= FocusedOnNotification;
+            entry.showHideAnimator.OnWillFinishHide -= SetScrollToEnd;
+
+            PopulateFriendRequestNotification(entry, model);
+
+            entry.transform.SetParent(chatEntriesContainer, false);
+            entry.RefreshControl();
+            entry.OnClickedNotification += ClickedOnFriendRequest;
+            entry.onFocused += FocusedOnNotification;
+            entry.showHideAnimator.OnWillFinishHide += SetScrollToEnd;
+
+            chatEntriesContainer.anchoredPosition += notificationOffset;
+            if (isOverPanel)
+            {
+                notificationButton.gameObject.SetActive(true);
+                IncreaseNotificationCount();
+            }
+            else
+            {
+                ResetNotificationButton();
+                animationCancellationToken.Cancel();
+                animationCancellationToken = new CancellationTokenSource();
+                AnimateNewEntry(entry.gameObject.transform, animationCancellationToken.Token).Forget();
+            }
+
+            OnResetFade?.Invoke(!isOverMessage && !isOverPanel);
+            CheckNotificationCountAndRelease();
+
+            // TODO: refactor sfx usage into non-static
+            AudioScriptableObjects.FriendRequestEvent.Play();
+        }
+
         private async UniTaskVoid AnimateNewEntry(Transform notification, CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
@@ -237,36 +278,67 @@ namespace DCL.Chat.Notifications
             ResetNotificationButton();
         }
 
-        private void PopulatePrivateNotification(ChatNotificationMessageComponentView chatNotificationComponentView,
+        private void PopulatePrivateNotification(ChatNotificationMessageComponentView view,
             PrivateChatMessageNotificationModel model)
         {
-            chatNotificationComponentView.SetIsPrivate(true);
-            chatNotificationComponentView.SetMessage(model.Body);
-            chatNotificationComponentView.SetNotificationHeader("Private message");
-            chatNotificationComponentView.SetNotificationSender($"{model.Username}:");
-            chatNotificationComponentView.SetNotificationTargetId(model.SenderId);
+            string senderName = model.ImTheSender ? "You" : model.SenderUsername;
+
+            view.SetIsPrivate(true);
+            view.SetMaxContentCharacters(40 - senderName.Length);
+            view.SetMessage(model.Body);
+            view.SetNotificationHeader($"DM - {model.PeerUsername}");
+            view.SetNotificationSender($"{senderName}:");
+            view.SetNotificationTargetId(model.TargetId);
+            view.SetImageVisibility(!model.ImTheSender);
+
             if (!string.IsNullOrEmpty(model.ProfilePicture))
-                chatNotificationComponentView.SetImage(model.ProfilePicture);
+                view.SetImage(model.ProfilePicture);
+
+            if (model.ImTheSender)
+                view.DockRight();
+            else
+                view.DockLeft();
         }
 
-        private void PopulatePublicNotification(ChatNotificationMessageComponentView chatNotificationComponentView,
+        private void PopulatePublicNotification(ChatNotificationMessageComponentView view,
             PublicChannelMessageNotificationModel model)
         {
-            chatNotificationComponentView.SetIsPrivate(false);
-            chatNotificationComponentView.SetMessage(model.Body);
+            string channelId = model.ChannelId;
+            string channelName = model.ChannelName == "nearby" ? "~nearby" : $"#{model.ChannelName}";
+            string senderName = model.ImTheSender ? "You" : model.Username;
 
-            var channelId = model.ChannelId;
-            var channelName = model.ChannelName == "nearby" ? "~nearby" : $"#{model.ChannelName}";
+            view.SetIsPrivate(false);
+            view.SetMaxContentCharacters(40 - senderName.Length);
+            view.SetMessage(model.Body);
+            view.SetNotificationTargetId(channelId);
+            view.SetNotificationHeader(channelName);
+            view.SetNotificationSender($"{senderName}:");
+            view.SetImageVisibility(false);
 
-            chatNotificationComponentView.SetNotificationTargetId(channelId);
-            chatNotificationComponentView.SetNotificationHeader(channelName);
-            chatNotificationComponentView.SetNotificationSender($"{model.Username}:");
+            if (model.ImTheSender)
+                view.DockRight();
+            else
+                view.DockLeft();
         }
 
         private void ClickedOnNotification(string targetId)
         {
-            OnClickedNotification?.Invoke(targetId);
+            OnClickedChatMessage?.Invoke(targetId);
         }
+
+        private void PopulateFriendRequestNotification(FriendRequestNotificationComponentView friendRequestNotificationComponentView,
+            FriendRequestNotificationModel model)
+        {
+            friendRequestNotificationComponentView.SetFriendRequestId(model.FriendRequestId);
+            friendRequestNotificationComponentView.SetUser(model.UserId, model.UserName);
+            friendRequestNotificationComponentView.SetHeader(model.Header);
+            friendRequestNotificationComponentView.SetMessage(model.Message);
+            friendRequestNotificationComponentView.SetTimestamp(Utils.UnixTimeStampToLocalTime(model.Timestamp));
+            friendRequestNotificationComponentView.SetIsAccepted(model.IsAccepted);
+        }
+
+        private void ClickedOnFriendRequest(string friendRequestId, string userId, bool isAcceptedFromPeer) =>
+            OnClickedFriendRequest?.Invoke(friendRequestId, userId, isAcceptedFromPeer);
 
         private void FocusedOnNotification(bool isInFocus)
         {
@@ -285,7 +357,7 @@ namespace DCL.Chat.Notifications
         {
             if (poolableQueue.Count >= MAX_NOTIFICATION_ENTRIES)
             {
-                ChatNotificationMessageComponentView notificationToDequeue = notificationQueue.Dequeue();
+                BaseComponentView notificationToDequeue = notificationQueue.Dequeue();
                 notificationToDequeue.onFocused -= FocusedOnNotification;
                 entryPool.Release(poolableQueue.Dequeue());
             }
@@ -299,6 +371,22 @@ namespace DCL.Chat.Notifications
             entryPool = PoolManager.i.AddPool(
                 NOTIFICATION_POOL_NAME_PREFIX + name + GetInstanceID(),
                 Instantiate(chatNotification).gameObject,
+                maxPrewarmCount: MAX_NOTIFICATION_ENTRIES,
+                isPersistent: true);
+            entryPool.ForcePrewarm();
+
+            return entryPool;
+        }
+
+        private Pool GetFriendRequestNotificationEntryPool()
+        {
+            var entryPool = PoolManager.i.GetPool(FRINED_REQUEST_NOTIFICATION_POOL_NAME_PREFIX + name + GetInstanceID());
+            if (entryPool != null)
+                return entryPool;
+
+            entryPool = PoolManager.i.AddPool(
+                FRINED_REQUEST_NOTIFICATION_POOL_NAME_PREFIX + name + GetInstanceID(),
+                Instantiate(friendRequestNotification).gameObject,
                 maxPrewarmCount: MAX_NOTIFICATION_ENTRIES,
                 isPersistent: true);
             entryPool.ForcePrewarm();

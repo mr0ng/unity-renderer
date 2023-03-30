@@ -27,7 +27,7 @@ namespace DCL
         public BaseVariable<bool> isFPSPanelVisible = new BaseVariable<bool>();
         
         [System.NonSerialized]
-        public BaseDictionary<string, bool> showSceneBoundingBoxes = new BaseDictionary<string, bool>();
+        public BaseDictionary<int, bool> showSceneBoundingBoxes = new BaseDictionary<int, bool>();
         
         [System.NonSerialized]
         public  BaseVariable<bool> isPreviewMenuActive = new BaseVariable<bool>();
@@ -65,8 +65,7 @@ namespace DCL
         /// do Debug.Break() and log when processing each message
         /// </summary>
         public bool msgStepByStep = false;
-    
-
         //public bool openInternalBrowser = true;
+        public bool logWs;
     }
 }

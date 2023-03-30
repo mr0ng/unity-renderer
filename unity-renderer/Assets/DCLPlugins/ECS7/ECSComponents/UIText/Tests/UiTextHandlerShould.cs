@@ -2,12 +2,15 @@ using DCL;
 using DCL.Controllers;
 using DCL.ECS7.InternalComponents;
 using DCL.ECSComponents;
+using DCL.ECSComponents.UIText;
 using DCL.ECSRuntime;
 using DCL.Models;
+using Decentraland.Common;
 using NSubstitute;
 using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.UIElements;
+using Position = UnityEngine.UIElements.Position;
 
 namespace Tests
 {
@@ -26,7 +29,7 @@ namespace Tests
         public void SetUp()
         {
             sceneTestHelper = new ECS7TestUtilsScenesAndEntities();
-            scene = sceneTestHelper.CreateScene("temptation");
+            scene = sceneTestHelper.CreateScene(666);
             entity = scene.CreateEntity(1111);
 
             ECSComponentData<InternalUiContainer> internalCompData = null;
@@ -74,13 +77,13 @@ namespace Tests
             {
                 Value = "temptation",
                 FontSize = 34,
-                Color = new Color3() { R = 0.1f, G = 0.2f, B = 0.3f },
+                Color = new Color4() { R = 0.1f, G = 0.2f, B = 0.3f, A = 1 },
                 TextAlign = TextAlignMode.TamMiddleRight
             });
 
             Assert.AreEqual("temptation", handler.uiElement.text);
             Assert.AreEqual(new StyleLength(new Length(34, LengthUnit.Pixel)), handler.uiElement.style.fontSize);
-            Assert.AreEqual(new Color(0.1f, 0.2f, 0.3f), handler.uiElement.style.color.value);
+            Assert.AreEqual(new Color(0.1f, 0.2f, 0.3f, 1), handler.uiElement.style.color.value);
             Assert.AreEqual(TextAnchor.MiddleRight, handler.uiElement.style.unityTextAlign.value);
         }
 

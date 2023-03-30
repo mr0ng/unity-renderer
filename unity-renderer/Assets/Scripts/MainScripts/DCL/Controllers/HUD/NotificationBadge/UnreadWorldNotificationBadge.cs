@@ -1,4 +1,6 @@
+using DCL;
 using DCL.Chat;
+using DCL.Social.Chat;
 using TMPro;
 using UnityEngine;
 
@@ -36,9 +38,9 @@ public class UnreadWorldNotificationBadge : MonoBehaviour
 
     private void Start()
     {
-        Initialize(ChatController.i);
+        Initialize(Environment.i.serviceLocator.Get<IChatController>());
     }
-    
+
     private void OnDestroy()
     {
         if (chatController != null)

@@ -12,24 +12,25 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: de20c26162ae24092b9bf5d122b2d850, type: 3}
   m_Name: QualitySettingsData
   m_EditorClassIdentifier: 
-  defaultPresetIndex: 0
+  defaultPresetIndex: 1
   settings:
   - displayName: Low
     baseResolution: 0
     antiAliasing: 1
-    renderScale: 0.95
+    renderScale: 0.7
     shadows: 0
     softShadows: 0
     shadowResolution: 256
-    cameraDrawDistance: 59
+    cameraDrawDistance: 100
     bloom: 0
-    fpsCap: 0
+    fpsCap: 1
     shadowDistance: 45
     enableDetailObjectCulling: 1
     detailObjectCullingLimit: 85
     ssaoQuality: 1
     maxHQAvatars: 25
     reflectionResolution: 0
+    shaderQuality: 0
   - displayName: Medium
     baseResolution: 1
     antiAliasing: 1
@@ -46,6 +47,7 @@ MonoBehaviour:
     ssaoQuality: 2
     maxHQAvatars: 40
     reflectionResolution: 1
+    shaderQuality: 1
   - displayName: High
     baseResolution: 1
     antiAliasing: 4
@@ -62,8 +64,9 @@ MonoBehaviour:
     ssaoQuality: 2
     maxHQAvatars: 60
     reflectionResolution: 2
+    shaderQuality: 2
   - displayName: Ultra
-    baseResolution: 2
+    baseResolution: 1
     antiAliasing: 8
     renderScale: 1
     shadows: 1
@@ -78,3 +81,4 @@ MonoBehaviour:
     ssaoQuality: 3
     maxHQAvatars: 100
     reflectionResolution: 3
+    shaderQuality: 2

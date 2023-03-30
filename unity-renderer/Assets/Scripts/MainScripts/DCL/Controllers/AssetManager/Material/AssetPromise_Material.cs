@@ -1,7 +1,9 @@
-﻿using System;
+﻿using Cysharp.Threading.Tasks;
+using System;
 using System.Collections;
 using DCL.Helpers;
 using UnityEngine;
+using DCL.Shaders;
 
 namespace DCL
 {
@@ -72,7 +74,7 @@ namespace DCL
             }
             else
             {
-                BasicMaterial.SetUp(material, model.alphaTest);
+                BasicMaterial.SetUp(material, model.alphaTest, model.diffuseColor);
             }
 
             albedoTexturePromise = CreateTexturePromise(model.albedoTexture);
@@ -120,9 +122,19 @@ namespace DCL
                 return null;
 
             AssetPromise_Material_Model.Texture texture = textureData.Value;
-            var promise = new AssetPromise_Texture(texture.src, texture.wrapMode, texture.filterMode);
-            AssetPromiseKeeper_Texture.i.Keep(promise);
-            return promise;
+
+            if (texture.videoTexture)
+            {
+                var promise = new AssetPromise_EmptyTexture();
+                AssetPromiseKeeper_Texture.i.Keep(promise);
+                return promise;
+            }
+            else
+            {
+                var promise = new AssetPromise_Texture(texture.src, texture.wrapMode, texture.filterMode);
+                AssetPromiseKeeper_Texture.i.Keep(promise);
+                return promise;
+            }
         }
 
         private static IEnumerator WaitAll(AssetPromise_Texture p1, AssetPromise_Texture p2, AssetPromise_Texture p3, AssetPromise_Texture p4)

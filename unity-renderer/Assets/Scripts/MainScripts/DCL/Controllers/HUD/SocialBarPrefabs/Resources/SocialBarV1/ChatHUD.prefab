@@ -247,7 +247,6 @@ GameObject:
   - component: {fileID: 590022725704841183}
   - component: {fileID: 6653680574432472638}
   - component: {fileID: 620615709946968176}
-  - component: {fileID: 1411069277002511373}
   m_Layer: 5
   m_Name: Input
   m_TagString: Untagged
@@ -443,18 +442,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   showHtmlElement: 0
---- !u!114 &1411069277002511373
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1466904682867656693}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3d4ded867e561ad4fbd434e1b7dbc807, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1 &1867782450773908753
 GameObject:
   m_ObjectHideFlags: 0
@@ -1820,6 +1807,8 @@ MonoBehaviour:
   contextMenu: {fileID: 1012573262644825583}
   confirmationDialog: {fileID: 7303840854963470765}
   defaultChatEntryFactory: {fileID: 11400000, guid: de537b45ff89f45489136467b5b292aa,
+    type: 2}
+  poolChatEntryFactory: {fileID: 11400000, guid: d0497e2593c8e4f3fa89fe66bb8f5ac0,
     type: 2}
   model:
     isInputFieldFocused: 0

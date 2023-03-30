@@ -3,10 +3,7 @@
   "version": "1.0.0",
   "description": "",
   "scripts": {
-    "build-renderer-protocol": "ts-node --project scripts/tsconfig.json scripts/build-renderer-protocol.ts",
-    "build-components": "ts-node --project scripts/tsconfig.json scripts/build-components.ts",
-    "build-bff": "ts-node --project scripts/tsconfig.json scripts/build-bff.ts",
-    "build-all": "npm run build-renderer-protocol && npm run build-components && npm run build-bff"
+    "build": "ts-node --project scripts/tsconfig.json scripts/build-protocol.ts"
   },
   "private": true,
   "keywords": [],
@@ -14,11 +11,11 @@
   "license": "Apache-2.0",
   "devDependencies": {
     "@types/node": "^14.14.35",
-    "ts-node": "^9.1.1",
+    "ts-node": "^10.9.1",
     "typescript": "^4.2.3"
   },
   "dependencies": {
-    "@dcl/protocol": "^1.0.0-3338184295.commit-c785923",
+    "@dcl/protocol": "1.0.0-4114477251.commit-ccb88d6",
     "@protobuf-ts/protoc": "^2.8.1",
     "@types/fs-extra": "^9.0.8",
     "@types/glob": "^8.0.0",
@@ -26,7 +23,7 @@
     "fs-extra": "^10.1.0",
     "glob": "^8.0.3",
     "node-fetch": "^2.6.1",
-    "protoc-gen-dclunity": "^1.0.0-20221027134426.commit-a16ed21"
+    "protoc-gen-dclunity": "^1.0.0-20221220125058.commit-f88552f"
   },
   "config": {
     "protocVersion": "3.20.1"

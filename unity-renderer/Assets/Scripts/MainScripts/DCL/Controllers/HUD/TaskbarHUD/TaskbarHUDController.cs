@@ -1,7 +1,10 @@
-using System;
+using Cysharp.Threading.Tasks;
 using DCL;
+using DCL.Chat;
 using DCL.Chat.HUD;
-using DCL.Chat.Notifications;
+using DCL.Social.Friends;
+using System;
+using System.Threading;
 using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -33,12 +36,13 @@ public class TaskbarHUDController : IHUD
     private Transform experiencesViewerTransform;
     private Transform notificationViewerTransform;
     private Transform topNotificationViewerTransform;
-    private IHUD chatToggleTargetWindow;
-    private IHUD chatInputTargetWindow;
     private IHUD chatBackWindow;
     private SearchChannelsWindowController searchChannelsHud;
     private CreateChannelWindowController channelCreationWindow;
     private LeaveChannelConfirmationWindowController channelLeaveWindow;
+    private CancellationTokenSource openPrivateChatCancellationToken = new ();
+
+    private bool isFriendsFeatureEnabled => DataStore.i.featureFlags.flags.Get().IsFeatureEnabled("friends_enabled");
 
     public event Action OnAnyTaskbarButtonClicked;
 
@@ -52,7 +56,7 @@ public class TaskbarHUDController : IHUD
     internal BaseVariable<Transform> topNotificationPanelTransform => DataStore.i.HUDs.topNotificationPanelTransform;
     internal BaseVariable<bool> isExperiencesViewerOpen => DataStore.i.experiencesViewer.isOpen;
     internal BaseVariable<int> numOfLoadedExperiences => DataStore.i.experiencesViewer.numOfLoadedExperiences;
-    internal BaseVariable<string> openedChat => DataStore.i.HUDs.openedChat;
+    internal BaseVariable<string> openChat => DataStore.i.HUDs.openChat;
     internal BaseVariable<bool> isPromoteChannelsToastVisible => DataStore.i.channels.isPromoteToastVisible;
 
     public TaskbarHUDController(IChatController chatController, IFriendsController friendsController)
@@ -109,7 +113,6 @@ public class TaskbarHUDController : IHUD
         view.leftWindowContainerAnimator.Show();
 
         CommonScriptableObjects.isTaskbarHUDInitialized.Set(true);
-        DataStore.i.builderInWorld.showTaskBar.OnChange += SetVisibility;
 
         isExperiencesViewerInitialized.OnChange += InitializeExperiencesViewer;
         InitializeExperiencesViewer(isExperiencesViewerInitialized.Get(), null);
@@ -122,6 +125,8 @@ public class TaskbarHUDController : IHUD
 
         numOfLoadedExperiences.OnChange += NumOfLoadedExperiencesChanged;
         NumOfLoadedExperiencesChanged(numOfLoadedExperiences.Get(), 0);
+
+        openChat.OnChange += OpenChat;
     }
 
     private void HandleFriendsToggle(bool show)
@@ -131,7 +136,7 @@ public class TaskbarHUDController : IHUD
         else
         {
             friendsHud?.SetVisibility(false);
-            OpenPublicChatOnPreviewMode();
+            ToggleOffChatIcon();
         }
 
         OnAnyTaskbarButtonClicked?.Invoke();
@@ -147,14 +152,14 @@ public class TaskbarHUDController : IHUD
 
         if (show)
         {
-            OpenPublicChatOnPreviewMode();
+            ToggleOffChatIcon();
             ShowEmotes();
         }
         else
         {
             view.ToggleOff(TaskbarHUDView.TaskbarButtonType.Emotes);
             isEmotesVisible.Set(false);
-            OpenPublicChatOnPreviewMode();
+            ToggleOffChatIcon();
         }
 
         OnAnyTaskbarButtonClicked?.Invoke();
@@ -180,7 +185,7 @@ public class TaskbarHUDController : IHUD
         else
         {
             isExperiencesViewerOpen.Set(false);
-            OpenPublicChatOnPreviewMode();
+            ToggleOffChatIcon();
         }
 
         OnAnyTaskbarButtonClicked?.Invoke();
@@ -192,6 +197,7 @@ public class TaskbarHUDController : IHUD
             OpenVoiceChatWindow();
         else
             voiceChatHud?.SetVisibility(false);
+
         OnAnyTaskbarButtonClicked?.Invoke();
     }
 
@@ -212,6 +218,7 @@ public class TaskbarHUDController : IHUD
     private void ToggleFriendsTrigger_OnTriggered(DCLAction_Trigger action)
     {
         if (friendsHud == null) return;
+        if (!isFriendsFeatureEnabled) return;
 
         bool anyInputFieldIsSelected = EventSystem.current != null &&
                                        EventSystem.current.currentSelectedGameObject != null &&
@@ -230,7 +237,7 @@ public class TaskbarHUDController : IHUD
         else
         {
             CloseFriendsWindow();
-            OpenPublicChatOnPreviewMode();
+            ToggleOffChatIcon();
         }
     }
 
@@ -240,7 +247,7 @@ public class TaskbarHUDController : IHUD
                                        EventSystem.current.currentSelectedGameObject != null &&
                                        EventSystem.current.currentSelectedGameObject.GetComponent<TMP_InputField>() !=
                                        null;
-                                       
+
         if (anyInputFieldIsSelected) return;
 
         mouseCatcher.UnlockCursor();
@@ -249,22 +256,17 @@ public class TaskbarHUDController : IHUD
         if (!worldChatWindowHud.View.IsActive
             && !privateChatWindow.View.IsActive
             && !publicChatWindow.View.IsActive)
-            OpenLastActiveChatWindow(chatInputTargetWindow);
+            OpenLastActiveChatWindow();
     }
 
     private void CloseWindowTrigger_OnTriggered(DCLAction_Trigger action)
     {
-        if (mouseCatcher.isLocked) return;
+        if (mouseCatcher.IsLocked) return;
 
         if (publicChatWindow.View.IsActive ||
             channelChatWindow.View.IsActive ||
             privateChatWindow.View.IsActive)
-        {
-            publicChatWindow.SetVisibility(false);
-            worldChatWindowHud.SetVisibility(true);
-            chatToggleTargetWindow = worldChatWindowHud;
-            chatInputTargetWindow = publicChatWindow;
-        }
+            OpenChatList();
         else
         {
             worldChatWindowHud.SetVisibility(false);
@@ -284,36 +286,18 @@ public class TaskbarHUDController : IHUD
     {
         if (show)
         {
-            chatBackWindow = publicChatWindow;
-            var openedWindow = OpenLastActiveChatWindow(chatToggleTargetWindow);
-            if (openedWindow == publicChatWindow)
-                publicChatWindow.SetVisibility(true);
-            else if (openedWindow == privateChatWindow)
-                privateChatWindow.SetVisibility(true);
-            else if (openedWindow == channelChatWindow)
-                channelChatWindow.SetVisibility(true);
+            chatBackWindow = worldChatWindowHud;
+            OpenChatList();
         }
-        else
-        {
-            CloseAnyChatWindow();
-        }
+        else { CloseAnyChatWindow(); }
 
         OnAnyTaskbarButtonClicked?.Invoke();
     }
 
-    private void MouseCatcher_OnMouseUnlock()
-    {
-        // TODO: temporary deactivated current window fadein/fadeout until we get the full chat notifications feature implemented
-        // view.leftWindowContainerAnimator.Show();
-        // view.RestoreLastToggle();
-    }
+    private void MouseCatcher_OnMouseUnlock() { }
 
     private void MouseCatcher_OnMouseLock()
     {
-        // TODO: temporary deactivated current window fadein/fadeout until we get the full chat notifications feature implemented
-        // view.leftWindowContainerAnimator.Hide();
-        // view.ToggleAllOff();
-
         CloseFriendsWindow();
         CloseChatList();
         CloseVoiceChatWindow();
@@ -322,7 +306,7 @@ public class TaskbarHUDController : IHUD
         if (!privateChatWindow.View.IsActive
             && !publicChatWindow.View.IsActive
             && !channelChatWindow.View.IsActive)
-            OpenPublicChatOnPreviewMode();
+            ToggleOffChatIcon();
     }
 
     public void AddWorldChatWindow(WorldChatWindowController controller)
@@ -343,12 +327,13 @@ public class TaskbarHUDController : IHUD
         worldChatWindowHud = controller;
 
         view.ShowChatButton();
-        worldChatWindowHud.OnCloseView += OpenPublicChatOnPreviewMode;
+        worldChatWindowHud.OnCloseView += ToggleOffChatIcon;
         worldChatWindowHud.OnOpenChannelCreation += OpenChannelCreation;
         worldChatWindowHud.OnOpenChannelLeave += OpenChannelLeaveConfirmation;
     }
 
-    private void OpenPublicChatOnPreviewMode() => view.ToggleOff(TaskbarHUDView.TaskbarButtonType.Chat);
+    private void ToggleOffChatIcon() =>
+        view.ToggleOff(TaskbarHUDView.TaskbarButtonType.Chat);
 
     private void OpenFriendsWindow()
     {
@@ -366,10 +351,14 @@ public class TaskbarHUDController : IHUD
         isPromoteChannelsToastVisible.Set(false);
     }
 
+
     private void CloseFriendsWindow()
     {
-        friendsHud?.SetVisibility(false);
-        view.ToggleOff(TaskbarHUDView.TaskbarButtonType.Friends);
+        if(friendsHud is { IsVisible: true })
+        {
+            friendsHud?.SetVisibility(false);
+            view.ToggleOff(TaskbarHUDView.TaskbarButtonType.Friends);
+        }
     }
 
     public void OpenPrivateChat(string userId)
@@ -382,48 +371,21 @@ public class TaskbarHUDController : IHUD
         isExperiencesViewerOpen.Set(false);
         isEmotesVisible.Set(false);
         voiceChatHud?.SetVisibility(false);
-        openedChat.Set(userId);
+        openChat.Set(userId, false);
         privateChatWindow.Setup(userId);
         privateChatWindow.SetVisibility(true);
         view.ToggleOn(TaskbarHUDView.TaskbarButtonType.Chat);
-        chatToggleTargetWindow = worldChatWindowHud;
-        chatInputTargetWindow = privateChatWindow;
     }
 
-    private IHUD OpenLastActiveChatWindow(IHUD lastActiveWindow)
+    private void OpenLastActiveChatWindow()
     {
-        worldChatWindowHud.SetVisibility(false);
-        privateChatWindow.SetVisibility(false);
-        publicChatWindow.SetVisibility(false);
-        channelChatWindow?.SetVisibility(false);
-        searchChannelsHud.SetVisibility(false);
-        friendsHud?.SetVisibility(false);
-        isEmotesVisible.Set(false);
-        isExperiencesViewerOpen.Set(false);
-        voiceChatHud?.SetVisibility(false);
-        isPromoteChannelsToastVisible.Set(false);
+        string lastOpenedChat = openChat.Get();
 
-        IHUD visibleWindow;
+        string newChat = string.IsNullOrEmpty(lastOpenedChat)
+            ? ChatUtils.NEARBY_CHANNEL_ID
+            : lastOpenedChat;
 
-        if (lastActiveWindow == publicChatWindow)
-        {
-            publicChatWindow.SetVisibility(true, true);
-            visibleWindow = publicChatWindow;
-        }
-        else if (lastActiveWindow != null)
-        {
-            lastActiveWindow.SetVisibility(true);
-            visibleWindow = lastActiveWindow;
-        }
-        else
-        {
-            publicChatWindow.SetVisibility(true, true);
-            visibleWindow = publicChatWindow;
-        }
-
-        view.ToggleOn(TaskbarHUDView.TaskbarButtonType.Chat);
-
-        return visibleWindow;
+        openChat.Set(newChat, true);
     }
 
     private void CloseAnyChatWindow()
@@ -438,7 +400,7 @@ public class TaskbarHUDController : IHUD
 
     public void OpenChannelChat(string channelId)
     {
-        openedChat.Set(channelId);
+        openChat.Set(channelId, false);
         channelChatWindow?.Setup(channelId);
         channelChatWindow?.SetVisibility(true);
         publicChatWindow?.SetVisibility(false);
@@ -451,15 +413,11 @@ public class TaskbarHUDController : IHUD
         voiceChatHud?.SetVisibility(false);
 
         view.ToggleOn(TaskbarHUDView.TaskbarButtonType.Chat);
-        
-        chatToggleTargetWindow = worldChatWindowHud;
-        chatInputTargetWindow = channelChatWindow;
     }
-
 
     public void OpenPublicChat(string channelId, bool focusInputField)
     {
-        openedChat.Set(channelId);
+        openChat.Set(channelId, false);
         publicChatWindow?.Setup(channelId);
         publicChatWindow?.SetVisibility(true, focusInputField);
         channelChatWindow?.SetVisibility(false);
@@ -472,9 +430,6 @@ public class TaskbarHUDController : IHUD
         voiceChatHud?.SetVisibility(false);
 
         view.ToggleOn(TaskbarHUDView.TaskbarButtonType.Chat);
-        
-        chatToggleTargetWindow = worldChatWindowHud;
-        chatInputTargetWindow = publicChatWindow;
     }
 
     private void OpenChatList()
@@ -487,10 +442,9 @@ public class TaskbarHUDController : IHUD
         isExperiencesViewerOpen.Set(false);
         isEmotesVisible.Set(false);
         voiceChatHud?.SetVisibility(false);
+        openChat.Set(ChatUtils.CONVERSATION_LIST_ID, false);
         worldChatWindowHud.SetVisibility(true);
         view.ToggleOn(TaskbarHUDView.TaskbarButtonType.Chat);
-        
-        chatToggleTargetWindow = worldChatWindowHud;
     }
 
     private void CloseChatList()
@@ -517,8 +471,11 @@ public class TaskbarHUDController : IHUD
 
     private void CloseVoiceChatWindow()
     {
-        voiceChatHud?.SetVisibility(false);
-        view.ToggleOff(TaskbarHUDView.TaskbarButtonType.VoiceChat);
+        if(voiceChatHud.IsVisible)
+        {
+            voiceChatHud?.SetVisibility(false);
+            view.ToggleOff(TaskbarHUDView.TaskbarButtonType.VoiceChat);
+        }
     }
 
     public void AddPrivateChatWindow(PrivateChatWindowController controller)
@@ -539,7 +496,7 @@ public class TaskbarHUDController : IHUD
 
         privateChatWindow = controller;
 
-        controller.OnClosed += OpenPublicChatOnPreviewMode;
+        controller.OnClosed += ToggleOffChatIcon;
     }
 
     public void AddPublicChatChannel(PublicChatWindowController controller)
@@ -559,34 +516,7 @@ public class TaskbarHUDController : IHUD
 
         publicChatWindow = controller;
 
-        controller.OnClosed += OpenPublicChatOnPreviewMode;
-    }
-
-    private void HandlePublicChannelPreviewModeChanged(bool isPreviewMode)
-    {
-        if (!publicChatWindow.View.IsActive) return;
-        if (isPreviewMode)
-            view.ToggleOff(TaskbarHUDView.TaskbarButtonType.Chat);
-        else
-            view.ToggleOn(TaskbarHUDView.TaskbarButtonType.Chat);
-    }
-
-    private void HandleChannelPreviewModeChanged(bool isPreviewMode)
-    {
-        if (!channelChatWindow.View.IsActive) return;
-        if (isPreviewMode)
-            view.ToggleOff(TaskbarHUDView.TaskbarButtonType.Chat);
-        else
-            view.ToggleOn(TaskbarHUDView.TaskbarButtonType.Chat);
-    }
-
-    private void HandlePrivateChannelPreviewMode(bool isPreviewMode)
-    {
-        if (!privateChatWindow.View.IsActive) return;
-        if (isPreviewMode)
-            view.ToggleOff(TaskbarHUDView.TaskbarButtonType.Chat);
-        else
-            view.ToggleOn(TaskbarHUDView.TaskbarButtonType.Chat);
+        controller.OnClosed += ToggleOffChatIcon;
     }
 
     public void AddFriendsWindow(FriendsHUDController controller)
@@ -606,11 +536,16 @@ public class TaskbarHUDController : IHUD
         experiencesViewerTransform?.SetAsLastSibling();
 
         friendsHud = controller;
-        view.ShowFriendsButton();
+
+        if (isFriendsFeatureEnabled)
+            view.ShowFriendsButton();
+        else
+            view.HideFriendsButton();
+
         friendsHud.OnViewClosed += () =>
         {
             view.ToggleOff(TaskbarHUDView.TaskbarButtonType.Friends);
-            OpenPublicChatOnPreviewMode();
+            ToggleOffChatIcon();
         };
     }
 
@@ -644,7 +579,8 @@ public class TaskbarHUDController : IHUD
         view.ShowEmotesButton();
     }
 
-    private void IsEmotesVisibleChanged(bool current, bool previous) => HandleEmotesToggle(current);
+    private void IsEmotesVisibleChanged(bool current, bool previous) =>
+        HandleEmotesToggle(current);
 
     private void InitializeExperiencesViewer(Transform currentViewTransform, Transform previousViewTransform)
     {
@@ -667,7 +603,6 @@ public class TaskbarHUDController : IHUD
         notificationViewerTransform.SetParent(view.leftWindowContainer, false);
         notificationViewerTransform.SetAsLastSibling();
         experiencesViewerTransform.SetAsLastSibling();
-        notificationViewerTransform.GetComponent<MainChatNotificationsComponentView>().OnClickedNotification += OpenClickedChat;
     }
 
     private void InitializeTopNotificationPanel(Transform currentPanelTransform, Transform previousPanelTransform)
@@ -678,29 +613,35 @@ public class TaskbarHUDController : IHUD
         topNotificationViewerTransform = currentPanelTransform;
         topNotificationViewerTransform.SetParent(view.leftWindowContainer, false);
         topNotificationViewerTransform.SetAsFirstSibling();
-        topNotificationViewerTransform.GetComponent<TopNotificationComponentView>().OnClickedNotification += OpenClickedChat;
     }
 
-    private void OpenClickedChat(string chatId)
+    private void OpenChat(string chatId, string previous)
     {
-        const string nearbyChannelId = "nearby";
-        const string conversationListId = "conversationList";
-        
-        if (chatId == nearbyChannelId)
-            OpenPublicChat(nearbyChannelId, true);
+        if (chatId == ChatUtils.NEARBY_CHANNEL_ID)
+            OpenPublicChat(ChatUtils.NEARBY_CHANNEL_ID, true);
         else if (chatController.GetAllocatedChannel(chatId) != null)
         {
-            if(chatController.GetAllocatedChannel(chatId).Joined)
+            if (chatController.GetAllocatedChannel(chatId).Joined)
                 OpenChannelChat(chatId);
             else
                 return;
         }
-        else if(chatId == conversationListId)
+        else if (chatId == ChatUtils.CONVERSATION_LIST_ID)
             OpenChatList();
         else
         {
-            if(friendsController.GetUserStatus(chatId).friendshipStatus == FriendshipStatus.FRIEND)
-                OpenPrivateChat(chatId);
+            async UniTaskVoid OpenPrivateChatAsync(string chatId, CancellationToken cancellationToken = default)
+            {
+                var friendshipStatus = await friendsController.GetFriendshipStatus(chatId, cancellationToken);
+
+                if (friendshipStatus == FriendshipStatus.FRIEND)
+                    OpenPrivateChat(chatId);
+            }
+
+            openPrivateChatCancellationToken.Cancel();
+            openPrivateChatCancellationToken.Dispose();
+            openPrivateChatCancellationToken = new CancellationTokenSource();
+            OpenPrivateChatAsync(chatId, openPrivateChatCancellationToken.Token).Forget();
         }
     }
 
@@ -710,7 +651,7 @@ public class TaskbarHUDController : IHUD
             return;
 
         view.ToggleOff(TaskbarHUDView.TaskbarButtonType.Experiences);
-        OpenPublicChatOnPreviewMode();
+        ToggleOffChatIcon();
     }
 
     private void NumOfLoadedExperiencesChanged(int current, int previous)
@@ -754,17 +695,14 @@ public class TaskbarHUDController : IHUD
         if (toggleWorldChatTrigger != null)
             toggleWorldChatTrigger.OnTriggered -= ToggleWorldChatTrigger_OnTriggered;
 
-        DataStore.i.builderInWorld.showTaskBar.OnChange -= SetVisibility;
         isEmotesWheelInitialized.OnChange -= InitializeEmotesSelector;
         isEmotesVisible.OnChange -= IsEmotesVisibleChanged;
         isExperiencesViewerOpen.OnChange -= IsExperiencesViewerOpenChanged;
         isExperiencesViewerInitialized.OnChange -= InitializeExperiencesViewer;
         numOfLoadedExperiences.OnChange -= NumOfLoadedExperiencesChanged;
-    }
 
-    private void SetVisibility(bool visible, bool previus)
-    {
-        SetVisibility(visible);
+        openPrivateChatCancellationToken.Cancel();
+        openPrivateChatCancellationToken.Dispose();
     }
 
     public void SetVisibility(bool visible)
@@ -795,7 +733,7 @@ public class TaskbarHUDController : IHUD
 
         channelChatWindow = controller;
 
-        controller.OnClosed += OpenPublicChatOnPreviewMode;
+        controller.OnClosed += ToggleOffChatIcon;
         controller.OnOpenChannelLeave += OpenChannelLeaveConfirmation;
     }
 
@@ -811,8 +749,9 @@ public class TaskbarHUDController : IHUD
         controller.OnClosed += () =>
         {
             controller.SetVisibility(false);
-            OpenPublicChatOnPreviewMode();
+            ToggleOffChatIcon();
         };
+
         controller.OnBack += GoBackFromChat;
         controller.OnOpenChannelCreation += OpenChannelCreation;
         controller.OnOpenChannelLeave += OpenChannelLeaveConfirmation;
@@ -821,7 +760,7 @@ public class TaskbarHUDController : IHUD
     public void AddChannelCreation(CreateChannelWindowController controller)
     {
         if (controller.View.Transform.parent == view.fullScreenWindowContainer) return;
-        
+
         controller.View.Transform.SetParent(view.fullScreenWindowContainer, false);
         experiencesViewerTransform?.SetAsLastSibling();
 

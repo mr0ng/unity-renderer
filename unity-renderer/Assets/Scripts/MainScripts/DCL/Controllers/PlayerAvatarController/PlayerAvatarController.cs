@@ -43,6 +43,7 @@ public class PlayerAvatarController : MonoBehaviour, IHideAvatarAreaHandler, IHi
     private BaseRefCounter<AvatarModifierAreaID> currentActiveModifiers;
 
     internal ISocialAnalytics socialAnalytics;
+    private Service<IEmotesCatalogService> emotesCatalog;
 
     private void Start()
     {
@@ -64,32 +65,15 @@ public class PlayerAvatarController : MonoBehaviour, IHideAvatarAreaHandler, IHi
 
         CommonScriptableObjects.rendererState.AddLock(this);
 
-#if UNITY_WEBGL
-        fatalErrorReporter = new WebFatalErrorReporter();
-#else
-        fatalErrorReporter = new DefaultFatalErrorReporter(DataStore.i);
-#endif
-
         mainCamera = Camera.main;
         currentActiveModifiers = new BaseRefCounter<AvatarModifierAreaID>();
     }
 
-    private AvatarSystem.Avatar GetStandardAvatar()
-    {
-        AvatarAnimatorLegacy animator = GetComponentInChildren<AvatarAnimatorLegacy>();
-        AvatarSystem.NoLODs noLod = new NoLODs();
-        return new AvatarSystem.Avatar(
-            new AvatarCurator(new WearableItemResolver(), Environment.i.serviceLocator.Get<IEmotesCatalogService>()),
-            new Loader(new WearableLoaderFactory(), avatarContainer, new AvatarMeshCombinerHelper()),
-            animator,
-            new Visibility(),
-            noLod,
-            new SimpleGPUSkinning(),
-            new GPUSkinningThrottler(),
-            new EmoteAnimationEquipper(animator, DataStore.i.emotes));
-    }
+    private IAvatar GetStandardAvatar() =>
+        Environment.i.serviceLocator.Get<IAvatarFactory>()
+                   .CreateAvatar(avatarContainer, GetComponentInChildren<AvatarAnimatorLegacy>(), NoLODs.i, new Visibility());
 
-    private AvatarWithHologram GetAvatarWithHologram()
+    private IAvatar GetAvatarWithHologram()
     {
         AvatarAnimatorLegacy animator = GetComponentInChildren<AvatarAnimatorLegacy>();
         AvatarSystem.NoLODs noLod = new NoLODs();
@@ -201,6 +185,7 @@ public class PlayerAvatarController : MonoBehaviour, IHideAvatarAreaHandler, IHi
         try
         {
             ct.ThrowIfCancellationRequested();
+
             if (avatar.status != IAvatar.Status.Loaded || !profile.avatar.HaveSameWearablesAndColors(currentAvatar))
             {
                 currentAvatar.CopyFrom(profile.avatar);
@@ -209,7 +194,7 @@ public class PlayerAvatarController : MonoBehaviour, IHideAvatarAreaHandler, IHi
                 wearableItems.Add(profile.avatar.bodyShape);
 
                 HashSet<string> emotes = new HashSet<string>(currentAvatar.emotes.Select(x => x.urn));
-                var embeddedEmotesSo = Resources.Load<EmbeddedEmotesSO>("EmbeddedEmotes");
+                var embeddedEmotesSo = await emotesCatalog.Ref.GetEmbeddedEmotes();
                 emotes.UnionWith(embeddedEmotesSo.emotes.Select(x => x.id));
                 wearableItems.AddRange(embeddedEmotesSo.emotes.Select(x => x.id));
 
@@ -223,7 +208,7 @@ public class PlayerAvatarController : MonoBehaviour, IHideAvatarAreaHandler, IHi
 
                 if (avatar.lodLevel <= 1)
                     AvatarSystemUtils.SpawnAvatarLoadedParticles(avatarContainer.transform, loadingParticlesPrefab);
-                
+
                 avatar.PlayEmote(profile.avatar.expressionTriggerId, profile.avatar.expressionTriggerTimestamp);
             }
         }
@@ -235,27 +220,29 @@ public class PlayerAvatarController : MonoBehaviour, IHideAvatarAreaHandler, IHi
         catch (Exception e)
         {
             Debug.LogException(e);
-            WebInterface.ReportAvatarFatalError();
+            //WebInterface.ReportAvatarFatalError(e.ToString());
             return;
         }
-
-        IAvatarAnchorPoints anchorPoints = new AvatarAnchorPoints();
-        anchorPoints.Prepare(avatarContainer.transform, avatar.GetBones(), AvatarSystemUtils.AVATAR_Y_OFFSET + avatar.extents.y);
-
-        var player = new Player()
+        finally
         {
-            id = userProfile.userId,
-            name = userProfile.name,
-            avatar = avatar,
-            anchorPoints = anchorPoints,
-            collider = avatarCollider
-        };
-        DataStore.i.player.ownPlayer.Set(player);
+            IAvatarAnchorPoints anchorPoints = new AvatarAnchorPoints();
+            anchorPoints.Prepare(avatarContainer.transform, avatar.GetBones(), AvatarSystemUtils.AVATAR_Y_OFFSET + avatar.extents.y);
 
-        enableCameraCheck = true;
-        avatarCollider.gameObject.SetActive(true);
-        CommonScriptableObjects.rendererState.RemoveLock(this);
-        DataStore.i.common.isPlayerRendererLoaded.Set(true);
+            var player = new Player()
+            {
+                id = userProfile.userId,
+                name = userProfile.name,
+                avatar = avatar,
+                anchorPoints = anchorPoints,
+                collider = avatarCollider
+            };
+            DataStore.i.player.ownPlayer.Set(player);
+
+            enableCameraCheck = true;
+            avatarCollider.gameObject.SetActive(true);
+            CommonScriptableObjects.rendererState.RemoveLock(this);
+            DataStore.i.common.isPlayerRendererLoaded.Set(true);
+        }
     }
 
     public void ApplyHideAvatarModifier()
@@ -268,7 +255,7 @@ public class PlayerAvatarController : MonoBehaviour, IHideAvatarAreaHandler, IHi
         currentActiveModifiers.AddRefCount(AvatarModifierAreaID.HIDE_AVATAR);
         DataStore.i.HUDs.avatarAreaWarnings.AddRefCount(AvatarModifierAreaID.HIDE_AVATAR);
     }
-    
+
     public void RemoveHideAvatarModifier()
     {
         DataStore.i.HUDs.avatarAreaWarnings.RemoveRefCount(AvatarModifierAreaID.HIDE_AVATAR);
@@ -285,7 +272,7 @@ public class PlayerAvatarController : MonoBehaviour, IHideAvatarAreaHandler, IHi
         DataStore.i.HUDs.avatarAreaWarnings.AddRefCount(AvatarModifierAreaID.DISABLE_PASSPORT);
         currentActiveModifiers.AddRefCount(AvatarModifierAreaID.DISABLE_PASSPORT);
     }
-    
+
     public void RemoveHidePassportModifier()
     {
         DataStore.i.HUDs.avatarAreaWarnings.RemoveRefCount(AvatarModifierAreaID.DISABLE_PASSPORT);

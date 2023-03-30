@@ -8,10 +8,10 @@ namespace DCL.Chat.HUD
         {
             channelLimitReachedWindow = new ChannelJoinErrorWindowController(
                 ChannelJoinErrorWindowComponentView.Create(),
-                ChatController.i,
+                Environment.i.serviceLocator.Get<IChatController>(),
                 DataStore.i);
         }
-        
+
         public void Dispose() => channelLimitReachedWindow.Dispose();
     }
 }

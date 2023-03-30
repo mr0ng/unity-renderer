@@ -51,7 +51,7 @@ public class TeleportPromptHUDView : MonoBehaviour
     public event Action OnTeleportEvent;
     public event Action<bool> OnSetVisibility;
 
-    WebRequestAsyncOperation fetchParcelImageOp;
+    IWebRequestAsyncOperation fetchParcelImageOp;
     Texture2D downloadedBanner;
     private HUDCanvasCameraModeController hudCanvasCameraModeController;
 
