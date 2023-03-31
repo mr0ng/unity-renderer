@@ -5,7 +5,7 @@ import {
   NETWORK_MISMATCH,
   ExecutionLifecycleEventsList
 } from './types'
-import { trackEvent } from '../analytics'
+import { trackEvent } from 'shared/analytics/trackEvent'
 import { action } from 'typesafe-actions'
 import { globalObservable } from '../observables'
 import { getUnityInstance } from 'unity-interface/IUnityInterface'
@@ -105,6 +105,8 @@ export function BringDownClientAndReportFatalError(
     stack: getStack(error).slice(0, 10000),
     saga_stack: sagaStack
   })
+
+  store.dispatch(fatalError(error.message || 'fatal error'))
 
   globalObservable.emit('error', {
     error,

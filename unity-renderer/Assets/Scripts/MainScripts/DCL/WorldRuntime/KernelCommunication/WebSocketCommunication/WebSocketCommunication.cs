@@ -1,7 +1,10 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Net;
 using System.Net.Sockets;
+using System.Security.Cryptography;
+using System.Security.Cryptography.X509Certificates;
 using DCL;
 using UnityEngine;
 // <<<<<<< HEAD
@@ -73,7 +76,7 @@ public class WebSocketCommunication : IKernelCommunication
                 {
                     SslConfiguration =
                     {
-                        ServerCertificate = CertificateUtils.CreateSelfSignedCert(),
+                        ServerCertificate = loadSelfSignedServerCertificate(),
                         ClientCertificateRequired = false,
                         CheckCertificateRevocation = false,
                         ClientCertificateValidationCallback = (sender, certificate, chain, sslPolicyErrors) => true,
@@ -165,6 +168,12 @@ public class WebSocketCommunication : IKernelCommunication
         string wssUrl = wssServerUrl + wssServiceId;
         return wssUrl;
     }
+
+    private X509Certificate2 loadSelfSignedServerCertificate() {
+        byte[] rawData = Convert.FromBase64String(SelfCertificateData.data);
+        return new X509Certificate2(rawData, "cert");
+    }
+
     private void OnWebSocketLog(LogData logData, string message)
     {
         switch (logData.Level)
@@ -305,7 +314,6 @@ public class WebSocketCommunication : IKernelCommunication
         messageTypeToBridgeName["SetPlayerTalking"] = "HUDController";
         messageTypeToBridgeName["SetVoiceChatEnabledByScene"] = "HUDController";
         messageTypeToBridgeName["TriggerSelfUserExpression"] = "HUDController";
-        messageTypeToBridgeName["AirdroppingRequest"] = "HUDController";
 
         messageTypeToBridgeName["GetMousePosition"] = "BuilderController";
         messageTypeToBridgeName["SelectGizmo"] = "BuilderController";

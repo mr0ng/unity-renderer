@@ -2,6 +2,7 @@ using DCL;
 using DCL.ECS7.InternalComponents;
 using DCL.ECSComponents;
 using DCL.Helpers;
+using DCL.Models;
 using Decentraland.Common;
 using NSubstitute;
 using NUnit.Framework;
@@ -130,7 +131,7 @@ namespace Tests
         }
 
         [UnityTest]
-        public IEnumerator ChangeMaterialWhenNoTextureSource()
+        public IEnumerator ChangeMaterialWhenNoTextureSourceChangeMaterialWhenNoTextureSource()
         {
             Debug.Log(TestAssetsUtils.GetPath() + "/Images/avatar.png");
 
@@ -168,6 +169,8 @@ namespace Tests
                     }
                 }
             };
+
+            LogAssert.Expect(LogType.Error, "Media asset url error: media URL is empty.");
 
             handler.OnComponentModelUpdated(scene, entity, model2);
             yield return handler.promiseMaterial;
@@ -240,6 +243,8 @@ namespace Tests
                     }
                 }
             };
+
+            LogAssert.Expect(LogType.Error, "Media asset url error: media URL is empty.");
 
             handler.OnComponentModelUpdated(scene, entity, model2);
             yield return handler.promiseMaterial;
@@ -387,7 +392,45 @@ namespace Tests
                     Src = "data:text/plain;base64",
                 }
             };
+
+            LogAssert.Expect(LogType.Error, "External media asset url error: 'allowedMediaHostnames' missing in scene.json file.");
+
             Assert.AreEqual(string.Empty, texture.GetTextureUrl(scene));
+        }
+
+        [Test]
+        public void NotAllowExternalTextureWithoutPermissionsSet()
+        {
+            TextureUnion texture = new TextureUnion()
+            {
+                Texture = new Texture()
+                {
+                    Src = "http://fake/sometexture.png",
+                }
+            };
+
+            scene.sceneData.allowedMediaHostnames = new[] { "fake" };
+
+            LogAssert.Expect(LogType.Error, "External media asset url error: 'allowedMediaHostnames' missing in scene.json file.");
+
+            Assert.AreEqual(string.Empty, texture.GetTextureUrl(scene));
+        }
+
+        [Test]
+        public void AllowExternalTextureWithPermissionsSet()
+        {
+            TextureUnion texture = new TextureUnion()
+            {
+                Texture = new Texture()
+                {
+                    Src = "http://fake/sometexture.png",
+                }
+            };
+
+            scene.sceneData.allowedMediaHostnames = new[] { "fake" };
+            scene.sceneData.requiredPermissions = new[] { ScenePermissionNames.ALLOW_MEDIA_HOSTNAMES };
+
+            Assert.AreEqual(texture.Texture.Src, texture.GetTextureUrl(scene));
         }
     }
 }

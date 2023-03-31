@@ -1,31 +1,26 @@
 import { Authenticator } from '@dcl/crypto'
-import { call, put, select, take, takeEvery, takeLatest } from 'redux-saga/effects'
-
-import { DEBUG_KERNEL_LOG, ETHEREUM_NETWORK, PREVIEW } from 'config'
-
-import { createDummyLogger, createLogger } from 'lib/logger'
-import { getUserAccount, isSessionExpired, requestManager } from 'shared/ethereum/provider'
-import { awaitingUserSignature, AWAITING_USER_SIGNATURE } from 'shared/loading/types'
-import { initializeReferral } from 'shared/referral'
-import { getAppNetwork, registerProviderNetChanges } from 'shared/web3'
-
-import { getFromPersistentStorage, saveToPersistentStorage } from 'lib/browser/persistentStorage'
-
 import { createUnsafeIdentity } from '@dcl/crypto/dist/crypto'
+import { DEBUG_KERNEL_LOG, ETHEREUM_NETWORK, PREVIEW } from 'config'
 import { RequestManager } from 'eth-connect'
 import { DecentralandIdentity, LoginState } from 'kernel-web-interface'
+import { getFromPersistentStorage, saveToPersistentStorage } from 'lib/browser/persistentStorage'
+import { createDummyLogger, createLogger } from 'lib/logger'
+import { getEthereumNetworkFromProvider } from 'lib/web3/getEthereumNetworkFromProvider'
+import { getUserAccount, isSessionExpired, requestManager } from 'lib/web3/provider'
 import { Store } from 'redux'
+import { call, put, select, take, takeEvery, takeLatest } from 'redux-saga/effects'
 import { setRoomConnection } from 'shared/comms/actions'
 import { selectNetwork } from 'shared/dao/actions'
 import { getSelectedNetwork } from 'shared/dao/selectors'
+import { awaitingUserSignature, AWAITING_USER_SIGNATURE } from 'shared/loading/types'
 import { ensureMetaConfigurationInitialized } from 'shared/meta'
 import { globalObservable } from 'shared/observables'
 import { initialRemoteProfileLoad } from 'shared/profiles/sagas/initialRemoteProfileLoad'
 import { localProfilesRepo } from 'shared/profiles/sagas/local/localProfilesRepo'
 import { waitForRealm } from 'shared/realm/waitForRealmAdapter'
+import { registerProviderNetChanges } from 'shared/registerProviderNetChanges'
 import { waitForRendererInstance } from 'shared/renderer/sagas-helper'
 import { store } from 'shared/store/isolatedStore'
-import { getUnityInstance } from 'unity-interface/IUnityInterface'
 import { saveProfileDelta } from '../profiles/actions'
 import {
   AUTHENTICATE,
@@ -46,7 +41,7 @@ import {
   UserAuthenticated,
   USER_AUTHENTICATED
 } from './actions'
-import { getLastGuestSession, getStoredSession, removeStoredSession, setStoredSession } from './index'
+import { deleteSession, retrieveLastGuestSession, retrieveLastSessionByAddress, storeSession } from './index'
 import { getCurrentIdentity, isGuestLogin } from './selectors'
 import { ExplorerIdentity, RootSessionState, SessionState, StoredSession } from './types'
 
@@ -69,7 +64,6 @@ export function* sessionSaga(): any {
   })
 
   yield call(initialize)
-  yield call(initializeReferral)
 }
 
 function* initialize() {
@@ -109,16 +103,16 @@ function* authenticate(action: AuthenticateAction) {
     }
   }
 
+  // set the etherum network to start loading profiles
+  const net: ETHEREUM_NETWORK = yield call(getEthereumNetworkFromProvider)
+  yield put(selectNetwork(net))
+  registerProviderNetChanges()
+
   yield put(changeLoginState(LoginState.WAITING_RENDERER))
 
   yield call(waitForRendererInstance)
 
   yield put(changeLoginState(LoginState.WAITING_PROFILE))
-
-  // set the etherum network to start loading profiles
-  const net: ETHEREUM_NETWORK = yield call(getAppNetwork)
-  yield put(selectNetwork(net))
-  registerProviderNetChanges()
 
   // 1. authenticate our user
   yield put(userAuthenticated(identity, net, isGuest))
@@ -136,11 +130,6 @@ function* authenticate(action: AuthenticateAction) {
   // 4. finish sign in
   yield call(ensureMetaConfigurationInitialized)
   yield put(changeLoginState(LoginState.COMPLETED))
-
-  if (isSignUp) {
-    // HACK to fix onboarding flow, remove in RFC-1 impl
-    getUnityInstance().FadeInLoadingHUD({} as any)
-  }
 }
 
 function* authorize(requestManager: RequestManager) {
@@ -149,12 +138,12 @@ function* authorize(requestManager: RequestManager) {
   const isGuest: boolean = yield select(isGuestLogin)
 
   if (isGuest) {
-    userData = yield call(getLastGuestSession)
+    userData = yield call(retrieveLastGuestSession)
   } else {
     try {
       const address: string = yield call(getUserAccount, requestManager, false)
       if (address) {
-        userData = yield call(getStoredSession, address)
+        userData = yield call(retrieveLastSessionByAddress, address)
 
         if (userData) {
           // We save the raw ethereum address of the current user to avoid having to convert-back later after lowercasing it for the userId
@@ -206,7 +195,7 @@ function* cancelSignUp() {
 }
 
 async function saveSession(identity: ExplorerIdentity, isGuest: boolean) {
-  await setStoredSession({
+  await storeSession({
     identity,
     isGuest
   })
@@ -275,7 +264,7 @@ function* logout() {
   yield put(setRoomConnection(undefined))
 
   if (identity?.address) {
-    yield call(removeStoredSession, identity.address)
+    yield call(deleteSession, identity.address)
   }
   window.location.reload()
 }
@@ -285,7 +274,7 @@ function* redirectToSignUp() {
   window.location.reload()
 }
 
-export function observeAccountStateChange(
+function observeAccountStateChange(
   store: Store<RootSessionState>,
   accountStateChange: (previous: SessionState, current: SessionState) => any
 ) {

@@ -26,6 +26,7 @@ namespace DCL
         public static ServiceLocator CreateDefault()
         {
             var result = new ServiceLocator();
+            IRPC irpc = new RPC();
 
             //Addressable Resource Provider
             var addressableResourceProvider = new AddressableResourceProvider();
@@ -37,25 +38,27 @@ namespace DCL
             result.Register<IParcelScenesCleaner>(() => new ParcelScenesCleaner());
             result.Register<IClipboard>(Clipboard.Create);
             result.Register<IPhysicsSyncController>(() => new PhysicsSyncController());
-            result.Register<IWebRequestController>(WebRequestController.Create);
+            result.Register<IRPC>(() => irpc);
+            result.Register<IWebRequestController>(() => new WebRequestController(
+                new GetWebRequestFactory(),
+                new WebRequestAssetBundleFactory(),
+                new WebRequestTextureFactory(),
+                new WebRequestAudioFactory(),
+                new PostWebRequestFactory(),
+                new RPCSignRequest(irpc)
+            ));
             result.Register<IServiceProviders>(() => new ServiceProviders());
             result.Register<ILambdasService>(() => new LambdasService());
             result.Register<INamesService>(() => new NamesService());
             result.Register<ILandsService>(() => new LandsService());
             result.Register<IUpdateEventHandler>(() => new UpdateEventHandler());
-            result.Register<IRPC>(() => new RPC());
             result.Register<IWebRequestMonitor>(() => new SentryWebRequestMonitor());
-            result.Register<IWearablesCatalogService>(() => new WearablesCatalogServiceProxy(
-                new LambdasWearablesCatalogService(DataStore.i.common.wearables),
-                WebInterfaceWearablesCatalogService.Instance,
-                DataStore.i.common.wearables,
-                KernelConfig.i,
-                new WearablesWebInterfaceBridge()));
 
             // World runtime
             result.Register<IIdleChecker>(() => new IdleChecker());
             result.Register<IAvatarsLODController>(() => new AvatarsLODController());
             result.Register<IFeatureFlagController>(() => new FeatureFlagController());
+            result.Register<IGPUSkinningThrottlerService>(() => GPUSkinningThrottlerService.Create(true));
             result.Register<ISceneController>(() => new SceneController());
             result.Register<IWorldState>(() => new WorldState());
             result.Register<ISceneBoundsChecker>(() => new SceneBoundsChecker());
@@ -69,6 +72,13 @@ namespace DCL
             result.Register<ITeleportController>(() => new TeleportController());
             result.Register<IApplicationFocusService>(() => new ApplicationFocusService());
             result.Register<IBillboardsController>(BillboardsController.Create);
+            result.Register<IWearablesCatalogService>(() => new WearablesCatalogServiceProxy(
+                new LambdasWearablesCatalogService(DataStore.i.common.wearables, result.Get<ILambdasService>()),
+                WebInterfaceWearablesCatalogService.Instance,
+                DataStore.i.common.wearables,
+                KernelConfig.i,
+                new WearablesWebInterfaceBridge(),
+                DataStore.i.featureFlags.flags));
 
             result.Register<IProfanityFilter>(() => new ThrottledRegexProfanityFilter(
                 new ProfanityWordProviderFromResourcesJson("Profanity/badwords"), 20));
@@ -92,8 +102,8 @@ namespace DCL
             }, DataStore.i.featureFlags));
 
             // HUD
-            result.Register<IHUDFactory>(() => new HUDFactory());
-            result.Register<IHUDController>(() => new HUDController(DataStore.i.featureFlags));
+            result.Register<IHUDFactory>(() => new HUDFactory(addressableResourceProvider));
+            result.Register<IHUDController>(() => new HUDController(result.Get<IWearablesCatalogService>(), DataStore.i));
 
             result.Register<IChannelsFeatureFlagService>(() =>
                 new ChannelsFeatureFlagService(DataStore.i, new UserProfileWebInterfaceBridge()));

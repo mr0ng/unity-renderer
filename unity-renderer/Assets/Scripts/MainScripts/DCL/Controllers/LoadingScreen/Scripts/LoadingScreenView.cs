@@ -9,8 +9,6 @@ namespace DCL.LoadingScreen
     /// </summary>
     public class LoadingScreenView : BaseComponentView, ILoadingScreenView
     {
-        private static readonly string PATH = "_LoadingScreen";
-
         [SerializeField] private LoadingScreenTipsView tipsView;
         [SerializeField] private LoadingScreenPercentageView percentageView;
         [SerializeField] private RawImage rawImage;
@@ -19,9 +17,6 @@ namespace DCL.LoadingScreen
         private RectTransform rawImageRectTransform;
 
         public event Action<ShowHideAnimator> OnFadeInFinish;
-
-        public static LoadingScreenView Create() =>
-            Create<LoadingScreenView>(PATH);
 
         public override void Start()
         {
@@ -61,6 +56,7 @@ namespace DCL.LoadingScreen
         public void FadeOut()
         {
             if (!isVisible) return;
+            rawImage.gameObject.SetActive(false);
 
             Hide();
         }

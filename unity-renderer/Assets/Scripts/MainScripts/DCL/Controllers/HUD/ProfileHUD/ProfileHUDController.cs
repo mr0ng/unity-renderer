@@ -29,6 +29,7 @@ public class ProfileHUDController : IHUD
     public readonly IProfileHUDView view;
     private readonly IUserProfileBridge userProfileBridge;
     private readonly ISocialAnalytics socialAnalytics;
+    private readonly DataStore dataStore;
 
     public event Action OnOpen;
     public event Action OnClose;
@@ -45,23 +46,19 @@ public class ProfileHUDController : IHUD
 
     public ProfileHUDController(
         IUserProfileBridge userProfileBridge,
-        ISocialAnalytics socialAnalytics)
+        ISocialAnalytics socialAnalytics,
+        DataStore dataStore)
     {
         this.userProfileBridge = userProfileBridge;
         this.socialAnalytics = socialAnalytics;
+        this.dataStore = dataStore;
 
-        //GameObject viewGo = UnityEngine.Object.Instantiate(GetViewPrefab());
-        //viewGo.name = VIEW_NAME;
-        
+        GameObject viewGo = UnityEngine.Object.Instantiate(GetViewPrefab());
+        viewGo.name = VIEW_NAME;
+        view = viewGo.GetComponent<IProfileHUDView>();
 
-//<<<<<<< HEAD
-        viewGo = UnityEngine.Object.Instantiate(GetViewPrefab()).GetComponent<ProfileHUDView>();
-        viewGo.name = "_ProfileHUDVR";
-		view = viewGo.GetComponent<IProfileHUDView>();
-//=======
-        DataStore.i.exploreV2.isOpen.OnChange += SetAsFullScreenMenuMode;
-        DataStore.i.exploreV2.profileCardIsOpen.OnChange += SetProfileCardExtended;
-
+        dataStore.exploreV2.isOpen.OnChange += SetAsFullScreenMenuMode;
+        dataStore.exploreV2.profileCardIsOpen.OnChange += SetProfileCardExtended;
 
         view.SetWalletSectionEnabled(false);
         view.SetNonWalletSectionEnabled(false);
@@ -99,15 +96,14 @@ public class ProfileHUDController : IHUD
             KernelConfig.i.OnChange += OnKernelConfigChanged;
         }
 
-        DataStore.i.exploreV2.isInitialized.OnChange += ExploreV2Changed;
-        ExploreV2Changed(DataStore.i.exploreV2.isInitialized.Get(), false);
+        dataStore.exploreV2.isInitialized.OnChange += ExploreV2Changed;
+        ExploreV2Changed(dataStore.exploreV2.isInitialized.Get(), false);
     }
 
     private void OnSignedUp(object sender, EventArgs e)
     {
         DCL.SettingsCommon.Settings.i.SaveSettings();
         WebInterface.RedirectToSignUp();
-
     }
 
     private void OnLoggedOut(object sender, EventArgs e)
@@ -169,8 +165,8 @@ public class ProfileHUDController : IHUD
         if (!DCL.Configuration.EnvironmentSettings.RUNNING_TESTS)
             KernelConfig.i.OnChange -= OnKernelConfigChanged;
 
-        DataStore.i.exploreV2.profileCardIsOpen.OnChange -= SetAsFullScreenMenuMode;
-        DataStore.i.exploreV2.isInitialized.OnChange -= ExploreV2Changed;
+        dataStore.exploreV2.profileCardIsOpen.OnChange -= SetAsFullScreenMenuMode;
+        dataStore.exploreV2.isInitialized.OnChange -= ExploreV2Changed;
     }
 
     protected virtual GameObject GetViewPrefab()

@@ -2,6 +2,7 @@ using DCL.Components;
 using DCL.Configuration;
 using DCL.Helpers;
 using DCL.Interface;
+using DCL.Map;
 using DCL.SettingsCommon;
 using DCL.VR;
 using RPC;
@@ -74,7 +75,6 @@ namespace DCL
                 // DataStore.i.HUDs.loadingHUD.visible.OnChange += OnLoadingScreenVisibleStateChange;
 // =======
 
-                dataStoreLoadingScreen.Ref.loadingHUD.visible.OnChange += OnLoadingScreenVisibleStateChange;
                 dataStoreLoadingScreen.Ref.decoupledLoadingHUD.visible.OnChange += OnLoadingScreenVisibleStateChange;
 // >>>>>>> upstream/release/20230227
             }
@@ -189,7 +189,6 @@ namespace DCL
             {
                 // Prewarm shader variants
                 Resources.Load<ShaderVariantCollection>("ShaderVariantCollections/shaderVariants-selected").WarmUp();
-                dataStoreLoadingScreen.Ref.loadingHUD.visible.OnChange -= OnLoadingScreenVisibleStateChange;
                 dataStoreLoadingScreen.Ref.decoupledLoadingHUD.visible.OnChange -= OnLoadingScreenVisibleStateChange;
             }
         }
@@ -221,11 +220,6 @@ namespace DCL
 
         protected virtual void Dispose()
         {
-// <<<<<<< HEAD
-            // isDisposed = true;
-            // DataStore.i.HUDs.loadingHUD.visible.OnChange -= OnLoadingScreenVisibleStateChange;
-// =======
-            dataStoreLoadingScreen.Ref.loadingHUD.visible.OnChange -= OnLoadingScreenVisibleStateChange;
             dataStoreLoadingScreen.Ref.decoupledLoadingHUD.visible.OnChange -= OnLoadingScreenVisibleStateChange;
 // >>>>>>> upstream/release/20230227
 
@@ -244,8 +238,8 @@ namespace DCL
         {
             gameObject.AddComponent<UserProfileController>();
             gameObject.AddComponent<RenderingController>();
-            gameObject.AddComponent<CatalogController>();
             gameObject.AddComponent<WebInterfaceWearablesCatalogService>();
+            gameObject.AddComponent<WebInterfaceMinimapApiBridge>();
             gameObject.AddComponent<MinimapMetadataController>();
 // <<<<<<< HEAD
             // //TODO: handle HUDS that need to be converted to VR

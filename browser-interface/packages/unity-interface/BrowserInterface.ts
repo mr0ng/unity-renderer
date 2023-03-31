@@ -2,17 +2,15 @@ import { EcsMathReadOnlyQuaternion, EcsMathReadOnlyVector3 } from '@dcl/ecs-math
 
 import { Authenticator } from '@dcl/crypto'
 import { Avatar, generateLazyValidator, JSONSchema } from '@dcl/schemas'
-import {
-  DEBUG,
-  ethereumConfigurations,
-  playerConfigurations,
-  timeBetweenLoadingUpdatesInMillis,
-  WORLD_EXPLORER
-} from 'config'
+import { DEBUG, ethereumConfigurations, playerHeight, WORLD_EXPLORER } from 'config'
 import { isAddress } from 'eth-connect'
 import future, { IFuture } from 'fp-future'
-import { getAuthHeaders } from 'lib/decentraland/authentication/signedFetch'
-import { trackEvent } from 'shared/analytics'
+import { getSignedHeaders } from 'lib/decentraland/authentication/signedFetch'
+import { arrayCleanup } from 'lib/javascript/arrayCleanup'
+import { now } from 'lib/javascript/now'
+import { defaultLogger } from 'lib/logger'
+import { fetchENSOwner } from 'lib/web3/fetchENSOwner'
+import { trackEvent } from 'shared/analytics/trackEvent'
 import { setDecentralandTime } from 'shared/apis/host/EnvironmentAPI'
 import { reportScenesAroundParcel, setHomeScene } from 'shared/atlas/actions'
 import { emotesRequest, wearablesRequest } from 'shared/catalogs/actions'
@@ -22,7 +20,7 @@ import { sendMessage } from 'shared/chat/actions'
 import { sendPublicChatMessage } from 'shared/comms'
 import { changeRealm } from 'shared/dao'
 import { getSelectedNetwork } from 'shared/dao/selectors'
-import { getERC20Balance } from 'shared/ethereum/EthereumService'
+import { getERC20Balance } from 'lib/web3/EthereumService'
 import { leaveChannel, updateUserData } from 'shared/friends/actions'
 import { ensureFriendProfile } from 'shared/friends/ensureFriendProfile'
 import {
@@ -50,7 +48,6 @@ import { ReportFatalErrorWithUnityPayloadAsync } from 'shared/loading/ReportFata
 import { getLastUpdateTime } from 'shared/loading/selectors'
 import { AVATAR_LOADING_ERROR } from 'shared/loading/types'
 import { renderingActivated, renderingDectivated } from 'shared/loadingScreen/types'
-import { defaultLogger } from 'lib/logger'
 import { globalObservable } from 'shared/observables'
 import { denyPortableExperiences, removeScenePortableExperience } from 'shared/portableExperiences/actions'
 import { saveProfileDelta, sendProfileToRenderer } from 'shared/profiles/actions'
@@ -99,7 +96,6 @@ import {
   setVoiceChatVolume
 } from 'shared/voiceChat/actions'
 import { requestMediaDevice } from 'shared/voiceChat/sagas'
-import { fetchENSOwner } from 'shared/web3'
 import { rendererSignalSceneReady } from 'shared/world/actions'
 import {
   allScenesEvent,
@@ -117,6 +113,7 @@ import { getUnityInstance } from './IUnityInterface'
 
 declare const globalThis: { gifProcessor?: GIFProcessor; __debug_wearables: any }
 export const futures: Record<string, IFuture<any>> = {}
+const TIME_BETWEEN_SCENE_LOADING_UPDATES = 1_000
 
 type UnityEvent = any
 
@@ -235,11 +232,6 @@ const validateRendererSaveProfileV0 = generateLazyValidator<RendererSaveProfile>
 // This is the new one
 const validateRendererSaveProfileV1 = generateLazyValidator<RendererSaveProfile>(rendererSaveProfileSchemaV1)
 
-// Returns the current time in millis
-function now() {
-  return new Date().getTime()
-}
-
 // the BrowserInterface is a visitor for messages received from Unity
 export class BrowserInterface {
   private lastBalanceOfMana: number = -1
@@ -288,7 +280,7 @@ export class BrowserInterface {
       data.position,
       data.rotation,
       data.cameraRotation || data.rotation,
-      data.playerHeight || playerConfigurations.height
+      data.playerHeight || playerHeight
     )
   }
 
@@ -907,10 +899,6 @@ export class BrowserInterface {
     )
   }
 
-  public async LoadingHUDReadyForTeleport(data: { x: number; y: number }) {
-    TeleportController.LoadingHUDReadyForTeleport(data)
-  }
-
   public async UpdateMemoryUsage() {
     getUnityInstance().SendMemoryUsageToRenderer()
   }
@@ -920,7 +908,7 @@ export class BrowserInterface {
     const currentTime = now()
     const last = getLastUpdateTime(store.getState())
     const elapsed = currentTime - (last || 0)
-    if (elapsed > timeBetweenLoadingUpdatesInMillis) {
+    if (elapsed > TIME_BETWEEN_SCENE_LOADING_UPDATES) {
       store.dispatch(updateStatusMessage(message, loadPercentage, currentTime))
     }
   }
@@ -1011,7 +999,7 @@ export class BrowserInterface {
     const identity = getCurrentIdentity(store.getState())
 
     const headers: Record<string, string> = identity
-      ? getAuthHeaders(data.method, data.url, data.metadata, (_payload) =>
+      ? getSignedHeaders(data.method, data.url, data.metadata, (_payload) =>
           Authenticator.signPayload(identity, data.url)
         )
       : {}
@@ -1135,10 +1123,6 @@ export class BrowserInterface {
         break
     }
   }
-}
-
-function arrayCleanup<T>(array: T[] | null | undefined): T[] | undefined {
-  return !array || array.length === 0 ? undefined : array
 }
 
 export const browserInterface: BrowserInterface = new BrowserInterface()

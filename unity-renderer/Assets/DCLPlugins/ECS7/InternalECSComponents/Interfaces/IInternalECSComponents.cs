@@ -1,9 +1,11 @@
-using System;
 using DCL.ECS7.InternalComponents;
 
 public interface IInternalECSComponents
 {
-    void WriteSystemUpdate();
+    void MarkDirtyComponentsUpdate();
+
+    void ResetDirtyComponentsUpdate();
+
     IInternalECSComponent<InternalTexturizable> texturizableComponent { get; }
     IInternalECSComponent<InternalMaterial> materialComponent { get; }
     IInternalECSComponent<InternalVideoMaterial> videoMaterialComponent { get; }
@@ -15,4 +17,6 @@ public interface IInternalECSComponents
     IInternalECSComponent<InternalInputEventResults> inputEventResultsComponent { get; }
     IInternalECSComponent<InternalUiContainer> uiContainerComponent { get; }
     IInternalECSComponent<InternalUIInputResults> uiInputResultsComponent { get; }
+    IInternalECSComponent<InternalSceneBoundsCheck> sceneBoundsCheckComponent { get; }
+    IInternalECSComponent<InternalAudioSource> audioSourceComponent { get; }
 }

@@ -2,13 +2,14 @@ using DCL;
 using DCL.ECSComponents;
 using ECSSystems.BillboardSystem;
 using ECSSystems.CameraSystem;
+using ECSSystems.ECSSceneBoundsCheckerSystem;
 using ECSSystems.InputSenderSystem;
 using ECSSystems.MaterialSystem;
 using ECSSystems.PlayerSystem;
 using ECSSystems.PointerInputSystem;
 using ECSSystems.ScenesUiSystem;
-using ECSSystems.VideoPlayerSystem;
 using ECSSystems.UIInputSenderSystem;
+using ECSSystems.VideoPlayerSystem;
 using ECSSystems.VisibilitySystem;
 using System;
 using System.Collections.Generic;
@@ -24,23 +25,25 @@ public class ECSSystemsController : IDisposable
     private readonly IList<ECS7System> lateUpdateSystems;
     private readonly IUpdateEventHandler updateEventHandler;
     private readonly ECS7System componentWriteSystem;
-    private readonly ECS7System internalComponentWriteSystem;
+    private readonly ECS7System internalComponentMarkDirtySystem;
+    private readonly ECS7System internalComponentRemoveDirtySystem;
     private readonly ECSScenesUiSystem uiSystem;
     private readonly ECSBillboardSystem billboardSystem;
     private readonly ECSCameraEntitySystem cameraEntitySystem;
     private readonly ECSPlayerTransformSystem playerTransformSystem;
     private readonly ECSVideoPlayerSystem videoPlayerSystem;
     private readonly ECSUIInputSenderSystem uiInputSenderSystem;
+    private readonly ECSSceneBoundsCheckerSystem sceneBoundsCheckerSystem;
     private readonly GameObject hoverCanvas;
     private readonly GameObject scenesUi;
     private readonly DataStoreRef<DataStore_LoadingScreen> dataStoreLoadingScreen;
-
 
     public ECSSystemsController(ECS7System componentWriteSystem, SystemsContext context)
     {
         this.updateEventHandler = Environment.i.platform.updateEventHandler;
         this.componentWriteSystem = componentWriteSystem;
-        this.internalComponentWriteSystem = context.internalEcsComponents.WriteSystemUpdate;
+        this.internalComponentMarkDirtySystem = context.internalEcsComponents.MarkDirtyComponentsUpdate;
+        this.internalComponentRemoveDirtySystem = context.internalEcsComponents.ResetDirtyComponentsUpdate;
 
         var canvas = Resources.Load<GameObject>("ECSInteractionHoverCanvas");
         hoverCanvas = Object.Instantiate(canvas);
@@ -54,11 +57,7 @@ public class ECSSystemsController : IDisposable
 
         BaseVariable<bool> loadingScreenVisible;
 
-        if (DataStore.i.featureFlags.flags.Get().IsFeatureEnabled(DataStore.i.featureFlags.DECOUPLED_LOADING_SCREEN_FF))
-            loadingScreenVisible = dataStoreLoadingScreen.Ref.decoupledLoadingHUD.visible;
-        else
-            loadingScreenVisible = dataStoreLoadingScreen.Ref.loadingHUD.visible;
-
+        loadingScreenVisible = dataStoreLoadingScreen.Ref.decoupledLoadingHUD.visible;
 
         uiSystem = new ECSScenesUiSystem(scenesUiDocument,
             context.internalEcsComponents.uiContainerComponent,
@@ -75,12 +74,22 @@ public class ECSSystemsController : IDisposable
 
         uiInputSenderSystem = new ECSUIInputSenderSystem(context.internalEcsComponents.uiInputResultsComponent, context.componentWriter);
 
+        sceneBoundsCheckerSystem = new ECSSceneBoundsCheckerSystem(
+            DataStore.i.ecs7.scenes,
+            context.internalEcsComponents.sceneBoundsCheckComponent,
+            context.internalEcsComponents.visibilityComponent,
+            context.internalEcsComponents.renderersComponent,
+            context.internalEcsComponents.onPointerColliderComponent,
+            context.internalEcsComponents.physicColliderComponent,
+            context.internalEcsComponents.audioSourceComponent,
+            DataStore.i.debugConfig.isDebugMode.Get());
+
         updateEventHandler.AddListener(IUpdateEventHandler.EventType.Update, Update);
         updateEventHandler.AddListener(IUpdateEventHandler.EventType.LateUpdate, LateUpdate);
 
         updateSystems = new ECS7System[]
         {
-            ECSTransformParentingSystem.Update,
+            ECSTransformParentingSystem.CreateSystem(context.internalEcsComponents.sceneBoundsCheckComponent),
             ECSMaterialSystem.CreateSystem(context.componentGroups.texturizableGroup,
                 context.internalEcsComponents.texturizableComponent, context.internalEcsComponents.materialComponent),
             ECSVisibilitySystem.CreateSystem(context.componentGroups.visibilityGroup,
@@ -94,15 +103,16 @@ public class ECSSystemsController : IDisposable
                 Environment.i.world.state,
                 DataStore.i.ecs7),
             ECSInputSenderSystem.CreateSystem(context.internalEcsComponents.inputEventResultsComponent, context.componentWriter),
-            uiInputSenderSystem.Update,
             billboardSystem.Update,
             videoPlayerSystem.Update,
         };
 
         lateUpdateSystems = new ECS7System[]
         {
+            uiInputSenderSystem.Update, // Input detection happens during Update() so this system has to run in LateUpdate()
             cameraEntitySystem.Update,
-            playerTransformSystem.Update
+            playerTransformSystem.Update,
+            sceneBoundsCheckerSystem.Update // Should always be the last system
         };
     }
 
@@ -113,22 +123,36 @@ public class ECSSystemsController : IDisposable
         uiSystem.Dispose();
         cameraEntitySystem.Dispose();
         playerTransformSystem.Dispose();
+        sceneBoundsCheckerSystem.Dispose();
         Object.Destroy(hoverCanvas);
         Object.Destroy(scenesUi);
     }
 
     private void Update()
     {
-        componentWriteSystem.Invoke();
+        try
+        {
+            componentWriteSystem.Invoke();
+            internalComponentMarkDirtySystem.Invoke();
+        }
+        catch (Exception e)
+        {
+            Debug.LogException(e);
+        }
 
         int count = updateSystems.Count;
 
         for (int i = 0; i < count; i++)
         {
-            updateSystems[i].Invoke();
+            try
+            {
+                updateSystems[i].Invoke();
+            }
+            catch (Exception e)
+            {
+                Debug.LogException(e);
+            }
         }
-
-        internalComponentWriteSystem.Invoke();
     }
 
     private void LateUpdate()
@@ -137,7 +161,23 @@ public class ECSSystemsController : IDisposable
 
         for (int i = 0; i < count; i++)
         {
-            lateUpdateSystems[i].Invoke();
+            try
+            {
+                lateUpdateSystems[i].Invoke();
+            }
+            catch (Exception e)
+            {
+                Debug.LogException(e);
+            }
+        }
+
+        try
+        {
+            internalComponentRemoveDirtySystem.Invoke();
+        }
+        catch (Exception e)
+        {
+            Debug.LogException(e);
         }
     }
 }

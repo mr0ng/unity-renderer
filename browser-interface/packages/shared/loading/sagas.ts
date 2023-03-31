@@ -1,34 +1,37 @@
+import { getAssetBundlesBaseUrl } from 'config'
+import { LoginState } from 'kernel-web-interface'
+import { now } from 'lib/javascript/now'
+import { waitFor } from 'lib/redux'
 import { AnyAction } from 'redux'
+import { call } from 'redux-saga-test-plan/matchers'
 import { fork, put, race, select, take, takeEvery, takeLatest } from 'redux-saga/effects'
-
-import { RENDERER_INITIALIZED_CORRECTLY } from 'shared/renderer/types'
-import { CHANGE_LOGIN_STAGE, ChangeLoginStateAction } from 'shared/session/actions'
-import { trackEvent } from '../analytics'
-import { lastPlayerPosition } from '../world/positionThings'
-
+import { trackEvent } from 'shared/analytics/trackEvent'
+import { getSelectedNetwork } from 'shared/dao/selectors'
+import { getResourcesURL } from 'shared/location'
+import { SET_REALM_ADAPTER } from 'shared/realm/actions'
+import { PARCEL_LOADING_STARTED, RENDERER_INITIALIZED_CORRECTLY } from 'shared/renderer/types'
+import { POSITION_SETTLED, POSITION_UNSETTLED, SET_SCENE_LOADER } from 'shared/scene-loader/actions'
+import { AUTHENTICATE, ChangeLoginStateAction, CHANGE_LOGIN_STAGE, SIGNUP_SET_IS_SIGNUP } from 'shared/session/actions'
+import { onLoginCompleted } from 'shared/session/onLoginCompleted'
+import { getCurrentUserId } from 'shared/session/selectors'
+import { LoadableScene } from 'shared/types'
+import { loadedSceneWorkers } from 'shared/world/parcelSceneManager'
+import { lastPlayerPosition } from 'shared/world/positionThings'
+import { SceneWorkerReadyState } from 'shared/world/SceneWorker'
 import {
   informPendingScenes,
+  PENDING_SCENES,
+  SceneFail,
+  SceneLoad,
   SCENE_CHANGED,
   SCENE_FAIL,
   SCENE_LOAD,
   SCENE_START,
-  SceneFail,
-  SceneLoad
+  SCENE_UNLOAD,
+  UPDATE_STATUS_MESSAGE
 } from './actions'
-import { experienceStarted, metricsAuthSuccessful, metricsUnityClientLoaded } from './types'
-import { getCurrentUserId } from 'shared/session/selectors'
-import { LoginState } from 'kernel-web-interface'
-import { call } from 'redux-saga-test-plan/matchers'
-import { RootState } from 'shared/store/rootTypes'
-import { onLoginCompleted } from 'shared/session/onLoginCompleted'
-import { getResourcesURL } from 'shared/location'
-import { getSelectedNetwork } from 'shared/dao/selectors'
-import { getAssetBundlesBaseUrl } from 'config'
-import { loadedSceneWorkers } from 'shared/world/parcelSceneManager'
-import { SceneWorkerReadyState } from 'shared/world/SceneWorker'
-import { LoadableScene } from 'shared/types'
-import { updateLoadingScreen } from '../loadingScreen/actions'
-import { ACTIONS_FOR_LOADING } from '../loadingScreen/sagas'
+import { shouldWaitForScenes } from './selectors'
+import { experienceStarted, metricsAuthSuccessful, metricsUnityClientLoaded, TELEPORT_TRIGGERED } from './types'
 
 export function* loadingSaga() {
   yield takeEvery(SCENE_LOAD, trackLoadTime)
@@ -68,7 +71,7 @@ function* triggerUnityClientLoaded() {
 }
 
 export function* trackLoadTime(action: SceneLoad): any {
-  const start = new Date().getTime()
+  const start = now()
   const { id } = action.payload
   const entityId = id
   const result = yield race({
@@ -81,38 +84,32 @@ export function* trackLoadTime(action: SceneLoad): any {
   const position = lastPlayerPosition
   trackEvent('SceneLoadTimes', {
     position: { ...position },
-    elapsed: new Date().getTime() - start,
+    elapsed: now() - start,
     success: !!result.start,
     sceneId: entityId,
     userId: userId
   })
 }
 
-function* waitForSceneLoads() {
-  function shouldWaitForScenes(state: RootState) {
-    if (!state.renderer.parcelLoadingStarted) {
-      return true
-    }
+export const ACTIONS_FOR_LOADING = [
+  AUTHENTICATE,
+  CHANGE_LOGIN_STAGE,
+  PARCEL_LOADING_STARTED,
+  PENDING_SCENES,
+  RENDERER_INITIALIZED_CORRECTLY,
+  SCENE_FAIL,
+  SCENE_LOAD,
+  SIGNUP_SET_IS_SIGNUP,
+  TELEPORT_TRIGGERED,
+  UPDATE_STATUS_MESSAGE,
+  SET_REALM_ADAPTER,
+  SET_SCENE_LOADER,
+  POSITION_SETTLED,
+  POSITION_UNSETTLED,
+  SCENE_UNLOAD
+]
 
-    // in the initial load, we should wait until we have *some* scene to load
-    if (state.loading.initialLoad) {
-      if (state.loading.pendingScenes !== 0 || state.loading.totalScenes === 0) {
-        return true
-      }
-    }
-
-    // otherwise only wait until pendingScenes == 0
-    return state.loading.pendingScenes !== 0
-  }
-
-  while (yield select(shouldWaitForScenes)) {
-    // these are the events that _may_ change the result of shouldWaitForScenes
-    yield take(ACTIONS_FOR_LOADING)
-  }
-
-  // trigger the signal to apply the state in the renderer
-  yield put(updateLoadingScreen())
-}
+const waitForSceneLoads = waitFor(shouldWaitForScenes, ACTIONS_FOR_LOADING)
 
 function* initialSceneLoading() {
   yield call(onLoginCompleted)

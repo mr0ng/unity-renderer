@@ -11,7 +11,7 @@ import type { RpcServerPort } from '@dcl/rpc'
 import * as codegen from '@dcl/rpc/dist/codegen'
 import type { PortContext } from './context'
 
-import { PlayersServiceDefinition } from '@dcl/protocol/out-ts/decentraland/kernel/apis/players.gen'
+import { PlayersServiceDefinition } from 'shared/protocol/decentraland/kernel/apis/players.gen'
 import { isWorldPositionInsideParcels } from 'lib/decentraland/parcels/isWorldPositionInsideParcels'
 import { getVisiblePeerEthereumAddresses } from 'shared/comms/peers'
 import { sceneRuntimeCompatibleAvatar } from 'lib/decentraland/profiles'
@@ -61,8 +61,9 @@ export function registerPlayersServiceServerImplementation(port: RpcServerPort<P
       return { players: result }
     },
     async getConnectedPlayers() {
+      const userId = getCurrentUserId(store.getState())!
       return {
-        players: getVisiblePeerEthereumAddresses()
+        players: getVisiblePeerEthereumAddresses().concat({ userId })
       }
     }
   }))

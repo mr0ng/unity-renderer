@@ -1,4 +1,4 @@
-import type * as rfc4 from '@dcl/protocol/out-ts/decentraland/kernel/comms/rfc4/comms.gen'
+import type * as rfc4 from 'shared/protocol/decentraland/kernel/comms/rfc4/comms.gen'
 import type { Avatar } from '@dcl/schemas'
 import { EthAddress } from '@dcl/schemas'
 import { commConfigurations } from 'config'
@@ -93,6 +93,12 @@ export function setupPeer(address: string): PeerInformation {
 
     // if we have user data, then send it to the avatar-scene
     sendPeerUserData(address)
+
+    avatarMessageObservable.notifyObservers({
+      type: AvatarMessageType.USER_VISIBLE,
+      userId: ethereumAddress,
+      visible: true
+    })
 
     return peer
   } else {
