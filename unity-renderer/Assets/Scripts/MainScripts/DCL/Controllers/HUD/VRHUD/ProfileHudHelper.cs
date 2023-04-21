@@ -6,8 +6,8 @@ using UnityEngine;
 public class ProfileHudHelper : VRHUDHelper
 {
     [SerializeField]
-    private ProfileHUDView view;
-    
+    private ProfileHUDViewV2 view;
+
     protected override void SetupHelper()
     {
         VRHUDController.I.Register(this, true);
@@ -17,12 +17,12 @@ public class ProfileHudHelper : VRHUDHelper
     public override void Hide()
     {
         view.SetStartMenuButtonActive(false);
-        view.SetCardAsFullScreenMenuMode(true);
+        view.ShowExpanded(true);
     }
 
     public override void Show()
     {
         view.SetStartMenuButtonActive(true);
-        view.SetCardAsFullScreenMenuMode(false);
+        view.ShowExpanded(false);
     }
 }

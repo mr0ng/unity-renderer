@@ -18,7 +18,6 @@ namespace DCL.Controllers
         IECSComponentsManagerLegacy componentsManagerLegacy { get; }
         LoadParcelScenesMessage.UnityParcelScene sceneData { get; }
         ContentProvider contentProvider { get; }
-        int distanceToPlayer { get; set; }
         bool isPersistent { get; }
         bool isPortableExperience { get; }
         bool isTestScene { get; }

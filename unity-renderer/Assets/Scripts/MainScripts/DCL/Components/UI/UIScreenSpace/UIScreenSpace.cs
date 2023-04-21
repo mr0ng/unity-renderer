@@ -197,8 +197,6 @@ namespace DCL.Components
 
             UpdateCanvasVisibility();
             CommonScriptableObjects.allUIHidden.OnChange += AllUIHidden_OnChange;
-            
-            canvasGameObject.AddComponent<UIScreenSpaceHelper>();
         }
     }
 }

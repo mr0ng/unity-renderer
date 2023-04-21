@@ -10,8 +10,11 @@ using UnityEngine.UI;
 
 public class PlayerInfoCardHUDView : MonoBehaviour
 {
+    #if DCL_VR
     private const string PREFAB_PATH = "PlayerInfoCardHUDVR";
-
+    #else
+    private const string PREFAB_PATH = "PlayerInfoCardHUD";
+#endif
     public enum Tabs
     {
         Passport,

@@ -28,6 +28,7 @@ RectTransform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 4088236047519927448}
   m_Father: {fileID: 5294144831671452514}
@@ -104,6 +105,7 @@ RectTransform:
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 8383359114467703496}
   - {fileID: 8613156211359973908}
@@ -184,6 +186,7 @@ RectTransform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 5294144831671452514}
   m_RootOrder: 4
@@ -320,6 +323,7 @@ RectTransform:
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 5170406175408120703}
   m_RootOrder: 0
@@ -440,7 +444,6 @@ GameObject:
   - component: {fileID: 3237083452506707214}
   - component: {fileID: 390665515752535611}
   - component: {fileID: 5770164777666249056}
-  - component: {fileID: -8556690536741982847}
   m_Layer: 5
   m_Name: PromoteChannelsHUD
   m_TagString: Untagged
@@ -458,6 +461,7 @@ RectTransform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 0, y: 0, z: 0}
+  m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 5294144831671452514}
   m_Father: {fileID: 0}
@@ -477,7 +481,7 @@ Canvas:
   m_GameObject: {fileID: 4946458985502074645}
   m_Enabled: 1
   serializedVersion: 3
-  m_RenderMode: 2
+  m_RenderMode: 0
   m_Camera: {fileID: 0}
   m_PlaneDistance: 100
   m_PixelPerfect: 0
@@ -511,7 +515,7 @@ MonoBehaviour:
   m_FallbackScreenDPI: 96
   m_DefaultSpriteDPI: 96
   m_DynamicPixelsPerUnit: 1
-  m_PresetInfoIsWorld: 1
+  m_PresetInfoIsWorld: 0
 --- !u!114 &390665515752535611
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -543,21 +547,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   showHideAnimator: {fileID: 0}
   closeButton: {fileID: 7155727032241293140}
---- !u!114 &-8556690536741982847
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4946458985502074645}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c2741530f002f7841bf417201957881e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  sortingOrder: 0
-  showHideAnimator: {fileID: 0}
-  submenu: 0
 --- !u!1 &5585790365960245527
 GameObject:
   m_ObjectHideFlags: 0
@@ -586,6 +575,7 @@ RectTransform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 5294144831671452514}
   m_RootOrder: 0
@@ -661,6 +651,7 @@ RectTransform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 5294144831671452514}
   m_RootOrder: 3

@@ -69,7 +69,7 @@ MonoBehaviour:
         Microsoft.MixedReality.Toolkit.Providers.OpenXR
     componentName: OpenXR XRSDK Device Manager
     priority: 0
-    runtimePlatform: 55
+    runtimePlatform: 63
     deviceManagerProfile: {fileID: 0}
   focusProviderType:
     reference: Microsoft.MixedReality.Toolkit.Input.FocusProvider, Microsoft.MixedReality.Toolkit.Services.InputSystem
@@ -82,8 +82,8 @@ MonoBehaviour:
     type: 2}
   inputActionRulesProfile: {fileID: 11400000, guid: 03945385d89102f41855bc8f5116b199,
     type: 2}
-  pointerProfile: {fileID: 11400000, guid: f23ec28ed16dcbe4f97c2a282eb2bacd, type: 2}
-  gesturesProfile: {fileID: 11400000, guid: bd7829a9b29409045a745b5a18299291, type: 2}
+  pointerProfile: {fileID: 11400000, guid: 88a8e1851af69fc4394323179eddb12f, type: 2}
+  gesturesProfile: {fileID: 11400000, guid: 9c798b69bfd8a4e458ad6f335c789393, type: 2}
   speechCommandsProfile: {fileID: 11400000, guid: e8d0393e66374dae9646851a57dc6bc1,
     type: 2}
   enableControllerMapping: 1

@@ -54,14 +54,7 @@ namespace DCL.Social.Chat.Channels
             if (model == null)
                 return;
 
-// <<<<<<< HEAD
-    // internal static JoinChannelComponentView Create()
-    // {
-        // JoinChannelComponentView joinChannelComponenView = Instantiate(Resources.Load<GameObject>("JoinChannelHUDVR")).GetComponent<JoinChannelComponentView>();
-        // joinChannelComponenView.name = "_JoinChannelHUD";
-// =======
             SetChannel(model.channelId);
-// >>>>>>> upstream/release/20230227
 
             if (model.isLoading)
                 ShowLoading();

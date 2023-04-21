@@ -1,4 +1,5 @@
 ﻿using DCL;
+using SignupHUD;
 using UnityEngine;
 
 public class TermsOfServiceHudHelper : VRHUDHelper
@@ -19,10 +20,10 @@ public class TermsOfServiceHudHelper : VRHUDHelper
     {
         if (dataStoreIsOpen.Get())
             myTrans.localRotation = Quaternion.identity;
-        else if (visible) 
+        else if (visible)
             Position();
     }
-    
+
     private void Position()
     {
         var forward = CommonScriptableObjects.cameraForward;

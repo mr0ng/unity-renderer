@@ -7,14 +7,14 @@ namespace UnityGLTF
     {
         private readonly HashSet<IDownloadQueueElement> queuedElements = new HashSet<IDownloadQueueElement>();
 
-        public int MaxDownloadCount {  set; get; } = 10;
+        public int maxDownloadCount;
         private Func<int> GetCurrentDownloadAmount;
 
         public IDownloadQueueElement nextToDownload { private set; get; } = null;
 
         public DownloadQueueHandler(int maxDownloadCount, Func<int> GetCurrentDownloadAmount)
         {
-            this.MaxDownloadCount = maxDownloadCount;
+            this.maxDownloadCount = maxDownloadCount;
             this.GetCurrentDownloadAmount = GetCurrentDownloadAmount;
         }
 
@@ -62,7 +62,7 @@ namespace UnityGLTF
 
         private bool ShouldRefreshSorting()
         {
-            return nextToDownload == null && GetCurrentDownloadAmount() < MaxDownloadCount;
+            return nextToDownload == null && GetCurrentDownloadAmount() < maxDownloadCount;
         }
 
         private void RefreshSorting()

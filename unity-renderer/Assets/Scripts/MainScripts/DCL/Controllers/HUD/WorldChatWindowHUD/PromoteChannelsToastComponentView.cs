@@ -26,8 +26,13 @@ namespace DCL.Chat.HUD
 
         public static PromoteChannelsToastComponentView Create()
         {
+            #if DCL_VR
+            return Instantiate(
+                Resources.Load<PromoteChannelsToastComponentView>("SocialBarV1/PromoteChannelsHUDVR"));
+            #else
             return Instantiate(
                 Resources.Load<PromoteChannelsToastComponentView>("SocialBarV1/PromoteChannelsHUD"));
+            #endif
         }
     }
 }

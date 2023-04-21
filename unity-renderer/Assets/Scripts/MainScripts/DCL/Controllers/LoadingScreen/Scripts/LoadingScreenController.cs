@@ -95,7 +95,11 @@ namespace DCL.LoadingScreen
             if (current)
                 FadeOutView();
             else
+            #if DCL_VR
+                view.SetVisible(true,false);
+            #else
                 view.FadeIn(false, false);
+#endif
         }
 
         private void TeleportRequested(Vector3 current, Vector3 previous)
@@ -113,8 +117,11 @@ namespace DCL.LoadingScreen
                 //Temporarily removing tips until V2
                 //tipsController.StopTips();
                 percentageController.StartLoading(currentDestination);
-
+#if DCL_VR
+                view.SetVisible(true,true);
+#else
                 view.FadeIn(false, true);
+#endif
             }
             else
             {
@@ -168,7 +175,11 @@ namespace DCL.LoadingScreen
 
         private void FadeOutView()
         {
+#if DCL_VR
+            view.SetVisible(false,false);
+#else
             view.FadeOut();
+#endif
             loadingScreenDataStore.decoupledLoadingHUD.visible.Set(false);
         }
     }

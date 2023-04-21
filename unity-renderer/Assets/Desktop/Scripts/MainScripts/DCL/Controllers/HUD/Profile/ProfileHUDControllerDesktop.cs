@@ -31,7 +31,11 @@ namespace MainScripts.DCL.Controllers.HUD.Profile
 
         protected override GameObject GetViewPrefab()
         {
+            #if DCL_VR
+            return Resources.Load<GameObject>("ProfileHUDDesktop_V2VR");
+            #else
             return Resources.Load<GameObject>("ProfileHUDDesktop_V2");
+#endif
         }
     }
 }

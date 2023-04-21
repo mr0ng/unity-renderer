@@ -28,7 +28,6 @@ namespace DCL
         {
             CommandLineParserUtils.ParseArguments();
             isConnectionLost = false;
-
             DCLVideoTexture.videoPluginWrapperBuilder = VideoProviderFactory.CreateVideoProvider;
 
             InitializeSettings();

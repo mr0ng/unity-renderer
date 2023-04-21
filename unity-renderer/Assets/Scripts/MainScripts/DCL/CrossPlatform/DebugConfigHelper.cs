@@ -9,8 +9,8 @@ public class DebugConfigHelper : MonoBehaviour
     private const string OrgUrl = "http://play.decentraland.org/?";
     private const string ZoneUrl = "http://play.decentraland.zone/?";
     private const string LocalUrl = "http://localhost:8080/?";
-    
-    [SerializeField] 
+
+    [SerializeField]
     private DebugConfigComponent debugConfigComponent;
     private void Awake()
     {

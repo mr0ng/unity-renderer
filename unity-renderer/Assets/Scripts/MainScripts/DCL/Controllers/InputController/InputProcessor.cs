@@ -1,6 +1,7 @@
 ﻿using DCL;
 using DCL.Helpers;
 using System;
+using System.Linq;
 using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -22,7 +23,7 @@ public static class InputProcessor
         NeedsPointerLocked = 0b0000001, // The pointer must be locked to the game
         FocusNotInInput = 0b0000010, // The game focus cannot be in an input field
         NotInStartMenu = 0b0000100, // The game focus cannot be in full-screen start menu
-        OnlyWithInputFocused = 0b0001000, // The game focus must be in an input field
+        OnlyWithInputFocused = 0b0001000 // The game focus must be in an input field
     }
 
     /// <summary>
@@ -71,7 +72,7 @@ public static class InputProcessor
     /// <returns></returns>
     private static bool PassModifiers(Modifier modifiers)
     {
-        if (IsModifierSet(modifiers, Modifier.NeedsPointerLocked) && !Utils.IsCursorLocked)
+        if (IsModifierSet(modifiers, Modifier.NeedsPointerLocked) && !DCL.Helpers.Utils.IsCursorLocked)
             return false;
 
         bool isInputFieldFocused = FocusIsInInputField();
@@ -139,16 +140,40 @@ public static class InputProcessor
     /// <param name="action">Hold Action to perform</param>
     /// <param name="key">KeyCode mapped to this action</param>
     /// <param name="modifiers">Miscellaneous modifiers required for this action</param>
-    public static void FromKey(InputAction_Hold action, KeyCode key, Modifier modifiers = Modifier.None)
+    public static void FromKey(InputAction_Hold action, object keyValue, Modifier modifiers = Modifier.None, KeyCode? secondaryKey = null)
     {
         if (!PassModifiers(modifiers))
             return;
 
-        if (Input.GetKeyDown(key))
-            action.RaiseOnStarted();
-        if (Input.GetKeyUp(key))
-            action.RaiseOnFinished();
+        if (keyValue is KeyCode key)
+        {
+            if (Input.GetKeyDown(key))
+                action.RaiseOnStarted();
+            if (Input.GetKeyUp(key))
+                action.RaiseOnFinished();
+        }
+        else if (keyValue is float axisFloatValue)
+        {
+            if (axisFloatValue > 0.5f)
+                action.RaiseOnStarted();
+            else if (axisFloatValue <= 0.5f)
+                action.RaiseOnFinished();
+        }
+        else
+        {
+            throw new ArgumentException("Invalid key value type. Must be a KeyCode or float.");
+        }
+
+        if (secondaryKey.HasValue)
+        {
+            KeyCode secondaryKeyCode = secondaryKey.Value;
+            if (Input.GetKeyDown(secondaryKeyCode))
+                action.RaiseOnStarted();
+            if (Input.GetKeyUp(secondaryKeyCode))
+                action.RaiseOnFinished();
+        }
     }
+
 
     /// <summary>
     /// Process an input action mapped to a keyboard key
@@ -188,7 +213,7 @@ public static class InputProcessor
     /// <param name="action">Measurable Action to perform</param>
     /// <param name="axisName">Axis name</param>
     /// <param name="modifiers">Miscellaneous modifiers required for this action</param>
-    public static void FromAxis(InputAction_Measurable action, string axisName, Modifier modifiers = Modifier.None)
+    public static void FromAxis(InputAction_Measurable action, object axisValue, Modifier modifiers = Modifier.None)
     {
         if (!PassModifiers(modifiers))
         {
@@ -196,7 +221,18 @@ public static class InputProcessor
             return;
         }
 
-        action.RaiseOnValueChanged(Input.GetAxis(axisName));
+        if (axisValue is string axisName)
+        {
+            action.RaiseOnValueChanged(Input.GetAxis(axisName));
+        }
+        else if (axisValue is float axisFloatValue)
+        {
+            action.RaiseOnValueChanged(axisFloatValue);
+        }
+        else
+        {
+            throw new ArgumentException("Invalid axis value type. Must be a string or float.");
+        }
     }
 
     /// <summary>
@@ -220,7 +256,7 @@ public static class InputProcessor
 
         return EventSystem.current.currentSelectedGameObject != null &&
                (EventSystem.current.currentSelectedGameObject.GetComponent<TMP_InputField>() != null ||
-                EventSystem.current.currentSelectedGameObject.GetComponent<InputField>() != null ||
+                EventSystem.current.currentSelectedGameObject.GetComponent<UnityEngine.UI.InputField>() != null ||
                 FocusIsInTextField(EventSystem.current.currentSelectedGameObject));
     }
 

@@ -65,7 +65,7 @@ namespace WebSocketSharp.Server
             _hosts = new Dictionary<string, WebSocketServiceHost>();
             _state = ServerState.Ready;
             _sync = ((ICollection)_hosts).SyncRoot;
-            _waitTime = TimeSpan.FromSeconds(10);
+            _waitTime = TimeSpan.FromSeconds(1);
         }
 
         #endregion

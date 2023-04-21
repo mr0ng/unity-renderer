@@ -1065,11 +1065,7 @@ namespace WebSocketSharp.Server
                 Debug.LogError($"WebSocketServer: {msg}");
                 throw new InvalidOperationException(msg, ex);
             }
-            Debug.Log("WebSocketServer: Listener Started");
-            if (_receiveThread != null)
-            {
-                _receiveThread.Abort();
-            }
+
             _receiveThread = new Thread(new ThreadStart(receiveRequest));
             _receiveThread.IsBackground = true;
             _receiveThread.Start();

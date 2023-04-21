@@ -46,8 +46,11 @@ namespace DCL.SettingsPanelHUD
         [SerializeField] private ShowHideAnimator settingsAnimator;
 
         public bool isOpen { get; private set; }
-
+#if DCL_VR
         private const string PATH = "SettingsPanelHUDVR";
+        #else
+        private const string PATH = "SettingsPanelHUD";
+        #endif
         private const float WORLD_PREVIEW_MIN_WIDTH_TO_BE_SHOWED = 200f;
         private const float WORLD_PREVIEW_ORIGINAL_WIDTH = 400f;
         private const float WORLD_PREVIEW_ORIGINAL_HEIGHT = 250f;
@@ -89,7 +92,7 @@ namespace DCL.SettingsPanelHUD
 
             DataStore.i.screen.size.OnChange += ScreenSizeChanged;
             ScreenSizeChanged(DataStore.i.screen.size.Get(), Vector2Int.zero);
-            
+
             //WorldPreviewWindow is not being used at the moment. If we decide to reuse it, remove this activation
             worldPreviewWindowTransform.gameObject.SetActive(false);
         }
@@ -169,7 +172,7 @@ namespace DCL.SettingsPanelHUD
                 settingsPanelController.SaveSettings();
                 SetWorldPreviewActive(false);
             }
-            
+
             isOpen = visible;
         }
 

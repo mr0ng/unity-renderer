@@ -1,6 +1,6 @@
 using DCL;
+using DCL.GoToPanel;
 using DCL.Huds;
-using GotoPanel;
 using SignupHUD;
 using UnityEngine;
 
@@ -12,16 +12,16 @@ public class GotoPanelHudHelper : VRHUDHelper
     protected override void SetupHelper()
     {
         myTrans.localScale = 0.002f * Vector3.one;
-        view.OnSetVisibility += OnVisiblityChange;
+        // view.OnClosePressed += OnVisiblityChange;
     }
     private void OnVisiblityChange(bool visible)
     {
         if (dataStoreIsOpen.Get())
             myTrans.localRotation = Quaternion.identity;
-        else if (visible) 
+        else if (visible)
             Position();
     }
-    
+
     private void Position()
     {
         var forward = VRHUDController.I.GetForward();

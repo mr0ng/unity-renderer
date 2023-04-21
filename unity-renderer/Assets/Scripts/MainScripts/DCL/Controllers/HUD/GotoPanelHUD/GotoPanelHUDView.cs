@@ -30,6 +30,7 @@ namespace DCL.GoToPanel
 
         private void Awake()
         {
+
             teleportButton.onClick.AddListener(TeleportTo);
             closeButton.onClick.AddListener(ClosePanel);
             cancelButton.onClick.AddListener(ClosePanel);
@@ -54,7 +55,11 @@ namespace DCL.GoToPanel
 
         public static GotoPanelHUDView CreateView()
         {
+#if DCL_VR
+            GotoPanelHUDView view = Instantiate(Resources.Load<GotoPanelHUDView>("GotoPanelHUDVR"));
+#else
             GotoPanelHUDView view = Instantiate(Resources.Load<GotoPanelHUDView>("GotoPanelHUD"));
+#endif
             view.name = "_GotoPanelHUD";
             return view;
         }

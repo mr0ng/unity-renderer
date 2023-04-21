@@ -73,6 +73,7 @@ public class ExploreV2MenuComponentView : BaseComponentView, IExploreV2MenuCompo
     public override void Awake()
     {
         base.Awake();
+
         showHideAnimator.OnWillFinishStart += OnAfterShowAnimationCompleted;
 
         profileCardRectTransform = profileCard.GetComponent<RectTransform>();

@@ -17,9 +17,13 @@ namespace DCL.ConfirmationPopup
         public event Action OnConfirm;
         public event Action OnCancel;
 
+        #if DCL_VR
+        public static ConfirmationPopupHUDComponentView Create() =>
+            Instantiate(Resources.Load<ConfirmationPopupHUDComponentView>("GenericConfirmationPopupVR"));
+        #else
         public static ConfirmationPopupHUDComponentView Create() =>
             Instantiate(Resources.Load<ConfirmationPopupHUDComponentView>("GenericConfirmationPopup"));
-
+        #endif
         public override void Awake()
         {
             base.Awake();

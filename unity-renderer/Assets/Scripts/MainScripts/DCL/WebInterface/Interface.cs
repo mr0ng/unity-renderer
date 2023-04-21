@@ -1416,14 +1416,7 @@ namespace DCL.Interface
             SendMessage("TermsOfServiceResponse", payload);
         }
 
-        public static void SendExpression(string expressionID, long timestamp)
-        {
-            SendMessage("TriggerExpression", new SendExpressionPayload()
-            {
-                id = expressionID,
-                timestamp = timestamp
-            });
-        }
+
         private static CanvasWebViewPrefab mainWebViewPrefab;
         private static bool isWebViewInitiated = false;
         private static GameObject _canvas;
@@ -1432,8 +1425,8 @@ namespace DCL.Interface
         {
 #if UNITY_WEBGL
             SendMessage("OpenWebURL", new OpenURLPayload { url = url });
-            
-#else 
+
+#else
 
             if (openURLInternal)
             {

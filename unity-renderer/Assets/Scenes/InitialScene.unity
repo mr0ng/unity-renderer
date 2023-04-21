@@ -131,6 +131,23 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 1594024437603002686, guid: ceb6d50874be1824d8eb3e16a06470ce,
+        type: 3}
+      propertyPath: VRPrefab
+      value: 
+      objectReference: {fileID: 2352618979895236223, guid: 375a1554d9718db4d848450788b2e47a,
+        type: 3}
+    - target: {fileID: 1594024437603002686, guid: ceb6d50874be1824d8eb3e16a06470ce,
+        type: 3}
+      propertyPath: desktopPrefab
+      value: 
+      objectReference: {fileID: 4625910312644941330, guid: eb8e1071401ed1b4a9da376e23483830,
+        type: 3}
+    - target: {fileID: 1594024437603002686, guid: ceb6d50874be1824d8eb3e16a06470ce,
+        type: 3}
+      propertyPath: currentPlatform
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 2098027020916773621, guid: ceb6d50874be1824d8eb3e16a06470ce,
         type: 3}
       propertyPath: m_Name

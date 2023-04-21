@@ -16,7 +16,7 @@ namespace DCL.Huds
         private readonly List<VRHUDHelper> submenu = new List<VRHUDHelper>();
 
         private BaseVariable<bool> exploreV2IsOpen => DataStore.i.exploreV2.isOpen;
-        
+
         [SerializeField]
         private BooleanVariable hudOpen;
         [SerializeField]
@@ -28,7 +28,7 @@ namespace DCL.Huds
         private Transform mainCam;
         private DCLPlayerInput.PlayerActions actions;
         private bool loading;
-        
+
         private void Awake()
         {
             if (I != null)
@@ -75,7 +75,7 @@ namespace DCL.Huds
         {
             loading = false;
         }
-        
+
         private void OnLoadingStart()
         {
             loading = true;
@@ -106,7 +106,7 @@ namespace DCL.Huds
             if (Vector3.Distance(dock.position, mainCam.position) > 2f) PositionHud(forward);
             else DeactivateHud();
         }
-        
+
         public Vector3 GetForward()
         {
             var rawForward = mainCam.forward;
@@ -123,11 +123,11 @@ namespace DCL.Huds
                 if (submenu.Contains(hud))
                     hud.Show();
             }
-            
+
             dock.position = mainCam.position + forward;
             dock.forward = forward;
         }
-        
+
         public void DeactivateHud()
         {
             if (exploreV2IsOpen.Get()) exploreV2IsOpen.Set(false);
@@ -138,7 +138,8 @@ namespace DCL.Huds
         }
         public void SetupLoading(ShowHideAnimator animator)
         {
-            animator.OnWillFinishStart += (ani) => { LoadingStart.Invoke(); };
+            if (animator == null) return;
+            WebSocketCommunication.OnProfileLoading += (ani) => { LoadingStart.Invoke(); };
             animator.OnWillFinishHide += (ani) => { LoadingEnd.Invoke(); };
         }
     }

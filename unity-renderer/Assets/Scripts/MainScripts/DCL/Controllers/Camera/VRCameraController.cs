@@ -34,11 +34,14 @@ namespace DCL.Camera
         private Vector3 cameraDifferenceRot;
         private Vector3 lastCameraRot;
         private bool smoothRotate;
-        
+
         [SerializeField]
         private float rotationThreshold = 0.001f;
         void Start()
         {
+            #if !DCL_VR
+                return;
+            #endif
             myTrans = transform;
             camTrans = UnityEngine.Camera.main.transform;
             lastCameraRot = camTrans.localEulerAngles;
@@ -53,6 +56,9 @@ namespace DCL.Camera
 
         private void Update()
         {
+#if !DCL_VR
+                return;
+#endif
             DisableCamera();
             if (!camTrans.hasChanged)
                 return;
@@ -63,12 +69,12 @@ namespace DCL.Camera
             //add to CharacterController
             myTrans.eulerAngles += new Vector3(0f, cameraDifferenceRot.y, 0f);
             lastCameraRot = localEulerAngles;
-            
+
             CommonScriptableObjects.cameraForward.Set(camTrans.forward);
             CommonScriptableObjects.cameraRight.Set(camTrans.right);
             CommonScriptableObjects.cameraPosition.Set(camTrans.position);
         }
-        
+
         private void DisableCamera()
         {
             if (!cam.enabled)
@@ -82,7 +88,7 @@ namespace DCL.Camera
             {
                 SmoothRotate(value);
                 return;
-            } 
+            }
             SnapRotate(value);
         }
 

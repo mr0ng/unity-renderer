@@ -26,10 +26,15 @@ namespace MainScripts.DCL.Controllers.HUD.Preloading
 
             loadingScreenRef.Ref.decoupledLoadingHUD.visible.OnChange += OnDecoupledLoadingScreenVisibilityChange;
             isSignUpFlow.OnChange += SignUpFlowChanged;
-
+            #if DCL_VR
+            async UniTask GetView(CancellationToken cancellationToken) =>
+                view = (await addressableResourceProvider.Instantiate<Transform>("PreloadingVR", cancellationToken: cancellationToken))
+                   .gameObject;
+            #else
             async UniTask GetView(CancellationToken cancellationToken) =>
                 view = (await addressableResourceProvider.Instantiate<Transform>("Preloading", cancellationToken: cancellationToken))
                    .gameObject;
+            #endif
         }
 
         public void Dispose()

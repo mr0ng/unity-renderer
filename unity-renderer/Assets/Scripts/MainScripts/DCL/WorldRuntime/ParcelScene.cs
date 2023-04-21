@@ -1,4 +1,3 @@
-
 using Cysharp.Threading.Tasks;
 using DCL.Configuration;
 using DCL.Helpers;
@@ -27,7 +26,6 @@ namespace DCL.Controllers
         public LoadParcelScenesMessage.UnityParcelScene sceneData { get; protected set; }
         public HashSet<Vector2Int> parcels = new HashSet<Vector2Int>();
         public ISceneMetricsCounter metricsCounter { get; set; }
-        public int distanceToPlayer { get; set; }
         public event System.Action<IDCLEntity> OnEntityAdded;
         public event System.Action<IDCLEntity> OnEntityRemoved;
         public event System.Action<LoadParcelScenesMessage.UnityParcelScene> OnSetData;
@@ -64,10 +62,6 @@ namespace DCL.Controllers
             sceneLifecycleHandler = new SceneLifecycleHandler(this);
             metricsCounter = new SceneMetricsCounter(DataStore.i.sceneWorldObjects);
         }
-        public void Start()
-        {
-            StartCoroutine(CRUpdate());
-        }
 
         private void OnDestroy()
         {
@@ -82,19 +76,9 @@ namespace DCL.Controllers
 
         private void Update()
         {
-            // if (sceneLifecycleHandler.state == SceneLifecycleHandler.State.READY
-            //     && CommonScriptableObjects.rendererState.Get())
-            //     SendMetricsEvent();
-        }
-        private readonly WaitForSeconds yieldTime = new WaitForSeconds(0.2f);
-        private IEnumerator CRUpdate()
-        {
-            yield return yieldTime;
             if (sceneLifecycleHandler.state == SceneLifecycleHandler.State.READY
                 && CommonScriptableObjects.rendererState.Get())
                 SendMetricsEvent();
-            
-                
         }
 
         protected virtual string prettyName => sceneData.basePosition.ToString();
@@ -231,8 +215,6 @@ namespace DCL.Controllers
                     this.gameObject.SetActive(false);
 
                     RemoveAllEntities();
-                    //Resources.UnloadUnusedAssets();
-                    //GC.Collect();
                 }
                 else
                 {
@@ -408,7 +390,6 @@ namespace DCL.Controllers
             PoolableObject po = PoolManager.i.Get(PoolManagerFactory.EMPTY_GO_POOL_NAME);
 
             newEntity.meshesInfo.innerGameObject = po.gameObject;
-            
             newEntity.gameObject = po.gameObject;
 
 #if UNITY_EDITOR
@@ -417,7 +398,6 @@ namespace DCL.Controllers
             newEntity.gameObject.transform.SetParent(gameObject.transform, false);
             newEntity.gameObject.SetActive(true);
             newEntity.scene = this;
-            
 
             newEntity.OnCleanupEvent += po.OnCleanup;
 

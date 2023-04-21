@@ -4,12 +4,15 @@ public class Bootstrapper : MonoBehaviour
 {
     [SerializeField] private GameObject webGLPrefab;
     [SerializeField] private GameObject desktopPrefab;
+    [SerializeField] private GameObject VRPrefab;
+
 
 #if UNITY_EDITOR
     private enum Platform
     {
         WebGL,
         Desktop,
+        VR
     }
 
     [SerializeField] private Platform currentPlatform;
@@ -24,6 +27,9 @@ public class Bootstrapper : MonoBehaviour
             case Platform.Desktop:
                 Instantiate(desktopPrefab);
                 break;
+            case Platform.VR:
+                Instantiate(VRPrefab);
+                break;
         }
     }
 
@@ -32,6 +38,8 @@ public class Bootstrapper : MonoBehaviour
     {
 #if UNITY_WEBGL
         Instantiate(webGLPrefab);
+#elif ENABLE_VR
+        Instantiate(VRPrefab);
 #else
         Instantiate(desktopPrefab);
 #endif

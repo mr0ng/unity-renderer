@@ -21,15 +21,27 @@ namespace DCL.LoadingScreen
         public override void Start()
         {
             base.Start();
+
+
+
             showHideAnimator.OnWillFinishStart += FadeInFinish;
-
+            WebSocketCommunication.OnProfileLoading += OnProfileLoading;
             betaTag.SetActive(!Application.isEditor && Application.platform != RuntimePlatform.WebGLPlayer);
+#if DCL_VR
+            LoadingHudHelper loadingHudHelper;
+            loadingHudHelper = gameObject.AddComponent<LoadingHudHelper>();
 
+            loadingHudHelper.showHideAnimator = showHideAnimator;
+#endif
             rawImageRectTransform = rawImage.GetComponent<RectTransform>();
             SetupBlitTexture();
             FadeIn(true, false);
         }
-
+        private void OnProfileLoading(string profileId)
+        {
+            SetupBlitTexture();
+            FadeIn(true,false);
+        }
         public override void Dispose()
         {
             base.Dispose();
@@ -42,12 +54,19 @@ namespace DCL.LoadingScreen
         public LoadingScreenPercentageView GetPercentageView() =>
             percentageView;
 
+        public void SetVisible(bool isVisible, bool instant)
+        {
+            if (isVisible) { showHideAnimator.Show(instant); }
+            else { showHideAnimator.Hide(instant); }
+        }
+
+
         public void FadeIn(bool instant, bool blitTexture)
         {
             if (isVisible) return;
 
             //We blit the texture in case we need a static image when teleport starts
-            if(blitTexture)
+            if (blitTexture)
                 BlitTexture();
 
             Show(instant);
@@ -89,6 +108,7 @@ namespace DCL.LoadingScreen
             renderTexture = new RenderTexture(Screen.width, Screen.height, 0);
             rawImage.texture = renderTexture;
         }
+
 
     }
 }

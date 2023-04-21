@@ -13,9 +13,9 @@ MonoBehaviour:
   m_Name: InputActions.MixedRealityGesturesProfile
   m_EditorClassIdentifier: 
   isCustomProfile: 1
-  manipulationGestures: 12
+  manipulationGestures: 13
   navigationGestures: 112
-  useRailsNavigation: 0
+  useRailsNavigation: 1
   railsNavigationGestures: 896
   windowsGestureAutoStart: 0
   gestures:

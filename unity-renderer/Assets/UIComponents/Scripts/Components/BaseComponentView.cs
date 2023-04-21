@@ -84,7 +84,7 @@ public abstract class BaseComponentView : MonoBehaviour, IBaseComponentView
 
     public virtual bool isVisible { get; private set; }
     protected bool isDestroyed = false;
-
+    public static event Action<BaseComponentView> OnViewCreated;
     public event Action<bool> onFocused;
     public bool isFocused { get; private set; }
 
@@ -104,7 +104,10 @@ public abstract class BaseComponentView : MonoBehaviour, IBaseComponentView
 
     public virtual void OnDisable() { OnLoseFocus(); }
 
-    public virtual void Start() { }
+    public virtual void Start() {
+        OnViewCreated?.Invoke(this); //Event for VRUIManager
+        Debug.Log($"BaseComponentView created for {this.name}");
+    }
 
     public virtual void Update() { }
 
@@ -144,7 +147,7 @@ public abstract class BaseComponentView : MonoBehaviour, IBaseComponentView
     {
         if (myTrans == null)
             myTrans = transform;
-        myTrans.localRotation = Quaternion.identity; 
+        myTrans.localRotation = Quaternion.identity;
     }
 
     public virtual void Dispose()
@@ -152,7 +155,7 @@ public abstract class BaseComponentView : MonoBehaviour, IBaseComponentView
         DataStore.i.screen.size.OnChange -= OnScreenSizeModified;
 
         if (!isDestroyed && gameObject)
-            Destroy(gameObject);
+            DestroyImmediate(gameObject);
     }
 
     public virtual void OnPointerEnter(PointerEventData eventData) { OnFocus(); }
@@ -184,4 +187,5 @@ public abstract class BaseComponentView : MonoBehaviour, IBaseComponentView
         T buttonComponentView = Instantiate(Resources.Load<GameObject>(resourceName)).GetComponent<T>();
         return buttonComponentView;
     }
+
 }

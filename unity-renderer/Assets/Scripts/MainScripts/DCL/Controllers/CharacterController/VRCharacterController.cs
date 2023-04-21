@@ -23,12 +23,12 @@ public class VRCharacterController : MonoBehaviour
     // public float seven = 0;
     // public float eight = 0;
     // public float nine = 0;
- 
-    [SerializeField] 
+
+    [SerializeField]
     private float waitTimeSec = 0.05f;
-    [SerializeField] 
+    [SerializeField]
     private float distanceThreshold = 0.1f;
-    
+
     private WaitForSeconds waitTime;
     private readonly DataStore_Player dataStorePlayer = DataStore.i.player;
  //#if (UNITY_ANDROID && !UNITY_EDITOR)
@@ -40,7 +40,9 @@ public class VRCharacterController : MonoBehaviour
 
     private void Start()
     {
-        
+        #if !DCL_VR
+        return;
+        #endif
         mixedRealityPlayspace = VRPlaySpace.i.transform;
         menuOpen.OnChange += MenuOpened;
         PlaceCamera();
@@ -52,17 +54,20 @@ public class VRCharacterController : MonoBehaviour
     }
     private void LateUpdate()
     {
+#if !DCL_VR
+        return;
+#endif
         // while (true)
         // {
             waitTime = new WaitForSeconds(waitTimeSec);
-                
+
             if (!dataStorePlayer.canPlayerMove.Get())
             {
                 return;
             }
         //TODO: Clint make sure HMD motion gets reported through CharacterController, but without skewing the HMD camera position.
             //make head movements move the CharacterController, so other players see player motions.
-            
+
             // var localPosition = mainCamera.localPosition;
             //
             // cameraDifferenceLocPos = lastCameraLocPos - localPosition;

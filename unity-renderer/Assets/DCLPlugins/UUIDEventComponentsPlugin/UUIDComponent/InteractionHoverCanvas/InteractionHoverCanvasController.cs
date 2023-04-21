@@ -27,6 +27,7 @@ public class InteractionHoverCanvasController : MonoBehaviour
     const string ACTION_BUTTON_SECONDARY = "SECONDARY";
 
     private DataStore_Cursor dataStore;
+    private Transform myTrans;
 
     void Awake()
     {
@@ -76,14 +77,7 @@ public class InteractionHoverCanvasController : MonoBehaviour
         UpdateCanvas();
     }
 
-    private void Update()
-    {
-        if (!isHovered)
-            return;
-        Vector3 offsetPos = CrossPlatformManager.GetPoint() + offset;
-        myTrans.position = Vector3.Lerp(myTrans.position, offsetPos, followSpeed);
-        myTrans.forward = CommonScriptableObjects.cameraForward.Get();
-    }
+
 
     public void Setup(string button, string feedbackText)
     {
@@ -141,6 +135,13 @@ public class InteractionHoverCanvasController : MonoBehaviour
 
     private void Update()
     {
+#if DCL_VR
+        if (!isHovered)
+            return;
+        Vector3 offsetPos = CrossPlatformManager.GetPoint() + offset;
+        myTrans.position = Vector3.Lerp(myTrans.position, offsetPos, followSpeed);
+        myTrans.forward = CommonScriptableObjects.cameraForward.Get();
+#else
         if (Utils.IsCursorLocked)
         {
             anchor.anchoredPosition = defaultAnchorOffset;
@@ -154,5 +155,6 @@ public class InteractionHoverCanvasController : MonoBehaviour
 
         anchor.position = canvas.transform.TransformPoint(movePos);
         anchor.anchoredPosition += defaultAnchorOffset;
+#endif
     }
 }

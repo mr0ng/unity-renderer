@@ -29,10 +29,15 @@ namespace DCL.Social.Friends
         public event Action OnSend;
         public event Action OnCancel;
 
+        #if DCL_VR
+        public static SendFriendRequestHUDComponentView Create() =>
+            Instantiate(
+                Resources.Load<SendFriendRequestHUDComponentView>("FriendRequests/SendFriendRequestHUDVR"));
+        #else
         public static SendFriendRequestHUDComponentView Create() =>
             Instantiate(
                 Resources.Load<SendFriendRequestHUDComponentView>("FriendRequests/SendFriendRequestHUD"));
-
+        #endif
         public override void Awake()
         {
             base.Awake();

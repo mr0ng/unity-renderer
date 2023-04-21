@@ -5,8 +5,11 @@ using UnityEngine.UI;
 
 public class TermsOfServiceHUDView : MonoBehaviour
 {
+    #if DCL_VR
     private const string VIEW_PATH = "TermsOfServiceHUDVR";
-
+    #else
+    private const string VIEW_PATH = "TermsOfServiceHUD";
+    #endif
     private const string SCENE_NAME_VAR = "$sceneName";
     private static readonly string TITLE = $"Terms of Service - {SCENE_NAME_VAR}";
     private static readonly string DESCRIPTION = $"Welcome to {SCENE_NAME_VAR}. Before you proceed, please read carefully.";

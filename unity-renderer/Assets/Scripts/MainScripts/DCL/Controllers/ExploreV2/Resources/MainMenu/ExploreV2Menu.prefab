@@ -1612,7 +1612,7 @@ MonoBehaviour:
   m_FallbackScreenDPI: 96
   m_DefaultSpriteDPI: 96
   m_DynamicPixelsPerUnit: 1
-  m_PresetInfoIsWorld: 0
+  m_PresetInfoIsWorld: 1
 --- !u!114 &5674188681382852263
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4019,7 +4019,7 @@ MonoBehaviour:
   hideOnEnable: 1
   animSpeedFactor: 1
   disableAfterFadeOut: 0
-  canvasGroup: {fileID: 0}
+  canvasGroup: {fileID: 5627507744505667787}
 --- !u!225 &5627507744505667787
 CanvasGroup:
   m_ObjectHideFlags: 0
@@ -4044,7 +4044,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 060893a08eeb00e44b3de73f05c91bfc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  showHideAnimator: {fileID: 0}
+  showHideAnimator: {fileID: 4877455492981599637}
   featureContainer: {fileID: 8319504516856779982}
 --- !u!1 &8428837407125496152
 GameObject:
@@ -8074,7 +8074,7 @@ PrefabInstance:
     - target: {fileID: 1883087575123481342, guid: 01095a78852393446834e68bf8628274,
         type: 3}
       propertyPath: m_Value
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 1883449486760215772, guid: 01095a78852393446834e68bf8628274,
         type: 3}
@@ -9764,12 +9764,12 @@ PrefabInstance:
     - target: {fileID: 4675281936854104394, guid: 01095a78852393446834e68bf8628274,
         type: 3}
       propertyPath: m_Size
-      value: 0.7073188
+      value: 0.70731884
       objectReference: {fileID: 0}
     - target: {fileID: 4675281936854104394, guid: 01095a78852393446834e68bf8628274,
         type: 3}
       propertyPath: m_Value
-      value: 1
+      value: 1.0000004
       objectReference: {fileID: 0}
     - target: {fileID: 4756098747589214600, guid: 01095a78852393446834e68bf8628274,
         type: 3}

@@ -1,8 +1,9 @@
 using System;
 using System.Collections.Generic;
+using DCL.Configuration;
 using DCL.Interface;
 using UnityEngine;
-using InputSettings = DCL.Configuration.InputSettings;
+//using InputSettings = DCL.Configuration.InputSettings;
 
 namespace DCL
 {
@@ -40,7 +41,7 @@ namespace DCL
             new Dictionary<WebInterface.ACTION_BUTTON, List<ButtonListenerCallback>>();
 
         private List<BUTTON_MAP> buttonsMap = new List<BUTTON_MAP>();
-        
+
 
         public InputController_Legacy()
         {
@@ -180,7 +181,7 @@ namespace DCL
         private int updateSkip = 0;
         public void Update()
         {
-            
+
             if (!renderingEnabled)
                 return;
             // updateSkip = (updateSkip + 1 ) % 25;
@@ -190,7 +191,7 @@ namespace DCL
 
             for (int i = 0; i < count; i++)
             {
-                
+
                 BUTTON_MAP btnMap = buttonsMap[i];
 
                 switch (btnMap.type)
@@ -198,19 +199,19 @@ namespace DCL
                     case BUTTON_TYPE.MOUSE:
                         if (CommonScriptableObjects.allUIHidden.Get())
                             break;
-                        if (GetButtonDown(btnMap) && !btnMap.lastState)
+                        if (Input.GetMouseButtonDown(btnMap.buttonNum) && !btnMap.lastState)
                             RaiseEvent(btnMap.buttonId, EVENT.BUTTON_DOWN, btnMap.useRaycast,
                                 btnMap.enablePointerEvent);
-                        else if (GetButtonUp(btnMap) && btnMap.lastState)
+                        else if (Input.GetMouseButtonUp(btnMap.buttonNum) && btnMap.lastState)
                             RaiseEvent(btnMap.buttonId, EVENT.BUTTON_UP, btnMap.useRaycast, btnMap.enablePointerEvent);
                         break;
                     case BUTTON_TYPE.KEYBOARD:
                         if (CommonScriptableObjects.allUIHidden.Get())
                             break;
-                        if (GetKeyDown((KeyCode) btnMap.buttonNum) && !btnMap.lastState)
+                        if (Input.GetKeyDown((KeyCode) btnMap.buttonNum) && !btnMap.lastState)
                             RaiseEvent(btnMap.buttonId, EVENT.BUTTON_DOWN, btnMap.useRaycast,
                                 btnMap.enablePointerEvent);
-                        else if (!GetKeyDown((KeyCode) btnMap.buttonNum)&& btnMap.lastState)
+                        else if (!Input.GetKeyDown((KeyCode) btnMap.buttonNum)&& btnMap.lastState)
                             RaiseEvent(btnMap.buttonId, EVENT.BUTTON_UP, btnMap.useRaycast, btnMap.enablePointerEvent);
                         break;
                 }
@@ -233,7 +234,7 @@ namespace DCL
                     return actions.PrimaryInteraction.triggered;
                 case KeyCode.F:
                     return actions.SecondaryInteraction.triggered;
-                default: 
+                default:
                     return default;
             }
         }
@@ -243,15 +244,15 @@ namespace DCL
             switch (button)
             {
                 case WebInterface.ACTION_BUTTON.POINTER:
-                    return actions.Select.triggered;
+                    return Input.GetMouseButton(0);
                 case WebInterface.ACTION_BUTTON.PRIMARY:
-                    return actions.PrimaryInteraction.triggered;
+                    return Input.GetKey(InputSettings.PrimaryButtonKeyCode);
                 case WebInterface.ACTION_BUTTON.SECONDARY:
-                    return actions.SecondaryInteraction.triggered;
+                    return Input.GetKey(InputSettings.SecondaryButtonKeyCode);
                 default: // ANY
-                    return actions.Select.triggered ||
-                           actions.PrimaryInteraction.triggered ||
-                           actions.SecondaryInteraction.triggered;
+                    return Input.GetMouseButton(0) ||
+                           Input.GetKey(InputSettings.PrimaryButtonKeyCode) ||
+                           Input.GetKey(InputSettings.SecondaryButtonKeyCode);
             }
         }
 

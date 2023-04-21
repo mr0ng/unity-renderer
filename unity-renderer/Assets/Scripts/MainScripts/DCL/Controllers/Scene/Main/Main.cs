@@ -4,8 +4,6 @@ using DCL.Helpers;
 using DCL.Interface;
 using DCL.Map;
 using DCL.SettingsCommon;
-using DCL.VR;
-using RPC;
 using DCl.Social.Friends;
 using DCL.Social.Friends;
 using DCLServices.WearablesCatalogService;
@@ -25,13 +23,6 @@ namespace DCL
         [SerializeField] private bool disableSceneDependencies;
 
         public PoolableComponentFactory componentFactory;
-// <<<<<<< HEAD
-
-        // public  WebSocketCommunication webSocketCommunication;
-        // private Transform mixedRealityPlayspace;
-        // private Transform cameraParent;
-        // private bool isDisposed;
-// =======
         private readonly DataStoreRef<DataStore_LoadingScreen> dataStoreLoadingScreen;
         protected IKernelCommunication kernelCommunication;
 
@@ -40,10 +31,8 @@ namespace DCL
         protected PluginSystem pluginSystem;
         public static Main i { get; private set; }
 
-// >>>>>>> upstream/release/20230227
         protected virtual void Awake()
         {
-            UnityThread.initUnityThread(true);
             if (i != null)
             {
                 Utils.SafeDestroy(this);
@@ -51,9 +40,7 @@ namespace DCL
             }
 
             i = this;
-            mixedRealityPlayspace = VRPlaySpace.i.transform;
-            mixedRealityPlayspace.parent = cameraParent;
-            mixedRealityPlayspace.localPosition = new Vector3(0f, -0.85f, 0f);;
+
             if (!disableSceneDependencies)
                 InitializeSceneDependencies();
 
@@ -68,15 +55,9 @@ namespace DCL
             if (!EnvironmentSettings.RUNNING_TESTS)
             {
                 performanceMetricsController = new PerformanceMetricsController();
-          
                 SetupServices();
-// <<<<<<< HEAD
-                // DataStore.i.wsCommunication.communicationReady.OnChange += RestartSocketServer;
-                // DataStore.i.HUDs.loadingHUD.visible.OnChange += OnLoadingScreenVisibleStateChange;
-// =======
 
                 dataStoreLoadingScreen.Ref.decoupledLoadingHUD.visible.OnChange += OnLoadingScreenVisibleStateChange;
-// >>>>>>> upstream/release/20230227
             }
 
             // TODO (NEW FRIEND REQUESTS): remove when the kernel bridge is production ready
@@ -96,55 +77,6 @@ namespace DCL
             InitializeCommunication();
         }
 
-// <<<<<<< HEAD
-        // protected virtual void InitializeDataStore()
-        // {
-
-            // DataStore.i.textureConfig.gltfMaxSize.Set(TextureCompressionSettings.GLTF_TEX_MAX_SIZE_WEB);
-            // DataStore.i.textureConfig.generalMaxSize.Set(TextureCompressionSettings.GENERAL_TEX_MAX_SIZE_WEB);
-            // DataStore.i.avatarConfig.useHologramAvatar.Set(true);
-
-        // }
-
-        // protected virtual void InitializeCommunication()
-        // {
-// #if UNITY_WEBGL && !UNITY_EDITOR
-            // Debug.Log("DCL Unity Build Version: " + DCL.Configuration.ApplicationSettings.version);
-            // Debug.unityLogger.logEnabled = true;
-            // Debug.Log($"Main: starting NativeBridgeCommunication");
-            // kernelCommunication = new NativeBridgeCommunication(Environment.i.world.sceneController);
-// #else
-            // if (!EnvironmentSettings.RUNNING_TESTS)
-            // {
-                // kernelCommunication = new WebSocketCommunication(DebugConfigComponent.i.webSocketSSL);
-            // }
-// #endif
-            // RPCServerBuilder.BuildDefaultServer();
-        // }
-
-        // void OnLoadingScreenVisibleStateChange(bool newVisibleValue, bool previousVisibleValue)
-        // {
-            // if (newVisibleValue)
-            // {
-                // // Prewarm shader variants
-                // Resources.Load<ShaderVariantCollection>("ShaderVariantCollections/shaderVariants-selected").WarmUp();
-                // DataStore.i.HUDs.loadingHUD.visible.OnChange -= OnLoadingScreenVisibleStateChange;
-            // }
-        // }
-
-        // protected virtual void SetupPlugins()
-        // {
-            // pluginSystem = PluginSystemFactory.Create();
-            // pluginSystem.Initialize();
-        // }
-
-        // protected virtual void SetupServices()
-        // {
-            // Environment.Setup(ServiceLocatorFactory.CreateDefault());
-        // }
-
-// =======
-// >>>>>>> upstream/release/20230227
         protected virtual void Start()
         {
             // this event should be the last one to be executed after initialization
@@ -221,7 +153,6 @@ namespace DCL
         protected virtual void Dispose()
         {
             dataStoreLoadingScreen.Ref.decoupledLoadingHUD.visible.OnChange -= OnLoadingScreenVisibleStateChange;
-// >>>>>>> upstream/release/20230227
 
             DataStore.i.common.isApplicationQuitting.Set(true);
             Settings.i.SaveSettings();
@@ -241,56 +172,27 @@ namespace DCL
             gameObject.AddComponent<WebInterfaceWearablesCatalogService>();
             gameObject.AddComponent<WebInterfaceMinimapApiBridge>();
             gameObject.AddComponent<MinimapMetadataController>();
-// <<<<<<< HEAD
-            // //TODO: handle HUDS that need to be converted to VR
-            // gameObject.AddComponent<ChatController>();
-            // //TODO: handle HUDS that need to be converted to VR
-            // gameObject.AddComponent<FriendsController>();
-            
-// =======
             gameObject.AddComponent<WebInterfaceFriendsApiBridge>();
-// >>>>>>> upstream/release/20230227
             gameObject.AddComponent<HotScenesController>();
             gameObject.AddComponent<GIFProcessingBridge>();
             gameObject.AddComponent<RenderProfileBridge>();
             gameObject.AddComponent<AssetCatalogBridge>();
-            //gameObject.AddComponent<ScreenSizeWatcher>();//Test VR not needed.
+            gameObject.AddComponent<ScreenSizeWatcher>();
             gameObject.AddComponent<SceneControllerBridge>();
 
             MainSceneFactory.CreateBridges();
-            //TODO: handle HUDS that need to be converted to VR
-            //MainSceneFactory.CreateMouseCatcher();
+            MainSceneFactory.CreateMouseCatcher();
             MainSceneFactory.CreatePlayerSystems();
             CreateEnvironment();
             MainSceneFactory.CreateAudioHandler();
             MainSceneFactory.CreateHudController();
             MainSceneFactory.CreateNavMap();
-            MainSceneFactory.CreateEventSystem();
+            if(!CrossPlatformManager.IsVR)
+                MainSceneFactory.CreateEventSystem();
+
         }
 
-// <<<<<<< HEAD
-        // protected virtual void CreateEnvironment() => MainSceneFactory.CreateEnvironment();
-        // public void RestartSocketServer(bool current, bool previous)
-        // {
-             // if (current)
-                            // return;
-            // //DebugConfigComponent.i.ReloadPage();
-          // //  kernelCommunication.Dispose();
-            // //SetupPlugins();
-            
-            
-            // InitializeCommunication();
-            // //DebugConfigComponent.i.ShowWebviewScreen();
-            // DCL.Interface.WebInterface.SendSystemInfoReport();
-            // SetupServices();
-            // InitializeSceneDependencies();
-            // InitializeDataStore();
-            // // We trigger the Decentraland logic once everything is initialized.
-            // DCL.Interface.WebInterface.StartDecentraland();
-        // }
-// =======
         protected virtual void CreateEnvironment() =>
             MainSceneFactory.CreateEnvironment();
-// >>>>>>> upstream/release/20230227
     }
 }

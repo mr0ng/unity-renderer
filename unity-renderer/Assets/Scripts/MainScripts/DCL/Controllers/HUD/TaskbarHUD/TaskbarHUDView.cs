@@ -5,8 +5,11 @@ using UnityEngine.UI;
 
 public class TaskbarHUDView : MonoBehaviour
 {
+    #if DCL_VR
     private const string VIEW_PATH = "TaskbarVR";
-
+#else
+    private const string VIEW_PATH = "Taskbar";
+#endif
     [SerializeField] internal RectTransform fullScreenWindowContainer;
 
     [Header("Taskbar Animation")] [SerializeField]

@@ -2,6 +2,14 @@ using DCL;
 using DCL.Configuration;
 using System;
 using UnityEngine;
+using DCL.Configuration;
+using System.Collections.Generic;
+using UnityEngine.EventSystems;
+using UnityEngine.InputSystem;
+using UnityEngine.XR;
+using InputDevice = UnityEngine.XR.InputDevice;
+using InputSettings = DCL.Configuration.InputSettings;
+
 /// <summary>
 /// Mapping for Trigger actions
 /// </summary>
@@ -113,7 +121,9 @@ public class InputController : MonoBehaviour
     private Vector3 currentPos;
     private Vector3 lastRot;
     private Vector3 currentRot;
-    
+
+
+
     private void Awake()
     {
         playerInput = new DCLPlayerInput();
@@ -124,6 +134,14 @@ public class InputController : MonoBehaviour
     {
         lastPos = player.MoveHMD.ReadValue<Vector3>();
         lastRot = player.RotateHMD.ReadValue<Vector3>();
+        InputDevices.deviceDisconnected += DeviceDisconnected;
+        InputDevices.deviceConnected += DeviceConnected;
+
+    }
+    private void DeviceConnected(InputDevice obj) { Debug.Log($"{obj.name} was connected. {obj.characteristics.ToString()}"); }
+    private void DeviceDisconnected(InputDevice obj)
+    {
+        Debug.Log($"{obj.name} was disconnected. {obj.characteristics.ToString()}");
     }
 
     public static void GetPlayerActions(ref DCLPlayerInput.PlayerActions actions) => actions = player;
@@ -139,12 +157,11 @@ public class InputController : MonoBehaviour
             Stop_Measurable(measurableActions);
             return;
         }
+
         Update_Trigger(triggerTimeActions);
         Update_Hold(holdActions);
         Update_Measurable(measurableActions);
     }
-
-    
 
     /// <summary>
     /// Map the trigger actions to inputs + modifiers and check if their events must be triggered
@@ -159,19 +176,12 @@ public class InputController : MonoBehaviour
             switch (action.DCLAction)
             {
                 case DCLAction_Trigger.CameraChange:
-// <<<<<<< HEAD
-                    // if (CommonScriptableObjects.cameraModeInputLocked.Get()) 
-                        // break;
 
-                    // //Disable until the fine-tuning is ready
-                    // // if (ENABLE_THIRD_PERSON_CAMERA)
-                    // //     InputProcessor.FromKey(action, KeyCode.V,
-                    // //         modifiers: InputProcessor.Modifier.FocusNotInInput);
-// =======
                     // Disable until the fine-tuning is ready
+#if !DCL_VR
                     if (!CommonScriptableObjects.cameraModeInputLocked.Get() && ENABLE_THIRD_PERSON_CAMERA)
                         InputProcessor.FromKey(action, KeyCode.V, modifiers: InputProcessor.Modifier.FocusNotInInput);
-// >>>>>>> upstream/release/20230227
+#endif
                     break;
                 case DCLAction_Trigger.CursorUnlock:
                     InputProcessor.FromMouseButtonUp(action, mouseButtonIdx: 1, modifiers: InputProcessor.Modifier.NeedsPointerLocked);
@@ -328,8 +338,6 @@ public class InputController : MonoBehaviour
         foreach (var action in holdActions)
         {
             if (action.isHoldBlocked != null && action.isHoldBlocked.Get())
-            {
-                Debug.Log($"{action.name} is hold blocked1");
                 continue;
 
             switch (action.DCLAction)
@@ -337,9 +345,13 @@ public class InputController : MonoBehaviour
                 case DCLAction_Hold.Sprint:
                     InputProcessor.FromKey(action, player.Walk.ReadValue<float>(),
                         InputProcessor.Modifier.FocusNotInInput | InputProcessor.Modifier.NotInStartMenu);
+					InputProcessor.FromKey(action, InputSettings.WalkButtonKeyCode,
+                        InputProcessor.Modifier.FocusNotInInput | InputProcessor.Modifier.NotInStartMenu);
                     break;
                 case DCLAction_Hold.Jump:
-                    InputProcessor.FromKey(action, player.Jump.ReadValue<float>(),
+                    InputProcessor.FromKey(action, InputSettings.JumpButtonKeyCode,
+                        InputProcessor.Modifier.FocusNotInInput | InputProcessor.Modifier.NotInStartMenu);
+					InputProcessor.FromKey(action, player.Jump.ReadValue<float>(),
                         InputProcessor.Modifier.FocusNotInInput | InputProcessor.Modifier.NotInStartMenu);
                     break;
                 case DCLAction_Hold.ZoomIn:
@@ -382,46 +394,57 @@ public class InputController : MonoBehaviour
         foreach (var action in measurableActions)
         {
             if (action.isMeasurableBlocked != null && action.isMeasurableBlocked.Get())
-            {
-                Debug.Log($"{action.name} is hold blocked2");
                 continue;
-// <<<<<<< HEAD  Possibly VR control
-            // }
-            
-            // switch (action.GetDCLAction())
-            // {
-                // case DCLAction_Measurable.CharacterXAxis:
-                    // InputProcessor.FromAxis(action, player.Move.ReadValue<Vector2>().x , 
-                        // InputProcessor.Modifier.FocusNotInInput | InputProcessor.Modifier.NotInStartMenu);
-                    
-                    // break;
-                // case DCLAction_Measurable.CharacterYAxis:
-                    // InputProcessor.FromAxis(action, player.Move.ReadValue<Vector2>().y ,
-                        // InputProcessor.Modifier.FocusNotInInput | InputProcessor.Modifier.NotInStartMenu);
-// =======
+
 
             switch (action.DCLAction)
             {
+                #if DCL_VR
+                //TODO: Check if this new modification from upstream works for VR controllers.
+                case DCLAction_Measurable.CharacterXAxis:
+                    InputProcessor.FromAxis(action, player.Move.ReadValue<Vector2>().x ,
+                        InputProcessor.Modifier.FocusNotInInput | InputProcessor.Modifier.NotInStartMenu);
+                    break;
+                case DCLAction_Measurable.CharacterYAxis:
+                    InputProcessor.FromAxis(action, player.Move.ReadValue<Vector2>().y ,
+                        InputProcessor.Modifier.FocusNotInInput | InputProcessor.Modifier.NotInStartMenu);
+                    break;
+                case DCLAction_Measurable.CameraXAxis:
+
+                    InputProcessor.FromAxis(action, player.Look.ReadValue<Vector2>().x,
+                        InputProcessor.Modifier.NeedsPointerLocked | InputProcessor.Modifier.NeedsPointerLocked);
+                    break;
+                case DCLAction_Measurable.CameraYAxis:
+                    InputProcessor.FromAxis(action, player.Look.ReadValue<Vector2>().y,
+                        InputProcessor.Modifier.NeedsPointerLocked | InputProcessor.Modifier.NeedsPointerLocked);
+                    break;
+                case DCLAction_Measurable.MouseWheel:
+                    InputProcessor.FromAxis(action, player.ScrollMouse.ReadValue<float>(), modifiers: InputProcessor.Modifier.FocusNotInInput);
+                    break;
+
+                default:
+                    throw new ArgumentOutOfRangeException();
+
+                #else
+
                 case DCLAction_Measurable.CharacterXAxis:
                     InputProcessor.FromAxis(action, "Horizontal", InputProcessor.Modifier.FocusNotInInput | InputProcessor.Modifier.NotInStartMenu);
                     break;
                 case DCLAction_Measurable.CharacterYAxis:
                     InputProcessor.FromAxis(action, "Vertical", InputProcessor.Modifier.FocusNotInInput | InputProcessor.Modifier.NotInStartMenu);
-// >>>>>>> upstream/release/20230227
                     break;
                 case DCLAction_Measurable.CameraXAxis:
-                    InputProcessor.FromAxis(action, player.Look.ReadValue<Vector2>().x,
-                        InputProcessor.Modifier.NeedsPointerLocked | InputProcessor.Modifier.RequiresPointer);
+                    InputProcessor.FromAxis(action, "Mouse X", InputProcessor.Modifier.NeedsPointerLocked);
                     break;
                 case DCLAction_Measurable.CameraYAxis:
-                    InputProcessor.FromAxis(action, player.Look.ReadValue<Vector2>().y,
-                        InputProcessor.Modifier.NeedsPointerLocked | InputProcessor.Modifier.RequiresPointer);
+                    InputProcessor.FromAxis(action, "Mouse Y", InputProcessor.Modifier.NeedsPointerLocked);
                     break;
                 case DCLAction_Measurable.MouseWheel:
-                    InputProcessor.FromAxis(action, player.ScrollMouse.ReadValue<float>(), modifiers: InputProcessor.Modifier.FocusNotInInput);
+                    InputProcessor.FromAxis(action, "Mouse ScrollWheel", modifiers: InputProcessor.Modifier.FocusNotInInput);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();
+                #endif
             }
         }
     }
@@ -432,241 +455,3 @@ public class InputController : MonoBehaviour
             action.RaiseOnValueChanged(0);
     }
 }
-// <<<<<<< HEAD
-
-// /// <summary>
-// /// Helper class that wraps the processing of inputs and modifiers to trigger actions events
-// /// </summary>
-// public static class InputProcessor
-// {
-    // private static readonly KeyCode[] MODIFIER_KEYS = new[] { KeyCode.LeftControl, KeyCode.LeftAlt, KeyCode.LeftShift, KeyCode.LeftCommand, KeyCode.B };
-
-    // [Flags]
-    // public enum Modifier
-    // {
-        // //Set the values as bit masks
-        // None = 0b0000000, // No modifier needed
-        // NeedsPointerLocked = 0b0000001, // The pointer must be locked to the game
-        // FocusNotInInput = 0b0000010, // The game focus cannot be in an input field
-        // NotInStartMenu = 0b0000100, // The game focus cannot be in full-screen start menu
-        // OnlyWithInputFocused = 0b0001000, // The game focus must be in an input field
-        // RequiresPointer = 0b0010000
-    // }
-
-    // /// <summary>
-    // /// Check if the modifier keys are pressed
-    // /// </summary>
-    // /// <param name="modifierKeys"> Keycodes modifiers</param>
-    // /// <returns></returns>
-    // public static Boolean PassModifierKeys(KeyCode[] modifierKeys)
-    // {
-        // for (var i = 0; i < MODIFIER_KEYS.Length; i++)
-        // {
-            // var keyCode = MODIFIER_KEYS[i];
-            // var pressed = Input.GetKey(keyCode);
-            // if (modifierKeys == null)
-            // {
-                // if (pressed)
-                    // return false;
-            // }
-            // else
-            // {
-                // if (modifierKeys.Contains(keyCode) != pressed)
-                    // return false;
-            // }
-        // }
-
-        // return true;
-    // }
-
-    // /// <summary>
-    // /// Check if a miscellaneous modifiers are present. These modifiers are related to the meta-state of the application
-    // /// they can be anything such as mouse pointer state, where the focus is, camera mode...
-    // /// </summary>
-    // /// <param name="modifiers"></param>
-    // /// <returns></returns>
-    // public static bool PassModifiers(Modifier modifiers)
-    // {
-        // bool hasPointer = IsModifierSet(modifiers, Modifier.RequiresPointer) && !CrossPlatformManager.IsVR;
-        // if (hasPointer && IsModifierSet(modifiers, Modifier.NeedsPointerLocked) && !DCL.Helpers.Utils.IsCursorLocked)
-            // return false;
-
-        // var isInputFieldFocused = FocusIsInInputField();
-        
-        // if (IsModifierSet(modifiers, Modifier.FocusNotInInput) && isInputFieldFocused)
-            // return false;
-        
-        // if (IsModifierSet(modifiers, Modifier.OnlyWithInputFocused) && !isInputFieldFocused)
-            // return false;
-
-        // if (IsModifierSet(modifiers, Modifier.NotInStartMenu) && IsStartMenuVisible())
-            // return false;
-
-        // return true;
-    // }
-
-    // private static bool IsStartMenuVisible() => DataStore.i.exploreV2.isOpen.Get();
-
-    // /// <summary>
-    // /// Process an input action mapped to a keyboard key.
-    // /// </summary>
-    // /// <param name="action">Trigger Action to perform</param>
-    // /// <param name="key">KeyCode mapped to this action</param>
-    // /// <param name="modifierKeys">KeyCodes required to perform the action</param>
-    // /// <param name="modifiers">Miscellaneous modifiers required for this action</param>
-    // public static void FromKey(InputAction_Trigger action, KeyCode key, KeyCode[] modifierKeys = null,
-        // Modifier modifiers = Modifier.None)
-    // {
-        // if (!PassModifiers(modifiers))
-            // return;
-
-        // if (!PassModifierKeys(modifierKeys))
-            // return;
-
-        // if (Input.GetKeyDown(key))
-            // action.RaiseOnTriggered();
-    // }
-
-    // /// <summary>
-    // /// Process an input action mapped to a button.
-    // /// </summary>
-    // /// <param name="action">Trigger Action to perform</param>
-    // /// <param name="mouseButtonIdx">Index of the mouse button mapped to this action</param>
-    // /// <param name="modifiers">Miscellaneous modifiers required for this action</param>
-    // public static void FromMouseButton(InputAction_Trigger action, int mouseButtonIdx,
-        // Modifier modifiers = Modifier.None)
-    // {
-        // if (!PassModifiers(modifiers))
-            // return;
-
-        // if (Input.GetMouseButton(mouseButtonIdx))
-            // action.RaiseOnTriggered();
-    // }
-    
-    // public static void FromMouseButtonUp(InputAction_Trigger action, int mouseButtonIdx,
-        // Modifier modifiers = Modifier.None)
-    // {
-        // if (!PassModifiers(modifiers))
-            // return;
-
-        // if (Input.GetMouseButtonUp(mouseButtonIdx))
-            // action.RaiseOnTriggered();
-    // }
-
-    // /// <summary>
-    // /// Process an input action mapped to a keyboard key
-    // /// </summary>
-    // /// <param name="action">Hold Action to perform</param>
-    // /// <param name="key">KeyCode mapped to this action</param>
-    // /// <param name="modifiers">Miscellaneous modifiers required for this action</param>
-    // public static void FromKey(InputAction_Hold action, KeyCode key, Modifier modifiers = Modifier.None)
-    // {
-        // if (!PassModifiers(modifiers))
-            // return;
-
-        // if (Input.GetKeyDown(key))
-            // action.RaiseOnStarted();
-        // if (Input.GetKeyUp(key))
-            // action.RaiseOnFinished();
-    // }
-
-    // public static void FromKey(InputAction_Hold action, float pressed, Modifier modifiers = Modifier.None)
-    // {
-        // if (!action.isOn && pressed > .5f)
-            // action.RaiseOnStarted();
-        // if (action.isOn && pressed < .5f)
-            // action.RaiseOnFinished();
-        
-    // }
-
-    // /// <summary>
-    // /// Process an input action mapped to a keyboard key
-    // /// </summary>
-    // /// <param name="action">Hold Action to perform</param>
-    // /// <param name="key">KeyCode mapped to this action</param>
-    // /// <param name="modifiers">Miscellaneous modifiers required for this action</param>
-    // /// <param name="modifierKeys">KeyCodes required to perform the action</param>
-    // public static void FromKey(InputAction_Hold action, KeyCode key, Modifier modifiers, KeyCode[] modifierKeys)
-    // {
-        // if (!PassModifierKeys(modifierKeys))
-            // return;
-
-        // FromKey(action, key, modifiers);
-    // }
-
-    // /// <summary>
-    // /// Process an input action mapped to a mouse button
-    // /// </summary>
-    // /// <param name="action">Hold Action to perform</param>
-    // /// <param name="mouseButtonIdx">Index of the mouse button</param>
-    // /// <param name="modifiers">Miscellaneous modifiers required for this action</param>
-    // public static void FromMouse(InputAction_Hold action, int mouseButtonIdx, Modifier modifiers = Modifier.None)
-    // {
-        // if (!PassModifiers(modifiers))
-            // return;
-
-        // if (Input.GetMouseButtonDown(mouseButtonIdx))
-            // action.RaiseOnStarted();
-        // if (Input.GetMouseButtonUp(mouseButtonIdx))
-            // action.RaiseOnFinished();
-    // }
-
-    // /// <summary>
-    // /// Process an input action mapped to an axis
-    // /// </summary>
-    // /// <param name="action">Measurable Action to perform</param>
-    // /// <param name="axisName">Axis name</param>
-    // /// <param name="modifiers">Miscellaneous modifiers required for this action</param>
-    // public static void FromAxis(InputAction_Measurable action, string axisName, Modifier modifiers = Modifier.None)
-    // {
-        // if (!PassModifiers(modifiers))
-        // {
-            // action.RaiseOnValueChanged(0);
-            // return;
-        // }
-
-        // action.RaiseOnValueChanged(Input.GetAxis(axisName));
-    // }
-
-    // public static void FromAxis(InputAction_Measurable action, float value, Modifier modifiers = Modifier.None)
-    // {
-        // if (!PassModifiers(modifiers))
-        // {
-            // action.RaiseOnValueChanged(0);
-            // return;
-        // }
-
-        // action.RaiseOnValueChanged(value);
-    // }
-
-    // /// <summary>
-    // /// Bitwise check for the modifiers flags
-    // /// </summary>
-    // /// <param name="modifiers">Modifier to check</param>
-    // /// <param name="value">Modifier mapped to a bit to check</param>
-    // /// <returns></returns>
-    // public static bool IsModifierSet(Modifier modifiers, Modifier value)
-    // {
-        // int flagsValue = (int)modifiers;
-        // int flagValue = (int)value;
-
-        // return (flagsValue & flagValue) != 0;
-    // }
-
-    // public static bool FocusIsInInputField()
-    // {
-        // if (EventSystem.current == null)
-            // return false;
-
-        // if (EventSystem.current.currentSelectedGameObject != null &&
-            // (EventSystem.current.currentSelectedGameObject.GetComponent<TMP_InputField>() != null ||
-             // EventSystem.current.currentSelectedGameObject.GetComponent<UnityEngine.UI.InputField>() != null))
-        // {
-            // return true;
-        // }
-
-        // return false;
-    // }
-// }
-// =======
-// >>>>>>> upstream/release/20230227

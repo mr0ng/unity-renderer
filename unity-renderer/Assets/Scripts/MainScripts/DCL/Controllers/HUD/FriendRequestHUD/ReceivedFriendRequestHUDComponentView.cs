@@ -39,10 +39,15 @@ namespace DCL.Social.Friends
 
         private bool lastTryWasConfirm;
 
+#if DCL_VR
+        public static ReceivedFriendRequestHUDComponentView Create() =>
+            Instantiate(
+                Resources.Load<ReceivedFriendRequestHUDComponentView>("FriendRequests/ReceivedFriendRequestHUDVR"));
+        #else
         public static ReceivedFriendRequestHUDComponentView Create() =>
             Instantiate(
                 Resources.Load<ReceivedFriendRequestHUDComponentView>("FriendRequests/ReceivedFriendRequestHUD"));
-
+#endif
         public override void Awake()
         {
             base.Awake();

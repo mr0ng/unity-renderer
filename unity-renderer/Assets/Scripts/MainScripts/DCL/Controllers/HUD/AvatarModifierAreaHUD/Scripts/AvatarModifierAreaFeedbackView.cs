@@ -11,19 +11,23 @@ namespace DCL.AvatarModifierAreaFeedback
 {
     public class AvatarModifierAreaFeedbackView : MonoBehaviour, IAvatarModifierAreaFeedbackView, IPointerEnterHandler, IPointerExitHandler
     {
-        
+
         internal enum AvatarModifierAreaFeedbackState { NEVER_SHOWN, ICON_VISIBLE, WARNING_MESSAGE_VISIBLE, NONE_VISIBLE }
 
+        #if DCL_VR
+        private const string PATH = "_AvatarModifierAreaFeedbackHUDVR";
+        #else
         private const string PATH = "_AvatarModifierAreaFeedbackHUD";
+        #endif
         private const string PATH_TO_WARNING_MESSAGE = "_WarningMessageAreaFeedbackHUD";
         private BaseRefCounter<AvatarModifierAreaID> avatarAreaWarningsCounter;
         private HUDCanvasCameraModeController hudCanvasCameraModeController;
 
-        
+
         [SerializeField] internal RectTransform warningContainer;
         [SerializeField] private CanvasGroup pointerEnterTriggerArea;
         [SerializeField] private Animator messageAnimator;
-       
+
         internal bool isVisible;
         internal AvatarModifierAreaFeedbackState currentState;
         internal Dictionary<AvatarModifierAreaID, GameObject> warningMessagesDictionary;
@@ -33,7 +37,7 @@ namespace DCL.AvatarModifierAreaFeedback
         private string msgInAnimationTrigger = "MsgIn";
         private string iconInAnimationTrigger = "IconIn";
         private string iconOutAnimationTrigger = "IconOut";
-        
+
         public static AvatarModifierAreaFeedbackView Create() { return Instantiate(Resources.Load<GameObject>(PATH)).GetComponent<AvatarModifierAreaFeedbackView>(); }
 
         public void Awake()
@@ -49,14 +53,14 @@ namespace DCL.AvatarModifierAreaFeedback
             avatarAreaWarningsCounter.OnRemoved += RemovedWarning;
 
             warningMessagesDictionary = new Dictionary<AvatarModifierAreaID, GameObject>();
-            
+
             foreach (AvatarModifierAreaID warningMessageEnum in Enum.GetValues(typeof(AvatarModifierAreaID)))
             {
                 GameObject newWarningMessage = Instantiate(Resources.Load<GameObject>(PATH_TO_WARNING_MESSAGE), warningContainer);
                 newWarningMessage.GetComponent<TMP_Text>().text = GetWarningMessage(warningMessageEnum);
                 newWarningMessage.SetActive(false);
                 warningMessagesDictionary.Add(warningMessageEnum, newWarningMessage);
-            }  
+            }
         }
 
         private void RemovedWarning(AvatarModifierAreaID obj)
@@ -78,7 +82,7 @@ namespace DCL.AvatarModifierAreaFeedback
             if (isVisible) return;
             isVisible = true;
             ResetAllTriggers();
-            
+
             if (currentState.Equals(AvatarModifierAreaFeedbackState.NEVER_SHOWN))
             {
                 messageAnimator.SetTrigger(msgInAnimationTrigger);
@@ -92,15 +96,15 @@ namespace DCL.AvatarModifierAreaFeedback
                 currentState = AvatarModifierAreaFeedbackState.ICON_VISIBLE;
             }
         }
-        
+
         private void Hide()
         {
             isVisible = false;
-            
+
             deactivatePreviewCancellationToken.Cancel();
-            
+
             pointerEnterTriggerArea.blocksRaycasts = false;
-            
+
             if (currentState.Equals(AvatarModifierAreaFeedbackState.WARNING_MESSAGE_VISIBLE))
             {
                 messageAnimator.SetTrigger(msgOutAnimationTrigger);
@@ -111,7 +115,7 @@ namespace DCL.AvatarModifierAreaFeedback
             }
             currentState = AvatarModifierAreaFeedbackState.NONE_VISIBLE;
         }
-        
+
         public void OnPointerEnter(PointerEventData eventData)
         {
             if (!isVisible) return;
@@ -119,23 +123,23 @@ namespace DCL.AvatarModifierAreaFeedback
             messageAnimator.SetTrigger(msgInAnimationTrigger);
             currentState = AvatarModifierAreaFeedbackState.WARNING_MESSAGE_VISIBLE;
         }
-        
+
         public void OnPointerExit(PointerEventData eventData)
         {
             if (!isVisible) return;
-            
+
             messageAnimator.SetTrigger(iconInAnimationTrigger);
             currentState = AvatarModifierAreaFeedbackState.ICON_VISIBLE;
         }
-        
-      
+
+
         async UniTaskVoid HideFirstTimeWarningMessageUniTask(CancellationToken cancellationToken)
         {
             await UniTask.Delay(5000, cancellationToken: cancellationToken);
             await UniTask.SwitchToMainThread(cancellationToken);
             if (cancellationToken.IsCancellationRequested) return;
             messageAnimator.SetTrigger(iconInAnimationTrigger);
-            
+
             currentState = AvatarModifierAreaFeedbackState.ICON_VISIBLE;
             pointerEnterTriggerArea.blocksRaycasts = true;
         }
@@ -148,7 +152,7 @@ namespace DCL.AvatarModifierAreaFeedback
             avatarAreaWarningsCounter.OnRemoved -= RemovedWarning;
 			hudCanvasCameraModeController?.Dispose();
         }
-        
+
         private string GetWarningMessage(AvatarModifierAreaID idToSet)
         {
             switch (idToSet)
@@ -170,6 +174,6 @@ namespace DCL.AvatarModifierAreaFeedback
             messageAnimator.ResetTrigger(iconOutAnimationTrigger);
         }
 
-        
+
     }
 }

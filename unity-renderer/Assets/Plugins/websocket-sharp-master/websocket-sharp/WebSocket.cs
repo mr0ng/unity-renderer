@@ -176,7 +176,7 @@ namespace WebSocketSharp
             _message = messages;
             _secure = context.IsSecureConnection;
             _stream = context.Stream;
-            _waitTime = TimeSpan.FromSeconds(5);
+            _waitTime = TimeSpan.FromSeconds(1);
 
             init();
         }
@@ -192,7 +192,7 @@ namespace WebSocketSharp
             _message = messages;
             _secure = context.IsSecureConnection;
             _stream = context.Stream;
-            _waitTime = TimeSpan.FromSeconds(5);
+            _waitTime = TimeSpan.FromSeconds(1);
 
             init();
         }
@@ -2117,7 +2117,7 @@ namespace WebSocketSharp
             _stream = null;
             _context = null;
         }
-        private int _retryCountForSend = 0;
+
         private bool send(Opcode opcode, Stream stream)
         {
             lock (_forSend)
@@ -2136,15 +2136,7 @@ namespace WebSocketSharp
                     sent = send(opcode, stream, compressed);
                     if (!sent)
                     {
-                        if (_retryCountForSend < 15){
-                            _retryCountForSend ++;
-                            send(opcode,  stream);
-                        }
-                        else
-                        {
-                            _retryCountForConnect = 0;
-                            error("A send has been interrupted.", null);
-                        }
+                        error("A send has been interrupted.", null);
                     }
                 }
                 catch (Exception ex)
@@ -2295,7 +2287,7 @@ namespace WebSocketSharp
         private HttpResponse sendHandshakeRequest()
         {
             var req = createHandshakeRequest();
-            var res = sendHttpRequest(req, 250000);
+            var res = sendHttpRequest(req, 90000);
             if (res.IsUnauthorized)
             {
                 var chal = res.Headers["WWW-Authenticate"];
@@ -2325,7 +2317,7 @@ namespace WebSocketSharp
                     var authRes = new AuthenticationResponse(_authChallenge, _credentials, _nonceCount);
                     _nonceCount = authRes.NonceCount;
                     req.Headers["Authorization"] = authRes.ToString();
-                    res = sendHttpRequest(req, 250000);
+                    res = sendHttpRequest(req, 15000);
                 }
             }
 
@@ -2388,7 +2380,7 @@ namespace WebSocketSharp
         private void sendProxyConnectRequest()
         {
             var req = HttpRequest.CreateConnectRequest(_uri);
-            var res = sendHttpRequest(req, 250000);
+            var res = sendHttpRequest(req, 90000);
             if (res.IsProxyAuthenticationRequired)
             {
                 var chal = res.Headers["Proxy-Authenticate"];
@@ -2417,7 +2409,7 @@ namespace WebSocketSharp
 
                     var authRes = new AuthenticationResponse(authChal, _proxyCredentials, 0);
                     req.Headers["Proxy-Authorization"] = authRes.ToString();
-                    res = sendHttpRequest(req, 250000);
+                    res = sendHttpRequest(req, 15000);
                 }
 
                 if (res.IsProxyAuthenticationRequired)
@@ -3624,7 +3616,8 @@ namespace WebSocketSharp
                 var msg = "Its size is greater than 123 bytes.";
                 throw new ArgumentOutOfRangeException("reason", msg);
             }
-            Debug.Log($"CloseAsync3585 {code.ToString()}, {reason.ToString()}");            closeAsync((ushort)code, reason);
+            Debug.Log($"CloseAsync3585 {code.ToString()}, {reason.ToString()}");
+			closeAsync((ushort)code, reason);
         }
 
         /// <summary>

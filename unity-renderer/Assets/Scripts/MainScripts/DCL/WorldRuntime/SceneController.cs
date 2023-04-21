@@ -122,6 +122,7 @@ namespace DCL
         private int updateSkip =  0;
         public void Update()
         {
+		//VR optimizations
             updateSkip = (updateSkip + 1 ) % 31;
             if (updateSkip != 0)
                 return;
@@ -139,10 +140,11 @@ namespace DCL
         private int updateSkip2 =  0;
         public void LateUpdate()
         {
+		//VR optimizations
             updateSkip2 = (updateSkip2 + 1 ) % 6;
             if (updateSkip2 != 0)
                 return;
-            
+
             if (!enabled)
                 return;
 
@@ -457,7 +459,7 @@ namespace DCL
                 {
                     if (chunksToDecode.Count > 0)
                     {
-                        TaskUtils.Run(async () => await(ThreadedDecodeAndEnqueue(cancellationToken))).Forget();
+                        ThreadedDecodeAndEnqueue(cancellationToken);
                     }
                 }
                 catch (Exception e)
@@ -468,12 +470,8 @@ namespace DCL
                 await UniTask.Yield();
             }
         }
-// <<<<<<< HEAD
-        // private async UniTask ThreadedDecodeAndEnqueue(CancellationToken cancellationToken)
-// =======
 
-        private void ThreadedDecodeAndEnqueue(CancellationToken cancellationToken)
-// >>>>>>> upstream/release/20230227
+        private async void ThreadedDecodeAndEnqueue(CancellationToken cancellationToken)
         {
             DateTime lastStart = DateTime.Now;
             while (chunksToDecode.TryDequeue(out string chunk))
@@ -482,11 +480,11 @@ namespace DCL
 
                 string[] payloads = chunk.Split(new [] { '\n' }, StringSplitOptions.RemoveEmptyEntries);
                 var count = payloads.Length;
-                
+
                 ;
                 for (int i = 0; i < count; i++)
                 {
-                    
+
                     var payload = payloads[i];
                     bool availableMessage = sceneMessagesPool.TryDequeue(out QueuedSceneMessage_Scene freeMessage);
 
@@ -498,11 +496,11 @@ namespace DCL
                     {
                         EnqueueSceneMessage(Decode(payload, new QueuedSceneMessage_Scene()));
                     }
+                    // Added for VR optimizations
                     if (DateTime.Now - lastStart > TimeSpan.FromMilliseconds(4))
                     {
                         await UniTask.Yield();
                         lastStart = DateTime.Now;
-                        
                     }
                 }
             }
@@ -748,7 +746,7 @@ namespace DCL
                 UnloadParcelSceneExecute(kvp.Key);
             }
         }
-       
+
         public void LoadParcelScenes(string decentralandSceneJSON)
         {
             var queuedMessage = new QueuedSceneMessage()
@@ -886,7 +884,7 @@ namespace DCL
         public event Action OnSortScenes;
         public event Action<IParcelScene, string> OnOpenExternalUrlRequest;
         public event Action<IParcelScene> OnNewSceneAdded;
-        
+
         public event Action<IParcelScene> OnSceneRemoved;
 
         private Vector2Int currentGridSceneCoordinate = new Vector2Int(EnvironmentSettings.MORDOR_SCALAR, EnvironmentSettings.MORDOR_SCALAR);

@@ -21,8 +21,11 @@ namespace DCL.EmotesWheel
             public Color markColor;
         }
 
+#if DCL_VR
         private const string PATH = "EmotesWheelHUDVR";
-      
+#else
+        private const string PATH = "EmotesWheelHUD";
+#endif
 
         public event Action<string> onEmoteClicked;
         public event Action OnClose;
@@ -37,9 +40,12 @@ namespace DCL.EmotesWheel
         [SerializeField] internal GameObject customizeTitle;
 
         private HUDCanvasCameraModeController hudCanvasCameraModeController;
-        
-        public static EmotesWheelView Create() { return Instantiate(Resources.Load<GameObject>(PATH)).GetComponent<EmotesWheelView>(); }
 
+#if DCL_VR
+        public static EmotesWheelView Create() { return Instantiate(Resources.Load<GameObject>(PATH)).GetComponent<EmotesWheelView>(); }
+#else
+        public static EmotesWheelView Create() { return Instantiate(Resources.Load<GameObject>(PATH)).GetComponent<EmotesWheelView>(); }
+#endif
         private void Awake()
         {
             for (int i = 0; i < closeButtons.Length; i++)
@@ -87,7 +93,7 @@ namespace DCL.EmotesWheel
                     if (equippedEmote != null)
                     {
                         emoteButtons[i].button.onClick.AddListener(() => onEmoteClicked?.Invoke(equippedEmote.emoteItem.id));
-                        
+
                         if (equippedEmote.thumbnailSprite != null)
                             emoteButtons[i].SetImage(equippedEmote.thumbnailSprite);
                         else
@@ -95,10 +101,10 @@ namespace DCL.EmotesWheel
 
                         emoteButtons[i].SetId(equippedEmote.emoteItem.id);
                         emoteButtons[i].SetName(equippedEmote.emoteItem.GetName());
-                        
+
                         RarityColor rarityColor = rarityColors.FirstOrDefault(x => x.rarity == equippedEmote.emoteItem.rarity);
                         emoteButtons[i].SetRarity(
-                            rarityColor != null, 
+                            rarityColor != null,
                             rarityColor != null ? rarityColor.markColor : Color.white);
                     }
                     else

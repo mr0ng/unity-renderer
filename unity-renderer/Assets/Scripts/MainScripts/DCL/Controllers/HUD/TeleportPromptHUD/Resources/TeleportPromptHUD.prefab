@@ -2232,7 +2232,7 @@ MonoBehaviour:
   hideOnEnable: 1
   animSpeedFactor: 1
   disableAfterFadeOut: 0
-  canvasGroup: {fileID: 0}
+  canvasGroup: {fileID: 8869010452230871736}
 --- !u!1 &4666791225321054498
 GameObject:
   m_ObjectHideFlags: 0

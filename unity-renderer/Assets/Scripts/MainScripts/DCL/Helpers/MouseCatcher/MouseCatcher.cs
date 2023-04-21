@@ -42,12 +42,11 @@ namespace DCL
         private void Awake()
         {
             if (CrossPlatformManager.IsVR)
+            {
                 enabled = false;
+                gameObject.SetActive(false);
+            }
         }
-
-
-        private HUDCanvasCameraModeController hudCanvasCameraModeController;
-        
 
         private void Start()
         {

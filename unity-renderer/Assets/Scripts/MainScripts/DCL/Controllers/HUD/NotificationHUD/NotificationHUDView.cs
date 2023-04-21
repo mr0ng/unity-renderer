@@ -10,8 +10,12 @@ public class NotificationHUDView : MonoBehaviour
     private RectTransform notificationPanel;
 
     public event Action<INotification> OnNotificationDismissedEvent;
-
+    #if DCL_VR
+    private const string VIEW_PATH = "NotificationHUDVR";
+    #else
     private const string VIEW_PATH = "NotificationHUD";
+    #endif
+
     private const string VIEW_OBJECT_NAME = "_NotificationHUD";
 
     internal static NotificationHUDView Create()

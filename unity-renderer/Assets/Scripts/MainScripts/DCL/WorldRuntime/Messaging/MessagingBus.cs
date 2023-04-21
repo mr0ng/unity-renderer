@@ -50,7 +50,12 @@ namespace DCL
 
         public float timeBudget
         {
+
+#if DCL_VR
             get => renderingIsDisabled ? 3*timeBudgetValue: timeBudgetValue;
+#else
+			get => renderingIsDisabled ? float.MaxValue : timeBudgetValue;
+#endif
             set => timeBudgetValue = value;
         }
 
@@ -88,8 +93,8 @@ namespace DCL
         public void Enqueue(QueuedSceneMessage message, QueueMode queueMode = QueueMode.Reliable)
         {
             lock (unreliableMessages)
-            {                
-                // TODO: If we check here for 'if (message == null || string.IsNullOrEmpty(message.message))' loading the scene breaks, as we get empty messages every frame... 
+            {
+                // TODO: If we check here for 'if (message == null || string.IsNullOrEmpty(message.message))' loading the scene breaks, as we get empty messages every frame...
                 if (message == null)
                     throw new Exception("A null message?");
 
@@ -168,7 +173,7 @@ namespace DCL
 
             while (enabled && pendingMessagesCount > 0 )//&& Time.realtimeSinceStartup - startTime < timeBudget)
             {
-                
+
                 LinkedListNode<QueuedSceneMessage> pendingMessagesFirst;
 
                 lock (pendingMessages)
@@ -187,14 +192,14 @@ namespace DCL
                 QueuedSceneMessage m = pendingMessagesFirst.Value;
 
                 PerformanceAnalytics.MessagesProcessedTracker.Track();
-                
+
                 RemoveFirstReliableMessage();
 
                 if (m.isUnreliable)
                     RemoveUnreliableMessage(m);
 
                 bool shouldLogMessage = VERBOSE;
-                
+
                 switch (m.type)
                 {
                     case QueuedSceneMessage.Type.NONE:
@@ -243,17 +248,13 @@ namespace DCL
                         });
                         break;
                     case QueuedSceneMessage.Type.UNLOAD_PARCEL:
-// <<<<<<< HEAD
+
                         UnityThread.ExecuteInTimeBudgetCoroutine(() =>
                         {
-                            handler.UnloadParcelSceneExecute(m.message);
+                            handler.UnloadParcelSceneExecute(m.sceneNumber);
                             ProfilingEvents.OnMessageWillDequeue?.Invoke("UnloadScene");
                         });
-// =======
-                        handler.UnloadParcelSceneExecute(m.sceneNumber);
-                        ProfilingEvents.OnMessageWillDequeue?.Invoke("UnloadScene");
 
-// >>>>>>> upstream/release/20230227
                         break;
                     case QueuedSceneMessage.Type.UPDATE_PARCEL:
                         UnityThread.ExecuteInTimeBudgetCoroutine(() =>

@@ -48,4 +48,6 @@ MonoBehaviour:
     type: 3}
   desktopPrefab: {fileID: 3966731394931121075, guid: eb8e1071401ed1b4a9da376e23483830,
     type: 3}
-  currentPlatform: 0
+  VRPrefab: {fileID: 3966731394931121075, guid: 7ac8a1892b090954da8c2f436a421240,
+    type: 3}
+  currentPlatform: 2

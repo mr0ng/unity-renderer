@@ -12,7 +12,11 @@ namespace DCLPlugins.LoadingScreenPlugin
     /// </summary>
     public class LoadingScreenPlugin : IPlugin
     {
+        #if DCL_VR
+        private const string LOADING_SCREEN_ASSET = "_LoadingScreenVR";
+        #else
         private const string LOADING_SCREEN_ASSET = "_LoadingScreen";
+        #endif
 
         private readonly DataStoreRef<DataStore_LoadingScreen> dataStoreLoadingScreen;
         private readonly CancellationTokenSource cancellationTokenSource;

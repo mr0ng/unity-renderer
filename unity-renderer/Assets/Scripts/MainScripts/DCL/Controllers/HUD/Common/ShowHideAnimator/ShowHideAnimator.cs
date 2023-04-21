@@ -11,7 +11,9 @@ public class ShowHideAnimator : MonoBehaviour
     private const float BASE_DURATION = 0.2f;
 
     public event System.Action<ShowHideAnimator> OnWillFinishHide;
+    public event Action OnStartHide;
     public event System.Action<ShowHideAnimator> OnWillFinishStart;
+    public event Action OnStartShow;
     //added for ease of triggering VR panel placement.
     public event System.Action<bool> OnSetVisibility;
 
@@ -26,8 +28,6 @@ public class ShowHideAnimator : MonoBehaviour
 
     public bool isVisible => canvasGroup == null || canvasGroup.blocksRaycasts;
 
-    public event Action<ShowHideAnimator> OnWillFinishHide;
-    public event Action<ShowHideAnimator> OnWillFinishStart;
 
     private void Awake()
     {
@@ -45,14 +45,19 @@ public class ShowHideAnimator : MonoBehaviour
 
     public void Show(bool instant = false)
     {
+        //if (this.gameObject.name.Contains("Loading")) return;
+        OnSetVisibility?.Invoke(true);
         SetVisibility(visible: true, OnShowCompleted, instant);
 
-        void OnShowCompleted() =>
+        void OnShowCompleted()
+        {
             OnWillFinishStart?.Invoke(this);
+        }
     }
 
     public void Hide(bool instant = false)
     {
+        OnSetVisibility?.Invoke(true);
         SetVisibility(visible: false, OnHideCompleted, instant);
 
         void OnHideCompleted()
@@ -71,9 +76,13 @@ public class ShowHideAnimator : MonoBehaviour
     {
         SetVisibility(visible: true, onComplete: HideAfterDelay);
 
-        void HideAfterDelay() =>
+        void HideAfterDelay()
+        {
             SetVisibility(visible: false, null).SetDelay(delay);
-    }
+            OnWillFinishStart?.Invoke(this);
+        }
+
+}
 
     private TweenerCore<float, float, FloatOptions> SetVisibility(bool visible, TweenCallback onComplete, bool instant = false)
     {

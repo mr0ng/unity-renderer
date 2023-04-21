@@ -171,7 +171,11 @@ public class ProfileHUDController : IHUD
 
     protected virtual GameObject GetViewPrefab()
     {
+        #if DCL_VR
+        return Resources.Load<GameObject>("ProfileHUD_V2VR");
+        #else
         return Resources.Load<GameObject>("ProfileHUD_V2");
+        #endif
     }
 
     private void OnProfileUpdated(UserProfile profile) =>

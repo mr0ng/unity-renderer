@@ -31,6 +31,7 @@ namespace SignupHUD
         public event Action OnEditAvatar;
         public event Action OnTermsOfServiceAgreed;
         public event Action OnTermsOfServiceBack;
+        public event Action<bool> OnSetVisibility;
 
         [Header("Name and Email Screen")]
         [SerializeField] internal RectTransform nameAndEmailPanel;
@@ -111,7 +112,11 @@ namespace SignupHUD
 
         private void OnFaceSnapshotReady(Texture2D texture) { avatarPic.texture = texture; }
 
-        public void SetVisibility(bool visible) { gameObject.SetActive(visible); }
+        public void SetVisibility(bool visible)
+        {
+            gameObject.SetActive(visible);
+            OnSetVisibility?.Invoke(visible);
+        }
 
         public void ShowNameScreen()
         {
@@ -158,5 +163,7 @@ namespace SignupHUD
         }
 
         private bool IsValidName(string name) { return Regex.IsMatch(name, "^[a-zA-Z0-9]*$"); }
+
+
     }
 }

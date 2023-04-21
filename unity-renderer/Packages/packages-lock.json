@@ -70,6 +70,13 @@
       "dependencies": {},
       "hash": "df8e5a76a9b7ad1d3b266a5bd359257b0d60e09c"
     },
+    "com.madsbangh.easybuttons": {
+      "version": "1.3.0",
+      "depth": 0,
+      "source": "registry",
+      "dependencies": {},
+      "url": "https://package.openupm.com"
+    },
     "com.microsoft.mixedreality.openxr": {
       "version": "file:MixedReality/com.microsoft.mixedreality.openxr-1.2.1.tgz",
       "depth": 0,
@@ -78,15 +85,6 @@
         "com.unity.xr.arfoundation": "4.1.7",
         "com.unity.xr.management": "4.2.0",
         "com.unity.xr.openxr": "1.3.1"
-      }
-    },
-    "com.microsoft.mixedreality.toolkit.examples": {
-      "version": "file:MixedReality/com.microsoft.mixedreality.toolkit.examples-2.7.3.tgz",
-      "depth": 0,
-      "source": "local-tarball",
-      "dependencies": {
-        "com.microsoft.mixedreality.toolkit.foundation": "2.7.3",
-        "com.microsoft.mixedreality.toolkit.extensions": "2.7.3"
       }
     },
     "com.microsoft.mixedreality.toolkit.extensions": {
@@ -112,13 +110,6 @@
       "dependencies": {
         "com.unity.textmeshpro": "2.1.4"
       }
-	},
-    "com.madsbangh.easybuttons": {
-      "version": "1.3.0",
-      "depth": 0,
-      "source": "registry",
-      "dependencies": {},
-      "url": "https://package.openupm.com"
     },
     "com.unity.2d.sprite": {
       "version": "1.0.0",
@@ -211,10 +202,12 @@
       "url": "https://packages.unity.com"
     },
     "com.unity.inputsystem": {
-      "version": "1.0.2",
+      "version": "1.5.0",
       "depth": 1,
       "source": "registry",
-      "dependencies": {},
+      "dependencies": {
+        "com.unity.modules.uielements": "1.0.0"
+      },
       "url": "https://packages.unity.com"
     },
     "com.unity.mathematics": {
@@ -234,7 +227,7 @@
       "url": "https://packages.unity.com"
     },
     "com.unity.mobile.android-logcat": {
-      "version": "1.2.3",
+      "version": "1.3.2",
       "depth": 0,
       "source": "registry",
       "dependencies": {},
@@ -316,7 +309,7 @@
     },
     "com.unity.subsystemregistration": {
       "version": "1.1.0",
-      "depth": 3,
+      "depth": 2,
       "source": "registry",
       "dependencies": {
         "com.unity.modules.subsystems": "1.0.0"
@@ -385,31 +378,29 @@
       }
     },
     "com.unity.ui": {
-      "version": "1.0.0-preview.18",
+      "version": "2.0.0",
       "depth": 0,
-      "source": "registry",
-      "dependencies": {
-        "com.unity.modules.uielementsnative": "1.0.0",
-        "com.unity.textcore": "1.0.0-preview.3"
-      },
-      "url": "https://packages.unity.com"
+      "source": "builtin",
+      "dependencies": {}
     },
     "com.unity.xr.arfoundation": {
-      "version": "4.1.7",
+      "version": "4.2.7",
       "depth": 1,
       "source": "registry",
       "dependencies": {
-        "com.unity.xr.arsubsystems": "4.1.7",
-        "com.unity.xr.management": "4.0.1"
+        "com.unity.xr.arsubsystems": "4.2.7",
+        "com.unity.xr.management": "4.0.1",
+        "com.unity.modules.particlesystem": "1.0.0"
       },
       "url": "https://packages.unity.com"
     },
     "com.unity.xr.arsubsystems": {
-      "version": "4.1.9",
+      "version": "4.2.7",
       "depth": 2,
       "source": "registry",
       "dependencies": {
-        "com.unity.subsystemregistration": "1.1.0"
+        "com.unity.subsystemregistration": "1.1.0",
+        "com.unity.xr.management": "4.0.1"
       },
       "url": "https://packages.unity.com"
     },
@@ -436,26 +427,35 @@
       },
       "url": "https://packages.unity.com"
     },
-    "com.unity.xr.oculus": {
-      "version": "1.10.0",
+    "com.unity.xr.mock-hmd": {
+      "version": "1.3.1-preview.1",
       "depth": 0,
       "source": "registry",
       "dependencies": {
-        "com.unity.xr.management": "4.0.1",
-        "com.unity.ugui": "1.0.0"
+        "com.unity.xr.management": "4.0.1"
+      },
+      "url": "https://packages.unity.com"
+    },
+    "com.unity.xr.oculus": {
+      "version": "3.2.3",
+      "depth": 0,
+      "source": "registry",
+      "dependencies": {
+        "com.unity.xr.management": "4.2.0"
       },
       "url": "https://packages.unity.com"
     },
     "com.unity.xr.openxr": {
-      "version": "1.3.1",
+      "version": "1.6.0",
       "depth": 0,
       "source": "registry",
       "dependencies": {
         "com.unity.xr.management": "4.0.1",
         "com.unity.xr.legacyinputhelpers": "2.1.2",
-        "com.unity.inputsystem": "1.0.2"
+        "com.unity.inputsystem": "1.4.4"
       },
       "url": "https://packages.unity.com"
+    },
     "io.sentry.unity": {
       "version": "https://github.com/getsentry/unity.git#0.28.0",
       "depth": 0,

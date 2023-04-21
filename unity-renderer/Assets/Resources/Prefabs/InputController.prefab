@@ -10,6 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 5175052615018462646}
   - component: {fileID: 5175052615018462647}
+  - component: {fileID: 3579642219277513404}
   m_Layer: 0
   m_Name: InputController
   m_TagString: Untagged
@@ -108,3 +109,18 @@ MonoBehaviour:
   - {fileID: 11400000, guid: c5302665e8f998e4ea2673bba5e22914, type: 2}
   - {fileID: 11400000, guid: 03d744388580e334391bfa394a66e6d7, type: 2}
   - {fileID: 11400000, guid: 321d843783c1847a2a90e7e46f44e476, type: 2}
+  vrInputHandler: {fileID: 3579642219277513404}
+--- !u!114 &3579642219277513404
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5175052615018462640}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 11ed866614a70d442b68e88b3bbed828, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  vrInputActions: {fileID: -944628639613478452, guid: 8bf02d1f48ad24d4591f9809d62f6f88,
+    type: 3}

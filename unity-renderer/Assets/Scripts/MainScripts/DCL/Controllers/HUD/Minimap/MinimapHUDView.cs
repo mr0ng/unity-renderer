@@ -6,7 +6,11 @@ using UnityEngine.UI;
 
 public class MinimapHUDView : MonoBehaviour
 {
+#if DCL_VR
     public const string VIEW_PATH = "MinimapHUDVR";
+#else
+    public const string VIEW_PATH = "MinimapHUD";
+#endif
     public const string VIEW_OBJECT_NAME = "_MinimapHUD";
 
     private int START_MENU_HOVER_BOOL = Animator.StringToHash("hover");
@@ -76,7 +80,7 @@ public class MinimapHUDView : MonoBehaviour
         controller.SetHomeScene(isOn);
     }
 
-    internal void OnMouseLocked() 
+    internal void OnMouseLocked()
     {
         sceneOptionsPanel.SetActive(false);
     }

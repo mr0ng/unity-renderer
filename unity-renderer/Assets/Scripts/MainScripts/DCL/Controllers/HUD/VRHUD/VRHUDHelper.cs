@@ -8,8 +8,8 @@ public abstract class VRHUDHelper : MonoBehaviour
     [SerializeField]
     public int sortingOrder;
     [SerializeField]
-    protected ShowHideAnimator showHideAnimator;
-    
+    public ShowHideAnimator showHideAnimator;
+
     protected Transform myTrans;
 
     protected virtual void Awake()
@@ -33,7 +33,7 @@ public abstract class VRHUDHelper : MonoBehaviour
     private void ConvertUI()
     {
         Canvas canvas = GetComponent<Canvas>();
-        
+
         canvas.renderMode = RenderMode.WorldSpace;
         canvas.overrideSorting = true;
         canvas.sortingOrder = sortingOrder;
@@ -64,10 +64,10 @@ public abstract class VRHUDHelper : MonoBehaviour
         myTrans.localPosition = Vector3.zero;
         myTrans.localRotation = Quaternion.identity;
     }
-    public virtual void Show() 
-    { 
+    public virtual void Show()
+    {
         if (showHideAnimator)
             showHideAnimator.Show(true);
-        
+
     }
 }

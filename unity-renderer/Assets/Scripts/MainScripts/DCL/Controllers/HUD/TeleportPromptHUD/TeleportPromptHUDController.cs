@@ -17,7 +17,11 @@ public class TeleportPromptHUDController : IHUD
 
     public TeleportPromptHUDController()
     {
+        #if DCL_VR
         view = UnityEngine.Object.Instantiate(Resources.Load<GameObject>("TeleportPromptHUDVR")).GetComponent<TeleportPromptHUDView>();
+        #else
+        view = UnityEngine.Object.Instantiate(Resources.Load<GameObject>("TeleportPromptHUD")).GetComponent<TeleportPromptHUDView>();
+        #endif
         view.name = "_TeleportPromptHUD";
         view.content.GetComponent<Canvas>().enabled = false;
         view.OnTeleportEvent += OnTeleportPressed;

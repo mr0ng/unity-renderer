@@ -15,8 +15,12 @@ public class ExternalUrlPromptHUDController : IHUD
 
     public ExternalUrlPromptHUDController()
     {
+        #if DCL_VR
         view = UnityEngine.Object.Instantiate(Resources.Load<GameObject>("ExternalUrlPromptHUDVR")).GetComponent<ExternalUrlPromptView>();
-        view.name = "_ExternalUrlPromptHUDVR";
+       #else
+        view = UnityEngine.Object.Instantiate(Resources.Load<GameObject>("ExternalUrlPromptHUD")).GetComponent<ExternalUrlPromptView>();
+        #endif
+        view.name = "_ExternalUrlPromptHUD";
         //view.content.SetActive(false);
 
         if (Environment.i != null)

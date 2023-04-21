@@ -20,7 +20,11 @@ namespace DCL.Huds.QuestsPanel
     public class QuestsPanelHUDView : MonoBehaviour, IQuestsPanelHUDView
     {
         internal static int ENTRIES_PER_FRAME { get; set; } = 5;
+        #if DCL_VR
+        private const string VIEW_PATH = "QuestsPanelHUDVR";
+        #else
         private const string VIEW_PATH = "QuestsPanelHUD";
+        #endif
 
         [SerializeField] internal RectTransform availableQuestsContainer;
         [SerializeField] internal RectTransform completedQuestsContainer;

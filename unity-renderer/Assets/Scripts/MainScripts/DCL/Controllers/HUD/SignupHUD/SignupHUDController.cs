@@ -88,7 +88,7 @@ namespace SignupHUD
             if (visible)
                 StartSignupProcess();
         }
-        
+
 
         public void Dispose()
         {

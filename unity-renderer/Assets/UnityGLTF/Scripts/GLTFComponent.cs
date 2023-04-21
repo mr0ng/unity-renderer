@@ -115,7 +115,7 @@ namespace UnityGLTF
         private void UpdateMaxDownloads(int current, int previous)
         {
             maxSimultaneousDownloads = DataStore.i.performance.maxDownloads;
-            downloadQueueHandler.MaxDownloadCount = current;
+            downloadQueueHandler.maxDownloadCount = current;
         }
 
         public void LoadAsset(string baseUrl, string incomingURI = "", string idPrefix = "", bool loadEvenIfAlreadyLoaded = false, Settings settings = null, AssetIdConverter fileToHashConverter = null)

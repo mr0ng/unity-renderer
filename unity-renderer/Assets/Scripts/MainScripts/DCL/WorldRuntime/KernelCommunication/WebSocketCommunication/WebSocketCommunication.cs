@@ -7,10 +7,6 @@ using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using DCL;
 using UnityEngine;
-// <<<<<<< HEAD
-// using UnityEngine.Rendering;
-// =======
-// >>>>>>> upstream/release/20230227
 using WebSocketSharp;
 using WebSocketSharp.Server;
 
@@ -31,7 +27,7 @@ public class WebSocketCommunication : IKernelCommunication
     private Coroutine updateCoroutine;
 
     WebSocketServer ws;
-
+    public static event Action<string> OnProfileLoading;
     public WebSocketCommunication(bool withSSL = false, int startPort = 7666, int endPort = 7800)
     {
         InitMessageTypeToBridgeName();
@@ -47,7 +43,6 @@ public class WebSocketCommunication : IKernelCommunication
         DataStore.i.wsCommunication.communicationReady.Set(true);
 
         updateCoroutine = CoroutineStarter.Start(ProcessMessages());
-        
     }
 
     public bool isServerReady => ws.IsListening;
@@ -84,9 +79,6 @@ public class WebSocketCommunication : IKernelCommunication
                     },
                     KeepClean = false
                 };
-                ws.AllowForwardedRequest = true;
-                ws.ReuseAddress = true;
-                Debug.Log("WebSocketCommunication: SSL used");
             }
             else
             {
@@ -96,50 +88,14 @@ public class WebSocketCommunication : IKernelCommunication
                 wssServerUrl = $"ws://localhost:{port}/";
 #endif
                 ws = new WebSocketServer(wssServerUrl);
-                ws.AllowForwardedRequest = true;
-                ws.ReuseAddress = true;
             }
 
             ws.AddWebSocketService("/" + wssServiceId, () =>
             {
                 service = new DCLWebSocketService();
-                service.OriginValidator = val =>
-                {
-                    Debug.Log($"originValidator: {val}");
-                    return  true;
-                };
-                service.OnCloseEvent += () =>
-                {
-                    // DataStore.i.wsCommunication.communicationReady.Set(false);
-                    
-                    ws.Stop();
-                    ws.WebSocketServices.Clear();
-                    
-                    //ws.WebSocketServices.Clear();
-                    
-                    queuedMessages.Clear();
-                    //service.Context.WebSocket.Connect();
-                   
-                   
-                    service = null;
-                    ws = null;
-                    requestStop = false;
-                    queuedMessagesDirty = false;
-                    
-                   
-                    UnityThread.executeCoroutine(
-                        RestartCommunication(port, maxPort, withSSL)
-                    );
-                    
-
-                };
-                
-                
                 OnWebSocketServiceAdded?.Invoke(service);
-                Debug.Log("WebSocketCommunication: Added DCLWebSocket Service");
                 return service;
             });
-            ws.ReuseAddress = true;
 
             if (verbose)
             {
@@ -147,9 +103,6 @@ public class WebSocketCommunication : IKernelCommunication
                 ws.Log.Output += OnWebSocketLog;
             }
             ws.Start();
-            
-            Debug.Log("WebSocketCommunication: Start Called");
-            
         }
         catch (InvalidOperationException e)
         {
@@ -193,51 +146,6 @@ public class WebSocketCommunication : IKernelCommunication
         }
     }
 
-    private IEnumerator RestartCommunication(int port, int maxPort, bool withSSL)
-    {
-        yield return new WaitForSeconds(3);
-        DataStore.i.wsCommunication.communicationReady.Set(false);
-        DataStore.i.common.isApplicationQuitting.Set(false);
-        //
-        // yield return new WaitForSeconds(3);
-        // InitMessageTypeToBridgeName();
-        //
-        // DCL.DataStore.i.debugConfig.isWssDebugMode = true;
-        // string url = StartServer(port + 1, maxPort, withSSL);
-        // Debug.Log("WebSocket Server URL: " + url);
-        //
-        // DataStore.i.wsCommunication.url = url;
-        //
-        // DataStore.i.wsCommunication.communicationReady.Set(true);
-        // if(updateCoroutine == null);
-        // updateCoroutine = CoroutineStarter.Start(ProcessMessages());
-        //
-        yield return new WaitForSeconds(1);
-        DebugConfigComponent.i.ShowWebviewScreen();
-    }
-
-//<<<<<<< HEAD
-    // public WebSocketCommunication(bool withSSL = false, int startPort = 5000, int endPort = 5100)
-    // {
-    //     Debug.Log($"WebSocketCommunication: withSSL:{withSSL}, port {startPort}-{endPort}");
-    //     InitMessageTypeToBridgeName();
-    //     Debug.Log($"WebSocketCommunication: 1");
-    //     DCL.DataStore.i.debugConfig.isWssDebugMode = true;
-    //     Debug.Log($"WebSocketCommunication: 2");
-    //     string url = StartServer(startPort, endPort, withSSL);
-    //     
-    //     Debug.Log("WebSocketCommunication: 3started " + url);
-    //
-    //     DataStore.i.wsCommunication.url = url;
-    //
-    //     DataStore.i.wsCommunication.communicationReady.Set(true);
-    //     Debug.Log($"WebSocketCommunication: 4 start ProcessMessages");
-    //     updateCoroutine = CoroutineStarter.Start(ProcessMessages());
-    //     Debug.Log($"WebSocketCommunication: 5");
-    // }
-
-//=======
-//>>>>>>> upstream/dev
     private void InitMessageTypeToBridgeName()
     {
         // Please, use `Bridges` as a bridge name, avoid adding messages here. The system will use `Bridges` as the default bridge name.
@@ -374,6 +282,9 @@ public class WebSocketCommunication : IKernelCommunication
                                 {
                                     mainGO.SendMessage(msg.type, durationInSeconds);
                                 }
+                                break;
+                            case "LoadProfile":
+                                OnProfileLoading?.Invoke(msg.payload);
                                 break;
                             default:
                                 if (!messageTypeToBridgeName.TryGetValue(msg.type, out string bridgeName))

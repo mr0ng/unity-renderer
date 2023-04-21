@@ -19,7 +19,7 @@ public class Options : MonoBehaviour
             C.enabled = false;
 
         }
-        
+
     }
     public void SwapShaders()
     {
@@ -32,10 +32,12 @@ public class Options : MonoBehaviour
             r.material.shader = shaders[shaderCount];
 
         }
-        
+
     }
+    #if DCL_VR
     public void PauseWebview()
     {
         DebugConfigComponent.i.PauseWebview();
     }
+    #endif
 }

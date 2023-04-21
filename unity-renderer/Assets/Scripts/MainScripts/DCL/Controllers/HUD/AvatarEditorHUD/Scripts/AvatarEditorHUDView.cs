@@ -19,8 +19,12 @@ using Random = System.Random;
 public class AvatarEditorHUDView : MonoBehaviour, IAvatarEditorHUDView, IPointerDownHandler
 {
     private static readonly int RANDOMIZE_ANIMATOR_LOADING_BOOL = Animator.StringToHash("Loading");
+    #if DCL_VR
     private const string VIEW_PATH = "AvatarEditorHUDVR";
-    private const string VIEW_OBJECT_NAME = "_AvatarEditorHUDVR";
+    #else
+    private const string VIEW_PATH = "AvatarEditorHUD";
+#endif
+    private const string VIEW_OBJECT_NAME = "_AvatarEditorHUD";
     internal const int AVATAR_SECTION_INDEX = 0;
     internal const string AVATAR_SECTION_TITLE = "Avatar";
     internal const int EMOTES_SECTION_INDEX = 1;
@@ -154,6 +158,7 @@ public class AvatarEditorHUDView : MonoBehaviour, IAvatarEditorHUDView, IPointer
 
     private void Awake()
     {
+
         loadingSpinnerGameObject.SetActive(false);
         doneButton.interactable = false; //the default state of the button should be disable until a profile has been loaded.
         isOpen = false;
@@ -265,7 +270,11 @@ public class AvatarEditorHUDView : MonoBehaviour, IAvatarEditorHUDView, IPointer
     internal static AvatarEditorHUDView Create(AvatarEditorHUDController controller)
     {
         var view = Instantiate(Resources.Load<GameObject>(VIEW_PATH)).GetComponent<AvatarEditorHUDView>();
+// #if DCL_VR
+//         view.gameObject.AddComponent<AvatarEditorHudHelper>();
+// #endif
         view.Initialize(controller);
+
         return view;
     }
 
@@ -478,7 +487,7 @@ public class AvatarEditorHUDView : MonoBehaviour, IAvatarEditorHUDView, IPointer
             while (enumerator.MoveNext())
             {
                 enumerator.Current.Value.RemoveAllWearables();
-                
+
             }
         }
 

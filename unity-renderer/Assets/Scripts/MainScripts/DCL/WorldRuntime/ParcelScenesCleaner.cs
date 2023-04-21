@@ -9,7 +9,7 @@ namespace DCL
 {
     public class ParcelScenesCleaner : IParcelScenesCleaner
     {
-        const float MAX_TIME_BUDGET = 0.005f;
+        const float MAX_TIME_BUDGET = 0.01f;
 
         private readonly struct MarkedEntityInfo
         {
@@ -167,7 +167,6 @@ namespace DCL
 
             CommonScriptableObjects.rendererState.OnChange -= OnRendererStateChange;
             Environment.i.platform.memoryManager.OnCriticalMemory -= CleanMarkedEntities;
-            
         }
     }
 }

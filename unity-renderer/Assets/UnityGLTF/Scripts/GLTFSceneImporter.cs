@@ -81,11 +81,8 @@ namespace UnityGLTF
         /// <summary>
         /// Maximum LOD
         /// </summary>
-#if UNITY_ANDROID && !UNITY_EDITOR
         public int maximumLod = 300;
-        #else
-        public int maximumLod = 300;
-#endif
+
         /// <summary>
         /// The parent transform for the created GameObject
         /// </summary>

@@ -107,7 +107,6 @@ public class ImageComponentView : BaseComponentView, IImageComponentView, ICompo
         lastLoadedUri = null;
         imageObserver.RemoveListener(OnImageObserverUpdated);
 
-
         DestroyInterntally(currentSprite);
 
         base.Dispose();
@@ -120,7 +119,6 @@ public class ImageComponentView : BaseComponentView, IImageComponentView, ICompo
 #else
         Destroy(obj);
 #endif
-
     }
 
     public void SetImage(Sprite sprite, bool cleanLastLoadedUri = true)
