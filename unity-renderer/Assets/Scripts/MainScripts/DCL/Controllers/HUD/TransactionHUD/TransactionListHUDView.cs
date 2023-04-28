@@ -21,7 +21,6 @@ public class TransactionListHUDView : MonoBehaviour
     {
         TransactionListHUDView view = Instantiate(Resources.Load<TransactionListHUDView>(VIEW_PATH));
         view.Initialize();
-
         return view;
     }
 
@@ -40,7 +39,7 @@ public class TransactionListHUDView : MonoBehaviour
     {
         if (transactionModel == null)
             return null;
-
+        
         TransactionHUD transactionHUD = Instantiate(Resources.Load<TransactionHUD>(VIEW_CHILD_PATH), transactionPanel);
         ShowTransaction(transactionHUD, transactionModel);
         return transactionHUD;
@@ -55,6 +54,6 @@ public class TransactionListHUDView : MonoBehaviour
     {
         OnTransactionRejectedEvent?.Invoke(transaction);
     }
-
+    
     public void SetActive(bool active) { gameObject.SetActive(active); }
 }

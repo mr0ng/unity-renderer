@@ -7,7 +7,7 @@ namespace DCL
     {
         public bool enabled = true;
         public double budgetPerFrame { get => enabled ? budgetPerFrameValue : double.MaxValue; set => budgetPerFrameValue = value; }
-        private double budgetPerFrameValue = 2.5 / 1000.0;
+        private double budgetPerFrameValue = 2 / 1000.0;
         private double timeBudgetCounter = 0f;
 
         /// <summary>

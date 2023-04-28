@@ -45,9 +45,8 @@ namespace DCL.Controllers
         {
             blockerInstanceHandler.SetCollision(newValue);
 
-            // if (newValue && DataStore.i.debugConfig.isDebugMode.Get())
-            //     SetEnabled(false);
-            // else SetEnabled(true);
+            if (newValue && DataStore.i.debugConfig.isDebugMode.Get())
+                SetEnabled(false);
         }
 
         public WorldBlockersController(IBlockerInstanceHandler blockerInstanceHandler = null,

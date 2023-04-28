@@ -9,8 +9,12 @@ namespace DCL
         public static List<GameObject> CreatePlayerSystems()
         {
             List<GameObject> result = new List<GameObject>();
+#if DCL_VR
             var controller = CrossPlatformManager.GetControllerName();
             GameObject playerGo = LoadAndInstantiate(controller);
+#else
+            GameObject playerGo = LoadAndInstantiate("Player");
+#endif
             var playerReferences = playerGo.GetComponent<PlayerReferences>();
             SceneReferences.i.playerAvatarController = playerReferences.avatarController;
             SceneReferences.i.inputController = playerReferences.inputController;
@@ -44,11 +48,11 @@ namespace DCL
 
         public static GameObject CreateAudioHandler() => LoadAndInstantiate("HUDAudioHandler");
 
-        #if DCL_VR
-        public static GameObject CreateNavMap() => LoadAndInstantiate("NavMapVR");
-        #else
+        //#if DCL_VR
+        //public static GameObject CreateNavMap() => LoadAndInstantiate("NavMapVR");
+        //#else
         public static GameObject CreateNavMap() => LoadAndInstantiate("NavMap");
-        #endif
+        //#endif
 
         public static GameObject CreateEnvironment(string prefabPath = "Environment")
         {

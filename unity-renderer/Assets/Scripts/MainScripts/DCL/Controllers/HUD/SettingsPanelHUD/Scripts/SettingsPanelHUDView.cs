@@ -92,7 +92,7 @@ namespace DCL.SettingsPanelHUD
 
             DataStore.i.screen.size.OnChange += ScreenSizeChanged;
             ScreenSizeChanged(DataStore.i.screen.size.Get(), Vector2Int.zero);
-
+            
             //WorldPreviewWindow is not being used at the moment. If we decide to reuse it, remove this activation
             worldPreviewWindowTransform.gameObject.SetActive(false);
         }
@@ -172,7 +172,7 @@ namespace DCL.SettingsPanelHUD
                 settingsPanelController.SaveSettings();
                 SetWorldPreviewActive(false);
             }
-
+            
             isOpen = visible;
         }
 
@@ -183,7 +183,6 @@ namespace DCL.SettingsPanelHUD
 
             transform.SetParent(parentTransform);
             transform.localScale = Vector3.one;
-            transform.localRotation = Quaternion.identity;
 
             RectTransform rectTransform = transform as RectTransform;
             rectTransform.anchorMin = Vector2.zero;

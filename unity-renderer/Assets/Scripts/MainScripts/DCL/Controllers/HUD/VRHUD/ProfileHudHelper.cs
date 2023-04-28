@@ -6,7 +6,8 @@ using UnityEngine;
 public class ProfileHudHelper : VRHUDHelper
 {
     [SerializeField]
-    private ProfileHUDViewV2 view;
+    private IProfileHUDView view;
+
 
     protected override void SetupHelper()
     {
@@ -14,6 +15,11 @@ public class ProfileHudHelper : VRHUDHelper
         VRHUDController.I.Reparent(myTrans);
     }
 
+    public void Start()
+    {
+        base.Start();
+        view = gameObject.GetComponent<IProfileHUDView>();
+    }
     public override void Hide()
     {
         view.SetStartMenuButtonActive(false);

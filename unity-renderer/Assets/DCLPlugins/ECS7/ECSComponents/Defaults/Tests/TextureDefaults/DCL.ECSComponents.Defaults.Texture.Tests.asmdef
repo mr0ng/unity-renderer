@@ -10,15 +10,10 @@
         "GUID:f3eba44237ea4969b29674e332426425",
         "GUID:97d8897529779cb49bebd400c7f402a6",
         "GUID:b24824f3bc2a60641a01e2083614f802",
-        "GUID:b308ae946900fa04080222d7daf47d9a",
-        "GUID:343deaaf83e0cee4ca978e7df0b80d21",
-        "GUID:2bafac87e7f4b9b418d9448d219b01ab",
-        "GUID:c912cc6330784b6ea86ca37282150483"
+        "GUID:b308ae946900fa04080222d7daf47d9a"
     ],
     "includePlatforms": [],
-    "excludePlatforms": [
-        "Android"
-    ],
+    "excludePlatforms": [],
     "allowUnsafeCode": false,
     "overrideReferences": true,
     "precompiledReferences": [

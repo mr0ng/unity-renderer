@@ -5,11 +5,11 @@ namespace MainScripts.DCL.Controllers.HUD.SettingsPanelHUDDesktop.Scripts
 {
     public class SettingsPanelHUDViewDesktop : SettingsPanelHUDView
     {
-        #if DCL_VR
-        private const string DESKTOP_PATH = "SettingsPanelHUDDesktopVR";
-        #else
+        //#if DCL_VR
+        //private const string DESKTOP_PATH = "SettingsPanelHUDDesktopVR";
+        //#else
         private const string DESKTOP_PATH = "SettingsPanelHUDDesktop";
-        #endif
+        //#endif
         internal static SettingsPanelHUDView Create()
         {
             SettingsPanelHUDView view = Instantiate(Resources.Load<GameObject>(DESKTOP_PATH)).GetComponent<SettingsPanelHUDView>();

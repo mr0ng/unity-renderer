@@ -18,28 +18,30 @@ namespace DCL.LoadingScreen
 
         public event Action<ShowHideAnimator> OnFadeInFinish;
 
-        public override void Start()
+        public void Start()
         {
-            base.Start();
-
-
-
             showHideAnimator.OnWillFinishStart += FadeInFinish;
-            WebSocketCommunication.OnProfileLoading += OnProfileLoading;
+
             betaTag.SetActive(!Application.isEditor && Application.platform != RuntimePlatform.WebGLPlayer);
 #if DCL_VR
-            LoadingHudHelper loadingHudHelper;
-            loadingHudHelper = gameObject.AddComponent<LoadingHudHelper>();
+            //CrossPlatformManager.SetCameraForGame();
+			WebSocketCommunication.OnProfileLoading += OnProfileLoading;
+             LoadingHudHelper loadingHudHelper;
+             loadingHudHelper = gameObject.GetComponent<LoadingHudHelper>();
 
             loadingHudHelper.showHideAnimator = showHideAnimator;
 #endif
             rawImageRectTransform = rawImage.GetComponent<RectTransform>();
             SetupBlitTexture();
+//#if !DCL_VR
+
             FadeIn(true, false);
+//#endif
         }
+		//VR loading trigger
         private void OnProfileLoading(string profileId)
         {
-            SetupBlitTexture();
+            //SetVisible(true,false);
             FadeIn(true,false);
         }
         public override void Dispose()
@@ -53,7 +55,7 @@ namespace DCL.LoadingScreen
 
         public LoadingScreenPercentageView GetPercentageView() =>
             percentageView;
-
+	//VR setVisible
         public void SetVisible(bool isVisible, bool instant)
         {
             if (isVisible) { showHideAnimator.Show(instant); }

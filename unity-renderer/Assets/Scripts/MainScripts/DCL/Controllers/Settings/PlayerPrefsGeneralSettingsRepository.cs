@@ -17,7 +17,7 @@ namespace DCL.SettingsCommon
         public const string INVERT_Y_AXIS = "InvertYAxis";
         public const string SKYBOX_TIME = "skyboxTime";
         public const string FIRST_PERSON_CAMERA_FOV = "firstPersonCameraFOV";
-        public const string USE_INTERNAL_BROWSER = "useInternalBrowser";
+        public const string USE_INTERNAL_BROWSER = "useInternalBrowser";//VR browser
         public const string SHOW_AVATAR_NAMES = "showAvatarNames";
         public const string CAMERA_MOVEMENT_MODE = "cameraMovementMode";
 
@@ -60,7 +60,7 @@ namespace DCL.SettingsCommon
             settingsByKey.SetBool(INVERT_Y_AXIS, currentSettings.invertYAxis);
             settingsByKey.SetFloat(SKYBOX_TIME, currentSettings.skyboxTime);
             settingsByKey.SetFloat(FIRST_PERSON_CAMERA_FOV, currentSettings.firstPersonCameraFOV);
-            settingsByKey.SetBool(USE_INTERNAL_BROWSER,currentSettings.useInternalBrowser);
+            settingsByKey.SetBool(USE_INTERNAL_BROWSER,currentSettings.useInternalBrowser);//VR browser
             settingsByKey.SetBool(SHOW_AVATAR_NAMES, currentSettings.showAvatarNames);
             settingsByKey.SetBool(CAMERA_MOVEMENT_MODE, currentSettings.leftMouseButtonCursorLock);
         }
@@ -86,7 +86,7 @@ namespace DCL.SettingsCommon
                 settings.invertYAxis = settingsByKey.GetBool(INVERT_Y_AXIS, defaultSettings.invertYAxis);
                 settings.skyboxTime = settingsByKey.GetFloat(SKYBOX_TIME, defaultSettings.skyboxTime);
                 settings.firstPersonCameraFOV = settingsByKey.GetFloat(FIRST_PERSON_CAMERA_FOV, defaultSettings.firstPersonCameraFOV);
-                settings.useInternalBrowser = settingsByKey.GetBool(USE_INTERNAL_BROWSER, defaultSettings.useInternalBrowser);
+                settings.useInternalBrowser = settingsByKey.GetBool(USE_INTERNAL_BROWSER, defaultSettings.useInternalBrowser); //VR Browser
                 settings.showAvatarNames = settingsByKey.GetBool(SHOW_AVATAR_NAMES, defaultSettings.showAvatarNames);
                 settings.leftMouseButtonCursorLock = settingsByKey.GetBool(CAMERA_MOVEMENT_MODE, defaultSettings.leftMouseButtonCursorLock);
             }

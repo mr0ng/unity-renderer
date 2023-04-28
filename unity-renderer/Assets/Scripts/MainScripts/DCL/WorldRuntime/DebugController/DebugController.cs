@@ -27,8 +27,8 @@ namespace DCL
             isFPSPanelVisible = DataStore.i.debugConfig.isFPSPanelVisible;
             isFPSPanelVisible.OnChange += OnFPSPanelToggle;
             //TODO: handle HUDS that need to be converted to VR
-            //GameObject view = Object.Instantiate(Resources.Load("DebugView")) as GameObject;
-            //debugView = view.GetComponent<DebugView>();
+            GameObject view = Object.Instantiate(Resources.Load("DebugView")) as GameObject;
+            debugView = view.GetComponent<DebugView>();
             this.botsController = botsController;
 
             OnKernelConfigChanged(KernelConfig.i.Get(), null);

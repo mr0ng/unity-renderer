@@ -145,7 +145,7 @@ PrefabInstance:
     - target: {fileID: 8540544952857596789, guid: 0f02993942607204bb37508b41ec4d98,
         type: 3}
       propertyPath: m_PresetInfoIsWorld
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 0f02993942607204bb37508b41ec4d98, type: 3}
@@ -181,16 +181,3 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   sortingOrder: 0
   showHideAnimator: {fileID: 0}
-  view: {fileID: 8732258619386754277}
---- !u!114 &8732258619386754277 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 1895908070123812521, guid: 0f02993942607204bb37508b41ec4d98,
-    type: 3}
-  m_PrefabInstance: {fileID: 7160908858333151820}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6749834853390442323}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 16f8926a28e635d4bb16c25f49aedfc1, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 

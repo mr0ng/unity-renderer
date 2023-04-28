@@ -92,12 +92,9 @@ namespace DCL.Components
 
             Environment.i.platform.updateEventHandler.AddListener(IUpdateEventHandler.EventType.Update, OnUpdate);
         }
-        private int updateSkip = 0;
+
         private void OnUpdate()
         {
-            updateSkip = (updateSkip + 1 ) % 5;
-            if (updateSkip != 0)
-                return;
             // Cameras are not detected while loading, so we can not load the camera on Awake or Start
             if (cachedModel.billboard && CameraFound)
                 transform.forward = mainCamera.transform.forward;

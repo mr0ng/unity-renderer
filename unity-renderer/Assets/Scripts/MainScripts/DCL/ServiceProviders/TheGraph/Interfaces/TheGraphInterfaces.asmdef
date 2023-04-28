@@ -2,8 +2,7 @@
   "name": "TheGraphInterfaces",
   "rootNamespace": "",
   "references": [
-    "GUID:e99faafecbf8dd74d8130597511b9b27",
-    "GUID:2bafac87e7f4b9b418d9448d219b01ab"
+    "GUID:e99faafecbf8dd74d8130597511b9b27"
   ],
   "includePlatforms": [],
   "excludePlatforms": [],

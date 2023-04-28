@@ -1427,7 +1427,7 @@ namespace DCL.Interface
             SendMessage("OpenWebURL", new OpenURLPayload { url = url });
 
 #else
-
+	//VR Internal Browser
             if (openURLInternal)
             {
                 if (!isWebViewInitiated)

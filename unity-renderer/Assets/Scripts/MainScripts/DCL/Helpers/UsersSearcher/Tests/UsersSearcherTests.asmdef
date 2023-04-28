@@ -8,8 +8,7 @@
         "UsersSearchBridge",
         "Utils",
         "UserProfile",
-        "Promise",
-        "UnityEngine.UI"
+        "Promise"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

@@ -6,6 +6,12 @@ public class AvatarEditorHudHelper : VRHUDHelper
     [SerializeField]
     private AvatarEditorHUDView view;
     private BaseVariable<bool> dataStoreIsOpen = DataStore.i.exploreV2.isOpen;
+
+    private void Start()
+    {
+        base.Start();
+        view = this.gameObject.GetComponent<AvatarEditorHUDView>();
+    }
     protected override void SetupHelper()
     {
 

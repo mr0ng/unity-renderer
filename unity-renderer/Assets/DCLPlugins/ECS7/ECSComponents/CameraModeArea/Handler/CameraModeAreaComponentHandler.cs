@@ -73,7 +73,7 @@ namespace DCL.ECSComponents
         private int updateSkip =  0;
         internal void Update()
         {
-            updateSkip = (updateSkip + 1 ) % 14;
+            updateSkip = (updateSkip + 1 ) % 5;
             if (updateSkip != 0)
                 return;
             if (lastModel == null)

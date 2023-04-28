@@ -417,8 +417,11 @@ namespace DCL
 
             while (true)
             {
+			#if DCL_VR
                 maxTimeForDecode = CommonScriptableObjects.rendererState.Get() ? MAX_TIME_FOR_DECODE : 5*MAX_TIME_FOR_DECODE;
-
+			#else
+				maxTimeForDecode = CommonScriptableObjects.rendererState.Get() ? MAX_TIME_FOR_DECODE : float.MaxValue;
+			#endif
                 if (chunksToDecode.TryDequeue(out string chunk))
                 {
                     EnqueueChunk(chunk);

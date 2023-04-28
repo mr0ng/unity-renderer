@@ -7,7 +7,7 @@ using UnityEngine.EventSystems;
 namespace UIComponents.Scripts.Components
 {
     public abstract class BaseComponentView<TModel> : BaseComponentView, IBaseComponentView<TModel>
-        where TModel : IEquatable<TModel>, new()
+        where TModel: IEquatable<TModel>, new()
     {
         [field: SerializeField]
         protected TModel model { get; private set; } = new ();
@@ -79,37 +79,59 @@ public interface IComponentModelConfig<T> where T : BaseComponentModel
 
 public abstract class BaseComponentView : MonoBehaviour, IBaseComponentView
 {
-    internal BaseComponentModel baseModel;
     public ShowHideAnimator showHideAnimator;
 
-    public virtual bool isVisible { get; private set; }
-    protected bool isDestroyed = false;
-    public static event Action<BaseComponentView> OnViewCreated;
-    public event Action<bool> onFocused;
-    public bool isFocused { get; private set; }
+    internal BaseComponentModel baseModel;
+    private bool isDestroyed;
 
+    public virtual bool isVisible { get; private set; }
+
+    public bool isFocused { get; private set; }
+    #if DCL_VR
+    public static event Action<BaseComponentView> OnViewCreated;
     private Transform myTrans;
+
+    #endif
+    public event Action<bool> onFocused;
+
+    public virtual void Dispose()
+    {
+        DataStore.i.screen.size.OnChange -= OnScreenSizeModified;
+
+        if (!isDestroyed && gameObject)
+            Destroy(gameObject);
+    }
 
     public virtual void Awake()
     {
+        #if DCL_VR
         myTrans = transform;
+        #endif
         showHideAnimator = GetComponent<ShowHideAnimator>();
         DataStore.i.screen.size.OnChange += OnScreenSizeModified;
     }
 
     public virtual void OnEnable()
     {
+        transform.localRotation = Quaternion.identity;
         StartCoroutine(RaiseOnScreenSizeChangedAfterDelay());
     }
 
-    public virtual void OnDisable() { OnLoseFocus(); }
-
+    public virtual void OnDisable()
+    {
+        OnLoseFocus();
+    }
+    #if DCL_VR
     public virtual void Start() {
         OnViewCreated?.Invoke(this); //Event for VRUIManager
         Debug.Log($"BaseComponentView created for {this.name}");
     }
-
-    public virtual void Update() { }
+    #endif
+    private void OnDestroy()
+    {
+        isDestroyed = true;
+        Dispose();
+    }
 
     public abstract void RefreshControl();
 
@@ -145,30 +167,21 @@ public abstract class BaseComponentView : MonoBehaviour, IBaseComponentView
 
     public virtual void OnScreenSizeChanged()
     {
-        if (myTrans == null)
-            myTrans = transform;
+        myTrans = transform;
         myTrans.localRotation = Quaternion.identity;
     }
 
-    public virtual void Dispose()
+    public virtual void OnPointerEnter(PointerEventData eventData)
     {
-        DataStore.i.screen.size.OnChange -= OnScreenSizeModified;
-
-        if (!isDestroyed && gameObject)
-            DestroyImmediate(gameObject);
+        OnFocus();
     }
 
-    public virtual void OnPointerEnter(PointerEventData eventData) { OnFocus(); }
-
-    public virtual void OnPointerExit(PointerEventData eventData) { OnLoseFocus(); }
-
-    private void OnDestroy()
+    public virtual void OnPointerExit(PointerEventData eventData)
     {
-        isDestroyed = true;
-        Dispose();
+        OnLoseFocus();
     }
 
-    internal void OnScreenSizeModified(Vector2Int current, Vector2Int previous)
+    private void OnScreenSizeModified(Vector2Int current, Vector2Int previous)
     {
         if (!gameObject.activeInHierarchy)
             return;
@@ -176,16 +189,15 @@ public abstract class BaseComponentView : MonoBehaviour, IBaseComponentView
         StartCoroutine(RaiseOnScreenSizeChangedAfterDelay());
     }
 
-    internal IEnumerator RaiseOnScreenSizeChangedAfterDelay()
+    private IEnumerator RaiseOnScreenSizeChangedAfterDelay()
     {
         yield return null;
         OnScreenSizeChanged();
     }
 
-    public static T Create<T>(string resourceName) where T : BaseComponentView
+    public static T Create<T>(string resourceName) where T: BaseComponentView
     {
         T buttonComponentView = Instantiate(Resources.Load<GameObject>(resourceName)).GetComponent<T>();
         return buttonComponentView;
     }
-
 }

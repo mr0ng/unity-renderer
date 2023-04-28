@@ -361,22 +361,22 @@ namespace DCL
                 },
                 {
                     ""name"": """",
-                    ""id"": ""92dbbce5-f800-4e33-b75c-c9597b6bd64f"",
-                    ""path"": ""<XRController>{RightHand}/gripPressed"",
+                    ""id"": ""e272afb7-774a-43e7-a1c7-a0d8e2f3011e"",
+                    ""path"": ""<Keyboard>/space"",
                     ""interactions"": """",
                     ""processors"": """",
-                    ""groups"": ""XR"",
+                    ""groups"": ""Keyboard&Mouse"",
                     ""action"": ""Jump"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 },
                 {
                     ""name"": """",
-                    ""id"": ""e272afb7-774a-43e7-a1c7-a0d8e2f3011e"",
-                    ""path"": ""<Keyboard>/space"",
+                    ""id"": ""92dbbce5-f800-4e33-b75c-c9597b6bd64f"",
+                    ""path"": ""<XRController>{RightHand}/gripPressed"",
                     ""interactions"": """",
                     ""processors"": """",
-                    ""groups"": ""Keyboard&Mouse"",
+                    ""groups"": ""XR"",
                     ""action"": ""Jump"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false

@@ -141,11 +141,16 @@ PrefabInstance:
         type: 3}
       propertyPath: desktopPrefab
       value: 
-      objectReference: {fileID: 4625910312644941330, guid: eb8e1071401ed1b4a9da376e23483830,
+      objectReference: {fileID: 3966731394931121075, guid: eb8e1071401ed1b4a9da376e23483830,
         type: 3}
     - target: {fileID: 1594024437603002686, guid: ceb6d50874be1824d8eb3e16a06470ce,
         type: 3}
       propertyPath: currentPlatform
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1594024437603002686, guid: ceb6d50874be1824d8eb3e16a06470ce,
+        type: 3}
+      propertyPath: _currentPlatform
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 2098027020916773621, guid: ceb6d50874be1824d8eb3e16a06470ce,
@@ -239,6 +244,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 73b83adac0a4ddd039a0a1c9c2a9a163, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  startMenu: {fileID: 0}
+  browserOptionsButton: {fileID: 0}
+  browserMessage: {fileID: 0}
+  popupMessage: {fileID: 0}
+  popupMessageObj: {fileID: 0}
+  DCLWebview: {fileID: 0}
+  optionsWeview: {fileID: 0}
+  urlInput: {fileID: 0}
+  reload: {fileID: 0}
+  swapTabs: {fileID: 0}
+  useInternalBrowser: {fileID: 0}
+  openInternalBrowser: 0
   debugConfig:
     soloScene: 0
     soloSceneCoords: {x: 0, y: 0}

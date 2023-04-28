@@ -19,11 +19,15 @@ public class ECS7TestScene : IParcelScene
 
     public Transform GetSceneTransform() => _go.transform;
     public ContentProvider contentProvider { get; } = new ContentProvider();
-    public int distanceToPlayer { get; set; }
     public bool isPersistent { set; get; } = false;
     public bool isPortableExperience { get; set; } = false;
     public bool IsInitMessageDone() =>
         true;
+
+    IDCLEntity IParcelScene.CreateEntity(long id)
+    {
+        return CreateEntity(id);
+    }
 
 // INTERNAL CONFIG FOR MOCKING
     internal GameObject _go;
@@ -35,17 +39,13 @@ public class ECS7TestScene : IParcelScene
     event Action<float> IParcelScene.OnLoadingStateUpdated { add => throw new NotImplementedException(); remove => throw new NotImplementedException(); }
     event Action<IDCLEntity> IParcelScene.OnEntityAdded { add => throw new NotImplementedException(); remove => throw new NotImplementedException(); }
     event Action<IDCLEntity> IParcelScene.OnEntityRemoved { add => throw new NotImplementedException(); remove => throw new NotImplementedException(); }
+    IECSComponentsManagerLegacy IParcelScene.componentsManagerLegacy => throw new NotImplementedException();
+    bool IParcelScene.isTestScene => throw new NotImplementedException();
+    float IParcelScene.loadingProgress => throw new NotImplementedException();
     IDCLEntity IParcelScene.GetEntityById(long entityId)
     {
         throw new NotImplementedException();
     }
-    IDCLEntity IParcelScene.CreateEntity(long id)
-    {
-        return CreateEntity(id);
-    }
-    IECSComponentsManagerLegacy IParcelScene.componentsManagerLegacy => throw new NotImplementedException();
-    bool IParcelScene.isTestScene => throw new NotImplementedException();
-    float IParcelScene.loadingProgress => throw new NotImplementedException();
     string IParcelScene.GetSceneName()
     {
         throw new NotImplementedException();

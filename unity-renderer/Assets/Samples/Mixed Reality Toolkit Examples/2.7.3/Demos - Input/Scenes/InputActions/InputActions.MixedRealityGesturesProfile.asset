@@ -28,12 +28,18 @@ MonoBehaviour:
   - description: Navigation
     gestureType: 2
     action:
-      id: 10
-      description: Navigation Action
-      axisConstraint: 0
+      id: 18
+      description: LookAround
+      axisConstraint: 4
   - description: Manipulation
     gestureType: 3
     action:
-      id: 9
-      description: Manipulate Action
-      axisConstraint: 0
+      id: 18
+      description: LookAround
+      axisConstraint: 4
+  - description: Select
+    gestureType: 4
+    action:
+      id: 1
+      description: Select
+      axisConstraint: 2

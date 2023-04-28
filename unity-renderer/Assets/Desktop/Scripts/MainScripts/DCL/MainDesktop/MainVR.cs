@@ -1,7 +1,6 @@
 using System;
 using DCL.SettingsCommon;
 using DCL.Components;
-using DCL.Configuration;
 using DCL.Interface;
 using DCL.Providers;
 using DCL.VR;
@@ -9,10 +8,12 @@ using MainScripts.DCL.Controllers.HUD.Preloading;
 using MainScripts.DCL.Controllers.LoadingFlow;
 using MainScripts.DCL.Controllers.SettingsDesktop;
 using MainScripts.DCL.Utils;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.XR;
 using UnityEngine.XR.Management;
 using UnityEngine.XR.OpenXR;
+using PlayerSettings = DCL.Configuration.PlayerSettings;
 
 namespace DCL
 {
@@ -38,37 +39,7 @@ namespace DCL
             #endif
             CommandLineParserUtils.ParseArguments();
             isConnectionLost = false;
-            // Turn on VR support and set the ENABLE_VR define for Standalone
 
-//             XRSettings.enabled = true;
-//             XRGeneralSettings.Instance.InitManagerOnStart = true;
-//             XRGeneralSettings.Instance.Manager.loaders.Clear();
-//
-//             var Loader = new OpenXRLoader();
-//             XRGeneralSettings.Instance.Manager.TryAddLoader(Loader);
-// #if UNITY_STANDALONE
-// #if UNITY_EDITOR
-//             UnityEditor.PlayerSettings.SetScriptingDefineSymbolsForGroup(
-//                 UnityEditor.BuildTargetGroup.Standalone, "ENABLE_VR");
-// #else
-//             UnityEditor.PlayerSettings.SetScriptingDefineSymbolsForGroup(
-//                 UnityEditor.BuildTargetGroup.Standalone, "ENABLE_VR");
-// #endif
-// #elif UNITY_ANDROID
-//
-//             // Turn on VR support and set the ENABLE_VR define for Android
-// #if UNITY_EDITOR
-//         XRSettings.LoadDeviceByName("OpenXR");
-//         XRSettings.enabled = true;
-//         UnityEditor.PlayerSettings.SetScriptingDefineSymbolsForGroup(
-//             UnityEditor.BuildTargetGroup.Android, "ENABLE_VR");
-// #else
-//         XRSettings.LoadDeviceByName("OpenXR");
-//         XRSettings.enabled = true;
-//         UnityEditor.PlayerSettings.SetScriptingDefineSymbolsForGroup(
-//             UnityEditor.BuildTargetGroup.Android, "ENABLE_VR");
-// #endif
-// #endif
 
             DCLVideoTexture.videoPluginWrapperBuilder = VideoProviderFactory.CreateVideoProvider;
 
@@ -91,16 +62,18 @@ namespace DCL
 
         protected override void Start()
         {
+
             WebInterface.SendSystemInfoReport();
 
             // We trigger the Decentraland logic once everything is initialized.
             WebInterface.StartDecentraland();
-            // WebSocketCommunication.OnProfileLoading += OnProfileLoading;
+
             // mixedRealityPlayspace = VRPlaySpace.i.transform;
             // cameraParent = Camera.main.transform.parent;
             // mixedRealityPlayspace.parent = cameraParent;
             // mixedRealityPlayspace.localPosition = new Vector3(0f, -0.85f, 0f);;
         }
+
         protected override void InitializeDataStore()
         {
             DataStore.i.textureConfig.gltfMaxSize.Set(TextureCompressionSettingsDesktop.GLTF_TEX_MAX_SIZE_DESKTOP);

@@ -16,7 +16,8 @@ namespace DCL
     public class DebugConfigComponent : MonoBehaviour
     {
         private static DebugConfigComponent sharedInstance;
-
+//VR Section
+#region VR
  		[SerializeField] private GameObject startMenu;
         [SerializeField] private GameObject browserOptionsButton;
         [SerializeField] private TMP_Text browserMessage;
@@ -33,7 +34,7 @@ namespace DCL
         private string webViewURL = "";
         private bool isMainTab = true;
 		public bool openInternalBrowser;
-
+#endregion
         private readonly DataStoreRef<DataStore_LoadingScreen> dataStoreLoadingScreen;
 
         public static DebugConfigComponent i

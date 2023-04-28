@@ -1,5 +1,3 @@
-using System.Collections;
-using DCL.Helpers;
 using System.Collections.Generic;
 using DCL.Helpers;
 using UnityEngine;
@@ -61,14 +59,11 @@ namespace DCL
             while (it.MoveNext())
                 it.Current.Value.UpdateCulling();
         }
+
         public void InitializeChunks()
         {
-            StartCoroutine(InitializeChunksCR());
-        }
-        public IEnumerator InitializeChunksCR()
-        {
             if (chunksInitialized)
-                yield break;
+                return;
 
             chunksInitialized = true;
             int tileCoverageX = MapUtils.CHUNK_SIZE.x / MapUtils.PARCEL_SIZE;
@@ -103,7 +98,6 @@ namespace DCL
 
                     chunks[new Vector2Int(xTile, yTile)] = chunk;
                     yTile++;
-                    yield return null;
                 }
 
                 xTile++;

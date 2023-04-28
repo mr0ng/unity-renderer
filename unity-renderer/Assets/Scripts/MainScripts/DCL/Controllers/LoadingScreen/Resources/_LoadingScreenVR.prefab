@@ -34,6 +34,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2481086363144932030, guid: ab94f4a6f36c1cd44bfc5dc64fd8d4c8,
         type: 3}
+      propertyPath: canvasGroup
+      value: 
+      objectReference: {fileID: 523497109394038251}
+    - target: {fileID: 2481086363144932030, guid: ab94f4a6f36c1cd44bfc5dc64fd8d4c8,
+        type: 3}
       propertyPath: hideOnEnable
       value: 1
       objectReference: {fileID: 0}
@@ -179,6 +184,12 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: ab94f4a6f36c1cd44bfc5dc64fd8d4c8, type: 3}
+--- !u!225 &523497109394038251 stripped
+CanvasGroup:
+  m_CorrespondingSourceObject: {fileID: 1054737520794358197, guid: ab94f4a6f36c1cd44bfc5dc64fd8d4c8,
+    type: 3}
+  m_PrefabInstance: {fileID: 711845780278299742}
+  m_PrefabAsset: {fileID: 0}
 --- !u!114 &3138565913595905760 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 2481086363144932030, guid: ab94f4a6f36c1cd44bfc5dc64fd8d4c8,
@@ -213,7 +224,7 @@ MonoBehaviour:
   showHideAnimator: {fileID: 3138565913595905760}
   loadingMask:
     serializedVersion: 2
-    m_Bits: 1057
+    m_Bits: 32
   animator: {fileID: 3138565913595905760}
 --- !u!114 &305164323875273945
 MonoBehaviour:
@@ -227,4 +238,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 31a19414c41e5ae4aae2af33fee712f6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_ShowMaskGraphic: 1
+  m_ShowMaskGraphic: 0

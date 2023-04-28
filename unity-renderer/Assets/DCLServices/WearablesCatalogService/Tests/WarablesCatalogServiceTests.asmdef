@@ -9,9 +9,7 @@
         "BaseVariable",
         "LambdasService",
         "UniTask",
-        "IService",
-        "UnityEditor.UI",
-        "UnityEngine.UI"
+        "IService"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

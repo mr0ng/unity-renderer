@@ -34,12 +34,12 @@ namespace DCL
         public void SetMaxTime(int time) { maxTime = time; }
 
         public int GetMaxTime() { return maxTime; }
-        private int updateSkip =  0;
+        //private int updateSkip =  0;
         public void Update()
         {
-            updateSkip = (updateSkip + 1 ) % 60;
-            if (updateSkip != 0)
-                return;
+           // updateSkip = (updateSkip + 1 ) % 60;
+           // if (updateSkip != 0)
+              //  return;
             Vector3 mouseDelta = Input.mousePosition - lastMouseCoordinate;
 
             bool mouseMoved = mouseDelta.sqrMagnitude > 0.0001f;

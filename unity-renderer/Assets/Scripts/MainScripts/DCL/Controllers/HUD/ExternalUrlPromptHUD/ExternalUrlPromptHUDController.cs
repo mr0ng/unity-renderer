@@ -21,7 +21,7 @@ public class ExternalUrlPromptHUDController : IHUD
         view = UnityEngine.Object.Instantiate(Resources.Load<GameObject>("ExternalUrlPromptHUD")).GetComponent<ExternalUrlPromptView>();
         #endif
         view.name = "_ExternalUrlPromptHUD";
-        //view.content.SetActive(false);
+        view.content.SetActive(false);
 
         if (Environment.i != null)
             Environment.i.world.sceneController.OnOpenExternalUrlRequest += ProcessOpenUrlRequest;
@@ -29,7 +29,7 @@ public class ExternalUrlPromptHUDController : IHUD
 
     public void SetVisibility(bool visible)
     {
-        //view.gameObject.SetActive(visible);
+        view.gameObject.SetActive(visible);
 
         if (visible)
         {

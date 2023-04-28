@@ -228,7 +228,6 @@ namespace DCL.Skybox
             if (runtimeReflectionObj == null)
             {
                 runtimeReflectionObj = skyboxProbe.gameObject.AddComponent<ReflectionProbeRuntime>();
-                runtimeReflectionObj.followTransform = Camera.main.transform;
             }
 
             // Update resolution
@@ -254,7 +253,7 @@ namespace DCL.Skybox
             }
 
             // make probe a child of main camera
-            if (Camera.main != null && runtimeReflectionObj != null)
+            if (Camera.main != null)
             {
                 GameObject mainCam = Camera.main.gameObject;
                 runtimeReflectionObj.followTransform = mainCam.transform;
@@ -482,12 +481,12 @@ namespace DCL.Skybox
         private void Configuration_OnTimelineEvent(string tag, bool enable, bool trigger) { OnTimelineEvent?.Invoke(tag, enable, trigger); }
 
         // Update is called once per frame
-        private int updateSkip =  0;
+        //private int updateSkip =  0;
         public void Update()
         {
-            updateSkip = (updateSkip + 1 ) % 5;
-            if (updateSkip != 0)
-                return;
+            //updateSkip = (updateSkip + 1 ) % 5;
+            //if (updateSkip != 0)
+                //return;
             if (!DataStore.i.skyboxConfig.disableReflection.Get() && skyboxProbe != null && !probeParented)
             {
                 AssignCameraInstancetoProbe();

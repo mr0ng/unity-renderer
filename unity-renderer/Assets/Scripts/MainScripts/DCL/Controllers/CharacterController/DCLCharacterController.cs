@@ -309,11 +309,23 @@ public class DCLCharacterController : MonoBehaviour
 
                 Vector3 forwardTarget = Vector3.zero;
 
-                forwardTarget += characterYAxis.GetValue() * xzPlaneForward;
-                forwardTarget += characterXAxis.GetValue() * xzPlaneRight;
-                
-                if (forwardTarget.magnitude > 1)
-                    forwardTarget.Normalize();
+                if (characterYAxis.GetValue() > CONTROLLER_DRIFT_OFFSET)
+                    forwardTarget += characterYAxis.GetValue() * xzPlaneForward;
+                if (characterYAxis.GetValue() < -CONTROLLER_DRIFT_OFFSET)
+                    forwardTarget += characterYAxis.GetValue() * xzPlaneForward;
+
+                if (characterXAxis.GetValue() > CONTROLLER_DRIFT_OFFSET)
+                    forwardTarget += characterXAxis.GetValue() * xzPlaneRight;
+                if (characterXAxis.GetValue() < -CONTROLLER_DRIFT_OFFSET)
+                    forwardTarget += characterXAxis.GetValue() * xzPlaneRight;
+
+                if (forwardTarget.Equals(Vector3.zero))
+                    isMovingByUserInput = false;
+                else
+                    isMovingByUserInput = true;
+
+
+                forwardTarget.Normalize();
                 velocity += forwardTarget * speed;
                 CommonScriptableObjects.playerUnityEulerAngles.Set(transform.eulerAngles);
             }
@@ -538,18 +550,18 @@ public class DCLCharacterController : MonoBehaviour
     void ReportMovement()
     {
         float height = 0.875f;
-        
-        //don't report movements under threshold for HMD movements.  Too small make the avatar jitter and not step. 
+
+        //don't report movements under threshold for HMD movements.  Too small make the avatar jitter and not step.
         //position of hmd calculated in VRCharacterController. Rotation Calculated in VRCameraController.
         var reportPosition = characterPosition.worldPosition + (Vector3.up * height);
+		#if DCL_VR
         if (Mathf.Abs((reportPosition - lastReportPosition).magnitude) < moveThreshold)
         {
             reportPosition = lastReportPosition;
         }
         else lastReportPosition = reportPosition;
-     
+     #endif
         var compositeRotation = Quaternion.LookRotation(characterForward.HasValue() ? characterForward.Get().Value : cameraForward.Get());
-        var playerHeight = height + (characterController.height / 2);
         var cameraRotation = Quaternion.LookRotation(cameraForward.Get());
 
         //NOTE(Brian): We have to wait for a Teleport before sending the ReportPosition, because if not ReportPosition events will be sent
@@ -558,8 +570,9 @@ public class DCLCharacterController : MonoBehaviour
         //             The race conditions that can arise from not having this flag can result in:
         //                  - Scenes not being sent for loading, making ActivateRenderer never being sent, only in WSS mode.
         //                  - Random teleports to 0,0 or other positions that shouldn't happen.
+        //We are sending a fixated camera height of 1.675f
         if (initialPositionAlreadySet)
-            DCL.Interface.WebInterface.ReportPosition(reportPosition, compositeRotation, playerHeight, cameraRotation);
+            DCL.Interface.WebInterface.ReportPosition(reportPosition, compositeRotation, characterController.height, cameraRotation);
 
         lastMovementReportTime = DCLTime.realtimeSinceStartup;
     }
@@ -572,7 +585,10 @@ public class DCLCharacterController : MonoBehaviour
 
     public void ResumeGravity() { gravity = originalGravity; }
 
-    void OnRenderingStateChanged(bool isEnable, bool prevState) { SetEnabled(isEnable); }
+    void OnRenderingStateChanged(bool isEnable, bool prevState)
+    {
+        SetEnabled(isEnable && !DataStore.i.common.isSignUpFlow.Get());
+    }
 
     bool IsLastCollisionGround()
     {

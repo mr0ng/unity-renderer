@@ -13,6 +13,7 @@ public class ProfileHUDViewV2 : BaseComponentView, IProfileHUDView
     private const float COPY_TOAST_VISIBLE_TIME = 3;
     private const int ADDRESS_CHUNK_LENGTH = 6;
     private const int NAME_POSTFIX_LENGTH = 4;
+
     private const string OPEN_PASSPORT_SOURCE = "ProfileHUD";
 
     [SerializeField] private RectTransform mainRootLayout;

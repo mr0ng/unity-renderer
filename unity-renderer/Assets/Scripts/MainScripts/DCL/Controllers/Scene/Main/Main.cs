@@ -6,7 +6,9 @@ using DCL.Map;
 using DCL.SettingsCommon;
 using DCl.Social.Friends;
 using DCL.Social.Friends;
+using MainScripts.DCL.Controllers.HotScenes;
 using DCLServices.WearablesCatalogService;
+using UnityEditor;
 using UnityEngine;
 #if UNITY_EDITOR
 using DG.Tweening;
@@ -21,6 +23,8 @@ namespace DCL
     public class Main : MonoBehaviour
     {
         [SerializeField] private bool disableSceneDependencies;
+
+        private HotScenesController hotScenesController;
 
         public PoolableComponentFactory componentFactory;
         private readonly DataStoreRef<DataStore_LoadingScreen> dataStoreLoadingScreen;
@@ -54,8 +58,8 @@ namespace DCL
 
             if (!EnvironmentSettings.RUNNING_TESTS)
             {
-                performanceMetricsController = new PerformanceMetricsController();
                 SetupServices();
+                performanceMetricsController = new PerformanceMetricsController();
 
                 dataStoreLoadingScreen.Ref.decoupledLoadingHUD.visible.OnChange += OnLoadingScreenVisibleStateChange;
             }
@@ -88,6 +92,7 @@ namespace DCL
             // We trigger the Decentraland logic once everything is initialized.
             WebInterface.StartDecentraland();
         }
+
 
         protected virtual void Update()
         {
@@ -133,7 +138,9 @@ namespace DCL
 
         protected virtual void SetupServices()
         {
-            Environment.Setup(ServiceLocatorFactory.CreateDefault());
+            var serviceLocator = ServiceLocatorFactory.CreateDefault();
+            serviceLocator.Register<IHotScenesController>(() => hotScenesController);
+            Environment.Setup(serviceLocator);
         }
 
         [RuntimeInitializeOnLoadMethod]
@@ -173,7 +180,7 @@ namespace DCL
             gameObject.AddComponent<WebInterfaceMinimapApiBridge>();
             gameObject.AddComponent<MinimapMetadataController>();
             gameObject.AddComponent<WebInterfaceFriendsApiBridge>();
-            gameObject.AddComponent<HotScenesController>();
+            hotScenesController = gameObject.AddComponent<HotScenesController>();
             gameObject.AddComponent<GIFProcessingBridge>();
             gameObject.AddComponent<RenderProfileBridge>();
             gameObject.AddComponent<AssetCatalogBridge>();

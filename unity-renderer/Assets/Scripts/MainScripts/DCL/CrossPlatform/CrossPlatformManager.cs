@@ -18,7 +18,7 @@ public static class CrossPlatformManager
         }
         private set => isVR = value;
     }
-    
+
     private static LayerMask layerMask;
     public static string GetControllerName()
     {
@@ -51,12 +51,12 @@ public static class CrossPlatformManager
         OverrideCursorLock(false);
         DCL.Helpers.Utils.OnCursorLockChanged += OverrideCursorLock;
     }
-    
+
     private static void OverrideCursorLock(bool state)
     {
         Utils.IsCursorLocked = true;
     }
-    
+
     public static Ray GetRay()
     {
         var pos = CoreServices.FocusProvider?.PrimaryPointer?.Result?.StartPoint;
@@ -80,10 +80,10 @@ public static class CrossPlatformManager
     public static void SetCameraForGame()
     {
         var mainCam = Camera.main;
-        mainCam.cullingMask =layerMask;
+        mainCam.cullingMask =25239351;
         mainCam.clearFlags = CameraClearFlags.Skybox;
     }
-    
+
     public static Vector3 GetPoint()
     {
         GetSurfacePoint(out var point, out var norm);

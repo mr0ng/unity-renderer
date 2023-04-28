@@ -135,6 +135,7 @@ public class PlaceCardComponentView : BaseComponentView, IPlaceCardComponentView
 
     public override void Awake()
     {
+        transform.localRotation = Quaternion.identity;
         base.Awake();
 
         if (placeImage != null)
@@ -151,7 +152,7 @@ public class PlaceCardComponentView : BaseComponentView, IPlaceCardComponentView
 
         if (modalBackgroundButton != null)
             modalBackgroundButton.onClick.AddListener(CloseModal);
-
+        transform.localRotation = Quaternion.identity;
         CleanFriendHeadsItems();
     }
 
@@ -400,6 +401,7 @@ public class PlaceCardComponentView : BaseComponentView, IPlaceCardComponentView
 
     internal void OnPlaceImageLoaded(Sprite sprite)
     {
+        transform.localRotation = Quaternion.identity;
         if (sprite != null)
             return;
 

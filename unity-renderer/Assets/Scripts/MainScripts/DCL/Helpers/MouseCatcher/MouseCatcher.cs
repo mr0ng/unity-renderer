@@ -41,11 +41,10 @@ namespace DCL
 
         private void Awake()
         {
-            if (CrossPlatformManager.IsVR)
-            {
+            #if DCL_VR
                 enabled = false;
                 gameObject.SetActive(false);
-            }
+            #endif
         }
 
         private void Start()

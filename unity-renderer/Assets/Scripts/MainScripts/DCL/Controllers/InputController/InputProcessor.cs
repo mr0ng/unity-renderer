@@ -1,7 +1,6 @@
 ﻿using DCL;
 using DCL.Helpers;
 using System;
-using System.Linq;
 using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -23,7 +22,8 @@ public static class InputProcessor
         NeedsPointerLocked = 0b0000001, // The pointer must be locked to the game
         FocusNotInInput = 0b0000010, // The game focus cannot be in an input field
         NotInStartMenu = 0b0000100, // The game focus cannot be in full-screen start menu
-        OnlyWithInputFocused = 0b0001000 // The game focus must be in an input field
+        OnlyWithInputFocused = 0b0001000, // The game focus must be in an input field
+        RequiresPointer = 0b0010000
     }
 
     /// <summary>
@@ -36,8 +36,7 @@ public static class InputProcessor
         for (var i = 0; i < MODIFIER_KEYS.Length; i++)
         {
             var keyCode = MODIFIER_KEYS[i];
-            bool pressed = Input.GetKey(keyCode);
-
+            var pressed = Input.GetKey(keyCode);
             if (modifierKeys == null)
             {
                 if (pressed)
@@ -70,13 +69,14 @@ public static class InputProcessor
     /// </summary>
     /// <param name="modifiers"></param>
     /// <returns></returns>
-    private static bool PassModifiers(Modifier modifiers)
+    public static bool PassModifiers(Modifier modifiers)
     {
-        if (IsModifierSet(modifiers, Modifier.NeedsPointerLocked) && !DCL.Helpers.Utils.IsCursorLocked)
+        bool hasPointer = IsModifierSet(modifiers, Modifier.RequiresPointer) && !CrossPlatformManager.IsVR;
+        if (hasPointer && IsModifierSet(modifiers, Modifier.NeedsPointerLocked) && !DCL.Helpers.Utils.IsCursorLocked)
             return false;
 
-        bool isInputFieldFocused = FocusIsInInputField();
-
+        var isInputFieldFocused = FocusIsInInputField();
+        
         if (IsModifierSet(modifiers, Modifier.FocusNotInInput) && isInputFieldFocused)
             return false;
 

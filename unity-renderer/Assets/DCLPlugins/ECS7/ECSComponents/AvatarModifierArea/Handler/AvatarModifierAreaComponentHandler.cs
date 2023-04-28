@@ -72,13 +72,13 @@ namespace DCL.ECSComponents
             ApplyCurrentModel(model);
         }
 
-        private int updateSkip =  0;
+        //private int updateSkip =  0;
         private void Update()
 
         {
-            updateSkip = (updateSkip + 1 ) % 12;
-            if (updateSkip != 0)
-                return;
+            //updateSkip = (updateSkip + 1 ) % 12;
+            //if (updateSkip != 0)
+                //return;
             if (model == null)
                 return;
 

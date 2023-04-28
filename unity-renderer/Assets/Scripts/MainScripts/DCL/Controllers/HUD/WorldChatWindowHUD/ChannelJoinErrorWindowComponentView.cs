@@ -9,7 +9,7 @@ namespace DCL.Chat.HUD
         [SerializeField] internal ButtonComponentView[] acceptButton;
         [SerializeField] internal ButtonComponentView retryButton;
         [SerializeField] internal TMP_Text titleLabel;
-
+        
         public event Action OnClose;
         public event Action OnRetry;
 
@@ -38,7 +38,7 @@ namespace DCL.Chat.HUD
 
             foreach (var button in acceptButton)
                 button.onClick.AddListener(() => OnClose?.Invoke());
-
+            
             retryButton.onClick.AddListener(() => OnRetry?.Invoke());
         }
 

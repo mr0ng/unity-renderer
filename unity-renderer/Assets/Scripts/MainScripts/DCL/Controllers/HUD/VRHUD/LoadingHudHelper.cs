@@ -27,7 +27,11 @@ public class LoadingHudHelper : VRHUDHelper
             DebugConfigComponent.i.HideWebViewScreens();
             myTrans.forward = forward;
         };
-        VRHUDController.LoadingEnd += CrossPlatformManager.SetCameraForGame;
+        VRHUDController.LoadingEnd += () =>
+        {
+            CrossPlatformManager.SetCameraForGame();
+            DebugConfigComponent.i.HideWebViewScreens();
+        };
         #endif
     }
 }

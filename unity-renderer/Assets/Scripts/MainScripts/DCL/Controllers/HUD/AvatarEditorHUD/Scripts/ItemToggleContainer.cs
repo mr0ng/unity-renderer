@@ -1,4 +1,3 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;   
@@ -26,7 +25,6 @@ public class ItemToggleContainer : MonoBehaviour
             {
                 var newItemToggle = Instantiate(itemPrefab, itemContainer);
                 items.Add(newItemToggle);
-              
             }
         }
 

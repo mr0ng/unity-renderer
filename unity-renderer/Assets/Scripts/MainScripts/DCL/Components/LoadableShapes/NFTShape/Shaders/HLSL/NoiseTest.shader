@@ -78,7 +78,7 @@ Shader "NoiseTest/HLSL/NoiseTest"
             #if defined(CNOISE)
                 o += cnoise(coord) * w;
             #elif defined(PNOISE)
-                //o += cnoise(coord, period) * w;
+                o += pnoise(coord, period) * w;
             #elif defined(SNOISE)
                 o += snoise(coord) * w;
             #elif defined(SNOISE_AGRAD)

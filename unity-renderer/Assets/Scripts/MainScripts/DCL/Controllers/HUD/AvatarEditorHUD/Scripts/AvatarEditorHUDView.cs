@@ -6,7 +6,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
-using Cysharp.Threading.Tasks;
 using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -19,11 +18,11 @@ using Random = System.Random;
 public class AvatarEditorHUDView : MonoBehaviour, IAvatarEditorHUDView, IPointerDownHandler
 {
     private static readonly int RANDOMIZE_ANIMATOR_LOADING_BOOL = Animator.StringToHash("Loading");
-    #if DCL_VR
-    private const string VIEW_PATH = "AvatarEditorHUDVR";
-    #else
+    //#if DCL_VR
+    //private const string VIEW_PATH = "AvatarEditorHUDVR";
+    //#else
     private const string VIEW_PATH = "AvatarEditorHUD";
-#endif
+//#endif
     private const string VIEW_OBJECT_NAME = "_AvatarEditorHUD";
     internal const int AVATAR_SECTION_INDEX = 0;
     internal const string AVATAR_SECTION_TITLE = "Avatar";
@@ -158,7 +157,6 @@ public class AvatarEditorHUDView : MonoBehaviour, IAvatarEditorHUDView, IPointer
 
     private void Awake()
     {
-
         loadingSpinnerGameObject.SetActive(false);
         doneButton.interactable = false; //the default state of the button should be disable until a profile has been loaded.
         isOpen = false;
@@ -270,11 +268,7 @@ public class AvatarEditorHUDView : MonoBehaviour, IAvatarEditorHUDView, IPointer
     internal static AvatarEditorHUDView Create(AvatarEditorHUDController controller)
     {
         var view = Instantiate(Resources.Load<GameObject>(VIEW_PATH)).GetComponent<AvatarEditorHUDView>();
-// #if DCL_VR
-//         view.gameObject.AddComponent<AvatarEditorHudHelper>();
-// #endif
         view.Initialize(controller);
-
         return view;
     }
 
@@ -487,7 +481,6 @@ public class AvatarEditorHUDView : MonoBehaviour, IAvatarEditorHUDView, IPointer
             while (enumerator.MoveNext())
             {
                 enumerator.Current.Value.RemoveAllWearables();
-
             }
         }
 
@@ -610,8 +603,9 @@ public class AvatarEditorHUDView : MonoBehaviour, IAvatarEditorHUDView, IPointer
 
         transform.SetParent(parentTransform);
         transform.localScale = Vector3.one;
+        #if DCL_VR
         transform.localRotation = Quaternion.identity;
-
+        #endif
         RectTransform rectTransform = transform as RectTransform;
         rectTransform.anchorMin = Vector2.zero;
         rectTransform.anchorMax = Vector2.one;

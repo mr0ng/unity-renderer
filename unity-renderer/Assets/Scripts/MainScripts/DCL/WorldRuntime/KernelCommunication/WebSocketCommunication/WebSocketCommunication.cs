@@ -283,10 +283,12 @@ public class WebSocketCommunication : IKernelCommunication
                                     mainGO.SendMessage(msg.type, durationInSeconds);
                                 }
                                 break;
-                            case "LoadProfile":
-                                OnProfileLoading?.Invoke(msg.payload);
-                                break;
+                            // case "LoadProfile":
+                            //     OnProfileLoading?.Invoke(msg.payload);
+                            //     break;
                             default:
+                                if (msg.type == "LoadProfile")
+                                    OnProfileLoading?.Invoke(msg.payload);
                                 if (!messageTypeToBridgeName.TryGetValue(msg.type, out string bridgeName))
                                 {
                                     bridgeName = "Bridges"; // Default bridge

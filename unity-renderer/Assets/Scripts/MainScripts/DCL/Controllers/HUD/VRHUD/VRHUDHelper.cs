@@ -22,7 +22,7 @@ public abstract class VRHUDHelper : MonoBehaviour
         myTrans = transform;
     }
 
-    private void Start()
+    protected void Start()
     {
         ConvertUI();
         SetupHelper();

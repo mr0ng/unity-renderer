@@ -28,7 +28,6 @@ public class ShowHideAnimator : MonoBehaviour
 
     public bool isVisible => canvasGroup == null || canvasGroup.blocksRaycasts;
 
-
     private void Awake()
     {
         if (canvasGroup == null)
@@ -45,19 +44,14 @@ public class ShowHideAnimator : MonoBehaviour
 
     public void Show(bool instant = false)
     {
-        //if (this.gameObject.name.Contains("Loading")) return;
-        OnSetVisibility?.Invoke(true);
         SetVisibility(visible: true, OnShowCompleted, instant);
 
-        void OnShowCompleted()
-        {
+        void OnShowCompleted() =>
             OnWillFinishStart?.Invoke(this);
-        }
     }
 
     public void Hide(bool instant = false)
     {
-        OnSetVisibility?.Invoke(true);
         SetVisibility(visible: false, OnHideCompleted, instant);
 
         void OnHideCompleted()
@@ -76,13 +70,9 @@ public class ShowHideAnimator : MonoBehaviour
     {
         SetVisibility(visible: true, onComplete: HideAfterDelay);
 
-        void HideAfterDelay()
-        {
+        void HideAfterDelay() =>
             SetVisibility(visible: false, null).SetDelay(delay);
-            OnWillFinishStart?.Invoke(this);
-        }
-
-}
+    }
 
     private TweenerCore<float, float, FloatOptions> SetVisibility(bool visible, TweenCallback onComplete, bool instant = false)
     {
@@ -100,6 +90,7 @@ public class ShowHideAnimator : MonoBehaviour
 
         canvasGroup.blocksRaycasts = visible;
         canvasGroup.DOKill();
+
         return canvasGroup.DOFade(visible ? 1 : 0, duration)
                    .SetEase(Ease.InOutQuad)
                    .OnComplete(onComplete)

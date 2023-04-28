@@ -46,7 +46,9 @@ namespace DCL.Huds
 
         private void Start()
         {
+            #if DCL_VR
             InputController.GetPlayerActions(ref actions);
+            #endif
             if (!actions.enabled) actions.Enable();
             actions.OpenMenu.performed += OpenHandMenu;
             dock.position = hidenPos;
@@ -138,8 +140,12 @@ namespace DCL.Huds
         }
         public void SetupLoading(ShowHideAnimator animator)
         {
-            if (animator == null) return;
+
+
+            CrossPlatformManager.SetCameraForGame();
             WebSocketCommunication.OnProfileLoading += (ani) => { LoadingStart.Invoke(); };
+            animator.OnStartShow += () => { LoadingStart.Invoke(); };
+            if (animator == null) return;
             animator.OnWillFinishHide += (ani) => { LoadingEnd.Invoke(); };
         }
     }

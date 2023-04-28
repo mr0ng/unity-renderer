@@ -27,13 +27,17 @@ namespace DCL.SettingsCommon
             nightMode = false,
             hideUI = false,
             showAvatarNames = true,
+			#if UNITY_Android && DCL_VR
             dynamicProceduralSkybox = false, //VR for Quest 2 native
+			#else
+			dynamicProceduralSkybox = true,
+			#endif
             skyboxTime = 0.0f,
             firstPersonCameraFOV = 60,
             useInternalBrowser = true
         };
 
-        private AudioSettings defaultAudioSettings = new AudioSettings
+        private readonly AudioSettings defaultAudioSettings = new ()
         {
             masterVolume = 1f,
             voiceChatVolume = 1f,
@@ -41,7 +45,7 @@ namespace DCL.SettingsCommon
             uiSFXVolume = 1f,
             sceneSFXVolume = 1f,
             musicVolume = 1f,
-            chatSFXEnabled = true
+            chatNotificationType = AudioSettings.ChatNotificationType.All,
         };
 
         public DefaultSettingsFactory WithDefaultGeneralSettings(GeneralSettings settings)

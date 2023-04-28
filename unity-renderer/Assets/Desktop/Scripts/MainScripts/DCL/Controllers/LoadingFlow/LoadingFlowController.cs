@@ -39,11 +39,11 @@ namespace MainScripts.DCL.Controllers.LoadingFlow
 
         private ILoadingFlowView CreateView()
         {
-            #if DCL_VR
-            return Object.Instantiate(Resources.Load<LoadingFlowView>("LoadingFlowVR"));
-            #else
+            //#if DCL_VR
+            //return Object.Instantiate(Resources.Load<LoadingFlowView>("LoadingFlowVR"));
+            //#else
             return Object.Instantiate(Resources.Load<LoadingFlowView>("LoadingFlow"));
-#endif
+//#endif
         }
 
         private void OnLoadingHudVisibleChanged(bool current, bool previous)
@@ -102,7 +102,6 @@ namespace MainScripts.DCL.Controllers.LoadingFlow
                 {
                     ShowTimeout();
                     StopWatching();
-                    break;
                 }
 
                 await UniTask.Yield(cancellationToken: disposeToken.Token);

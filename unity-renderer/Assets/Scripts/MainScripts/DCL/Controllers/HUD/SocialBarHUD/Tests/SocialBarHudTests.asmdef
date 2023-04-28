@@ -8,8 +8,7 @@
         "Utils",
         "FriendsController",
         "BaseVariable",
-        "DataStore",
-        "UnityEngine.UI"
+        "DataStore"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

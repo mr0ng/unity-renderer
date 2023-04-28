@@ -31,6 +31,7 @@ public class InteractionHoverCanvasController : MonoBehaviour
 
     void Awake()
     {
+        myTrans = transform;
         defaultAnchorOffset = anchor.anchoredPosition;
         dataStore = DataStore.i.Get<DataStore_Cursor>();
         backgroundTransform.gameObject.SetActive(false);

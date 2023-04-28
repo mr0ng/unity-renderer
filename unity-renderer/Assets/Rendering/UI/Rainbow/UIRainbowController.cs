@@ -36,12 +36,12 @@ public class UIRainbowController : MonoBehaviour
         }
     }
 
-    private int updateSkip = 0;
+    //private int updateSkip = 0;
     void FixedUpdate()
     {
-        updateSkip = (updateSkip + 1 ) % 60;
-        if (updateSkip != 0)
-            return;
+        //updateSkip = (updateSkip + 1 ) % 30;
+        //if (updateSkip != 0)
+            //return;
         if(targetMat)
         {
             SetValues();
