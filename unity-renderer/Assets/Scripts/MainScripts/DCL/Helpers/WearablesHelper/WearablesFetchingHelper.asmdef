@@ -11,7 +11,9 @@
         "GUID:dffbb581f2650ea4990781f603ac258a",
         "GUID:3b80b0b562b1cbc489513f09fc1b8f69",
         "GUID:3d1a503a92d494d8aa3f35909695fa1f",
-        "GUID:a4bf61c057a098f4ca05b539a6d8c0fe"
+        "GUID:a4bf61c057a098f4ca05b539a6d8c0fe",
+        "UnityEditor.UI",
+        "UnityEngine.UI"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

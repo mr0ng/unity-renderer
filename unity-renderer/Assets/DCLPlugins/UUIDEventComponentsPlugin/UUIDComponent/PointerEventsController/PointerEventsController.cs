@@ -20,10 +20,17 @@ namespace DCL
     public class PointerEventsController
     {
         private static bool renderingEnabled => CommonScriptableObjects.rendererState.Get();
+        public System.Action OnPointerHoverStarts;
+        public System.Action OnPointerHoverEnds;
 
+        DCLPlayerInput inputActions = new DCLPlayerInput();
+
+        RaycastHitInfo lastPointerDownEventHitInfo;
+        IPointerInputEvent pointerInputUpEvent;
+        IRaycastHandler raycastHandler = new RaycastHandler();
         private readonly PointerHoverController pointerHoverController;
 
-        private readonly IRaycastHandler raycastHandler = new RaycastHandler();
+
         private readonly PointerEventData uiGraphicRaycastPointerEventData = new (null);
         private readonly List<RaycastResult> uiGraphicRaycastResults = new ();
 
@@ -33,10 +40,10 @@ namespace DCL
 
         private DataStore_ECS7 dataStoreEcs7 = DataStore.i.ecs7;
 
-        private IPointerInputEvent pointerInputUpEvent;
+
         private Camera charCamera;
 
-        private RaycastHitInfo lastPointerDownEventHitInfo;
+
         private GraphicRaycaster uiGraphicRaycaster;
         private RaycastHit hitInfo;
 
@@ -95,8 +102,11 @@ namespace DCL
             }
 
             // We use Physics.Raycast() instead of our raycastHandler.Raycast() as that one is slower, sometimes 2x, because it fetches info we don't need here
-            Ray ray = Utils.IsCursorLocked ? GetRayFromCamera() : GetRayFromMouse();
-
+            #if DCL_VR
+			 Ray ray = GetRayFromCamera();
+			 #else
+			Ray ray = Utils.IsCursorLocked ? GetRayFromCamera() : GetRayFromMouse();
+			#endif
             bool didHit = Physics.Raycast(ray, out hitInfo, Mathf.Infinity, PhysicsLayers.physicsCastLayerMaskWithoutCharacter);
 
             if (dataStoreEcs7.isEcs7Enabled)
@@ -212,8 +222,14 @@ namespace DCL
                 charCamera = Camera.main;
         }
 
-        private Ray GetRayFromCamera() =>
-            charCamera.ScreenPointToRay(new Vector3(Screen.width / 2, Screen.height / 2, 0));
+        private Ray GetRayFromCamera()
+        {
+            #if DCL_VR
+            if (CrossPlatformManager.IsVRPlatform())
+                return CrossPlatformManager.GetRay();
+            #endif
+            return charCamera.ScreenPointToRay(new Vector3(Screen.width / 2, Screen.height / 2, 0));
+        }
 
         private Ray GetRayFromMouse() =>
             charCamera.ScreenPointToRay(Input.mousePosition);
@@ -271,8 +287,11 @@ namespace DCL
                 return;
 
             RaycastHitInfo raycastGlobalLayerHitInfo;
+			#if DCL_VR
+			Ray ray = GetRayFromCamera();
+			#else
             Ray ray = !Utils.IsCursorLocked || Utils.LockedThisFrame() ? GetRayFromMouse() : GetRayFromCamera();
-
+			#endif
             // Raycast for global pointer events
             worldState.TryGetScene(currentSceneNumber, out var loadedScene);
 
@@ -327,8 +346,11 @@ namespace DCL
 
             if (currentSceneNumber <= 0)
                 return;
-
+			#if DCL_VR
+			Ray ray = GetRayFromCamera();
+			#else
             Ray ray = !Utils.IsCursorLocked || Utils.LockedThisFrame() ? GetRayFromMouse() : GetRayFromCamera();
+			#endif
             worldState.TryGetScene(currentSceneNumber, out var loadedScene);
 
             // Raycast for pointer event components

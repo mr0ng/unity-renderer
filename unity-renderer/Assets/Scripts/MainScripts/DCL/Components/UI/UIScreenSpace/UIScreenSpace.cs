@@ -105,9 +105,9 @@ namespace DCL.Components
             {
                 DataStore.i.Get<DataStore_World>().currentRaycaster.Set(graphicRaycaster);
             }
-            
+
             bool shouldBeVisible = model.visible && isInsideSceneBounds && !CommonScriptableObjects.allUIHidden.Get() && isUIEnabled.Get();
-            
+
             canvasGroup.alpha = shouldBeVisible ? 1f : 0f;
             canvasGroup.blocksRaycasts = shouldBeVisible;
         }
@@ -197,6 +197,9 @@ namespace DCL.Components
 
             UpdateCanvasVisibility();
             CommonScriptableObjects.allUIHidden.OnChange += AllUIHidden_OnChange;
+            #if DCL_VR
+            canvasGameObject.AddComponent<UIScreenSpaceHelper>();
+            #endif
         }
     }
 }

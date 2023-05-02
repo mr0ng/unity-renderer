@@ -235,7 +235,7 @@ PrefabInstance:
         type: 3}
       propertyPath: camera
       value: 
-      objectReference: {fileID: 0}
+      objectReference: {fileID: 6441102298861331460}
     - target: {fileID: 4178404825261920003, guid: b0965b55b892d438da492708ea09799c,
         type: 3}
       propertyPath: m_VerticalAxis.Value
@@ -254,7 +254,7 @@ PrefabInstance:
     - target: {fileID: 4852920391666169108, guid: b0965b55b892d438da492708ea09799c,
         type: 3}
       propertyPath: m_Enabled
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 4852920391666169109, guid: b0965b55b892d438da492708ea09799c,
         type: 3}
@@ -326,8 +326,8 @@ MonoBehaviour:
   rotation: 45
   cameraChangeAction: {fileID: 11400000, guid: 6701d7e30ddf77c48accc629429f7e30, type: 2}
   cameraX: {fileID: 11400000, guid: c5302665e8f998e4ea2673bba5e22914, type: 2}
-  characterX: {fileID: 0}
-  characterY: {fileID: 0}
+  characterX: {fileID: 11400000, guid: 44c3c5f07adca334696adae7b81c1869, type: 2}
+  characterY: {fileID: 11400000, guid: d1bc201cd2f5a1d4b8f721ccc29d2c0f, type: 2}
   rotationThreshold: 0.001
 --- !u!1 &2664722497377917998 stripped
 GameObject:

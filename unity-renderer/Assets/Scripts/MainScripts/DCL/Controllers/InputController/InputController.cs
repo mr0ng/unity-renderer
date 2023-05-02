@@ -182,10 +182,10 @@ public class InputController : MonoBehaviour
                 case DCLAction_Trigger.CameraChange:
 
                     // Disable until the fine-tuning is ready
-#if !DCL_VR
+//#if !DCL_VR
                     if (!CommonScriptableObjects.cameraModeInputLocked.Get() && ENABLE_THIRD_PERSON_CAMERA)
                         InputProcessor.FromKey(action, KeyCode.V, modifiers: InputProcessor.Modifier.FocusNotInInput);
-#endif
+//#endif
                     break;
                 case DCLAction_Trigger.CursorUnlock:
                     InputProcessor.FromMouseButtonUp(action, mouseButtonIdx: 1, modifiers: InputProcessor.Modifier.NeedsPointerLocked);
@@ -409,24 +409,23 @@ public class InputController : MonoBehaviour
                 case DCLAction_Measurable.CharacterXAxis:
                     InputProcessor.FromAxis(action, player.Move.ReadValue<Vector2>().x ,
                         InputProcessor.Modifier.FocusNotInInput | InputProcessor.Modifier.NotInStartMenu);
+
                     break;
                 case DCLAction_Measurable.CharacterYAxis:
                     InputProcessor.FromAxis(action, player.Move.ReadValue<Vector2>().y ,
                         InputProcessor.Modifier.FocusNotInInput | InputProcessor.Modifier.NotInStartMenu);
                     break;
                 case DCLAction_Measurable.CameraXAxis:
-
                     InputProcessor.FromAxis(action, player.Look.ReadValue<Vector2>().x,
-                        InputProcessor.Modifier.NeedsPointerLocked | InputProcessor.Modifier.NeedsPointerLocked);
+                        InputProcessor.Modifier.NeedsPointerLocked | InputProcessor.Modifier.RequiresPointer);
                     break;
                 case DCLAction_Measurable.CameraYAxis:
                     InputProcessor.FromAxis(action, player.Look.ReadValue<Vector2>().y,
-                        InputProcessor.Modifier.NeedsPointerLocked | InputProcessor.Modifier.NeedsPointerLocked);
+                        InputProcessor.Modifier.NeedsPointerLocked | InputProcessor.Modifier.RequiresPointer);
                     break;
                 case DCLAction_Measurable.MouseWheel:
                     InputProcessor.FromAxis(action, player.ScrollMouse.ReadValue<float>(), modifiers: InputProcessor.Modifier.FocusNotInInput);
                     break;
-
                 default:
                     throw new ArgumentOutOfRangeException();
 

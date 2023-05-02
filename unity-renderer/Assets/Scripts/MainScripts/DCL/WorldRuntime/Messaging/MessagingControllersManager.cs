@@ -15,8 +15,8 @@ namespace DCL
 
         private const float MAX_SYSTEM_MSG_BUDGET_FOR_FAR_SCENES = 0.003f;
 
-        private const float GLTF_BUDGET_MAX = 0.036f;
-        private const float GLTF_BUDGET_MIN = 0.004f;
+        private const float GLTF_BUDGET_MAX = 0.033f;
+        private const float GLTF_BUDGET_MIN = 0.008f;
 
         private const int GLOBAL_MESSAGING_CONTROLLER_SCENE_NUMBER = 999999;
 
@@ -291,10 +291,14 @@ namespace DCL
                     PopulateBusesToBeProcessed();
                     populateBusesDirty = false;
                 }
-
+				#if DCL_VR
                 timeBudgetCounter =
                     CommonScriptableObjects.rendererState.Get() ? MAX_GLOBAL_MSG_BUDGET : 3*MAX_GLOBAL_MSG_BUDGET;
                 UnityThread.timeBudgetPerFrame = CommonScriptableObjects.rendererState.Get() ? 0.01f : 0.2f;
+				#else
+				 timeBudgetCounter =
+                    CommonScriptableObjects.rendererState.Get() ? MAX_GLOBAL_MSG_BUDGET : float.MaxValue;
+				#endif
 
                 for (int i = 0; i < busesToProcessCount; ++i)
                 {
@@ -344,7 +348,7 @@ namespace DCL
             RefreshControllerEnabledState(bus.owner);
 
             timeBudgetCounter -= Time.realtimeSinceStartup - startTime;
-            
+
             if (timeBudgetCounter <= 0)
                 return true;
 

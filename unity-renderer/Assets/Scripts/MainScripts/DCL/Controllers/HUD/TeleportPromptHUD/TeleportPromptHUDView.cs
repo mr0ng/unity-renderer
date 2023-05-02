@@ -7,7 +7,6 @@ using DCL;
 
 public class TeleportPromptHUDView : MonoBehaviour
 {
-    [SerializeField] public GameObject content;
     [SerializeField] internal ShowHideAnimator contentAnimator;
     [SerializeField] internal GameObject content;
     [SerializeField] internal Animator teleportHUDAnimator;
@@ -64,7 +63,7 @@ public class TeleportPromptHUDView : MonoBehaviour
         continueButton.onClick.AddListener(OnTeleportPressed);
 //<<<<<<< HEAD
 //        contentAnimator.OnWillFinishHide += (animator) => Hide();
-        
+
  //       contentAnimator.Hide();
 //        OnSetVisibility?.Invoke(false);
 //        content.GetComponent<Canvas>().enabled = false;

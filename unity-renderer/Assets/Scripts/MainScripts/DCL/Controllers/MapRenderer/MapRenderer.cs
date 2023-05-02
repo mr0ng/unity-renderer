@@ -33,9 +33,9 @@ namespace DCL
         [SerializeField] private Image parcelHighlighImagePrefab;
         [SerializeField] private Image parcelHighlighWithContentImagePrefab;
         [SerializeField] private Image selectParcelHighlighImagePrefab;
-		
+
         private float parcelSizeInMap;
-        
+
         // private Vector3Variable playerRotation => CommonScriptableObjects.cameraForward;
         private Vector3[] mapWorldspaceCorners = new Vector3[4];
         private Vector3 worldCoordsOriginInMap;
@@ -82,8 +82,8 @@ namespace DCL
 
         private HashSet<MinimapMetadata.MinimapSceneInfo> scenesOfInterest = new HashSet<MinimapMetadata.MinimapSceneInfo>();
         private Dictionary<MinimapMetadata.MinimapSceneInfo, GameObject> scenesOfInterestMarkers = new Dictionary<MinimapMetadata.MinimapSceneInfo, GameObject>();
-        
-
+        private PointerEventData uiRaycastPointerEventData = new PointerEventData(EventSystem.current);
+        private List<RaycastResult> uiRaycastResults = new List<RaycastResult>();
         private Dictionary<string, PoolableObject> usersInfoMarkers = new Dictionary<string, PoolableObject>();
         private Pool usersInfoPool;
 
@@ -123,7 +123,23 @@ namespace DCL
             Initialize();
         }
 
-       
+        void Update()
+        {
+            if ((playerWorldPosition.Get() - lastPlayerPosition).sqrMagnitude >= 0.1f * 0.1f)
+            {
+                lastPlayerPosition = playerWorldPosition.Get();
+                UpdateRendering(Utils.WorldToGridPositionUnclamped(lastPlayerPosition));
+            }
+
+            if (!parcelHighlightEnabled)
+                return;
+
+            UpdateCursorMapCoords();
+
+            UpdateParcelHighlight();
+
+            UpdateParcelHold();
+        }
 
         public void OnDestroy()
         {
@@ -367,25 +383,29 @@ namespace DCL
             if (!helper.IsCursorOverMapChunk(NAVMAP_CHUNK_LAYER))
                 return;
 
-// <<<<<<< HEAD
+#if DCL_VR
             cursorMapCoords.x = (int) (helper.GetPointerPos().x - worldCoordsOriginInMap.x);
             cursorMapCoords.y = (int) (helper.GetPointerPos().y - worldCoordsOriginInMap.y);
             cursorMapCoords /= (int) parcelSizeInMap;
 
             cursorMapCoords.x = (int)Mathf.Floor(cursorMapCoords.x);
             cursorMapCoords.y = (int)Mathf.Floor(cursorMapCoords.y);
-// =======
-            // const int OFFSET = -60; //Map is a bit off centered, we need to adjust it a little.
-            // RectTransformUtility.ScreenPointToLocalPointInRectangle(atlas.chunksParent, Input.mousePosition, DataStore.i.camera.hudsCamera.Get(), out var mapPoint);
-            // mapPoint -= Vector2.one * OFFSET;
-            // mapPoint -= (atlas.chunksParent.sizeDelta / 2f);
-            // cursorMapCoords = Vector2Int.RoundToInt(mapPoint / MapUtils.PARCEL_SIZE);
-// >>>>>>> upstream/dev
+#else
+            const int OFFSET = -60; //Map is a bit off centered, we need to adjust it a little.
+            RectTransformUtility.ScreenPointToLocalPointInRectangle(atlas.chunksParent, Input.mousePosition, DataStore.i.camera.hudsCamera.Get(), out var mapPoint);
+            mapPoint -= Vector2.one * OFFSET;
+            mapPoint -= (atlas.chunksParent.sizeDelta / 2f);
+            cursorMapCoords = Vector2Int.RoundToInt(mapPoint / MapUtils.PARCEL_SIZE);
+#endif
         }
 
         bool IsCursorOverMapChunk()
         {
+            #if DCL_VR
             uiRaycastPointerEventData.position = helper.GetPointerPos();
+            #else
+            uiRaycastPointerEventData.position = Input.mousePosition;
+            #endif
             EventSystem.current.RaycastAll(uiRaycastPointerEventData, uiRaycastResults);
 
             return uiRaycastResults.Count > 0 && uiRaycastResults[0].gameObject.layer == NAVMAP_CHUNK_LAYER;
@@ -552,13 +572,8 @@ namespace DCL
             Quaternion playerAngle = Quaternion.Euler(0, 0, Mathf.Atan2(-f.x, f.z) * Mathf.Rad2Deg);
 
             var gridPosition = playerGridPosition;
-// <<<<<<< HEAD
-            // playerPositionIcon.anchoredPosition = MapUtils.GetTileToLocalPosition(gridPosition.x, gridPosition.y);
-            // playerPositionIcon.localRotation = playerAngle;
-// =======
             playerPositionIcon.anchoredPosition = MapUtils.CoordsToPositionWithOffset(gridPosition);
             playerPositionIcon.rotation = playerAngle;
-// >>>>>>> upstream/dev
         }
 
         // Called by the parcelhighlight image button

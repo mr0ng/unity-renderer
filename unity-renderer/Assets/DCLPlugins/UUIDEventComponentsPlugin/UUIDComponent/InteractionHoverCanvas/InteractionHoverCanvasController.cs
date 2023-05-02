@@ -11,7 +11,7 @@ public class InteractionHoverCanvasController : MonoBehaviour
     public GameObject[] icons;
     public RectTransform anchor;
     private Vector2 defaultAnchorOffset;
-
+    private Transform myTrans;
 
     bool isHovered = false;
     GameObject hoverIcon;
@@ -27,10 +27,11 @@ public class InteractionHoverCanvasController : MonoBehaviour
     const string ACTION_BUTTON_SECONDARY = "SECONDARY";
 
     private DataStore_Cursor dataStore;
-    private Transform myTrans;
+
 
     void Awake()
     {
+        myTrans = transform;
         defaultAnchorOffset = anchor.anchoredPosition;
         dataStore = DataStore.i.Get<DataStore_Cursor>();
         backgroundTransform.gameObject.SetActive(false);

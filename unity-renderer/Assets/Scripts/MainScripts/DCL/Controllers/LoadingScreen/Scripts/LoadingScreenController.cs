@@ -124,14 +124,12 @@ namespace DCL.LoadingScreen
 #else
                 view.FadeIn(false, true);
 #endif
-                timeoutCTS = timeoutCTS.SafeRestart();
+ 				timeoutCTS = timeoutCTS.SafeRestart();
                 StartTimeoutCounter(timeoutCTS.Token);
             }else if (IsSceneLoaded(currentDestinationCandidate))
                 HandlePlayerLoading();
         }
-
-
-        private async UniTaskVoid StartTimeoutCounter(CancellationToken ct)
+		private async UniTaskVoid StartTimeoutCounter(CancellationToken ct)
         {
             if (!await UniTask.Delay(TimeSpan.FromMilliseconds(LOAD_SCENE_TIMEOUT), cancellationToken: ct).SuppressCancellationThrow())
                 DoTimeout();
@@ -180,7 +178,7 @@ namespace DCL.LoadingScreen
 
         private void FadeOutView()
         {
-
+		timeoutCTS.SafeCancelAndDispose();
 #if DCL_VR
             view.SetVisible(false,false);
 #else

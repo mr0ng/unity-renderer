@@ -23,7 +23,8 @@ public static class InputProcessor
         NeedsPointerLocked = 0b0000001, // The pointer must be locked to the game
         FocusNotInInput = 0b0000010, // The game focus cannot be in an input field
         NotInStartMenu = 0b0000100, // The game focus cannot be in full-screen start menu
-        OnlyWithInputFocused = 0b0001000 // The game focus must be in an input field
+        OnlyWithInputFocused = 0b0001000, // The game focus must be in an input field
+        RequiresPointer = 0b0010000
     }
 
     /// <summary>

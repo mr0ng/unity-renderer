@@ -177,6 +177,9 @@ public class EventCardComponentView : BaseComponentView, IEventCardComponentView
 
         onSubscribeClick.AddListener(PressedSubscribe);
         onUnsubscribeClick.AddListener(PressedUnsubscribe);
+        #if DCL_VR
+        transform.localRotation = Quaternion.identity;
+        #endif
     }
 
     private void PressedSubscribe()

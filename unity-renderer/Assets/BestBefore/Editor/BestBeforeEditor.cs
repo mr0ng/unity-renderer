@@ -4,7 +4,7 @@
 	file ext:	cs
 	author:		Alessandro Maione
 	version:	1.0.0
-	
+
 	purpose:	custom editor for BestBefore script
 *********************************************************************/
 
@@ -16,7 +16,7 @@ namespace BestBefore
 {
     [CustomEditor( typeof( BestBefore ) )]
     [CanEditMultipleObjects]
-    public class BestBeforeEditor : Editor
+    public class BestBeforeEditor : UnityEditor.Editor
     {
         private Dictionary<string, SerializedProperty> allProperties = new Dictionary<string, SerializedProperty>();
         private FontStyle headerFontStyle = FontStyle.Bold;
@@ -115,7 +115,7 @@ namespace BestBefore
                 EditorGUILayout.PropertyField( allProperties["Minute"] );
                 EditorGUILayout.PropertyField( allProperties["Second"] );
             }
-            
+
             else
             {
                 EditorGUILayout.PropertyField( allProperties["Year"] );

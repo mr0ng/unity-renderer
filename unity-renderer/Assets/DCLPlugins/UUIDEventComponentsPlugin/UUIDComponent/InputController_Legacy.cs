@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using DCL.Configuration;
 using DCL.Interface;
 using UnityEngine;
-//using InputSettings = DCL.Configuration.InputSettings;
+using InputSettings = DCL.Configuration.InputSettings;
 
 namespace DCL
 {
@@ -199,19 +199,35 @@ namespace DCL
                     case BUTTON_TYPE.MOUSE:
                         if (CommonScriptableObjects.allUIHidden.Get())
                             break;
+                        #if DCL_VR
+                        if (GetButtonDown(btnMap) && !btnMap.lastState)
+                            #else
                         if (Input.GetMouseButtonDown(btnMap.buttonNum) && !btnMap.lastState)
+                            #endif
                             RaiseEvent(btnMap.buttonId, EVENT.BUTTON_DOWN, btnMap.useRaycast,
                                 btnMap.enablePointerEvent);
+                        #if DCL_VR
+                        else if (GetButtonUp(btnMap) && btnMap.lastState)
+                        #else
                         else if (Input.GetMouseButtonUp(btnMap.buttonNum) && btnMap.lastState)
+                        #endif
                             RaiseEvent(btnMap.buttonId, EVENT.BUTTON_UP, btnMap.useRaycast, btnMap.enablePointerEvent);
                         break;
                     case BUTTON_TYPE.KEYBOARD:
                         if (CommonScriptableObjects.allUIHidden.Get())
                             break;
+                        #if DCL_VR
+                        if (GetKeyDown((KeyCode) btnMap.buttonNum) && !btnMap.lastState)
+                        #else
                         if (Input.GetKeyDown((KeyCode) btnMap.buttonNum) && !btnMap.lastState)
+                        #endif
                             RaiseEvent(btnMap.buttonId, EVENT.BUTTON_DOWN, btnMap.useRaycast,
                                 btnMap.enablePointerEvent);
+                        #if DCL_VR
+                        else if (!GetKeyDown((KeyCode) btnMap.buttonNum)&& btnMap.lastState)
+                        #else
                         else if (!Input.GetKeyDown((KeyCode) btnMap.buttonNum)&& btnMap.lastState)
+                            #endif
                             RaiseEvent(btnMap.buttonId, EVENT.BUTTON_UP, btnMap.useRaycast, btnMap.enablePointerEvent);
                         break;
                 }
@@ -243,6 +259,18 @@ namespace DCL
         {
             switch (button)
             {
+                #if DCL_VR
+                case WebInterface.ACTION_BUTTON.POINTER:
+                    return actions.Select.triggered;
+                case WebInterface.ACTION_BUTTON.PRIMARY:
+                    return actions.PrimaryInteraction.triggered;
+                case WebInterface.ACTION_BUTTON.SECONDARY:
+                    return actions.SecondaryInteraction.triggered;
+                default: // ANY
+                    return actions.Select.triggered ||
+                           actions.PrimaryInteraction.triggered ||
+                           actions.SecondaryInteraction.triggered;
+                #else
                 case WebInterface.ACTION_BUTTON.POINTER:
                     return Input.GetMouseButton(0);
                 case WebInterface.ACTION_BUTTON.PRIMARY:
@@ -253,6 +281,7 @@ namespace DCL
                     return Input.GetMouseButton(0) ||
                            Input.GetKey(InputSettings.PrimaryButtonKeyCode) ||
                            Input.GetKey(InputSettings.SecondaryButtonKeyCode);
+                #endif
             }
         }
 

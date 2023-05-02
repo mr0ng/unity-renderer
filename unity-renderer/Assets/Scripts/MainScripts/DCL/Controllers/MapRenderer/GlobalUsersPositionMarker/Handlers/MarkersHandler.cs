@@ -38,11 +38,23 @@ namespace DCL
             availableMarkers = new List<UserPositionMarker>(maxMarkers);
             usedMarkers = new List<UserPositionMarker>(maxMarkers);
 
+            InstantiateUserPositionMarkers(markerPrefab, overlayContainer);
+
+        }
+
+        public void InstantiateUserPositionMarkers(UserMarkerObject markerPrefab, Transform overlayContainer)
+        {
             for (int i = 0; i < maxMarkers; i++)
             {
-                var marker = new UserPositionMarker(GameObject.Instantiate(markerPrefab, overlayContainer));
-                availableMarkers.Add(marker);
-                marker.SetActive(false);
+                UnityThread.ExecuteInTimeBudgetCoroutine(() =>
+                {
+                    var marker = new UserPositionMarker(GameObject.Instantiate(markerPrefab, overlayContainer));
+                    availableMarkers.Add(marker);
+                    marker.SetActive(false);
+                });
+
+
+
             }
         }
 

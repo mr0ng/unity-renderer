@@ -448,7 +448,7 @@ namespace DCL.Helpers
         {
             get => isCursorLocked;
 
-            private set
+            set
             {
                 if (isCursorLocked == value) return;
                 isCursorLocked = value;

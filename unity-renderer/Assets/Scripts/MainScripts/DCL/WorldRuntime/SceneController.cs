@@ -135,7 +135,6 @@ namespace DCL
                 sceneSortDirty = false;
                 SortScenesByDistance();
             }
-            //UnloadSceneBeyondLOS();
         }
         private int updateSkip2 =  0;
         public void LateUpdate()
@@ -417,8 +416,11 @@ namespace DCL
 
             while (true)
             {
+                #if DCL_VR
                 maxTimeForDecode = CommonScriptableObjects.rendererState.Get() ? MAX_TIME_FOR_DECODE : 5*MAX_TIME_FOR_DECODE;
-
+                #else
+                maxTimeForDecode = CommonScriptableObjects.rendererState.Get() ? MAX_TIME_FOR_DECODE : float.MaxValue;
+                #endif
                 if (chunksToDecode.TryDequeue(out string chunk))
                 {
                     EnqueueChunk(chunk);
@@ -473,7 +475,7 @@ namespace DCL
 
         private async void ThreadedDecodeAndEnqueue(CancellationToken cancellationToken)
         {
-            DateTime lastStart = DateTime.Now;
+            DateTime lastStart = DateTime.Now;//VR optimizations
             while (chunksToDecode.TryDequeue(out string chunk))
             {
                 cancellationToken.ThrowIfCancellationRequested();
@@ -481,10 +483,8 @@ namespace DCL
                 string[] payloads = chunk.Split(new [] { '\n' }, StringSplitOptions.RemoveEmptyEntries);
                 var count = payloads.Length;
 
-                ;
                 for (int i = 0; i < count; i++)
                 {
-
                     var payload = payloads[i];
                     bool availableMessage = sceneMessagesPool.TryDequeue(out QueuedSceneMessage_Scene freeMessage);
 
