@@ -43,6 +43,7 @@ import { getUnityInstance } from 'unity-interface/IUnityInterface'
 import { nativeMsgBridge } from 'unity-interface/nativeMessagesBridge'
 import { protobufMsgBridge } from 'unity-interface/protobufMessagesBridge'
 import { PositionReport } from './positionThings'
+import { joinBuffers } from 'lib/javascript/uint8arrays'
 
 export enum SceneWorkerReadyState {
   LOADING = 1 << 0,
@@ -122,16 +123,20 @@ export class SceneWorker {
   private readonly lastSentRotation = new Quaternion(0, 0, 0, 1)
   private readonly startLoadingTime = performance.now()
   // this is the transport for the worker
-  public readonly transport: Transport
+  public transport?: Transport
 
   metadata: Scene
   logger: ILogger
 
-  static async createSceneWorker(loadableScene: Readonly<LoadableScene>, rpcClient: RpcClient, _transport?: Transport) {
+  static async createSceneWorker(
+    loadableScene: Readonly<LoadableScene>,
+    rpcClient: RpcClient,
+    transportBuilder: () => Transport | undefined
+  ) {
     ++globalSceneNumberCounter
     const sceneNumber = globalSceneNumberCounter
     const scenePort = await rpcClient.createPort(`scene-${sceneNumber}`)
-    const worker = new SceneWorker(loadableScene, sceneNumber, scenePort, _transport)
+    const worker = new SceneWorker(loadableScene, sceneNumber, scenePort, transportBuilder)
     await worker.attachTransport()
     return worker
   }
@@ -140,7 +145,7 @@ export class SceneWorker {
     public readonly loadableScene: Readonly<LoadableScene>,
     sceneNumber: number,
     scenePort: RpcClientPort,
-    _transport?: Transport
+    private transportBuilder: () => Transport | undefined
   ) {
     const skipErrors = ['Transport closed while waiting the ACK']
 
@@ -162,8 +167,6 @@ export class SceneWorker {
       loadableScene.entity.metadata.runtimeVersion === '7' ||
       !!loadableScene.entity.metadata.ecs7 ||
       !!loadableScene.entity.metadata.sdk7
-
-    this.transport = _transport || buildWebWorkerTransport(this.loadableScene, IS_SDK7)
 
     const rpcSceneControllerService = codegen.loadService<any>(scenePort, RpcSceneControllerServiceDefinition)
 
@@ -195,7 +198,10 @@ export class SceneWorker {
       sendProtoSceneEvent: (e) => {
         this.rpcContext.events.push(e)
       },
-      sendBatch: this.sendBatch.bind(this)
+      sendBatch: this.sendBatch.bind(this),
+      readFile: this.readFile.bind(this),
+      initialEntitiesTick0: Uint8Array.of(),
+      hasMainCrdt: false
     }
 
     // if the scene metadata has a base parcel, then we set it as the position
@@ -231,6 +237,29 @@ export class SceneWorker {
     }
   }
 
+  async readFile(fileName: string) {
+    // filenames are lower cased as per https://adr.decentraland.org/adr/ADR-80
+    const normalized = fileName.toLowerCase()
+
+    // and we iterate over the entity content mappings to resolve the file hash
+    for (const { file, hash } of this.rpcContext.sceneData.entity.content) {
+      if (file.toLowerCase() === normalized) {
+        // fetch the actual content
+        const baseUrl = this.rpcContext.sceneData.baseUrl.endsWith('/')
+          ? this.rpcContext.sceneData.baseUrl
+          : this.rpcContext.sceneData.baseUrl + '/'
+        const url = baseUrl + hash
+        const response = await fetch(url)
+
+        if (!response.ok) throw new Error(`Error fetching file ${file} from ${url}`)
+
+        return { hash, content: new Uint8Array(await response.arrayBuffer()) }
+      }
+    }
+
+    throw new Error(`File ${fileName} not found`)
+  }
+
   dispose() {
     const disposingFlags =
       SceneWorkerReadyState.DISPOSING | SceneWorkerReadyState.SYSTEM_DISPOSED | SceneWorkerReadyState.DISPOSED
@@ -245,7 +274,7 @@ export class SceneWorker {
     if ((this.ready & disposingFlags) === 0) {
       this.ready |= SceneWorkerReadyState.DISPOSING
 
-      this.transport.close()
+      this.transport?.close()
     }
 
     this.ready |= SceneWorkerReadyState.DISPOSED
@@ -320,8 +349,26 @@ export class SceneWorker {
       sdk7: this.rpcContext.sdk7
     })
 
+    let mainCrdt = Uint8Array.of()
+
+    try {
+      if (this.rpcContext.sceneData.entity.content.some(($) => $.file.toLowerCase() === 'main.crdt')) {
+        const file = await this.readFile('main.crdt')
+        mainCrdt = file.content
+      }
+    } catch (err: any) {
+      this.logger.error(err)
+    }
+
+    // this is the tick#0 as specified in ADR-133 and ADR-148
+    const result = await this.rpcContext.rpcSceneControllerService.sendCrdt({ payload: mainCrdt })
+    this.rpcContext.initialEntitiesTick0 = joinBuffers(mainCrdt, result.payload)
+    this.rpcContext.hasMainCrdt = mainCrdt.length > 0
+
     // from now on, the sceneData object is read-only
     Object.freeze(this.rpcContext.sceneData)
+
+    this.transport = this.transportBuilder() || buildWebWorkerTransport(this.loadableScene, this.rpcContext.sdk7)
 
     this.rpcServer.setHandler(registerServices)
     this.rpcServer.attachTransport(this.transport, this.rpcContext)

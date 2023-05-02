@@ -18,12 +18,8 @@ namespace DCL.LoadingScreen
 
         public event Action<ShowHideAnimator> OnFadeInFinish;
 
-        public override void Start()
+        public void Start()
         {
-            base.Start();
-
-
-
             showHideAnimator.OnWillFinishStart += FadeInFinish;
             WebSocketCommunication.OnProfileLoading += OnProfileLoading;
             betaTag.SetActive(!Application.isEditor && Application.platform != RuntimePlatform.WebGLPlayer);

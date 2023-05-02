@@ -33,6 +33,17 @@ export function registerRuntimeServiceServerImplementation(port: RpcServerPort<P
           isPreview: PREVIEW
         }
       }
+    },
+    async getSceneInformation(_, ctx) {
+      return {
+        urn: ctx.sceneData.id,
+        baseUrl: ctx.sceneData.baseUrl,
+        content: ctx.sceneData.entity.content,
+        metadataJson: JSON.stringify(ctx.sceneData.entity.metadata)
+      }
+    },
+    async readFile(req, ctx) {
+      return ctx.readFile(req.fileName)
     }
   }))
 }

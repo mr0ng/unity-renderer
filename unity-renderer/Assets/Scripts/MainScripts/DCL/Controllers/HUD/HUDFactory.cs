@@ -12,7 +12,6 @@ using DCL.SettingsCommon;
 using DCL.SettingsPanelHUD;
 using DCL.Social.Chat.Mentions;
 using DCL.Social.Friends;
-using DCLServices.WearablesCatalogService;
 using SignupHUD;
 using SocialFeaturesAnalytics;
 using System;
@@ -73,15 +72,7 @@ public class HUDFactory : IHUDFactory
 
                 break;
             case HUDElementID.NOTIFICATION:
-                hud =  new NotificationHUDController();
-                break;
-            case HUDElementID.AVATAR_EDITOR:
-                hud = new AvatarEditorHUDController(
-                    DataStore.i.featureFlags,
-                    Environment.i.platform.serviceProviders.analytics,
-                    Environment.i.serviceLocator.Get<IWearablesCatalogService>());
-
-                break;
+                return new NotificationHUDController();
             case HUDElementID.SETTINGS_PANEL:
                 hud =  new SettingsPanelHUDController();
                 break;
@@ -175,14 +166,9 @@ public class HUDFactory : IHUDFactory
                 hud = new TaskbarHUDController(Environment.i.serviceLocator.Get<IChatController>(), FriendsController.i);
                 break;
             case HUDElementID.OPEN_EXTERNAL_URL_PROMPT:
-                hud = new ExternalUrlPromptHUDController();
-                break;
+                return new ExternalUrlPromptHUDController(DataStore.i.rpc.context.restrictedActions);
             case HUDElementID.NFT_INFO_DIALOG:
-                hud = new NFTPromptHUDController();
-                break;
-            case HUDElementID.TELEPORT_DIALOG:
-                hud = new TeleportPromptHUDController();
-                break;
+                return new NFTPromptHUDController(DataStore.i.rpc.context.restrictedActions, DataStore.i.common.onOpenNFTPrompt);
             case HUDElementID.CONTROLS_HUD:
                 hud = new ControlsHUDController();
                 break;
@@ -210,27 +196,11 @@ public class HUDFactory : IHUDFactory
                 hud = new QuestsTrackerHUDController(await CreateHUDView<IQuestsTrackerHUDView>(QUESTS_TRACKER_HUD, cancellationToken));
                 break;
             case HUDElementID.SIGNUP:
-                hud = new SignupHUDController(Environment.i.platform.serviceProviders.analytics, await CreateSignupHUDView(cancellationToken), dataStoreLoadingScreen.Ref);
-                break;
+                return new SignupHUDController(Environment.i.platform.serviceProviders.analytics, await CreateSignupHUDView(cancellationToken),
+                    dataStoreLoadingScreen.Ref,
+                    DataStore.i.HUDs);
         }
-// #if DCL_VR
-//         if (hud != null)
-//         {
-//             try
-//             {
-//                 OnViewCreated?.Invoke(hud);
-//                 NotifyVRUIManager(hud);
-//             }
-//             catch(Exception ex)
-//             {
-//                 Debug.LogError(ex.Message);
-//             }
-//         }
-//         else
-//         {
-//             OnViewCreated?.Invoke(hud);
-//         }
-// #endif
+
 
         return hud;
     }

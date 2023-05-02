@@ -537,6 +537,7 @@ public class DCLCharacterController : MonoBehaviour
 
     void ReportMovement()
     {
+#if DCL_VR
         float height = 0.875f;
         
         //don't report movements under threshold for HMD movements.  Too small make the avatar jitter and not step. 
@@ -547,9 +548,10 @@ public class DCLCharacterController : MonoBehaviour
             reportPosition = lastReportPosition;
         }
         else lastReportPosition = reportPosition;
-     
+#else
+        var reportPosition = characterPosition.worldPosition;
+#endif
         var compositeRotation = Quaternion.LookRotation(characterForward.HasValue() ? characterForward.Get().Value : cameraForward.Get());
-        var playerHeight = height + (characterController.height / 2);
         var cameraRotation = Quaternion.LookRotation(cameraForward.Get());
 
         //NOTE(Brian): We have to wait for a Teleport before sending the ReportPosition, because if not ReportPosition events will be sent
@@ -558,8 +560,9 @@ public class DCLCharacterController : MonoBehaviour
         //             The race conditions that can arise from not having this flag can result in:
         //                  - Scenes not being sent for loading, making ActivateRenderer never being sent, only in WSS mode.
         //                  - Random teleports to 0,0 or other positions that shouldn't happen.
+        //We are sending a fixated camera height of 1.675f
         if (initialPositionAlreadySet)
-            DCL.Interface.WebInterface.ReportPosition(reportPosition, compositeRotation, playerHeight, cameraRotation);
+            DCL.Interface.WebInterface.ReportPosition(reportPosition, compositeRotation, characterController.height, cameraRotation);
 
         lastMovementReportTime = DCLTime.realtimeSinceStartup;
     }
@@ -572,7 +575,10 @@ public class DCLCharacterController : MonoBehaviour
 
     public void ResumeGravity() { gravity = originalGravity; }
 
-    void OnRenderingStateChanged(bool isEnable, bool prevState) { SetEnabled(isEnable); }
+    void OnRenderingStateChanged(bool isEnable, bool prevState)
+    {
+        SetEnabled(isEnable && !DataStore.i.common.isSignUpFlow.Get());
+    }
 
     bool IsLastCollisionGround()
     {

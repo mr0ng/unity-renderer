@@ -1,5 +1,6 @@
 using DCL;
 using DCL.Helpers.NFT;
+using RPC.Context;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
@@ -16,6 +17,8 @@ public class NFTPromptHUDController : IHUD
     internal INFTPromptHUDView view { get; private set; }
 
     private readonly OwnersInfoController ownersInfoController;
+    private readonly RestrictedActionsContext restrictedActionsContext;
+    private readonly BaseVariable<NFTPromptModel> openNftPromptVariable;
 
     private Coroutine fetchNFTRoutine = null;
     private NFTInfoSingleAsset? lastNFTInfo = null;
@@ -23,7 +26,7 @@ public class NFTPromptHUDController : IHUD
     private bool isPointerInTooltipArea = false;
     private bool isPointerInOwnerArea = false;
 
-    public NFTPromptHUDController()
+    public NFTPromptHUDController(RestrictedActionsContext restrictedActionsContext, BaseVariable<NFTPromptModel> openNftPromptVariable)
     {
         view = Object.Instantiate(Resources.Load<GameObject>(VIEW_PREFAB_PATH))
             .GetComponent<NFTPromptHUDView>();
@@ -37,7 +40,12 @@ public class NFTPromptHUDController : IHUD
         view.OnOwnersPopupClosed += HideOwnersPopup;
 
         ownersInfoController = new OwnersInfoController(view.GetOwnerElementPrefab());
-        DataStore.i.common.onOpenNFTPrompt.OnChange += OpenNftInfoDialog;
+
+        this.openNftPromptVariable = openNftPromptVariable;
+        openNftPromptVariable.OnChange += OpenNftInfoDialog;
+
+        this.restrictedActionsContext = restrictedActionsContext;
+        restrictedActionsContext.OpenNftPrompt += OpenPromptRequest;
     }
 
     public void OpenNftInfoDialog(NFTPromptModel model, NFTPromptModel prevModel)
@@ -91,7 +99,13 @@ public class NFTPromptHUDController : IHUD
 
         view?.Dispose();
 
-        DataStore.i.common.onOpenNFTPrompt.OnChange -= OpenNftInfoDialog;
+        openNftPromptVariable.OnChange -= OpenNftInfoDialog;
+        restrictedActionsContext.OpenNftPrompt -= OpenPromptRequest;
+    }
+
+    private void OpenPromptRequest(string contractAddress, string tokenId)
+    {
+        openNftPromptVariable.Set(new NFTPromptModel(contractAddress, tokenId, string.Empty));
     }
 
     private void SetNFT(NFTInfoSingleAsset info, string comment, bool shouldRefreshOwners)

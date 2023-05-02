@@ -1,3 +1,5 @@
+using DCL.AvatarEditor;
+using DCL.Backpack;
 using DCL.Chat.HUD;
 using DCL.Chat.Notifications;
 using DCL.ConfirmationPopup;
@@ -6,7 +8,6 @@ using DCL.Emotes;
 using DCL.EmotesWheel;
 using DCL.EquippedEmotes;
 using DCL.ExperiencesViewer;
-using DCL.GoToPanel;
 using DCL.Guests.HUD.ConnectWallet;
 using DCL.Helpers;
 using DCL.Providers;
@@ -42,9 +43,9 @@ namespace DCL
             #else
             pluginSystem.Register<SkyboxController>(() => new SkyboxController());
             #endif
-            pluginSystem.Register<GotoPanelPlugin>(() => new GotoPanelPlugin());
             pluginSystem.Register<ExperiencesViewerFeature>(() => new ExperiencesViewerFeature());
             pluginSystem.Register<EmoteAnimationsPlugin>(() => new EmoteAnimationsPlugin());
+            pluginSystem.Register<TeleportHUDPlugin>(() => new TeleportHUDPlugin());
             pluginSystem.Register<EquippedEmotesInitializerPlugin>(() => new EquippedEmotesInitializerPlugin());
             //TODO: handle plugins that need to be converted to VR
             pluginSystem.Register<EmotesWheelUIPlugin>(() => new EmotesWheelUIPlugin());
@@ -85,7 +86,7 @@ namespace DCL
             pluginSystem.RegisterWithFlag<PromoteChannelsToastPlugin>(() => new PromoteChannelsToastPlugin(), "promote_channels_toast");
             pluginSystem.RegisterWithFlag<PlayerPassportPlugin>(() => new PlayerPassportPlugin(), "new_avatar_flow");
             pluginSystem.RegisterWithFlag<FavoritePlacesPlugin>(() => new FavoritePlacesPlugin(), "favourite_places");
-            pluginSystem.RegisterWithFlag<OutlinerPlugin>(() => new OutlinerPlugin(), "avatar_outliner");
+            pluginSystem.RegisterWithFlag<OutlinerPlugin>(() => new OutlinerPlugin(Environment.i.serviceLocator.Get<IAddressableResourceProvider>()), "avatar_outliner");
 
             pluginSystem.Register<FriendsNotificationPlugin>(() => new FriendsNotificationPlugin(new DefaultPlayerPrefs(),
                 FriendsController.i,
@@ -97,7 +98,11 @@ namespace DCL
 
             pluginSystem.Register<ABDetectorPlugin>(() => new ABDetectorPlugin());
 
-            pluginSystem.Register<MapTexturePlugin>(() => new MapTexturePlugin());
+            pluginSystem.Register<MapTexturePlugin>(() => new MapTexturePlugin(Environment.i.serviceLocator.Get<IAddressableResourceProvider>()));
+
+            pluginSystem.RegisterWithFlag<BackpackEditorV2Plugin>(() => new BackpackEditorV2Plugin(), "backpack_editor_v2");
+            // TODO: remove the v1 backpack editor when v2 is confirmed to be completely functional
+            pluginSystem.RegisterWithFlag<AvatarEditorHUDPlugin>(() => new AvatarEditorHUDPlugin(), "backpack_editor_v1");
 
             pluginSystem.SetFeatureFlagsData(DataStore.i.featureFlags.flags);
 

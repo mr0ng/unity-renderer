@@ -39,7 +39,6 @@ namespace DCL.Interface
             /** Camera rotation */
             public Quaternion cameraRotation;
 
-            /** Camera height, relative to the feet of the avatar or ground */
             public float playerHeight;
 
             public Vector3 mousePosition;
