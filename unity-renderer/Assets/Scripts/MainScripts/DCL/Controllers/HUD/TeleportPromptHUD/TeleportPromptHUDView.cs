@@ -8,7 +8,7 @@ using DCL;
 public class TeleportPromptHUDView : MonoBehaviour
 {
     [SerializeField] internal ShowHideAnimator contentAnimator;
-    [SerializeField] internal GameObject content;
+    [SerializeField] public GameObject content;
     [SerializeField] internal Animator teleportHUDAnimator;
     [SerializeField] internal GraphicRaycaster teleportRaycaster;
 
@@ -62,13 +62,13 @@ public class TeleportPromptHUDView : MonoBehaviour
         backgroundCatcher.onClick.AddListener(OnClosePressed);
         continueButton.onClick.AddListener(OnTeleportPressed);
 //<<<<<<< HEAD
-//        contentAnimator.OnWillFinishHide += (animator) => Hide();
-
- //       contentAnimator.Hide();
-//        OnSetVisibility?.Invoke(false);
-//        content.GetComponent<Canvas>().enabled = false;
-//
-//        teleportRaycaster.enabled = false;
+        // contentAnimator.OnWillFinishHide += (animator) => Hide();
+        //
+        // contentAnimator.Hide();
+        // OnSetVisibility?.Invoke(false);
+        // //content.GetComponent<Canvas>().enabled = false;
+        //
+        // teleportRaycaster.enabled = false;
 //>>>>>>> dev
     }
 
@@ -137,19 +137,23 @@ public class TeleportPromptHUDView : MonoBehaviour
         textEventAttendees.text = $"+{attendeesCount}";
     }
 //<<<<<<< HEAD
-//    public void SetVisibility(bool visible)
-//    {
- //       OnSetVisibility?.Invoke(visible);
- //   }
-//    private void Hide()
-//    {
-//        content.GetComponent<Canvas>().enabled = false;
-//        SetVisibility((false));
- //       if (fetchParcelImageOp != null)
-//            fetchParcelImageOp.Dispose();
+    public void SetVisibility(bool visible)
+    {
+        OnSetVisibility?.Invoke(visible);
+    }
+    private void Hide()
+    {
+        content.GetComponent<Canvas>().enabled = false;
+        SetVisibility((false));
+        if (fetchParcelImageOp != null)
+            fetchParcelImageOp.Dispose();
 
-//        if (downloadedBanner != null)
-//	}
+        if (downloadedBanner != null)
+        {
+            UnityEngine.Object.Destroy(downloadedBanner);
+            downloadedBanner = null;
+        }
+	}
 //=======
 
     private AssetPromise_Texture texturePromise;
@@ -184,10 +188,10 @@ public class TeleportPromptHUDView : MonoBehaviour
     {
         OnCloseEvent?.Invoke();
 //<<<<<<< HEAD
-//        contentAnimator.Hide(true);
-//        OnSetVisibility?.Invoke(false);
-//        AudioScriptableObjects.dialogClose.Play(true);
-        //transform.position += 20*Vector3.down;
+        contentAnimator.Hide(true);
+        OnSetVisibility?.Invoke(false);
+        AudioScriptableObjects.dialogClose.Play(true);
+        transform.position += 20*Vector3.down;
 //=======
 //>>>>>>> dev
     }
@@ -195,12 +199,12 @@ public class TeleportPromptHUDView : MonoBehaviour
     private void OnTeleportPressed()
     {
         OnTeleportEvent?.Invoke();
-//<<<<<<< HEAD
-//        OnSetVisibility?.Invoke(false);
-//        contentAnimator.Hide(true);
-//        //transform.position += 20*Vector3.down;
-//=======
-//>>>>>>> dev
+// #if DCL_VR
+//
+//         OnSetVisibility?.Invoke(false);
+//         contentAnimator.Hide(true);
+//         transform.position += 20*Vector3.down;
+// #endif
     }
 
     private void OnDestroy()

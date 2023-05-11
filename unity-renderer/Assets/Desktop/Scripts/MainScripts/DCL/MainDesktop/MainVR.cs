@@ -9,10 +9,12 @@ using MainScripts.DCL.Controllers.HUD.Preloading;
 using MainScripts.DCL.Controllers.LoadingFlow;
 using MainScripts.DCL.Controllers.SettingsDesktop;
 using MainScripts.DCL.Utils;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.XR;
 using UnityEngine.XR.Management;
 using UnityEngine.XR.OpenXR;
+using PlayerSettings = DCL.Configuration.PlayerSettings;
 
 namespace DCL
 {
@@ -29,51 +31,22 @@ namespace DCL
         private readonly DataStoreRef<DataStore_LoadingScreen> loadingScreenRef;
 
         private BaseVariable<FeatureFlag> featureFlags => DataStore.i.featureFlags.flags;
-        // private Transform mixedRealityPlayspace;
-        // private Transform cameraParent;
+        private Transform mixedRealityPlayspace;
+        private Transform cameraParent;
         protected override void Awake()
         {
             #if !DCL_VR
             Debug.LogError("DCL_VR not added in Player Compiler Defines. Please add DCL_VR under player setting Defines to enable full VR capabilities");
-            #endif
+#else
+            UnityThread.initUnityThread(true);
+#endif
             CommandLineParserUtils.ParseArguments();
             isConnectionLost = false;
-            // Turn on VR support and set the ENABLE_VR define for Standalone
-
-//             XRSettings.enabled = true;
-//             XRGeneralSettings.Instance.InitManagerOnStart = true;
-//             XRGeneralSettings.Instance.Manager.loaders.Clear();
-//
-//             var Loader = new OpenXRLoader();
-//             XRGeneralSettings.Instance.Manager.TryAddLoader(Loader);
-// #if UNITY_STANDALONE
-// #if UNITY_EDITOR
-//             UnityEditor.PlayerSettings.SetScriptingDefineSymbolsForGroup(
-//                 UnityEditor.BuildTargetGroup.Standalone, "ENABLE_VR");
-// #else
-//             UnityEditor.PlayerSettings.SetScriptingDefineSymbolsForGroup(
-//                 UnityEditor.BuildTargetGroup.Standalone, "ENABLE_VR");
-// #endif
-// #elif UNITY_ANDROID
-//
-//             // Turn on VR support and set the ENABLE_VR define for Android
-// #if UNITY_EDITOR
-//         XRSettings.LoadDeviceByName("OpenXR");
-//         XRSettings.enabled = true;
-//         UnityEditor.PlayerSettings.SetScriptingDefineSymbolsForGroup(
-//             UnityEditor.BuildTargetGroup.Android, "ENABLE_VR");
-// #else
-//         XRSettings.LoadDeviceByName("OpenXR");
-//         XRSettings.enabled = true;
-//         UnityEditor.PlayerSettings.SetScriptingDefineSymbolsForGroup(
-//             UnityEditor.BuildTargetGroup.Android, "ENABLE_VR");
-// #endif
-// #endif
 
             DCLVideoTexture.videoPluginWrapperBuilder = VideoProviderFactory.CreateVideoProvider;
 
             InitializeSettings();
-
+            DataStore.i.wsCommunication.communicationReady.OnChange += RestartSocketServer;
             base.Awake();
 
             DataStore.i.wsCommunication.communicationEstablished.OnChange += OnCommunicationEstablished;
@@ -83,10 +56,10 @@ namespace DCL
 
             //TODO: Integrate preloading controller to LoadingScreenPlugin. Currently not visible
             //preloadingController = new PreloadingController(Environment.i.serviceLocator.Get<IAddressableResourceProvider>());
-            loadingFlowController = new LoadingFlowController(
-                loadingScreenRef.Ref.decoupledLoadingHUD.visible,
-                CommonScriptableObjects.rendererState,
-                DataStore.i.wsCommunication.communicationEstablished);
+            // loadingFlowController = new LoadingFlowController(
+            //     loadingScreenRef.Ref.decoupledLoadingHUD.visible,
+            //     CommonScriptableObjects.rendererState,
+            //     DataStore.i.wsCommunication.communicationEstablished);
         }
 
         protected override void Start()
@@ -100,6 +73,8 @@ namespace DCL
             // cameraParent = Camera.main.transform.parent;
             // mixedRealityPlayspace.parent = cameraParent;
             // mixedRealityPlayspace.localPosition = new Vector3(0f, -0.85f, 0f);;
+            // Add event handler for communicationEstablished.OnChange
+
         }
         protected override void InitializeDataStore()
         {
@@ -159,7 +134,8 @@ namespace DCL
 
         private void VRDestroy()
         {
-            loadingFlowController.Dispose();
+            if(loadingFlowController != null)
+                loadingFlowController.Dispose();
             //preloadingController.Dispose();
 #if !AV_PRO_PRESENT
             DCLVideoPlayer.StopAllThreads();
@@ -168,6 +144,14 @@ namespace DCL
 
         void OnCommunicationEstablished(bool current, bool previous)
         {
+            if (current && !previous) // if the communication has just been established
+            {
+                //preloadingController = new PreloadingController(Environment.i.serviceLocator.Get<IAddressableResourceProvider>());
+                loadingFlowController = new LoadingFlowController(
+                    loadingScreenRef.Ref.decoupledLoadingHUD.visible,
+                    CommonScriptableObjects.rendererState,
+                    DataStore.i.wsCommunication.communicationEstablished);
+            }
             if (current == false && previous) { isConnectionLost = true; }
         }
 
@@ -191,6 +175,24 @@ namespace DCL
         protected override void SetupServices()
         {
             Environment.Setup(ServiceLocatorDesktopFactory.CreateDefault());
+        }
+        public void RestartSocketServer(bool current, bool previous)
+        {
+            if (current)
+                return;
+            //DebugConfigComponent.i.ReloadPage();
+            //  kernelCommunication.Dispose();
+            //SetupPlugins();
+
+
+            InitializeCommunication();
+            //DebugConfigComponent.i.ShowWebviewScreen();
+            DCL.Interface.WebInterface.SendSystemInfoReport();
+            SetupServices();
+            InitializeSceneDependencies();
+            InitializeDataStore();
+            // We trigger the Decentraland logic once everything is initialized.
+            DCL.Interface.WebInterface.StartDecentraland();
         }
     }
 }

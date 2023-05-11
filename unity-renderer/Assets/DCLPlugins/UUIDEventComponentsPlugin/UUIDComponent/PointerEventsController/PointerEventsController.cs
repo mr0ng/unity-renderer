@@ -20,17 +20,14 @@ namespace DCL
     public class PointerEventsController
     {
         private static bool renderingEnabled => CommonScriptableObjects.rendererState.Get();
+        #if DCL_VR
         public System.Action OnPointerHoverStarts;
         public System.Action OnPointerHoverEnds;
-
         DCLPlayerInput inputActions = new DCLPlayerInput();
-
-        RaycastHitInfo lastPointerDownEventHitInfo;
-        IPointerInputEvent pointerInputUpEvent;
-        IRaycastHandler raycastHandler = new RaycastHandler();
+        #endif
         private readonly PointerHoverController pointerHoverController;
 
-
+        private readonly IRaycastHandler raycastHandler = new RaycastHandler();
         private readonly PointerEventData uiGraphicRaycastPointerEventData = new (null);
         private readonly List<RaycastResult> uiGraphicRaycastResults = new ();
 
@@ -40,10 +37,10 @@ namespace DCL
 
         private DataStore_ECS7 dataStoreEcs7 = DataStore.i.ecs7;
 
-
+        private IPointerInputEvent pointerInputUpEvent;
         private Camera charCamera;
 
-
+        private RaycastHitInfo lastPointerDownEventHitInfo;
         private GraphicRaycaster uiGraphicRaycaster;
         private RaycastHit hitInfo;
 
@@ -175,10 +172,13 @@ namespace DCL
         {
             if (Utils.LockedThisFrame())
                 return;
-
+            #if DCL_VR
+            bool mouseIsDown = inputActions.Player.Select.triggered;
+            bool mouseIsUp =  !inputActions.Player.Select.triggered;
+            #else
             bool mouseIsDown = Input.GetMouseButtonDown(0);
             bool mouseIsUp = Input.GetMouseButtonUp(0);
-
+            #endif
             switch (raycastHandlerTarget)
             {
                 case IRaycastPointerDownHandler down:
@@ -227,8 +227,9 @@ namespace DCL
             #if DCL_VR
             if (CrossPlatformManager.IsVRPlatform())
                 return CrossPlatformManager.GetRay();
-            #endif
+            #else
             return charCamera.ScreenPointToRay(new Vector3(Screen.width / 2, Screen.height / 2, 0));
+            #endif
         }
 
         private Ray GetRayFromMouse() =>

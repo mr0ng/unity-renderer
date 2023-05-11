@@ -11,27 +11,30 @@ public class InteractionHoverCanvasController : MonoBehaviour
     public GameObject[] icons;
     public RectTransform anchor;
     private Vector2 defaultAnchorOffset;
+#if DCL_VR
     private Transform myTrans;
+#endif
 
     bool isHovered = false;
     GameObject hoverIcon;
     private Vector3 meshCenteredPos;
-
+#if DCL_VR
     [SerializeField]
     private float followSpeed = .8f;
     [SerializeField]
     private Vector3 offset = new Vector3(0f, .8f, 0f);
-
+#endif
     const string ACTION_BUTTON_POINTER = "POINTER";
     const string ACTION_BUTTON_PRIMARY = "PRIMARY";
     const string ACTION_BUTTON_SECONDARY = "SECONDARY";
 
     private DataStore_Cursor dataStore;
 
-
     void Awake()
     {
+        #if DCL_VR
         myTrans = transform;
+        #endif
         defaultAnchorOffset = anchor.anchoredPosition;
         dataStore = DataStore.i.Get<DataStore_Cursor>();
         backgroundTransform.gameObject.SetActive(false);
@@ -78,8 +81,6 @@ public class InteractionHoverCanvasController : MonoBehaviour
         UpdateCanvas();
     }
 
-
-
     public void Setup(string button, string feedbackText)
     {
         text.text = feedbackText;
@@ -117,7 +118,9 @@ public class InteractionHoverCanvasController : MonoBehaviour
             return;
 
         isHovered = hoverState;
+        #if DCL_VR
         myTrans.position = CrossPlatformManager.GetPoint() + offset;
+#endif
         UpdateCanvas();
     }
 

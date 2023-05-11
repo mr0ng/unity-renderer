@@ -82,8 +82,6 @@ namespace DCL
 
         private HashSet<MinimapMetadata.MinimapSceneInfo> scenesOfInterest = new HashSet<MinimapMetadata.MinimapSceneInfo>();
         private Dictionary<MinimapMetadata.MinimapSceneInfo, GameObject> scenesOfInterestMarkers = new Dictionary<MinimapMetadata.MinimapSceneInfo, GameObject>();
-        private PointerEventData uiRaycastPointerEventData = new PointerEventData(EventSystem.current);
-        private List<RaycastResult> uiRaycastResults = new List<RaycastResult>();
         private Dictionary<string, PoolableObject> usersInfoMarkers = new Dictionary<string, PoolableObject>();
         private Pool usersInfoPool;
 
@@ -123,23 +121,7 @@ namespace DCL
             Initialize();
         }
 
-        void Update()
-        {
-            if ((playerWorldPosition.Get() - lastPlayerPosition).sqrMagnitude >= 0.1f * 0.1f)
-            {
-                lastPlayerPosition = playerWorldPosition.Get();
-                UpdateRendering(Utils.WorldToGridPositionUnclamped(lastPlayerPosition));
-            }
 
-            if (!parcelHighlightEnabled)
-                return;
-
-            UpdateCursorMapCoords();
-
-            UpdateParcelHighlight();
-
-            UpdateParcelHold();
-        }
 
         public void OnDestroy()
         {
@@ -341,7 +323,7 @@ namespace DCL
             highlightedLands.Add(coords, highlightItem);
         }
 
-
+#if DCL_VR
         void Update()
         {
             if (!parcelHighlightEnabled)
@@ -359,24 +341,25 @@ namespace DCL
 
             UpdateParcelHold();
         }
-        // void Update()
-        // {
-        //     if ((playerWorldPosition.Get() - lastPlayerPosition).sqrMagnitude >= 0.1f * 0.1f)
-        //     {
-        //         lastPlayerPosition = playerWorldPosition.Get();
-        //         UpdateRendering(Utils.WorldToGridPositionUnclamped(lastPlayerPosition));
-        //     }
-        //
-        //     if (!parcelHighlightEnabled)
-        //         return;
-        //
-        //     UpdateCursorMapCoords();
-        //
-        //     UpdateParcelHighlight();
-        //
-        //     UpdateParcelHold();
-        // }
+   #else
+        void Update()
+        {
+            if ((playerWorldPosition.Get() - lastPlayerPosition).sqrMagnitude >= 0.1f * 0.1f)
+            {
+                lastPlayerPosition = playerWorldPosition.Get();
+                UpdateRendering(Utils.WorldToGridPositionUnclamped(lastPlayerPosition));
+            }
 
+            if (!parcelHighlightEnabled)
+                return;
+
+            UpdateCursorMapCoords();
+
+            UpdateParcelHighlight();
+
+            UpdateParcelHold();
+        }
+#endif
 
         void UpdateCursorMapCoords()
         {

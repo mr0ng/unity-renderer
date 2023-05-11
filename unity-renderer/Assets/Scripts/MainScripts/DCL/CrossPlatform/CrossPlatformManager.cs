@@ -27,17 +27,18 @@ public static class CrossPlatformManager
             settings = Resources.Load<PlatformSettings>($"PlatformSettings");
         }
         string contorllerName;
-        IsVR = XRGeneralSettings.Instance.Manager.activeLoader != null;
-        if (!IsVR)
-        {
+
+
+        #if !DCL_VR
+
             contorllerName = settings.NonVRController;
-        }
-        else
-        {
+
+        #else
+            IsVR = XRGeneralSettings.Instance.Manager.activeLoader != null;
             SetUpForVR();
             contorllerName = settings.VRController;
-        }
 
+    #endif
         return contorllerName;
     }
 

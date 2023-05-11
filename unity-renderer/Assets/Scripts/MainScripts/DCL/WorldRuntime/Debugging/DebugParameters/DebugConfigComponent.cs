@@ -24,7 +24,7 @@ namespace DCL
         [SerializeField] private GameObject popupMessageObj;
         [SerializeField] private CanvasWebViewPrefab DCLWebview;
         // [SerializeField] private CanvasKeyboard keyboardDCL;
-        [SerializeField] private CanvasWebViewPrefab optionsWeview;
+        //[SerializeField] private CanvasWebViewPrefab optionsWeview;
         //[SerializeField] public CanvasKeyboard keyboardOptions;
         [SerializeField] private TMP_InputField urlInput;
         [SerializeField] private Button reload;
@@ -142,7 +142,7 @@ namespace DCL
             StandaloneWebView.SetAutoplayEnabled(true);
             StandaloneWebView.SetTargetFrameRate(72);
             StandaloneWebView.SetCommandLineArguments("--disable-web-security");
-            optionsWeview.gameObject.SetActive(false);
+            //optionsWeview.gameObject.SetActive(false);
             //keyboardOptions.gameObject.SetActive(false);
 #elif UNITY_ANDROID
             AndroidGeckoWebView.GloballySetUserAgent("Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2228.0 Safari/537.36");
@@ -464,11 +464,11 @@ namespace DCL
 
                 // DCLWebview.RemoteDebuggingEnabled = false;
                 // DCLWebview.LogConsoleMessages = false;
-                DCLWebview.NativeOnScreenKeyboardEnabled = false;
-                DCLWebview.Native2DModeEnabled = false;
+                //DCLWebview.NativeOnScreenKeyboardEnabled = false;
+                //DCLWebview.Native2DModeEnabled = false;
 
-                urlInput.keyboardType = TouchScreenKeyboardType.URL;
-                urlInput.contentType = TMP_InputField.ContentType.Alphanumeric;
+                //urlInput.keyboardType = TouchScreenKeyboardType.URL;
+                //urlInput.contentType = TMP_InputField.ContentType.Alphanumeric;
 
 
                 Debug.Log("Created WebView objects");
@@ -523,7 +523,7 @@ namespace DCL
             startMenu.SetActive((false));
             //keyboardOptions.gameObject.SetActive(false);
             //keyboardDCL.gameObject.SetActive((false));
-            optionsWeview.gameObject.SetActive(false);
+            //optionsWeview.gameObject.SetActive(false);
             urlInput.gameObject.SetActive(false);
             reload.gameObject.SetActive((false));
             swapTabs.gameObject.SetActive((false));
@@ -550,7 +550,7 @@ namespace DCL
             {
                 DCLWebview.gameObject.SetActive((false));
                 //keyboardDCL.gameObject.SetActive(false);
-                optionsWeview.gameObject.SetActive((true));
+                //optionsWeview.gameObject.SetActive((true));
                 //keyboardOptions.gameObject.SetActive(true);
                 isMainTab = false;
             }
@@ -558,7 +558,7 @@ namespace DCL
             {
                 DCLWebview.gameObject.SetActive((true));
                 //keyboardDCL.gameObject.SetActive(true);
-                optionsWeview.gameObject.SetActive((false));
+                //optionsWeview.gameObject.SetActive((false));
                 //keyboardOptions.gameObject.SetActive(false);
                 isMainTab = true;
             }

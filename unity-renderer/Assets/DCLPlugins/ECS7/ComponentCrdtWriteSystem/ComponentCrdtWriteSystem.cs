@@ -91,7 +91,6 @@ public class ComponentCrdtWriteSystem : IDisposable
             }
 
             if (message.writeType.HasFlag(ECSComponentWriteType.SEND_TO_LOCAL))
-
             {
                 crdtExecutor.Execute(crdt);
             }

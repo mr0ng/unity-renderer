@@ -12,7 +12,6 @@ GameObject:
   - component: {fileID: 8765831106391079321}
   - component: {fileID: 5411080435721854677}
   - component: {fileID: 6510873107651449072}
-  - component: {fileID: 6264616482115486705}
   m_Layer: 5
   m_Name: TransactionListHUD
   m_TagString: Untagged
@@ -97,21 +96,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   transactionPanel: {fileID: 1213814501773673423}
---- !u!114 &6264616482115486705
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2018494505262642849}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e1310d97fdbc2b04fba98e7452db4d2e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  sortingOrder: 0
-  showHideAnimator: {fileID: 0}
-  view: {fileID: 6510873107651449072}
 --- !u!1 &6184271161322807546
 GameObject:
   m_ObjectHideFlags: 0

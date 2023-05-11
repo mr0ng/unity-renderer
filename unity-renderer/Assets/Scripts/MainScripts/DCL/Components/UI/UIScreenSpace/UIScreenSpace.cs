@@ -126,24 +126,19 @@ namespace DCL.Components
 
             // Canvas
             canvas = canvasGameObject.AddComponent<Canvas>();
-
             hudCanvasCameraModeController = new HUDCanvasCameraModeController(canvas, DataStore.i.camera.hudsCamera);
 
-
-// #if UNITY_ANDROID && !UNITY_EDITOR
-//             canvas.renderMode = RenderMode.WorldSpace;
-//             #else
-//
-//             canvas.renderMode = RenderMode.ScreenSpaceOverlay;
-// #endif
+            #if DCL_VR
             var rect = canvasGameObject.transform as RectTransform;
             rect.sizeDelta = new Vector2(1250, 720);
+            #endif
             // Canvas Scaler (for maintaining ui aspect ratio)
-            // CanvasScaler canvasScaler = canvasGameObject.AddComponent<CanvasScaler>();
-            // canvasScaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
-            // canvasScaler.referenceResolution = new Vector2(1280f, 720f);
-            // canvasScaler.matchWidthOrHeight = 1f; // Match height, recommended for landscape projects
-
+            #if !DCL_VR
+             CanvasScaler canvasScaler = canvasGameObject.AddComponent<CanvasScaler>();
+             canvasScaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+             canvasScaler.referenceResolution = new Vector2(1280f, 720f);
+             canvasScaler.matchWidthOrHeight = 1f; // Match height, recommended for landscape projects
+            #endif
             // Graphics Raycaster (for allowing touch/click input on the ui components)
             graphicRaycaster = canvasGameObject.AddComponent<GraphicRaycaster>();
 
@@ -166,7 +161,11 @@ namespace DCL.Components
             childHookRectTransform.anchorMax = new Vector2(1, 0);
 
             // We scale the panel downwards to subtract the viewport's top 10%
-            float canvasHeight = 720; //canvasScaler.referenceResolution.y;
+            #if DCL_VR
+            float canvasHeight = 720;
+            #else
+            float canvasHeight = canvasScaler.referenceResolution.y;
+            #endif
             childHookRectTransform.pivot = new Vector2(0.5f, 0f);
             float canvasSubtraction = canvasHeight * UISettings.RESERVED_CANVAS_TOP_PERCENTAGE / 100;
             childHookRectTransform.sizeDelta = new Vector2(0, canvasHeight - canvasSubtraction);

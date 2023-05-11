@@ -13,15 +13,15 @@ namespace DCL.ECSComponents
         internal readonly IUpdateEventHandler updateEventHandler;
 
         internal CameraModeRepresentantion cameraModeRepresentantion;
-        private UnityEngine.Vector3 area; 
+        private UnityEngine.Vector3 area;
         private IDCLEntity entity;
         private IParcelScene scene;
         internal PBCameraModeArea lastModel;
-        
+
         internal ICameraModeAreasController areasController = new CameraModeAreasController();
         private Collider playerCollider;
         internal bool isPlayerInside = false;
-        
+
         public CameraModeAreaComponentHandler(IUpdateEventHandler updateEventHandler, DataStore_Player dataStore)
         {
             this.updateEventHandler = updateEventHandler;
@@ -44,43 +44,43 @@ namespace DCL.ECSComponents
         {
             // We check if the mode should change, and adjust the area for the new model
             bool cameraModeChanged = lastModel != null || model.Mode != lastModel?.Mode;
-            
+
             area = ProtoConvertUtils.PBVectorToUnityVector(model.Area);
             lastModel = model;
-            
-            // If the camera mode hasn't changed we skip the model 
+
+            // If the camera mode hasn't changed we skip the model
             if (!cameraModeChanged)
                 return;
-            
+
             // We set the new mode
             cameraModeRepresentantion.SetCameraMode(ProtoConvertUtils.PBCameraEnumToUnityEnum(model.Mode));
-            
+
             // If the mode must change and the player is inside, we change the mode here
             if (isPlayerInside)
                 areasController.ChangeAreaMode(cameraModeRepresentantion);
         }
-        
+
         internal void Initialize(in IParcelScene scene, in IDCLEntity entity, in Collider playerCollider)
         {
             this.playerCollider = playerCollider;
             this.scene = scene;
             this.entity = entity;
-            
+
             updateEventHandler.AddListener(IUpdateEventHandler.EventType.Update, Update);
             cameraModeRepresentantion = new CameraModeRepresentantion();
         }
 
-        private int updateSkip =  0;
+        //private int updateSkip =  0;
         internal void Update()
         {
-            updateSkip = (updateSkip + 1 ) % 14;
-            if (updateSkip != 0)
-                return;
+            //updateSkip = (updateSkip + 1 ) % 14;
+            //if (updateSkip != 0)
+            //    return;
             if (lastModel == null)
                 return;
-            
+
             bool playerInside = IsPlayerInsideArea();
-            
+
             switch (playerInside)
             {
                 case true when !isPlayerInside:
@@ -90,7 +90,7 @@ namespace DCL.ECSComponents
                     areasController.RemoveInsideArea(cameraModeRepresentantion);
                     break;
             }
-            
+
             isPlayerInside = playerInside;
         }
 
@@ -105,7 +105,7 @@ namespace DCL.ECSComponents
             if (entity == null || scene == null ||
                 scene.sceneData.sceneNumber != CommonScriptableObjects.sceneNumber.Get())
                 return false;
-            
+
             UnityEngine.Vector3 center = entity.gameObject.transform.position;
             Quaternion rotation = entity.gameObject.transform.rotation;
 
@@ -127,7 +127,7 @@ namespace DCL.ECSComponents
         {
             if (!isPlayerInside)
                 return;
-            
+
             areasController.RemoveInsideArea(cameraModeRepresentantion);
             isPlayerInside = false;
         }

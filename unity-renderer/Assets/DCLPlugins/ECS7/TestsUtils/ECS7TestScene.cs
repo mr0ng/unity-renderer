@@ -19,7 +19,6 @@ public class ECS7TestScene : IParcelScene
 
     public Transform GetSceneTransform() => _go.transform;
     public ContentProvider contentProvider { get; } = new ContentProvider();
-    public int distanceToPlayer { get; set; }
     public bool isPersistent { set; get; } = false;
     public bool isPortableExperience { get; set; } = false;
     public bool IsInitMessageDone() =>

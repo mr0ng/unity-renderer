@@ -803,7 +803,7 @@ Extended Payload Length: {7}
                               {
                                   frame3.Unmask();
                               }
-                              
+
                               completed(frame3);
                           },
                           error

@@ -102,7 +102,6 @@ namespace MainScripts.DCL.Controllers.LoadingFlow
                 {
                     ShowTimeout();
                     StopWatching();
-                    break;
                 }
 
                 await UniTask.Yield(cancellationToken: disposeToken.Token);

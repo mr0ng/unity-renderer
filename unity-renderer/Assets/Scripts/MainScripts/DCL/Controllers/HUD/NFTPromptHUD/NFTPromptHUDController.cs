@@ -30,7 +30,7 @@ public class NFTPromptHUDController : IHUD
     {
         view = Object.Instantiate(Resources.Load<GameObject>(VIEW_PREFAB_PATH))
             .GetComponent<NFTPromptHUDView>();
-        //view.SetActive(false);
+        view.SetActive(false);
 
         view.OnOwnerLabelPointerEnter += ShowOwnersTooltip;
         view.OnOwnerLabelPointerExit += TryHideOwnersTooltip;

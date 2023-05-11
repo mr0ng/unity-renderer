@@ -13,7 +13,9 @@ namespace DCL
             bool useRaycast, bool enablePointerEvent);
 
         private static bool renderingEnabled => CommonScriptableObjects.rendererState.Get();
+        #if DCL_VR
         private static DCLPlayerInput.PlayerActions actions;
+        #endif
 
         public enum EVENT
         {
@@ -34,7 +36,9 @@ namespace DCL
             public WebInterface.ACTION_BUTTON buttonId;
             public bool useRaycast;
             public bool enablePointerEvent;
+#if DCL_VR
             public bool lastState;
+#endif
         }
 
         private Dictionary<WebInterface.ACTION_BUTTON, List<ButtonListenerCallback>> listeners =
@@ -45,7 +49,9 @@ namespace DCL
 
         public InputController_Legacy()
         {
+            #if DCL_VR
             InputController.GetPlayerActions(ref actions);
+            #endif
             buttonsMap.Add(new BUTTON_MAP()
             {
                 type = BUTTON_TYPE.MOUSE, buttonNum = 0, buttonId = WebInterface.ACTION_BUTTON.POINTER,
@@ -178,7 +184,7 @@ namespace DCL
                 callbacks[i].Invoke(buttonId, evt, useRaycast, enablePointerEvent);
             }
         }
-        private int updateSkip = 0;
+        //private int updateSkip = 0;
         public void Update()
         {
 
@@ -191,7 +197,6 @@ namespace DCL
 
             for (int i = 0; i < count; i++)
             {
-
                 BUTTON_MAP btnMap = buttonsMap[i];
 
                 switch (btnMap.type)
@@ -202,14 +207,14 @@ namespace DCL
                         #if DCL_VR
                         if (GetButtonDown(btnMap) && !btnMap.lastState)
                             #else
-                        if (Input.GetMouseButtonDown(btnMap.buttonNum) && !btnMap.lastState)
+                        if (Input.GetMouseButtonDown(btnMap.buttonNum))
                             #endif
                             RaiseEvent(btnMap.buttonId, EVENT.BUTTON_DOWN, btnMap.useRaycast,
                                 btnMap.enablePointerEvent);
                         #if DCL_VR
                         else if (GetButtonUp(btnMap) && btnMap.lastState)
                         #else
-                        else if (Input.GetMouseButtonUp(btnMap.buttonNum) && btnMap.lastState)
+                        else if (Input.GetMouseButtonUp(btnMap.buttonNum))
                         #endif
                             RaiseEvent(btnMap.buttonId, EVENT.BUTTON_UP, btnMap.useRaycast, btnMap.enablePointerEvent);
                         break;
@@ -219,15 +224,15 @@ namespace DCL
                         #if DCL_VR
                         if (GetKeyDown((KeyCode) btnMap.buttonNum) && !btnMap.lastState)
                         #else
-                        if (Input.GetKeyDown((KeyCode) btnMap.buttonNum) && !btnMap.lastState)
+                        if (Input.GetKeyDown((KeyCode) btnMap.buttonNum))
                         #endif
                             RaiseEvent(btnMap.buttonId, EVENT.BUTTON_DOWN, btnMap.useRaycast,
                                 btnMap.enablePointerEvent);
                         #if DCL_VR
                         else if (!GetKeyDown((KeyCode) btnMap.buttonNum)&& btnMap.lastState)
                         #else
-                        else if (!Input.GetKeyDown((KeyCode) btnMap.buttonNum)&& btnMap.lastState)
-                            #endif
+                        else if (!Input.GetKeyDown((KeyCode) btnMap.buttonNum))
+                        #endif
                             RaiseEvent(btnMap.buttonId, EVENT.BUTTON_UP, btnMap.useRaycast, btnMap.enablePointerEvent);
                         break;
                 }
@@ -235,15 +240,24 @@ namespace DCL
         }
         private static bool GetButtonUp(BUTTON_MAP btnMap)
         {
+            #if DCL_VR
             return !actions.Select.triggered;
+            #else
+            return false;
+            #endif
         }
         private static bool GetButtonDown(BUTTON_MAP btnMap)
         {
+            #if DCL_VR
             return actions.Select.triggered;
+            #else
+            return false;
+            #endif
         }
 
         private static bool GetKeyDown(KeyCode code)
         {
+            #if DCL_VR
             switch (code)
             {
                 case KeyCode.E:
@@ -253,6 +267,9 @@ namespace DCL
                 default:
                     return default;
             }
+            #else
+                return false;
+            #endif
         }
 
         public bool IsPressed(WebInterface.ACTION_BUTTON button)

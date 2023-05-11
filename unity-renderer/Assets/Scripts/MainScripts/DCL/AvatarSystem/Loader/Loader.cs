@@ -189,7 +189,6 @@ namespace AvatarSystem
             bool success = avatarMeshCombiner.Combine(bonesContainer, allRenderers.ToArray());
             if (!success)
             {
-                Debug.LogError("Loader AvatarCombine failed!");
                 status = ILoader.Status.Failed_Major;
                 throw new Exception("Couldnt merge avatar");
             }

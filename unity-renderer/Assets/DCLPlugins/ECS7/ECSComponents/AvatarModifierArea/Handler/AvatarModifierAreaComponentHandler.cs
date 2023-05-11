@@ -13,24 +13,24 @@ namespace DCL.ECSComponents
     {
         private event Action<GameObject> OnAvatarEnter;
         private event Action<GameObject> OnAvatarExit;
-        
+
         internal HashSet<GameObject> avatarsInArea = new HashSet<GameObject>();
         internal HashSet<Collider> excludedColliders;
-        
+
         internal PBAvatarModifierArea model;
         private IDCLEntity entity;
         private UnityEngine.Vector3 boxArea;
-        
+
         private readonly AvatarModifierFactory factory;
         private readonly IUpdateEventHandler updateEventHandler;
         private readonly DataStore_Player dataStore;
-        
+
         public AvatarModifierAreaComponentHandler(IUpdateEventHandler updateEventHandler,DataStore_Player dataStore, AvatarModifierFactory factory)
         {
             this.factory = factory;
             this.dataStore = dataStore;
             this.updateEventHandler = updateEventHandler;
-            
+
             updateEventHandler.AddListener(IUpdateEventHandler.EventType.Update, Update);
             dataStore.otherPlayers.OnRemoved += OnOtherPlayersRemoved;
         }
@@ -49,7 +49,7 @@ namespace DCL.ECSComponents
             RemoveAllModifiers(toRemove);
             if(avatarsInArea != null)
                 avatarsInArea.Clear();
-            
+
             // We unsubscribe from events
             dataStore.ownPlayer.OnChange -= OwnPlayerOnOnChange;
             dataStore.otherPlayers.OnAdded -= OtherPlayersOnOnAdded;
@@ -62,7 +62,7 @@ namespace DCL.ECSComponents
         {
             if (model.Equals(this.model))
                 return;
-            
+
             // Clean up
             RemoveAllModifiers();
             OnAvatarEnter = null;
@@ -72,13 +72,13 @@ namespace DCL.ECSComponents
             ApplyCurrentModel(model);
         }
 
-        private int updateSkip =  0;
+       // private int updateSkip =  0;
         private void Update()
 
         {
-            updateSkip = (updateSkip + 1 ) % 12;
-            if (updateSkip != 0)
-                return;
+           // updateSkip = (updateSkip + 1 ) % 12;
+           // if (updateSkip != 0)
+           //     return;
             if (model == null)
                 return;
 
@@ -117,7 +117,7 @@ namespace DCL.ECSComponents
         {
             if (entity?.gameObject == null)
                 return null;
-            
+
             UnityEngine.Vector3 center = entity.gameObject.transform.position;
             Quaternion rotation = entity.gameObject.transform.rotation;
             return ECSAvatarUtils.DetectAvatars(boxArea, center, rotation, excludedColliders);
@@ -149,12 +149,12 @@ namespace DCL.ECSComponents
             {
                 // We set the unity engine Vector3 here, so we don't allocate a Vector3 each time we use it
                 boxArea = ProtoConvertUtils.PBVectorToUnityVector(model.Area);
-                
+
                 // Add all listeners
                 foreach (AvatarModifierType modifierKey in model.Modifiers)
                 {
                     var modifier = factory.GetOrCreateAvatarModifier(modifierKey);
-                    
+
                     OnAvatarEnter += modifier.ApplyModifier;
                     OnAvatarExit += modifier.RemoveModifier;
                 }
@@ -169,13 +169,13 @@ namespace DCL.ECSComponents
                 }
 
                 this.model = model;
-                
+
                 // Force update due to after model update modifiers are removed and re-added
                 // leaving a frame with the avatar without the proper modifications
                 Update();
             }
         }
-        
+
         internal HashSet<Collider> GetExcludedColliders(PBAvatarModifierArea model)
         {
             if (model.ExcludeIds.Count == 0)
@@ -205,10 +205,10 @@ namespace DCL.ECSComponents
         {
             if (model.ExcludeIds.Count == 0 || !model.ExcludeIds.Contains(player.id))
                 return;
-            
+
             if (excludedColliders == null)
                 excludedColliders = new HashSet<Collider>();
-            
+
             excludedColliders.Add(player.collider);
         }
     }
