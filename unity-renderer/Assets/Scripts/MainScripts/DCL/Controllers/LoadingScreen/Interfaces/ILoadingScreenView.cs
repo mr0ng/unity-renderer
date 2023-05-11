@@ -15,5 +15,8 @@ namespace DCL.LoadingScreen
         LoadingScreenPercentageView GetPercentageView();
 
         public abstract void SetVisible(bool isVisible, bool instant);
+
+        ILoadingScreenTimeoutView GetTimeoutView();
+
     }
 }

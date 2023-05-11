@@ -11,6 +11,7 @@ namespace DCL.LoadingScreen
     {
         [SerializeField] private LoadingScreenTipsView tipsView;
         [SerializeField] private LoadingScreenPercentageView percentageView;
+        [SerializeField] private LoadingScreenTimeoutView timeoutView;
         [SerializeField] private RawImage rawImage;
         [SerializeField] private GameObject betaTag;
         private RenderTexture renderTexture;
@@ -59,6 +60,9 @@ namespace DCL.LoadingScreen
             else { showHideAnimator.Hide(instant); }
         }
 
+
+        public ILoadingScreenTimeoutView GetTimeoutView() =>
+            timeoutView;
 
         public void FadeIn(bool instant, bool blitTexture)
         {

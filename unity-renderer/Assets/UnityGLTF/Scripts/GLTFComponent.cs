@@ -282,7 +282,7 @@ namespace UnityGLTF
                         return;
 #endif
 
-                    Debug.LogException(e);
+                    Debug.LogError("[Old GltfImporter] Failed to load: " + e.Message);
                 }
                 finally
                 {
