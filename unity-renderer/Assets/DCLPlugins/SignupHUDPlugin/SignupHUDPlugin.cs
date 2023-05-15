@@ -7,8 +7,12 @@ namespace DCLPlugins.SignupHUDPlugin
 {
     public class SignupHUDPlugin : IPlugin
     {
+        // #if DCL_VR
+        //
+        // private const string SIGNUP_HUD = "SignupHUDVR";
+        // #else
         private const string SIGNUP_HUD = "SignupHUD";
-
+        // #endif
         private SignupHUDController controller;
 
         public SignupHUDPlugin()

@@ -11,14 +11,14 @@ using DCL.Interface;
 using UnityEngine.UI;
 using Vuplex.WebView;
 using QualitySettings = UnityEngine.QualitySettings;
-
+//end VR additions
 namespace DCL
 {
     public class DebugConfigComponent : MonoBehaviour
     {
         private Stopwatch loadingStopwatch;
         private static DebugConfigComponent sharedInstance;
-
+//VR
  		[SerializeField] private GameObject startMenu;
         [SerializeField] private GameObject browserOptionsButton;
         [SerializeField] private TMP_Text browserMessage;
@@ -35,7 +35,7 @@ namespace DCL
         private string webViewURL = "";
         private bool isMainTab = true;
 		public bool openInternalBrowser;
-
+//end VR
         private readonly DataStoreRef<DataStore_LoadingScreen> dataStoreLoadingScreen;
 
         public static DebugConfigComponent i

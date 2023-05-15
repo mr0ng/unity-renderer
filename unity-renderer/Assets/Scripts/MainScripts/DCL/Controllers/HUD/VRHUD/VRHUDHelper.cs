@@ -14,16 +14,18 @@ public abstract class VRHUDHelper : MonoBehaviour
 
     protected virtual void Awake()
     {
-        if (!CrossPlatformManager.IsVR)
-        {
+#if !DCL_VR
             enabled = false;
             return;
-        }
+#endif
         myTrans = transform;
     }
 
     private void Start()
     {
+        #if !DCL_VR
+        return;
+        #endif
         ConvertUI();
         SetupHelper();
     }

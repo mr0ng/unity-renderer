@@ -241,34 +241,56 @@ namespace DCL
 
                         break;
                     case QueuedSceneMessage.Type.LOAD_PARCEL:
+                        #if DCL_VR
                         UnityThread.ExecuteInTimeBudgetCoroutine(() =>
                         {
                             handler.LoadParcelScenesExecute(m.message);
                             ProfilingEvents.OnMessageWillDequeue?.Invoke("LoadScene");
                         });
+                        #else
+                        handler.LoadParcelScenesExecute(m.message);
+                        ProfilingEvents.OnMessageWillDequeue?.Invoke("LoadScene");
+                        #endif
                         break;
                     case QueuedSceneMessage.Type.UNLOAD_PARCEL:
-
+                        #if DCL_VR
                         UnityThread.ExecuteInTimeBudgetCoroutine(() =>
                         {
+
                             handler.UnloadParcelSceneExecute(m.sceneNumber);
                             ProfilingEvents.OnMessageWillDequeue?.Invoke("UnloadScene");
+
                         });
+                        #else
+                        handler.UnloadParcelSceneExecute(m.sceneNumber);
+                        ProfilingEvents.OnMessageWillDequeue?.Invoke("UnloadScene");
+                        #endif
 
                         break;
                     case QueuedSceneMessage.Type.UPDATE_PARCEL:
+                    #if DCL_VR
                         UnityThread.ExecuteInTimeBudgetCoroutine(() =>
                         {
                             handler.UpdateParcelScenesExecute(m.message);
                             ProfilingEvents.OnMessageWillDequeue?.Invoke("UpdateScene");
                         });
+                        #else
+                        handler.UpdateParcelScenesExecute(m.message);
+                        ProfilingEvents.OnMessageWillDequeue?.Invoke("UpdateScene");
+                        #endif
                         break;
                     case QueuedSceneMessage.Type.UNLOAD_SCENES:
+                        #if DCL_VR
                         UnityThread.ExecuteInTimeBudgetCoroutine(() =>
                         {
                             handler.UnloadAllScenes();
                             ProfilingEvents.OnMessageWillDequeue?.Invoke("UnloadAllScenes");
                         });
+                        #else
+                        handler.UnloadAllScenes();
+                        ProfilingEvents.OnMessageWillDequeue?.Invoke("UnloadAllScenes");
+
+                        #endif
                         break;
                 }
 

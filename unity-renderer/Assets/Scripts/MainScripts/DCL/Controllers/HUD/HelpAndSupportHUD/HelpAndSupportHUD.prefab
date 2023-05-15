@@ -1684,6 +1684,7 @@ GameObject:
   - component: {fileID: 5769089342239212911}
   - component: {fileID: 130523288579308580}
   - component: {fileID: 5463299747482654253}
+  - component: {fileID: 7319523674050078523}
   m_Layer: 5
   m_Name: HelpAndSupportHUD
   m_TagString: Untagged
@@ -1821,6 +1822,21 @@ MonoBehaviour:
   visitFAQButton: {fileID: 6320019778723382392}
   closeButton: {fileID: 1979095170091145507}
   closeAction: {fileID: 11400000, guid: 54539b42d809e284090ff4087d5c733b, type: 2}
+--- !u!114 &7319523674050078523
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6498655820486328905}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4be9485c8c2c4ff4b8ac8d3a8f1e7dc1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  sortingOrder: 0
+  showHideAnimator: {fileID: 130523288579308580}
+  view: {fileID: 5463299747482654253}
 --- !u!1 &6637279912410458473
 GameObject:
   m_ObjectHideFlags: 0

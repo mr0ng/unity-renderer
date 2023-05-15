@@ -6,7 +6,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
-using Cysharp.Threading.Tasks;
 using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -158,7 +157,6 @@ public class AvatarEditorHUDView : MonoBehaviour, IAvatarEditorHUDView, IPointer
 
     private void Awake()
     {
-
         loadingSpinnerGameObject.SetActive(false);
         doneButton.interactable = false; //the default state of the button should be disable until a profile has been loaded.
         isOpen = false;
@@ -270,11 +268,7 @@ public class AvatarEditorHUDView : MonoBehaviour, IAvatarEditorHUDView, IPointer
     internal static AvatarEditorHUDView Create(AvatarEditorHUDController controller)
     {
         var view = Instantiate(Resources.Load<GameObject>(VIEW_PATH)).GetComponent<AvatarEditorHUDView>();
-// #if DCL_VR
-//         view.gameObject.AddComponent<AvatarEditorHudHelper>();
-// #endif
         view.Initialize(controller);
-
         return view;
     }
 
@@ -487,7 +481,6 @@ public class AvatarEditorHUDView : MonoBehaviour, IAvatarEditorHUDView, IPointer
             while (enumerator.MoveNext())
             {
                 enumerator.Current.Value.RemoveAllWearables();
-
             }
         }
 
@@ -610,7 +603,9 @@ public class AvatarEditorHUDView : MonoBehaviour, IAvatarEditorHUDView, IPointer
 
         transform.SetParent(parentTransform);
         transform.localScale = Vector3.one;
+        #if DCL_VR
         transform.localRotation = Quaternion.identity;
+        #endif
 
         RectTransform rectTransform = transform as RectTransform;
         rectTransform.anchorMin = Vector2.zero;

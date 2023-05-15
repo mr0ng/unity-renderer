@@ -23,6 +23,9 @@ namespace DCL.Interface
 
         private static void Create()
         {
+            #if !DCL_VR
+            return;
+            #endif
             canvasKeyboard = Instantiate((GameObject)Resources.Load("Prefabs/KeyboardCanvas"));
             keyboard = NonNativeKeyboard.Instance;
             _keyboardTrans = canvasKeyboard.transform;
@@ -32,6 +35,9 @@ namespace DCL.Interface
 
         private void Awake()
         {
+#if !DCL_VR
+            return;
+#endif
             tmpInputField = GetComponent<TMP_InputField>();
             tmpInputField.onSelect.AddListener(OpenKeyboard);
         }
@@ -40,13 +46,14 @@ namespace DCL.Interface
 
         private void OpenKeyboard(string arg0)
         {
+
             if (keyboardTrans == null)
                 return;
             CleanUpEvents();
             SetupEvents();
             keyboard.PresentKeyboard(NonNativeKeyboard.LayoutType.URL);
             var rawForward = CommonScriptableObjects.cameraForward.Get();
-            keyboardTrans.position = CommonScriptableObjects.cameraPosition.Get() + (.7f * rawForward) + new UnityEngine.Vector3(0, -0.2f, 0);
+            keyboardTrans.position = CommonScriptableObjects.cameraPosition.Get() + (.7f * rawForward) + new UnityEngine.Vector3(0, -0.3f, 0);
             keyboardTrans.forward = new UnityEngine.Vector3(rawForward.x, 0, rawForward.z);
             canvasKeyboard.SetActive(true);
         }

@@ -308,12 +308,32 @@ public class DCLCharacterController : MonoBehaviour
                 var xzPlaneRight = Vector3.Scale(cameraRight.Get(), new Vector3(1, 0, 1));
 
                 Vector3 forwardTarget = Vector3.zero;
-
+            #if DCL_VR
                 forwardTarget += characterYAxis.GetValue() * xzPlaneForward;
                 forwardTarget += characterXAxis.GetValue() * xzPlaneRight;
-                
+
                 if (forwardTarget.magnitude > 1)
                     forwardTarget.Normalize();
+            #else
+                if (characterYAxis.GetValue() > CONTROLLER_DRIFT_OFFSET)
+                    forwardTarget += xzPlaneForward;
+                if (characterYAxis.GetValue() < -CONTROLLER_DRIFT_OFFSET)
+                    forwardTarget -= xzPlaneForward;
+
+                if (characterXAxis.GetValue() > CONTROLLER_DRIFT_OFFSET)
+                    forwardTarget += xzPlaneRight;
+                if (characterXAxis.GetValue() < -CONTROLLER_DRIFT_OFFSET)
+                    forwardTarget -= xzPlaneRight;
+
+                if (forwardTarget.Equals(Vector3.zero))
+                    isMovingByUserInput = false;
+                else
+                    isMovingByUserInput = true;
+
+
+                forwardTarget.Normalize();
+            #endif
+
                 velocity += forwardTarget * speed;
                 CommonScriptableObjects.playerUnityEulerAngles.Set(transform.eulerAngles);
             }
@@ -539,8 +559,8 @@ public class DCLCharacterController : MonoBehaviour
     {
 #if DCL_VR
         float height = 0.875f;
-        
-        //don't report movements under threshold for HMD movements.  Too small make the avatar jitter and not step. 
+
+        //don't report movements under threshold for HMD movements.  Too small make the avatar jitter and not step.
         //position of hmd calculated in VRCharacterController. Rotation Calculated in VRCameraController.
         var reportPosition = characterPosition.worldPosition + (Vector3.up * height);
         if (Mathf.Abs((reportPosition - lastReportPosition).magnitude) < moveThreshold)

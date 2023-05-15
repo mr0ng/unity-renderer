@@ -26,7 +26,7 @@ public class TransactionHUDController : IHUD, ITransactionHUDController
         view = TransactionListHUDView.Create();
         view.OnTransactionAcceptedEvent += OnTransactionAccepted;
         view.OnTransactionRejectedEvent += OnTransactionRejected;
-    
+
         transactionBridge = SceneReferences.i.bridgeGameObject.AddComponent<TransactionBridge>();
         transactionBridge.transactionController = this;
     }

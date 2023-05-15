@@ -31,8 +31,9 @@ namespace SignupHUD
         public event Action OnEditAvatar;
         public event Action OnTermsOfServiceAgreed;
         public event Action OnTermsOfServiceBack;
+        #if DCL_VR
         public event Action<bool> OnSetVisibility;
-
+        #endif
         [Header("Name and Email Screen")]
         [SerializeField] internal RectTransform nameAndEmailPanel;
 
@@ -115,13 +116,18 @@ namespace SignupHUD
         public void SetVisibility(bool visible)
         {
             gameObject.SetActive(visible);
+            #if DCL_VR
             OnSetVisibility?.Invoke(visible);
+            #endif
         }
 
         public void ShowNameScreen()
         {
             nameAndEmailPanel.gameObject.SetActive(true);
             termsOfServicePanel.gameObject.SetActive(false);
+            #if DCL_VR
+            OnSetVisibility?.Invoke(true);
+            #endif
         }
 
         public void ShowTermsOfServiceScreen()
@@ -163,7 +169,5 @@ namespace SignupHUD
         }
 
         private bool IsValidName(string name) { return Regex.IsMatch(name, "^[a-zA-Z0-9]*$"); }
-
-
     }
 }

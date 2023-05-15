@@ -35,17 +35,13 @@ namespace DCL
         public event Action OnMouseLock;
         public event Action OnMouseDown;
 
-        //Default OnPointerEvent
-        public LayerMask OnPointerDownTarget = 1 << 9;
-
 
         private void Awake()
         {
-            if (CrossPlatformManager.IsVR)
-            {
+            #if DCL_VR
                 enabled = false;
                 gameObject.SetActive(false);
-            }
+            #endif
         }
 
         private void Start()

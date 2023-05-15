@@ -33,7 +33,9 @@ namespace DCL.Huds.QuestsTracker
         private bool layoutRebuildRequested;
 
         private bool isDestroyed;
-
+        #if DCL_VR
+        public event Action<bool> OnSetVisibility;
+        #endif
         private void Awake()
         {
             StartCoroutine(RemoveEntriesRoutine());
@@ -120,7 +122,13 @@ namespace DCL.Huds.QuestsTracker
             currentEntries.Clear();
         }
 
-        public void SetVisibility(bool visibility) { gameObject.SetActive(visibility); }
+        public void SetVisibility(bool visibility)
+        {
+            #if DCL_VR
+            OnSetVisibility.Invoke(visibility);
+            #endif
+            gameObject.SetActive(visibility);
+        }
         public void AddReward(string questId, QuestReward reward)
         {
             if (!currentEntries.TryGetValue(questId, out QuestsTrackerEntry entry))

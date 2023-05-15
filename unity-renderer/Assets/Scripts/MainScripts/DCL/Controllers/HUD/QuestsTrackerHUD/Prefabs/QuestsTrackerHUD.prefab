@@ -29,6 +29,7 @@ RectTransform:
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 2310616025352548241}
   m_Father: {fileID: 2310616024837110804}
@@ -119,6 +120,7 @@ RectTransform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 2310616023568484087}
   m_Father: {fileID: 2310616025345409039}
@@ -197,6 +199,7 @@ GameObject:
   - component: {fileID: 2310616025345409033}
   - component: {fileID: 2310616025345409032}
   - component: {fileID: 3262416412152778349}
+  - component: {fileID: 3755213598048295007}
   m_Layer: 5
   m_Name: QuestsTrackerHUD
   m_TagString: Untagged
@@ -214,6 +217,7 @@ RectTransform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 0, y: 0, z: 0}
+  m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 2310616024837110804}
   - {fileID: 6678755443994135145}
@@ -304,6 +308,21 @@ MonoBehaviour:
     type: 3}
   dynamicScrollSensitivity: {fileID: 5931781803862553512}
   notificationsController: {fileID: 8219365489055572791}
+--- !u!114 &3755213598048295007
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2310616025345409035}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f7f851e563671004fb47f89071fa5c51, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  sortingOrder: 0
+  showHideAnimator: {fileID: 0}
+  view: {fileID: 3262416412152778349}
 --- !u!1 &2310616025352548240
 GameObject:
   m_ObjectHideFlags: 0
@@ -333,6 +352,7 @@ RectTransform:
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 2310616023568484087}
   m_RootOrder: 0
@@ -419,6 +439,7 @@ RectTransform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 2310616025345409039}
   m_RootOrder: 1

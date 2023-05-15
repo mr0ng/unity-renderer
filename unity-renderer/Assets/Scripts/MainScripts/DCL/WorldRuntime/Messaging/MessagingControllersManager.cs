@@ -12,7 +12,6 @@ namespace DCL
         public static bool VERBOSE = false;
 
         private const float MAX_GLOBAL_MSG_BUDGET = 0.02f;
-
         private const float MAX_SYSTEM_MSG_BUDGET_FOR_FAR_SCENES = 0.003f;
 
         private const float GLTF_BUDGET_MAX = 0.033f;
@@ -312,7 +311,7 @@ namespace DCL
                     if (ProcessBus(bus))
                         break;
 
-                    //todo:Clint work the yield frequency into the performance manager.) Reduce to throttle loading items, open up to allow faster loading and communication.
+                    //todo:Clint work for VR:reduce the yield frequency into the performance manager.) Reduce to throttle loading items, open up to allow faster loading and communication.
                      if (CommonScriptableObjects.rendererState.Get() && (i % 15 == 0))
                      {
                          yield return null;

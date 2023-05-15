@@ -649,7 +649,6 @@ public class AvatarEditorHUDController : IHUD
     {
         wearablesByCategory.Clear();
         view.RemoveAllWearables();
-        
         bool hasSkin = false;
         bool hasCollectible = false;
         using (var iterator = catalog.Get().GetEnumerator())

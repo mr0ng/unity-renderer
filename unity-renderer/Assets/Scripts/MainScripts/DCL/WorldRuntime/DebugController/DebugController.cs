@@ -27,8 +27,10 @@ namespace DCL
             isFPSPanelVisible = DataStore.i.debugConfig.isFPSPanelVisible;
             isFPSPanelVisible.OnChange += OnFPSPanelToggle;
             //TODO: handle HUDS that need to be converted to VR
-            //GameObject view = Object.Instantiate(Resources.Load("DebugView")) as GameObject;
-            //debugView = view.GetComponent<DebugView>();
+            #if !DCL_VR
+            GameObject view = Object.Instantiate(Resources.Load("DebugView")) as GameObject;
+            debugView = view.GetComponent<DebugView>();
+            #endif
             this.botsController = botsController;
 
             OnKernelConfigChanged(KernelConfig.i.Get(), null);
@@ -84,7 +86,7 @@ namespace DCL
         {
             isFPSPanelVisible.Set(true);
         }
-        
+
         public void ToggleFPSPanel()
         {
             isFPSPanelVisible.Set(!isFPSPanelVisible.Get());
@@ -183,7 +185,7 @@ namespace DCL
         {
             Environment.i.platform.cullingController.SetAnimationCulling(enabled);
         }
-       
+
 
         public void Dispose()
         {

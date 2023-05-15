@@ -1,7 +1,6 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;   
+using UnityEngine.UI;
 
 public class ItemToggleContainer : MonoBehaviour
 {
@@ -17,7 +16,7 @@ public class ItemToggleContainer : MonoBehaviour
     {
         if (maxItems == newMaxItems) return;
         maxItems = newMaxItems;
-        
+
         var diff = maxItems - items.Count;
 
         if (diff > 0)
@@ -26,7 +25,6 @@ public class ItemToggleContainer : MonoBehaviour
             {
                 var newItemToggle = Instantiate(itemPrefab, itemContainer);
                 items.Add(newItemToggle);
-              
             }
         }
 
@@ -36,7 +34,7 @@ public class ItemToggleContainer : MonoBehaviour
             itemToggle.gameObject.SetActive(i < maxItems);
             itemToggle.transform.SetAsLastSibling();
         }
-        
+
         LayoutRebuilder.ForceRebuildLayoutImmediate(rectTransform);
     }
 
@@ -44,7 +42,7 @@ public class ItemToggleContainer : MonoBehaviour
     {
         var item = wearableSettings.Item;
         var newToggle = items[index];
-        
+
         newToggle.Initialize(item, false, wearableSettings.Amount, skinFactory.GetSkinForRarity(wearableSettings.Item.rarity));
         newToggle.SetHideOtherWerablesToastStrategy(wearableSettings.HideOtherWearablesToastStrategy);
         newToggle.SetBodyShapeCompatibilityStrategy(wearableSettings.IncompatibleWearableToastStrategy);

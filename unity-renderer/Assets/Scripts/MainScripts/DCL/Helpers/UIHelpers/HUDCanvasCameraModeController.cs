@@ -23,9 +23,9 @@ public class HUDCanvasCameraModeController : IDisposable
 
     internal void UpdateCanvas(Camera newCamera, Camera oldCamera)
     {
-#if !DCL_VR
-        canvas.renderMode = newCamera == null ? RenderMode.ScreenSpaceOverlay : RenderMode.ScreenSpaceCamera;
 
+        canvas.renderMode = newCamera == null ? RenderMode.ScreenSpaceOverlay : RenderMode.ScreenSpaceCamera;
+#if !DCL_VR
             canvas.worldCamera = newCamera; //disabled for vr to use raycast camera instead.
         #endif
     }

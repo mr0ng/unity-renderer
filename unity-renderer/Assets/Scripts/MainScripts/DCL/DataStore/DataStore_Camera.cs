@@ -11,6 +11,5 @@ namespace DCL
         public readonly BaseVariable<bool> invertYAxis = new BaseVariable<bool>();
         public readonly BaseVariable<bool> leftMouseButtonCursorLock = new BaseVariable<bool>();
         public readonly BaseVariable<Camera> hudsCamera = new BaseVariable<Camera>();
-        public readonly BaseVariable<bool> mainCamEnabled = new BaseVariable<bool>(true);
     }
 }

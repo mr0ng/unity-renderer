@@ -14,7 +14,9 @@ public class TermsOfServiceHudHelper : VRHUDHelper
         {
             rect.sizeDelta = new Vector2(1920, 1080);
         }
+        #if DCL_VR
         view.OnSetVisibility += OnVisiblityChange;
+        #endif
     }
     private void OnVisiblityChange(bool visible)
     {

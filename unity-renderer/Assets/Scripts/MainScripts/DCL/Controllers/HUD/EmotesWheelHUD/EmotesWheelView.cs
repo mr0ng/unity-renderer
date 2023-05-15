@@ -41,11 +41,8 @@ namespace DCL.EmotesWheel
 
         private HUDCanvasCameraModeController hudCanvasCameraModeController;
 
-#if DCL_VR
         public static EmotesWheelView Create() { return Instantiate(Resources.Load<GameObject>(PATH)).GetComponent<EmotesWheelView>(); }
-#else
-        public static EmotesWheelView Create() { return Instantiate(Resources.Load<GameObject>(PATH)).GetComponent<EmotesWheelView>(); }
-#endif
+
         private void Awake()
         {
             for (int i = 0; i < closeButtons.Length; i++)

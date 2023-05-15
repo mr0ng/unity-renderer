@@ -123,9 +123,11 @@ namespace DCL
         public void Update()
         {
 		//VR optimizations
-            updateSkip = (updateSkip + 1 ) % 31;
+        #if DCL_VR
+            updateSkip = (updateSkip + 1 ) % 10;
             if (updateSkip != 0)
                 return;
+        #endif
             if (!enabled)
                 return;
 
@@ -140,10 +142,11 @@ namespace DCL
         public void LateUpdate()
         {
 		//VR optimizations
+#if DCL_VR
             updateSkip2 = (updateSkip2 + 1 ) % 6;
             if (updateSkip2 != 0)
                 return;
-
+#endif
             if (!enabled)
                 return;
 
@@ -475,7 +478,9 @@ namespace DCL
 
         private async void ThreadedDecodeAndEnqueue(CancellationToken cancellationToken)
         {
+#if DCL_VR
             DateTime lastStart = DateTime.Now;//VR optimizations
+#endif
             while (chunksToDecode.TryDequeue(out string chunk))
             {
                 cancellationToken.ThrowIfCancellationRequested();
@@ -497,11 +502,13 @@ namespace DCL
                         EnqueueSceneMessage(Decode(payload, new QueuedSceneMessage_Scene()));
                     }
                     // Added for VR optimizations
+#if DCL_VR
                     if (DateTime.Now - lastStart > TimeSpan.FromMilliseconds(4))
                     {
                         await UniTask.Yield();
                         lastStart = DateTime.Now;
                     }
+#endif
                 }
             }
         }

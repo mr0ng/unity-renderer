@@ -20,7 +20,9 @@ namespace DCL.HelpAndSupportHUD
         public event Action OnDiscordButtonPressed;
         public event Action OnFaqButtonPressed;
         public event Action OnSupportButtonPressed;
-
+#if DCL_VR
+        public event Action<bool> OnSetVisibility;
+#endif
         public void Initialize()
         {
             closeActionDelegate = (x) => SetVisibility(false);
@@ -34,6 +36,9 @@ namespace DCL.HelpAndSupportHUD
 
         public void SetVisibility(bool visible)
         {
+#if DCL_VR
+            OnSetVisibility.Invoke(visible);
+#endif
             DataStore.i.exploreV2.isSomeModalOpen.Set(visible);
 
             closeAction.OnTriggered -= closeActionDelegate;

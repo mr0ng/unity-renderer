@@ -60,16 +60,14 @@ public class TeleportPromptHUDView : MonoBehaviour
         hudCanvasCameraModeController = new HUDCanvasCameraModeController(content.GetComponent<Canvas>(), DataStore.i.camera.hudsCamera);
         cancelButton.onClick.AddListener(OnClosePressed);
         backgroundCatcher.onClick.AddListener(OnClosePressed);
+        #if DCL_VR
         continueButton.onClick.AddListener(OnTeleportPressed);
-//<<<<<<< HEAD
-        // contentAnimator.OnWillFinishHide += (animator) => Hide();
-        //
-        // contentAnimator.Hide();
-        // OnSetVisibility?.Invoke(false);
-        // //content.GetComponent<Canvas>().enabled = false;
-        //
-        // teleportRaycaster.enabled = false;
-//>>>>>>> dev
+        contentAnimator.OnWillFinishHide += (animator) => Hide();
+
+        contentAnimator.Hide();
+        OnSetVisibility?.Invoke(false);
+        content.GetComponent<Canvas>().enabled = false;
+        #endif
     }
 
     public void Reset()
@@ -92,6 +90,9 @@ public class TeleportPromptHUDView : MonoBehaviour
 
     public void SetInAnimation()
     {
+        #if DCL_VR
+        SetVisibility(true);
+        #endif
         teleportRaycaster.enabled = true;
         teleportHUDAnimator.SetTrigger(IN);
     }
@@ -104,21 +105,27 @@ public class TeleportPromptHUDView : MonoBehaviour
 
     public void ShowTeleportToMagic()
     {
+#if DCL_VR
         OnSetVisibility?.Invoke(true);
+#endif
         containerMagic.SetActive(true);
         imageGotoMagic.gameObject.SetActive(true);
     }
 
     public void ShowTeleportToCrowd()
     {
+        #if DCL_VR
         OnSetVisibility?.Invoke(true);
+        #endif
         containerCrowd.SetActive(true);
         imageGotoCrowd.gameObject.SetActive(true);
     }
 
     public void ShowTeleportToCoords(string coords, string sceneName, string sceneCreator, string previewImageUrl)
     {
+        #if DCL_VR
         OnSetVisibility?.Invoke(true);
+        #endif
         containerCoords.SetActive(true);
         containerScene.SetActive(true);
 
@@ -136,11 +143,12 @@ public class TeleportPromptHUDView : MonoBehaviour
         textEventName.text = eventName;
         textEventAttendees.text = $"+{attendeesCount}";
     }
-//<<<<<<< HEAD
+    //VR helper
     public void SetVisibility(bool visible)
     {
         OnSetVisibility?.Invoke(visible);
     }
+    //VR helper
     private void Hide()
     {
         content.GetComponent<Canvas>().enabled = false;
@@ -154,7 +162,7 @@ public class TeleportPromptHUDView : MonoBehaviour
             downloadedBanner = null;
         }
 	}
-//=======
+
 
     private AssetPromise_Texture texturePromise;
 
@@ -164,7 +172,6 @@ public class TeleportPromptHUDView : MonoBehaviour
         imageSceneThumbnail.gameObject.SetActive(true);
 
         if (string.IsNullOrEmpty(imageUrl))
-//>>>>>>> dev
         {
             DisplayThumbnail(nullImage);
             return;
@@ -187,30 +194,27 @@ public class TeleportPromptHUDView : MonoBehaviour
     private void OnClosePressed()
     {
         OnCloseEvent?.Invoke();
-//<<<<<<< HEAD
+#if DCL_VR //TODO: test that this is still needed for VR or if new updates make this obsolete.
         contentAnimator.Hide(true);
         OnSetVisibility?.Invoke(false);
         AudioScriptableObjects.dialogClose.Play(true);
-        transform.position += 20*Vector3.down;
-//=======
-//>>>>>>> dev
+        //transform.position += 20*Vector3.down;
+#endif
     }
 
     private void OnTeleportPressed()
     {
         OnTeleportEvent?.Invoke();
-// #if DCL_VR
-//
-//         OnSetVisibility?.Invoke(false);
-//         contentAnimator.Hide(true);
-//         transform.position += 20*Vector3.down;
-// #endif
+ #if DCL_VR
+         OnSetVisibility?.Invoke(false);
+         contentAnimator.Hide(true);
+         //transform.position += 20*Vector3.down;
+ #endif
     }
 
     private void OnDestroy()
     {
         hudCanvasCameraModeController?.Dispose();
-
         if (downloadedBanner != null)
         {
             UnityEngine.Object.Destroy(downloadedBanner);

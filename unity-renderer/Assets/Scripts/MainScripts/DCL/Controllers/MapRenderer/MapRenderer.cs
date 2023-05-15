@@ -27,25 +27,20 @@ namespace DCL
 
         [SerializeField] private float parcelHightlightScale = 1.25f;
         [SerializeField] private Button ParcelHighlightButton;
-        [SerializeField] private PointerHelper helper;
         [SerializeField] private MapParcelHighlight highlight;
         [SerializeField] private Image parcelHighlightImage;
         [SerializeField] private Image parcelHighlighImagePrefab;
         [SerializeField] private Image parcelHighlighWithContentImagePrefab;
         [SerializeField] private Image selectParcelHighlighImagePrefab;
-
+        //#if DCL_VR
         private float parcelSizeInMap;
 
         // private Vector3Variable playerRotation => CommonScriptableObjects.cameraForward;
         private Vector3[] mapWorldspaceCorners = new Vector3[4];
         private Vector3 worldCoordsOriginInMap;
-        private List<RaycastResult> uiRaycastResults = new List<RaycastResult>();
-        private PointerEventData uiRaycastPointerEventData = new PointerEventData(EventSystem.current);
-
-        //[HideInInspector] public Vector3 cursorMapCoords;
+        //#endif
 
         [HideInInspector] public Vector2Int cursorMapCoords;
-
         [HideInInspector] public bool showCursorCoords = true;
         public MapAtlas atlas;
         public TextMeshProUGUI highlightedParcelText;
@@ -82,6 +77,8 @@ namespace DCL
 
         private HashSet<MinimapMetadata.MinimapSceneInfo> scenesOfInterest = new HashSet<MinimapMetadata.MinimapSceneInfo>();
         private Dictionary<MinimapMetadata.MinimapSceneInfo, GameObject> scenesOfInterestMarkers = new Dictionary<MinimapMetadata.MinimapSceneInfo, GameObject>();
+        private PointerEventData uiRaycastPointerEventData = new PointerEventData(EventSystem.current);
+        private List<RaycastResult> uiRaycastResults = new List<RaycastResult>();
         private Dictionary<string, PoolableObject> usersInfoMarkers = new Dictionary<string, PoolableObject>();
         private Pool usersInfoPool;
 
@@ -121,7 +118,43 @@ namespace DCL
             Initialize();
         }
 
+// #if DCL_VR
+//         void Update()
+//         {
+//             if (!parcelHighlightEnabled)
+//                 return;
+//
+//             var scale = centeredReferenceParcel.lossyScale.x < 1f ? 1f : centeredReferenceParcel.lossyScale.x;
+//             parcelSizeInMap = centeredReferenceParcel.rect.width * scale;
+//
+//             //the reference parcel has a bottom-left pivot
+//             helper.UpdateCorners(mapWorldspaceCorners, centeredReferenceParcel, ref worldCoordsOriginInMap);
+//
+//             UpdateCursorMapCoords();
+//
+//             UpdateParcelHighlight();
+//
+//             UpdateParcelHold();
+//         }
+// #else
+        void Update()
+        {
+            if ((playerWorldPosition.Get() - lastPlayerPosition).sqrMagnitude >= 0.1f * 0.1f)
+            {
+                lastPlayerPosition = playerWorldPosition.Get();
+                UpdateRendering(Utils.WorldToGridPositionUnclamped(lastPlayerPosition));
+            }
 
+            if (!parcelHighlightEnabled)
+                return;
+
+            UpdateCursorMapCoords();
+
+            UpdateParcelHighlight();
+
+            UpdateParcelHold();
+        }
+// #endif
 
         public void OnDestroy()
         {
@@ -323,69 +356,31 @@ namespace DCL
             highlightedLands.Add(coords, highlightItem);
         }
 
-#if DCL_VR
-        void Update()
-        {
-            if (!parcelHighlightEnabled)
-                return;
-
-            var scale = centeredReferenceParcel.lossyScale.x < 1f ? 1f : centeredReferenceParcel.lossyScale.x;
-            parcelSizeInMap = centeredReferenceParcel.rect.width * scale;
-
-            //the reference parcel has a bottom-left pivot
-            helper.UpdateCorners(mapWorldspaceCorners, centeredReferenceParcel, ref worldCoordsOriginInMap);
-
-            UpdateCursorMapCoords();
-
-            UpdateParcelHighlight();
-
-            UpdateParcelHold();
-        }
-   #else
-        void Update()
-        {
-            if ((playerWorldPosition.Get() - lastPlayerPosition).sqrMagnitude >= 0.1f * 0.1f)
-            {
-                lastPlayerPosition = playerWorldPosition.Get();
-                UpdateRendering(Utils.WorldToGridPositionUnclamped(lastPlayerPosition));
-            }
-
-            if (!parcelHighlightEnabled)
-                return;
-
-            UpdateCursorMapCoords();
-
-            UpdateParcelHighlight();
-
-            UpdateParcelHold();
-        }
-#endif
-
         void UpdateCursorMapCoords()
         {
-            if (!helper.IsCursorOverMapChunk(NAVMAP_CHUNK_LAYER))
+            if (!IsCursorOverMapChunk())
                 return;
 
-#if DCL_VR
-            cursorMapCoords.x = (int) (helper.GetPointerPos().x - worldCoordsOriginInMap.x);
-            cursorMapCoords.y = (int) (helper.GetPointerPos().y - worldCoordsOriginInMap.y);
-            cursorMapCoords /= (int) parcelSizeInMap;
-
-            cursorMapCoords.x = (int)Mathf.Floor(cursorMapCoords.x);
-            cursorMapCoords.y = (int)Mathf.Floor(cursorMapCoords.y);
-#else
+// #if DCL_VR
+//             cursorMapCoords.x = (int) (helper.GetPointerPos().x - worldCoordsOriginInMap.x);
+//             cursorMapCoords.y = (int) (helper.GetPointerPos().y - worldCoordsOriginInMap.y);
+//             cursorMapCoords /= (int) parcelSizeInMap;
+//
+//             cursorMapCoords.x = (int)Mathf.Floor(cursorMapCoords.x);
+//             cursorMapCoords.y = (int)Mathf.Floor(cursorMapCoords.y);
+// #else
             const int OFFSET = -60; //Map is a bit off centered, we need to adjust it a little.
             RectTransformUtility.ScreenPointToLocalPointInRectangle(atlas.chunksParent, Input.mousePosition, DataStore.i.camera.hudsCamera.Get(), out var mapPoint);
             mapPoint -= Vector2.one * OFFSET;
             mapPoint -= (atlas.chunksParent.sizeDelta / 2f);
             cursorMapCoords = Vector2Int.RoundToInt(mapPoint / MapUtils.PARCEL_SIZE);
-#endif
+// #endif
         }
 
         bool IsCursorOverMapChunk()
         {
             #if DCL_VR
-            uiRaycastPointerEventData.position = helper.GetPointerPos();
+            uiRaycastPointerEventData.position = Input.mousePosition;// helper.GetPointerPos();
             #else
             uiRaycastPointerEventData.position = Input.mousePosition;
             #endif
@@ -497,7 +492,9 @@ namespace DCL
             var marker = poolable.gameObject.GetComponent<MapUserIcon>();
             marker.gameObject.name = $"UserIcon-{player.name}";
             marker.gameObject.transform.SetParent(overlayContainerPlayers.transform, true);
+            #if DCL_VR
             marker.gameObject.transform.localScale = Vector3.one;
+            #endif
             marker.Populate(player);
             marker.gameObject.SetActive(otherPlayersIconsEnabled);
             marker.transform.localScale = Vector3.one;

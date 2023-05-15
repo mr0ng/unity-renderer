@@ -30,7 +30,7 @@ PrefabInstance:
     - target: {fileID: 2355457883833974318, guid: ab94f4a6f36c1cd44bfc5dc64fd8d4c8,
         type: 3}
       propertyPath: m_PresetInfoIsWorld
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 2481086363144932030, guid: ab94f4a6f36c1cd44bfc5dc64fd8d4c8,
         type: 3}
@@ -224,7 +224,7 @@ MonoBehaviour:
   showHideAnimator: {fileID: 3138565913595905760}
   loadingMask:
     serializedVersion: 2
-    m_Bits: 32
+    m_Bits: 33
   animator: {fileID: 3138565913595905760}
 --- !u!114 &305164323875273945
 MonoBehaviour:

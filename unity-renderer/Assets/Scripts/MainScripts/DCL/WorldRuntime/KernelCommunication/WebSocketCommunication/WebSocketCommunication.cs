@@ -284,8 +284,10 @@ public class WebSocketCommunication : IKernelCommunication
                                 }
                                 break;
                             default:
+                                #if DCL_VR
                                 if (msg.type == "LoadProfile")
                                     OnProfileLoading?.Invoke(msg.payload);
+                                #endif
                                 if (!messageTypeToBridgeName.TryGetValue(msg.type, out string bridgeName))
                                 {
                                     bridgeName = "Bridges"; // Default bridge

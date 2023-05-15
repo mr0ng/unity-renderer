@@ -227,9 +227,9 @@ namespace DCL
             #if DCL_VR
             if (CrossPlatformManager.IsVRPlatform())
                 return CrossPlatformManager.GetRay();
-            #else
-            return charCamera.ScreenPointToRay(new Vector3(Screen.width / 2, Screen.height / 2, 0));
             #endif
+            return charCamera.ScreenPointToRay(new Vector3(Screen.width / 2, Screen.height / 2, 0));
+
         }
 
         private Ray GetRayFromMouse() =>

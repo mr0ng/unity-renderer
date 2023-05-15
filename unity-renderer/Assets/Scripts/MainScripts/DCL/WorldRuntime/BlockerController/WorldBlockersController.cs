@@ -45,9 +45,8 @@ namespace DCL.Controllers
         {
             blockerInstanceHandler.SetCollision(newValue);
 
-            // if (newValue && DataStore.i.debugConfig.isDebugMode.Get())
-            //     SetEnabled(false);
-            // else SetEnabled(true);
+            if (newValue && DataStore.i.debugConfig.isDebugMode.Get())
+                SetEnabled(false);
         }
 
         public WorldBlockersController(IBlockerInstanceHandler blockerInstanceHandler = null,
@@ -223,7 +222,7 @@ namespace DCL.Controllers
 
         private bool IsSceneKnown(Vector2Int parcel)
         {
-            // Note: This returns false when the set of coordinates is about a parcel 
+            // Note: This returns false when the set of coordinates is about a parcel
             // where the kernel didn't provide yet any information to the renderer
             return sceneHandler.GetScene(parcel) != null;
         }

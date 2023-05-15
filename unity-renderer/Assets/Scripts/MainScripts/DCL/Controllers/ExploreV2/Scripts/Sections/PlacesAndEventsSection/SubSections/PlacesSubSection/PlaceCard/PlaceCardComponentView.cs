@@ -135,7 +135,9 @@ public class PlaceCardComponentView : BaseComponentView, IPlaceCardComponentView
 
     public override void Awake()
     {
+        #if DCL_VR
         transform.localRotation = Quaternion.identity;
+        #endif
         base.Awake();
 
         if (placeImage != null)

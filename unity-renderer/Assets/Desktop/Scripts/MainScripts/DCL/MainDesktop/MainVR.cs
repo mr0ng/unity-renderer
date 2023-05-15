@@ -6,11 +6,12 @@ using DCL.Interface;
 using DCL.Providers;
 using DCL.VR;
 using MainScripts.DCL.Controllers.HUD.Preloading;
-using MainScripts.DCL.Controllers.LoadingFlow;
+
 using MainScripts.DCL.Controllers.SettingsDesktop;
-using MainScripts.DCL.Utils;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.Diagnostics;
+using DCL.Helpers;
 using UnityEngine.XR;
 using UnityEngine.XR.Management;
 using UnityEngine.XR.OpenXR;
@@ -25,7 +26,6 @@ namespace DCL
     public class MainVR : Main
     {
         [SerializeField] private bool logWs = false;
-        private LoadingFlowController loadingFlowController;
         //private PreloadingController preloadingController;
         private bool isConnectionLost;
         private readonly DataStoreRef<DataStore_LoadingScreen> loadingScreenRef;
@@ -134,8 +134,6 @@ namespace DCL
 
         private void VRDestroy()
         {
-            if(loadingFlowController != null)
-                loadingFlowController.Dispose();
             //preloadingController.Dispose();
 #if !AV_PRO_PRESENT
             DCLVideoPlayer.StopAllThreads();
@@ -144,14 +142,6 @@ namespace DCL
 
         void OnCommunicationEstablished(bool current, bool previous)
         {
-            if (current && !previous) // if the communication has just been established
-            {
-                //preloadingController = new PreloadingController(Environment.i.serviceLocator.Get<IAddressableResourceProvider>());
-                loadingFlowController = new LoadingFlowController(
-                    loadingScreenRef.Ref.decoupledLoadingHUD.visible,
-                    CommonScriptableObjects.rendererState,
-                    DataStore.i.wsCommunication.communicationEstablished);
-            }
             if (current == false && previous) { isConnectionLost = true; }
         }
 
@@ -159,7 +149,7 @@ namespace DCL
         {
             base.Update();
 
-            if (isConnectionLost) { DesktopUtils.Quit(); }
+            if (isConnectionLost) {  Helpers.Utils.QuitApplication(); }
 
             // TODO: Remove this after we refactor InputController to support overrides from desktop or to use the latest Unity Input System
             // This shortcut will help some users to fix the small resolution bugs that may happen if the player prefs are manipulated

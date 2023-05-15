@@ -79,8 +79,11 @@ namespace DCL.Camera
                 }
             }
 
-            //cameraChangeAction.OnTriggered += OnCameraChangeAction;
-            //mouseWheelAction.OnValueChanged += OnMouseWheelChangeValue;
+
+            cameraChangeAction.OnTriggered += OnCameraChangeAction;
+#if !DCL_VR
+            mouseWheelAction.OnValueChanged += OnMouseWheelChangeValue;
+            #endif
             worldOffset.OnChange += OnWorldReposition;
             CommonScriptableObjects.cameraMode.OnChange += OnCameraModeChange;
 
@@ -252,8 +255,11 @@ namespace DCL.Camera
             }
 
             worldOffset.OnChange -= OnWorldReposition;
-           // cameraChangeAction.OnTriggered -= OnCameraChangeAction;
-           // mouseWheelAction.OnValueChanged -= OnMouseWheelChangeValue;
+
+            cameraChangeAction.OnTriggered -= OnCameraChangeAction;
+#if !DCL_VR
+            mouseWheelAction.OnValueChanged -= OnMouseWheelChangeValue;
+            #endif
             CommonScriptableObjects.cameraBlocked.OnChange -= CameraBlocked_OnChange;
             CommonScriptableObjects.isFullscreenHUDOpen.OnChange -= OnFullscreenUIVisibilityChange;
             CommonScriptableObjects.isLoadingHUDOpen.OnChange -= OnFullscreenUIVisibilityChange;

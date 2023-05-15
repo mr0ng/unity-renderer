@@ -4,6 +4,8 @@ public class VRDisableEventSystem : MonoBehaviour
 {
     private void Awake()
     {
-        if (CrossPlatformManager.IsVRPlatform()) gameObject.SetActive(false);
+        #if DCL_VR
+        gameObject.SetActive(false);
+        #endif
     }
 }

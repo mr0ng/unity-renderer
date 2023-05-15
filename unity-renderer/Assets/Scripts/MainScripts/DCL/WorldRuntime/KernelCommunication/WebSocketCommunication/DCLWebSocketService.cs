@@ -72,7 +72,6 @@ public class DCLWebSocketService : WebSocketBehavior
 
     protected override void OnMessage(MessageEventArgs e)
     {
-        // Debug.LogError($"DCLWebSocketService: Message {e.Data}");
         base.OnMessage(e);
 
         if (e.IsBinary)
@@ -107,7 +106,7 @@ public class DCLWebSocketService : WebSocketBehavior
         WebInterface.OnMessageFromEngine -= SendMessageToWeb;
         DataStore.i.wsCommunication.communicationEstablished.Set(false);
         OnCloseEvent?.Invoke();
-        
+
     }
 
     protected override void OnOpen()

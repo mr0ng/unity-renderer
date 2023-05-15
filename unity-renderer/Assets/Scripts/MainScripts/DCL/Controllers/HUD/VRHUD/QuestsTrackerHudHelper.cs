@@ -1,21 +1,22 @@
+using DCL.Huds.QuestsTracker;
 using SignupHUD;
 using UnityEngine;
 
-public class SignupHudHelper : VRHUDHelper
+public class QuestsTrackerHudHelper : VRHUDHelper
 {
     [SerializeField]
-    private SignupHUDView view;
+    private QuestsTrackerHUDView view;
     private Transform camTrans;
     protected override void Awake()
     {
-        #if !DCL_VR
+#if !DCL_VR
         return;
-        #endif
+#endif
         base.Awake();
         myTrans = transform;
-        #if DCL_VR
+#if DCL_VR
         view.OnSetVisibility += OnVisiblityChange;
-        #endif
+#endif
         if (myTrans is RectTransform rect)
         {
             rect.sizeDelta = new Vector2(1920, 1080);
@@ -23,9 +24,9 @@ public class SignupHudHelper : VRHUDHelper
     }
 
     protected override void SetupHelper() {
-        #if !DCL_VR
+#if !DCL_VR
         return;
-        #endif
+#endif
     }
 
     private void OnVisiblityChange(bool visible)
@@ -34,13 +35,6 @@ public class SignupHudHelper : VRHUDHelper
         return;
 #endif
         Position();
-         if(visible){
-             CrossPlatformManager.SetCameraForGame();
-        // int currentLayerMask = Camera.main.cullingMask;
-        // int defaultLayer = LayerMask.NameToLayer("Default");
-        // int updatedLayerMask = currentLayerMask | (1 << defaultLayer);
-        // Camera.main.cullingMask = updatedLayerMask;
-         }
     }
 
     public void Position()
@@ -48,7 +42,6 @@ public class SignupHudHelper : VRHUDHelper
 #if !DCL_VR
         return;
 #endif
-
         myTrans.localScale = 0.0024f*Vector3.one;
         var rawForward = CommonScriptableObjects.cameraForward.Get();
         var forward = new Vector3(rawForward.x, 0, rawForward.z).normalized;

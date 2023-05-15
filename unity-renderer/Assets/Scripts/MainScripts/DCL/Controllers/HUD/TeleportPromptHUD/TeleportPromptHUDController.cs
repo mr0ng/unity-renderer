@@ -29,7 +29,7 @@ public class TeleportPromptHUDController : IHUD
 
     public TeleportPromptHUDController(DataStore dataStore, IMinimapApiBridge minimapApiBridge)
     {
-		this.dataStore = dataStore;
+        this.dataStore = dataStore;
         this.minimapApiBridge = minimapApiBridge;
         #if DCL_VR
         view = UnityEngine.Object.Instantiate(Resources.Load<GameObject>("TeleportPromptHUDVR")).GetComponent<TeleportPromptHUDView>();
@@ -110,17 +110,7 @@ public class TeleportPromptHUDController : IHUD
     {
         if (visible)
         {
-//<<<<<<< HEAD
-//            view.contentAnimator.Hide();
-//        }
-//        else if (!view.contentAnimator.isVisible && visible)
-//        {
-//            view.content.GetComponent<Canvas>().enabled = true;
-//            view.contentAnimator.Show();
-//            view.SetVisibility((true));
-//=======
             view.SetInAnimation();
-//>>>>>>> dev
             AudioScriptableObjects.fadeIn.Play(true);
         }
         else
@@ -137,6 +127,7 @@ public class TeleportPromptHUDController : IHUD
 
     public void RequestTeleport(string teleportDataJson)
     {
+        //TODO: Test if this is necessary for VR.
         #if !DCL_VR
         if (view.contentAnimator.isVisible)
             return;

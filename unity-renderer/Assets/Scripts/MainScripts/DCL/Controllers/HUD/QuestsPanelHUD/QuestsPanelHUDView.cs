@@ -220,8 +220,9 @@ namespace DCL.Huds.QuestsPanel
 
             transform.SetParent(parentTransform);
             transform.localScale = Vector3.one;
+            #if DCL_VR
             transform.localRotation = Quaternion.identity;
-
+            #endif
             RectTransform rectTransform = transform as RectTransform;
             rectTransform.anchorMin = Vector2.zero;
             rectTransform.anchorMax = Vector2.one;
