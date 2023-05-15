@@ -1,4 +1,5 @@
 using DCL;
+using DCL.Helpers;
 using System;
 using System.Collections;
 using UnityEditor;
@@ -96,7 +97,7 @@ public abstract class BaseComponentView : MonoBehaviour, IBaseComponentView
         DataStore.i.screen.size.OnChange -= OnScreenSizeModified;
 
         if (!isDestroyed && gameObject)
-            Destroy(gameObject);
+            Utils.SafeDestroy(gameObject);
     }
 
     private Transform myTrans;
