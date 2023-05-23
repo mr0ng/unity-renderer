@@ -15,7 +15,7 @@ public class TeleportPromptHudHelper : VRHUDHelper
     protected override void SetupHelper()
     {
         ConvertUI();
-        transform.parent.localScale = 0.0033f * Vector3.one;
+        transform.localScale = 0.0033f * Vector3.one;
         view.content.transform.localScale = Vector3.one;
         myTrans.localPosition = Vector3.zero;
         view.OnSetVisibility += OnVisiblityChange;

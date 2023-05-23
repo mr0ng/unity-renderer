@@ -26,7 +26,7 @@ namespace DCL.LoadingScreen
             betaTag.SetActive(!Application.isEditor && Application.platform != RuntimePlatform.WebGLPlayer);
 #if DCL_VR
             //CrossPlatformManager.SetCameraForGame();
-			WebSocketCommunication.OnProfileLoading += OnProfileLoading;
+			//WebSocketCommunication.OnProfileLoading += OnProfileLoading;
              LoadingHudHelper loadingHudHelper;
              loadingHudHelper = gameObject.GetComponent<LoadingHudHelper>();
 

@@ -800,7 +800,14 @@ public class AvatarEditorHUDController : IHUD
 
             DataStore.i.common.isPlayerRendererLoaded.OnChange -= PlayerRendererLoaded;
 
+
             OnClose?.Invoke();
+            #if DCL_VR
+            DataStore.i.HUDs.avatarEditorVisible.Set(false);
+            DataStore.i.HUDs.signupVisible.Set(true);
+            #endif
+
+
         }
         else if (visible && !view.isOpen)
         {

@@ -1,3 +1,4 @@
+using DCL;
 using System;
 using System.Net.Mail;
 using System.Text.RegularExpressions;
@@ -24,6 +25,7 @@ namespace SignupHUD
 
     public class SignupHUDView : MonoBehaviour, ISignupHUDView
     {
+        public static SignupHUDView I;
         private const int MIN_NAME_LENGTH = 1;
         private const int MAX_NAME_LENGTH = 15;
 
@@ -60,6 +62,7 @@ namespace SignupHUD
 
         private void Awake()
         {
+            I = this;
             InitNameAndEmailScreen();
             InitTermsOfServicesScreen();
         }
@@ -108,7 +111,13 @@ namespace SignupHUD
 
             termsOfServiceAgreeButton.interactable = false;
             termsOfServiceBackButton.onClick.AddListener(() => OnTermsOfServiceBack?.Invoke());
-            termsOfServiceAgreeButton.onClick.AddListener(() => OnTermsOfServiceAgreed?.Invoke());
+            termsOfServiceAgreeButton.onClick.AddListener(() =>
+            {
+#if DCL_VR
+                DataStore.i.common.isSignUpFlow.Set(false);
+#endif
+                OnTermsOfServiceAgreed?.Invoke();
+            });
         }
 
         private void OnFaceSnapshotReady(Texture2D texture) { avatarPic.texture = texture; }
@@ -125,9 +134,9 @@ namespace SignupHUD
         {
             nameAndEmailPanel.gameObject.SetActive(true);
             termsOfServicePanel.gameObject.SetActive(false);
-            #if DCL_VR
-            OnSetVisibility?.Invoke(true);
-            #endif
+            // #if DCL_VR
+            // OnSetVisibility?.Invoke(true);
+            // #endif
         }
 
         public void ShowTermsOfServiceScreen()

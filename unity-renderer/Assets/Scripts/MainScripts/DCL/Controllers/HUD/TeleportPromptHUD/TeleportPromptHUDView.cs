@@ -60,14 +60,14 @@ public class TeleportPromptHUDView : MonoBehaviour
         hudCanvasCameraModeController = new HUDCanvasCameraModeController(content.GetComponent<Canvas>(), DataStore.i.camera.hudsCamera);
         cancelButton.onClick.AddListener(OnClosePressed);
         backgroundCatcher.onClick.AddListener(OnClosePressed);
-        #if DCL_VR
-        continueButton.onClick.AddListener(OnTeleportPressed);
-        contentAnimator.OnWillFinishHide += (animator) => Hide();
-
-        contentAnimator.Hide();
-        OnSetVisibility?.Invoke(false);
-        content.GetComponent<Canvas>().enabled = false;
-        #endif
+        // #if DCL_VR
+        // continueButton.onClick.AddListener(OnTeleportPressed);
+        // contentAnimator.OnWillFinishHide += (animator) => Hide();
+        //
+        // contentAnimator.Hide();
+        // OnSetVisibility?.Invoke(false);
+        // content.GetComponent<Canvas>().enabled = false;
+        // #endif
     }
 
     public void Reset()
@@ -195,9 +195,9 @@ public class TeleportPromptHUDView : MonoBehaviour
     {
         OnCloseEvent?.Invoke();
 #if DCL_VR //TODO: test that this is still needed for VR or if new updates make this obsolete.
-        contentAnimator.Hide(true);
-        OnSetVisibility?.Invoke(false);
-        AudioScriptableObjects.dialogClose.Play(true);
+        //contentAnimator.Hide(true);
+        //OnSetVisibility?.Invoke(false);
+        //AudioScriptableObjects.dialogClose.Play(true);
         //transform.position += 20*Vector3.down;
 #endif
     }

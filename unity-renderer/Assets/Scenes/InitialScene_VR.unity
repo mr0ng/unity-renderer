@@ -828,17 +828,17 @@ MonoBehaviour:
   customURL: https://play.decentraland.zone/?
   network: 0
   realm: 
-  startInCoords: {x: 0, y: 0}
+  startInCoords: {x: -127, y: -23}
   forceLocalComms: 0
   enableTutorial: 0
   builderInWorld: 0
   soloScene: 0
   disableAssetBundles: 1
-  enableGLTFast: 0
+  enableGLTFast: 1
   enableDebugMode: 0
   debugPanelMode: 0
   disableGLTFDownloadThrottle: 0
-  multithreaded: 0
+  multithreaded: 1
   runPerformanceMeterToolDuringLoading: 0
 --- !u!1 &1472591252
 GameObject:

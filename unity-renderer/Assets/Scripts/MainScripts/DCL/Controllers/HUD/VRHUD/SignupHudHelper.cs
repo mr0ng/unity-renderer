@@ -20,6 +20,7 @@ public class SignupHudHelper : VRHUDHelper
         {
             rect.sizeDelta = new Vector2(1920, 1080);
         }
+
     }
 
     protected override void SetupHelper() {

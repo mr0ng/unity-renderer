@@ -20,13 +20,18 @@ namespace DCL.Social.Passports
         public int PassportCurrentSortingOrder => passportCanvas.sortingOrder;
 
         public event Action OnClose;
-
+        public event Action<bool> OnSetVisibility;
         private CancellationTokenSource animationCancellationToken = new CancellationTokenSource();
         private MouseCatcher mouseCatcher;
 
+
+        #if DCL_VR
+        public static PlayerPassportHUDView CreateView() =>
+            Instantiate(Resources.Load<GameObject>("PlayerPassportVR")).GetComponent<PlayerPassportHUDView>();
+        #else
         public static PlayerPassportHUDView CreateView() =>
             Instantiate(Resources.Load<GameObject>("PlayerPassport")).GetComponent<PlayerPassportHUDView>();
-
+        #endif
         public void Initialize(MouseCatcher mouseCatcher)
         {
             hideCardButton.onClick.RemoveAllListeners();
@@ -43,6 +48,7 @@ namespace DCL.Social.Passports
 
         public void SetVisibility(bool visible)
         {
+            OnSetVisibility(visible);
             gameObject.SetActive(visible);
         }
 

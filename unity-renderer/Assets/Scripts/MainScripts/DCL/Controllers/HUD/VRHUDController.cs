@@ -138,8 +138,8 @@ namespace DCL.Huds
         }
         public void SetupLoading(ShowHideAnimator animator)
         {
-            if (animator == null) return;
             WebSocketCommunication.OnProfileLoading += (ani) => { LoadingStart.Invoke(); };
+            if (animator == null) return;
             animator.OnWillFinishHide += (ani) => { LoadingEnd.Invoke(); };
         }
     }

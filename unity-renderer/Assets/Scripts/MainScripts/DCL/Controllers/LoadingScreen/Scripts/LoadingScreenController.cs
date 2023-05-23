@@ -187,15 +187,15 @@ namespace DCL.LoadingScreen
         private void FadeOutView()
         {
 
-#if DCL_VR
-            view.SetVisible(false,false);
-#else
-            
+//#if DCL_VR
+//            view.SetVisible(false,false);
+//#else
+
 
             if (isFadingOut) return;
             isFadingOut = true;
             FadeOutViewAsync(cancellationTokenSource.Token).Forget();
-			#endif
+//			#endif
         }
 
         private async UniTask FadeOutViewAsync(CancellationToken cancellationToken)
