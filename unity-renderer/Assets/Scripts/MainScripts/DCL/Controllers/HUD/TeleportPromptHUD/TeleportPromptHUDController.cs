@@ -5,7 +5,7 @@ using System;
 using DCL.Helpers;
 using DCL.Map;
 using DCL.Tasks;
-using System.Linq;
+using RPC.Context;
 using System.Threading;
 
 public class TeleportPromptHUDController : IHUD
@@ -19,6 +19,7 @@ public class TeleportPromptHUDController : IHUD
 
     internal TeleportPromptHUDView view { get; private set; }
 
+    private readonly RestrictedActionsContext restrictedActionsServiceContext;
     private readonly DataStore dataStore;
     private readonly IMinimapApiBridge minimapApiBridge;
     private bool isVisible;
@@ -27,7 +28,7 @@ public class TeleportPromptHUDController : IHUD
     private CancellationTokenSource cancellationToken = new ();
     private EventData currentEvent;
 
-    public TeleportPromptHUDController(DataStore dataStore, IMinimapApiBridge minimapApiBridge)
+    public TeleportPromptHUDController(DataStore dataStore, IMinimapApiBridge minimapApiBridge, RestrictedActionsContext restrictedActionsContext)
     {
         this.dataStore = dataStore;
         this.minimapApiBridge = minimapApiBridge;
@@ -43,6 +44,9 @@ public class TeleportPromptHUDController : IHUD
         dataStore.HUDs.gotoPanelVisible.OnChange += ChangeVisibility;
         dataStore.HUDs.gotoPanelCoordinates.OnChange += SetCoordinates;
         dataStore.world.requestTeleportData.OnChange += ReceivedRequestTeleportData;
+
+        restrictedActionsServiceContext = restrictedActionsContext;
+        restrictedActionsServiceContext.TeleportToPrompt += RequestCoordinatesTeleport;
     }
 
     private void ClosePanel()
@@ -55,7 +59,7 @@ public class TeleportPromptHUDController : IHUD
         if (string.IsNullOrEmpty(current) || isVisible)
             return;
 
-        RequestTeleport(current);
+        RequestJSONTeleport(current);
     }
 
     private void SetCoordinates(ParcelCoordinates current, ParcelCoordinates previous)
@@ -125,7 +129,7 @@ public class TeleportPromptHUDController : IHUD
         isVisible = visible;
     }
 
-    public void RequestTeleport(string teleportDataJson)
+    public void RequestJSONTeleport(string teleportDataJson)
     {
         //TODO: Test if this is necessary for VR.
         #if !DCL_VR
@@ -152,6 +156,18 @@ public class TeleportPromptHUDController : IHUD
         }
     }
 
+    internal bool RequestCoordinatesTeleport(int xCoordinate, int yCoordinate)
+    {
+        Utils.UnlockCursor();
+
+        ParcelCoordinates coordinates = new ParcelCoordinates(xCoordinate, yCoordinate);
+        teleportData = new TeleportData() { coordinates = coordinates };
+
+        SetVisibility(true);
+        SetCoordinates(coordinates, null);
+        return true;
+    }
+
     public void Dispose()
     {
         view.OnCloseEvent -= CloseView;
@@ -166,6 +182,7 @@ public class TeleportPromptHUDController : IHUD
 
         dataStore.HUDs.gotoPanelVisible.OnChange -= ChangeVisibility;
         dataStore.HUDs.gotoPanelCoordinates.OnChange -= SetCoordinates;
+        restrictedActionsServiceContext.TeleportToPrompt -= RequestCoordinatesTeleport;
     }
 
     private void SetSceneEvent()

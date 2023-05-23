@@ -13,17 +13,6 @@ namespace DCL.Chat.HUD
 
         public void Hide() => gameObject.SetActive(false);
 
-        public static ChannelLimitReachedWindowComponentView Create()
-        {
-            #if DCL_VR
-            return Instantiate(
-                Resources.Load<ChannelLimitReachedWindowComponentView>("SocialBarV1/ChannelLimitReachedModalVR"));
-            #else
-            return Instantiate(
-                Resources.Load<ChannelLimitReachedWindowComponentView>("SocialBarV1/ChannelLimitReachedModal"));
-            #endif
-        }
-
         public override void Awake()
         {
             base.Awake();

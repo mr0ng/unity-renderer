@@ -21,17 +21,6 @@ namespace DCL.Chat.HUD
 
         public void Hide() => gameObject.SetActive(false);
 
-        public static ChannelJoinErrorWindowComponentView Create()
-        {
-            #if DCL_VR
-            return Instantiate(
-                Resources.Load<ChannelJoinErrorWindowComponentView>("SocialBarV1/ChannelJoinErrorModalVR"));
-            #else
-            return Instantiate(
-                Resources.Load<ChannelJoinErrorWindowComponentView>("SocialBarV1/ChannelJoinErrorModal"));
-            #endif
-        }
-
         public override void Awake()
         {
             base.Awake();

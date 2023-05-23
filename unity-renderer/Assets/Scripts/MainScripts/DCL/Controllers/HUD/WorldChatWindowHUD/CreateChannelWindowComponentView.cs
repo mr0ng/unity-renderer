@@ -28,15 +28,6 @@ namespace DCL.Chat.HUD
         public event Action OnClose;
         public event Action OnJoinChannel;
 
-        public static CreateChannelWindowComponentView Create()
-        {
-            #if DCL_VR
-            return Instantiate(Resources.Load<CreateChannelWindowComponentView>("SocialBarV1/ChannelCreationHUDVR"));
-            #else
-            return Instantiate(Resources.Load<CreateChannelWindowComponentView>("SocialBarV1/ChannelCreationHUD"));
-            #endif
-        }
-
         public override void Awake()
         {
             base.Awake();
