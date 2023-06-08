@@ -41,10 +41,8 @@ namespace DCL
 #endif
         }
 
-        private Dictionary<WebInterface.ACTION_BUTTON, List<ButtonListenerCallback>> listeners =
-            new Dictionary<WebInterface.ACTION_BUTTON, List<ButtonListenerCallback>>();
-
-        private List<BUTTON_MAP> buttonsMap = new List<BUTTON_MAP>();
+        private readonly Dictionary<WebInterface.ACTION_BUTTON, List<ButtonListenerCallback>> listeners = new ();
+        private readonly List<BUTTON_MAP> buttonsMap = new ();
 
 
         public InputController_Legacy()
@@ -199,8 +197,12 @@ namespace DCL
             {
                 BUTTON_MAP btnMap = buttonsMap[i];
 
+                if (CommonScriptableObjects.allUIHidden.Get())
+                    continue;
+
                 switch (btnMap.type)
                 {
+//<<<<<<< HEAD
                     case BUTTON_TYPE.MOUSE:
                         if (CommonScriptableObjects.allUIHidden.Get())
                             break;
@@ -234,6 +236,15 @@ namespace DCL
                         else if (!Input.GetKeyDown((KeyCode) btnMap.buttonNum))
                         #endif
                             RaiseEvent(btnMap.buttonId, EVENT.BUTTON_UP, btnMap.useRaycast, btnMap.enablePointerEvent);
+//=======
+                    case BUTTON_TYPE.MOUSE when Input.GetMouseButtonDown(btnMap.buttonNum):
+                    case BUTTON_TYPE.KEYBOARD when Input.GetKeyDown((KeyCode)btnMap.buttonNum):
+                        RaiseEvent(btnMap.buttonId, EVENT.BUTTON_DOWN, btnMap.useRaycast, btnMap.enablePointerEvent);
+                        break;
+                    case BUTTON_TYPE.MOUSE when Input.GetMouseButtonUp(btnMap.buttonNum):
+                    case BUTTON_TYPE.KEYBOARD when Input.GetKeyUp((KeyCode)btnMap.buttonNum):
+                        RaiseEvent(btnMap.buttonId, EVENT.BUTTON_UP, btnMap.useRaycast, btnMap.enablePointerEvent);
+//>>>>>>> dev
                         break;
                 }
             }
@@ -274,6 +285,7 @@ namespace DCL
 
         public bool IsPressed(WebInterface.ACTION_BUTTON button)
         {
+//<<<<<<< HEAD
             switch (button)
             {
                 #if DCL_VR
@@ -300,6 +312,15 @@ namespace DCL
                            Input.GetKey(InputSettings.SecondaryButtonKeyCode);
                 #endif
             }
+//=======
+            return button switch
+                   {
+                       WebInterface.ACTION_BUTTON.POINTER => Input.GetMouseButton(0),
+                       WebInterface.ACTION_BUTTON.PRIMARY => Input.GetKey(InputSettings.PrimaryButtonKeyCode),
+                       WebInterface.ACTION_BUTTON.SECONDARY => Input.GetKey(InputSettings.SecondaryButtonKeyCode),
+                       _ => Input.GetMouseButton(0) || Input.GetKey(InputSettings.PrimaryButtonKeyCode) || Input.GetKey(InputSettings.SecondaryButtonKeyCode)
+                   };
+//>>>>>>> dev
         }
 
         public void Dispose()

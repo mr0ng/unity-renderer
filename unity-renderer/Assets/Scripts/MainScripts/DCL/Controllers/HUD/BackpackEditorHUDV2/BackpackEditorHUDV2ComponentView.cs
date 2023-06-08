@@ -2,16 +2,21 @@ using Cysharp.Threading.Tasks;
 using DCL.Tasks;
 using MainScripts.DCL.Controllers.HUD.CharacterPreview;
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using UIComponents.Scripts.Components;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.UI;
 
 namespace DCL.Backpack
 {
     public class BackpackEditorHUDV2ComponentView : BaseComponentView<BackpackEditorHUDModel>, IBackpackEditorHUDView, IPointerDownHandler
     {
         public event Action<Color> OnColorChanged;
+        public event Action OnColorPickerToggle;
+        public event Action OnContinueSignup;
+        public event Action OnAvatarUpdated;
 
         private const int AVATAR_SECTION_INDEX = 0;
         private const int EMOTES_SECTION_INDEX = 1;
@@ -27,6 +32,8 @@ namespace DCL.Backpack
         [SerializeField] internal ColorPresetsSO colorPresetsSO;
         [SerializeField] internal ColorPresetsSO skinColorPresetsSO;
         [SerializeField] private BackpackFiltersComponentView backpackFiltersComponentView;
+        [SerializeField] internal Button saveAvatarButton;
+
         public override bool isVisible => gameObject.activeInHierarchy;
         public Transform EmotesSectionTransform => emotesSection.transform;
         public WearableGridComponentView WearableGridComponentView => wearableGridComponentView;
@@ -45,17 +52,30 @@ namespace DCL.Backpack
 
             thisTransform = transform;
             backpackPreviewPanel.SetLoadingActive(false);
+
             #if DCL_VR
             CanvasGroup canvasGroup = GetComponent<CanvasGroup>();
             canvasGroup.blocksRaycasts = false;
             #endif
+
+            saveAvatarButton.onClick.AddListener(() => OnContinueSignup?.Invoke());
+
         }
 
-        public void Initialize(ICharacterPreviewFactory characterPreviewFactory)
+        public void Initialize(
+            ICharacterPreviewFactory characterPreviewFactory,
+            IPreviewCameraRotationController avatarPreviewRotationController,
+            IPreviewCameraPanningController avatarPreviewPanningController,
+            IPreviewCameraZoomController avatarPreviewZoomController)
         {
             ConfigureSectionSelector();
-            backpackPreviewPanel.Initialize(characterPreviewFactory);
+            backpackPreviewPanel.Initialize(
+                characterPreviewFactory,
+                avatarPreviewRotationController,
+                avatarPreviewPanningController,
+                avatarPreviewZoomController);
             colorPickerComponentView.OnColorChanged += OnColorPickerColorChanged;
+            colorPickerComponentView.OnColorPickerToggle += ColorPickerToggle;
         }
 
         private void Update() =>
@@ -76,6 +96,7 @@ namespace DCL.Backpack
             backpackPreviewPanel.Dispose();
 
             colorPickerComponentView.OnColorChanged -= OnColorPickerColorChanged;
+            colorPickerComponentView.OnColorPickerToggle -= ColorPickerToggle;
         }
 
         #if DCL_VR
@@ -130,8 +151,13 @@ namespace DCL.Backpack
         public void PlayPreviewEmote(string emoteId) =>
             backpackPreviewPanel.PlayPreviewEmote(emoteId);
 
-        public void ResetPreviewEmote() =>
-            backpackPreviewPanel.ResetPreviewEmote();
+        public void PlayPreviewEmote(string emoteId, long timestamp)
+        {
+            if (avatarModelToUpdate != null)
+                avatarModelToUpdate.expressionTriggerTimestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+
+            backpackPreviewPanel.PlayPreviewEmote(emoteId, timestamp);
+        }
 
         public void UpdateAvatarPreview(AvatarModel avatarModel)
         {
@@ -148,11 +174,14 @@ namespace DCL.Backpack
             backpackPreviewPanel.SetLoadingActive(true);
         }
 
+        public void SetAvatarPreviewFocus(PreviewCameraFocus focus, bool useTransition = true) =>
+            backpackPreviewPanel.SetFocus(focus, useTransition);
+
         public void TakeSnapshotsAfterStopPreviewAnimation(IBackpackEditorHUDView.OnSnapshotsReady onSuccess, Action onFailed)
         {
             async UniTaskVoid TakeSnapshotsAfterStopPreviewAnimationAsync(CancellationToken ct)
             {
-                ResetPreviewEmote();
+                ResetPreviewPanel();
                 await UniTask.Delay(MS_TO_RESET_PREVIEW_ANIMATION, cancellationToken: ct);
                 backpackPreviewPanel.TakeSnapshots(
                     (face256, body) => onSuccess?.Invoke(face256, body),
@@ -172,11 +201,20 @@ namespace DCL.Backpack
             colorPickerComponentView.SetColorList(isSkinMode ? skinColorPresetsSO.colors : colorPresetsSO.colors);
         }
 
+        public void UpdateHideUnhideStatus(string slotCategory, HashSet<string> forceRender) =>
+            avatarSlotsView.SetHideUnhideStatus(slotCategory, forceRender.Contains(slotCategory));
+
         public void SetColorPickerValue(Color color)
         {
             colorPickerComponentView.SetColorSelector(color);
             colorPickerComponentView.UpdateSliderValues(color);
         }
+
+        public void ShowContinueSignup() =>
+            saveAvatarButton.gameObject.SetActive(true);
+
+        public void HideContinueSignup() =>
+            saveAvatarButton.gameObject.SetActive(false);
 
         public void OnPointerDown(PointerEventData eventData)
         {
@@ -189,19 +227,24 @@ namespace DCL.Backpack
             sectionSelector.GetSection(AVATAR_SECTION_INDEX).onSelect.AddListener((isSelected) =>
             {
                 wearablesSection.SetActive(isSelected);
-                backpackPreviewPanel.AnchorPreviewPanel(false);
 
                 if (isSelected)
-                    ResetPreviewEmote();
+                    ResetPreviewPanel();
             });
             sectionSelector.GetSection(EMOTES_SECTION_INDEX).onSelect.AddListener((isSelected) =>
             {
                 emotesSection.SetActive(isSelected);
-                backpackPreviewPanel.AnchorPreviewPanel(true);
 
                 if (isSelected)
-                    ResetPreviewEmote();
+                    ResetPreviewPanel();
             });
+        }
+
+        public void ResetPreviewPanel()
+        {
+            backpackPreviewPanel.ResetPreviewEmote();
+            backpackPreviewPanel.ResetPreviewRotation();
+            SetAvatarPreviewFocus(PreviewCameraFocus.DefaultEditing, false);
         }
 
         private void UpdateAvatarModelWhenNeeded()
@@ -210,6 +253,7 @@ namespace DCL.Backpack
             {
                 await backpackPreviewPanel.TryUpdatePreviewModelAsync(avatarModelToUpdate, ct);
                 backpackPreviewPanel.SetLoadingActive(false);
+                OnAvatarUpdated?.Invoke();
             }
 
             if (!isAvatarDirty)
@@ -223,6 +267,7 @@ namespace DCL.Backpack
         private void OnColorPickerColorChanged(Color newColor) =>
             OnColorChanged?.Invoke(newColor);
 
+//VR panel positioning for login.
         private void Position()
         {
             transform.localScale = 0.0024f*Vector3.one;
@@ -232,5 +277,9 @@ namespace DCL.Backpack
             transform.forward =  forward;
 
         }
+
+        private void ColorPickerToggle() =>
+            OnColorPickerToggle?.Invoke();
+
     }
 }

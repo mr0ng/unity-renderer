@@ -10,8 +10,8 @@
         "LambdasService",
         "UniTask",
         "IService",
-        "UnityEditor.UI",
-        "UnityEngine.UI"
+        "ServiceProvidersInterfaces",
+        "CatalystInterfaces"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

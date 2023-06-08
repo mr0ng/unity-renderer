@@ -42,7 +42,7 @@ public class AvatarEditorHUDView : MonoBehaviour, IAvatarEditorHUDView, IPointer
         public Toggle toggle;
         public Canvas canvas;
         public bool enabledByDefault;
-        public CharacterPreviewController.CameraFocus focus = CharacterPreviewController.CameraFocus.DefaultEditing;
+        public PreviewCameraFocus focus = PreviewCameraFocus.DefaultEditing;
 
         //To remove when we refactor this to avoid ToggleGroup issues when quitting application
         public void Initialize() { Application.quitting += () => toggle.onValueChanged.RemoveAllListeners(); }
@@ -87,9 +87,6 @@ public class AvatarEditorHUDView : MonoBehaviour, IAvatarEditorHUDView, IPointer
 
     [SerializeField]
     internal ColorPickerComponentView eyeBrowsColorPickerComponent;
-
-    [SerializeField]
-    internal PreviewCameraRotation characterPreviewRotation;
 
     [SerializeField]
     internal RawImage characterPreviewImage;
@@ -137,6 +134,14 @@ public class AvatarEditorHUDView : MonoBehaviour, IAvatarEditorHUDView, IPointer
     [SerializeField] internal UIHelper_ClickBlocker clickBlocker;
     [SerializeField] internal Notification noItemInCollectionWarning;
 
+    [Header("MOUSE INPUT CONFIGURATION")]
+    [SerializeField] private CharacterPreviewInputDetector characterPreviewInputDetector;
+    [SerializeField] internal InputAction_Hold firstClickAction;
+
+    [Header("ROTATE CONFIGURATION")]
+    [SerializeField] internal float rotationFactor = -30f;
+    [SerializeField] internal float slowDownTime = 0.5f;
+
     private Service<ICharacterPreviewFactory> characterPreviewFactory;
 
     private AvatarEditorHUDController controller;
@@ -145,8 +150,8 @@ public class AvatarEditorHUDView : MonoBehaviour, IAvatarEditorHUDView, IPointer
     private readonly Dictionary<string, ToggleComponentModel> loadedCollectionModels = new Dictionary<string, ToggleComponentModel>();
     private bool isAvatarDirty;
     private AvatarModel avatarModelToUpdate;
-
     private bool doAvatarFeedback;
+    private IPreviewCameraRotationController avatarPreviewRotationController;
 
     public ICharacterPreviewController CharacterPreview { get; private set; }
 
@@ -163,9 +168,10 @@ public class AvatarEditorHUDView : MonoBehaviour, IAvatarEditorHUDView, IPointer
         arePanelsInitialized = false;
     }
 
-    private void Initialize(AvatarEditorHUDController controller)
+    private void Initialize(AvatarEditorHUDController controller, IPreviewCameraRotationController avatarPreviewRotationController)
     {
         this.controller = controller;
+        this.avatarPreviewRotationController = avatarPreviewRotationController;
         gameObject.name = VIEW_OBJECT_NAME;
 
         randomizeButton.onClick.AddListener(OnRandomizeButton);
@@ -217,11 +223,18 @@ public class AvatarEditorHUDView : MonoBehaviour, IAvatarEditorHUDView, IPointer
         }
         InitializeNavigationInfo(collectiblesNavigationInfo, !isGuest);
 
-        characterPreviewRotation.OnHorizontalRotation += OnCharacterPreviewRotation;
+        avatarPreviewRotationController.Configure(
+            firstClickAction,
+            rotationFactor,
+            slowDownTime,
+            characterPreviewInputDetector,
+            null);
+
+        avatarPreviewRotationController.OnHorizontalRotation += OnCharacterPreviewRotationController;
         arePanelsInitialized = true;
     }
 
-    private void OnCharacterPreviewRotation(float angularVelocity)
+    private void OnCharacterPreviewRotationController(float angularVelocity)
     {
         CharacterPreview.Rotate(angularVelocity);
     }
@@ -265,10 +278,10 @@ public class AvatarEditorHUDView : MonoBehaviour, IAvatarEditorHUDView, IPointer
         eyeBrowsColorPickerComponent.OnColorChanged += controller.HairColorClicked;
     }
 
-    internal static AvatarEditorHUDView Create(AvatarEditorHUDController controller)
+    internal static AvatarEditorHUDView Create(AvatarEditorHUDController controller, IPreviewCameraRotationController avatarPreviewRotationController)
     {
         var view = Instantiate(Resources.Load<GameObject>(VIEW_PATH)).GetComponent<AvatarEditorHUDView>();
-        view.Initialize(controller);
+        view.Initialize(controller, avatarPreviewRotationController);
         return view;
     }
 
@@ -594,6 +607,9 @@ public class AvatarEditorHUDView : MonoBehaviour, IAvatarEditorHUDView, IPointer
         sectionSelector.GetSection(EMOTES_SECTION_INDEX).onSelect.RemoveAllListeners();
 
         clickBlocker.OnClicked -= ClickBlockerClicked;
+
+        avatarPreviewRotationController.OnHorizontalRotation -= OnCharacterPreviewRotationController;
+        avatarPreviewRotationController.Dispose();
     }
 
     public void SetAsFullScreenMenuMode(Transform parentTransform)
@@ -698,7 +714,7 @@ public class AvatarEditorHUDView : MonoBehaviour, IAvatarEditorHUDView, IPointer
                 ResetPreviewEmote();
             }
 
-            CharacterPreview.SetFocus(global::MainScripts.DCL.Controllers.HUD.CharacterPreview.CharacterPreviewController.CameraFocus.DefaultEditing);
+            CharacterPreview.SetFocus(PreviewCameraFocus.DefaultEditing);
             emotesCustomizationDataStore.isEmotesCustomizationSelected.Set(true, notifyEvent: false);
         });
     }

@@ -106,7 +106,6 @@ namespace DCL
         public bool builderInWorld = false;
         public bool soloScene = true;
         public bool disableAssetBundles = false;
-        public bool enableGLTFast = false;
         public bool enableDebugMode = false;
         public DebugPanel debugPanelMode = DebugPanel.Off;
 
@@ -382,11 +381,6 @@ namespace DCL
             if (disableAssetBundles)
             {
                 debugString += "DISABLE_ASSET_BUNDLES&DISABLE_WEARABLE_ASSET_BUNDLES&";
-            }
-
-            if (enableGLTFast)
-            {
-                debugString += "ENABLE_GLTFAST&";
             }
 
             if (enableDebugMode)
