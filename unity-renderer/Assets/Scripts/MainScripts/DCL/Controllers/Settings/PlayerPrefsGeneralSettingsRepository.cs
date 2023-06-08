@@ -17,7 +17,7 @@ namespace DCL.SettingsCommon
         public const string INVERT_Y_AXIS = "InvertYAxis";
         public const string SKYBOX_TIME = "skyboxTime";
         public const string FIRST_PERSON_CAMERA_FOV = "firstPersonCameraFOV";
-        public const string USE_INTERNAL_BROWSER = "useInternalBrowser";
+        public const string USE_INTERNAL_BROWSER = "useInternalBrowser";//VR internal browser. could be extended to desktop mode.
         public const string SHOW_AVATAR_NAMES = "showAvatarNames";
         public const string CAMERA_MOVEMENT_MODE = "cameraMovementMode";
 

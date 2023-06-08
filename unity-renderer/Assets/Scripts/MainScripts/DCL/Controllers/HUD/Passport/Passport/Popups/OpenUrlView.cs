@@ -28,7 +28,11 @@ public class OpenUrlView : BaseComponentView
     private void OpenLink()
     {
         Utils.UnlockCursor();
+        #if DCL_VR
+        WebInterface.OpenURL(currentUrl,true);
+        #else
         WebInterface.OpenURL(currentUrl);
+        #endif
         AnalyticsHelper.SendExternalLinkAnalytic(currentUrl);
         SetVisibility(true);
     }

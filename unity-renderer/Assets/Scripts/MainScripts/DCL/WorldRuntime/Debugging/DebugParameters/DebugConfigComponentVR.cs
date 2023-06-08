@@ -128,7 +128,7 @@ namespace DCL
             DataStore.i.performance.multithreading.Set(multithreaded);
             if (disableGLTFDownloadThrottle) DataStore.i.performance.maxDownloads.Set(999);
             Texture.allowThreadedTextureCreation = multithreaded;
-            
+
 			// options.Initialized += (sender, eventArgs) =>
             // {
             //     Debug.Log($"Secondary Webview loading {htmlServerTest}");
@@ -191,7 +191,7 @@ namespace DCL
 
         private void Start()
         {
-            
+
 			if (!Debug.isDebugBuild)
             {
 
@@ -215,7 +215,7 @@ namespace DCL
                 //disableAssetBundles = true;
             }
             useInternalBrowser.isOn = openInternalBrowser;
-            WebInterface.openURLInternal = openInternalBrowser;
+            // WebInterface.openURLInternal = openInternalBrowser;
             if (openInternalBrowser)
             {
                 browserMessage.transform.parent.gameObject.SetActive(true);
@@ -404,7 +404,7 @@ namespace DCL
 
             webViewURL =  $"{baseUrl}{debugString}{debugPanelString}position={startInCoords.x}%2C{startInCoords.y}&ws={DataStore.i.wsCommunication.url}";
             urlInput.text = webViewURL;
-           
+
             var canvas = GameObject.Find("Canvas");
 #if UNITY_ANDROID && !UNITY_EDITOR
             //don't have a method of using external browser on quest2.
@@ -580,7 +580,7 @@ namespace DCL
         {
 
             openInternalBrowser = useInternalBrowser.isOn;
-            WebInterface.openURLInternal = openInternalBrowser;
+            // WebInterface.openURLInternal = openInternalBrowser;
             // if (useInternalBrowser.isOn)
             // {
             //     DCLWebview.gameObject.SetActive(true);

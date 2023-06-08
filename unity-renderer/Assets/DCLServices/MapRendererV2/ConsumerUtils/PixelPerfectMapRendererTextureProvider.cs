@@ -36,6 +36,7 @@ namespace DCLServices.MapRendererV2.ConsumerUtils
             cameraController = null;
         }
 
+        #if !DCL_VR
         public Vector2Int GetPixelPerfectTextureResolution()
         {
             // assumes CanvasScale Match Height = 1;
@@ -52,7 +53,21 @@ namespace DCLServices.MapRendererV2.ConsumerUtils
             var screenSize = topRight - bottomLeft;
             return new Vector2Int((int) screenSize.x, (int) screenSize.y);
         }
+#else
+        public Vector2Int GetPixelPerfectTextureResolution()
+        {
+            var rectSize = rectTransform.rect.size;
+            var ratio = rectSize.x / rectSize.y;
+            var scale = rectTransform.lossyScale; // Takes into account all parent scaling
 
+            var worldSize = new Vector2(rectSize.x * scale.x, rectSize.y * scale.y);
+
+            // Convert worldSize to the screen size using the canvas camera.
+            var screenSize = RectTransformUtility.WorldToScreenPoint(hudCamera, worldSize);
+
+            return new Vector2Int(1920, 1080);
+        }
+#endif
         private void OnRectTransformDimensionsChange()
         {
             if (cameraController == null)

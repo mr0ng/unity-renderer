@@ -9,6 +9,7 @@ namespace DCL.Huds
     {
         public static Action LoadingStart;
         public static Action LoadingEnd;
+        private bool isProfileLoaded = false;
         public static VRHUDController I { get; private set; }
         private HUDController controller => HUDController.i;
         private readonly Vector3 hidenPos = new Vector3(0, -10, 0);
@@ -138,7 +139,13 @@ namespace DCL.Huds
         }
         public void SetupLoading(ShowHideAnimator animator)
         {
-            WebSocketCommunication.OnProfileLoading += (ani) => { LoadingStart.Invoke(); };
+            animator.OnWillFinishStart += (ani) => { LoadingStart.Invoke(); };
+            WebSocketCommunication.OnProfileLoading += (ani) => {
+                if (!isProfileLoaded)
+                {
+                    LoadingStart.Invoke();
+                    isProfileLoaded = true;
+                } };
             if (animator == null) return;
             animator.OnWillFinishHide += (ani) => { LoadingEnd.Invoke(); };
         }

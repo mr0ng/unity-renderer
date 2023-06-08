@@ -1419,8 +1419,8 @@ namespace DCL.Interface
         private static CanvasWebViewPrefab mainWebViewPrefab;
         private static bool isWebViewInitiated = false;
         private static GameObject _canvas;
-        public static bool openURLInternal = true;
-        public static async void OpenURL(string url)
+        // public static bool openURLInternal = true;
+        public static async void OpenURL(string url, bool openURLInternal = false)
         {
 #if UNITY_WEBGL
             SendMessage("OpenWebURL", new OpenURLPayload { url = url });

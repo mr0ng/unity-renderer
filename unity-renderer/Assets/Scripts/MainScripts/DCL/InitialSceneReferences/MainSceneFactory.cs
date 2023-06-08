@@ -44,11 +44,11 @@ namespace DCL
 
         public static GameObject CreateAudioHandler() => LoadAndInstantiate("HUDAudioHandler");
 
-        // #if DCL_VR
-        // public static GameObject CreateNavMap() => LoadAndInstantiate("NavMapVR");
-        // #else
+        #if DCL_VR
+        public static GameObject CreateNavMap() => LoadAndInstantiate("NavMapVR");
+        #else
         public static GameObject CreateNavMap() => LoadAndInstantiate("NavMap");
-        // #endif
+        #endif
 
         public static GameObject CreateEnvironment(string prefabPath = "Environment")
         {

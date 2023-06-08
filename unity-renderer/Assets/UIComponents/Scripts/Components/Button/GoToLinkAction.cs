@@ -22,8 +22,11 @@ public class GoToLinkAction : MonoBehaviour
     {
         if (string.IsNullOrEmpty(urlToGo))
             return;
-
+#if DCL_VR
+        WebInterface.OpenURL(urlToGo,true);
+        #else
         WebInterface.OpenURL(urlToGo);
+#endif
     }
 
     private void OnDestroy()

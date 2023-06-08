@@ -13,6 +13,11 @@ public class SignupHudHelper : VRHUDHelper
         #endif
         base.Awake();
         myTrans = transform;
+        Canvas canvas = GetComponent<Canvas>();
+        canvas.renderMode = RenderMode.WorldSpace;
+        canvas.overrideSorting = true;
+        canvas.sortingOrder = sortingOrder;
+        canvas.sortingLayerName = "menu";
         #if DCL_VR
         view.OnSetVisibility += OnVisiblityChange;
         #endif
@@ -49,7 +54,11 @@ public class SignupHudHelper : VRHUDHelper
 #if !DCL_VR
         return;
 #endif
-
+        Canvas canvas = GetComponent<Canvas>();
+        canvas.renderMode = RenderMode.WorldSpace;
+        canvas.overrideSorting = true;
+        canvas.sortingOrder = sortingOrder;
+        canvas.sortingLayerName = "menu";
         myTrans.localScale = 0.0024f*Vector3.one;
         var rawForward = CommonScriptableObjects.cameraForward.Get();
         var forward = new Vector3(rawForward.x, 0, rawForward.z).normalized;

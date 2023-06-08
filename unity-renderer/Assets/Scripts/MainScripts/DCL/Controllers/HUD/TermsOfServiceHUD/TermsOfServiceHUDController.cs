@@ -53,19 +53,31 @@ public class TermsOfServiceHUDController : IHUD
     private void OpenToS()
     {
         if (!string.IsNullOrEmpty(model.tosURL))
+            #if DCL_VR
+            WebInterface.OpenURL(model.tosURL,true);
+            #else
             WebInterface.OpenURL(model.tosURL);
+            #endif
     }
 
     private void OpenPrivacyPolicy()
     {
         if (!string.IsNullOrEmpty(model.privacyPolicyURL))
+            #if DCL_VR
+            WebInterface.OpenURL(model.privacyPolicyURL,true);
+            #else
             WebInterface.OpenURL(model.privacyPolicyURL);
+            #endif
     }
 
     private void OpenContactEmail()
     {
         if (!string.IsNullOrEmpty(model.emailContactURL))
+            #if DCL_VR
+            WebInterface.OpenURL($"mailto:{model.emailContactURL}",true);
+            #else
             WebInterface.OpenURL($"mailto:{model.emailContactURL}");
+            #endif
     }
 
     public void SetVisibility(bool visible) { view.gameObject.SetActive(visible); }

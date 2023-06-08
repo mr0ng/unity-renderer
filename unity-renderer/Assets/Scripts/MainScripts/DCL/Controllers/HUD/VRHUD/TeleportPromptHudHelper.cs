@@ -38,9 +38,9 @@ public class TeleportPromptHudHelper : VRHUDHelper
 
         var forward = VRHUDController.I.GetForward();
         if (Camera.main != null)
-            myTrans.parent.position = Camera.main.transform.position+ 1.9f*forward;
+            myTrans.position = Camera.main.transform.position+ 1.9f*forward;
 
-        myTrans.parent.forward = forward;
+        myTrans.forward = forward;
         myTrans.localPosition = Vector3.zero;
     }
     private void ConvertUI()

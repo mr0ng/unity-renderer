@@ -40,8 +40,11 @@ namespace MainScripts.DCL.Controllers.HUD.TaskbarHUD
                          $"&nametag={nametag}" +
                          $"&realm={realm}" +
                          $"&labels={GetLabels()}";
-
+            #if DCL_VR
+            WebInterface.OpenURL(url,true);
+            #else
             WebInterface.OpenURL(url);
+            #endif
         }
 
         private string GetLabels()

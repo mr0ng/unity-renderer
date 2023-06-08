@@ -76,7 +76,7 @@ namespace SignupHUD
             WebInterface.SendPassport(name, email);
             DataStore.i.common.isSignUpFlow.Set(false);
             newUserExperienceAnalytics?.SendTermsOfServiceAcceptedNux();
-            DataStore.i.common.isPlayerRendererLoaded.Set(true);
+            //DataStore.i.common.isPlayerRendererLoaded.Set(true);
             DataStore.i.common.isSignUpFlow.Set(false);
             DataStore.i.HUDs.signupVisible.Set(false);
 
@@ -87,8 +87,8 @@ namespace SignupHUD
         public void SetVisibility(bool visible)
         {
             view?.SetVisibility(visible);
-            if (visible)
-                StartSignupProcess();
+            if (visible && DataStore.i.common.isSignUpFlow.Get())
+               StartSignupProcess();
         }
 
         public void Dispose()

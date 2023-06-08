@@ -133,9 +133,11 @@ public class TaskbarHUDController : IHUD
         openChat.OnChange += OpenChat;
     }
 
-    private void OpenIntercom() =>
-        WebInterface.OpenURL(INTERCOM_URL);
-
+    #if DCL_VR
+    private void OpenIntercom() => WebInterface.OpenURL(INTERCOM_URL,true);
+    #else
+    private void OpenIntercom() => WebInterface.OpenURL(INTERCOM_URL);
+#endif
     private void HandleFriendsToggle(bool show)
     {
         if (show)

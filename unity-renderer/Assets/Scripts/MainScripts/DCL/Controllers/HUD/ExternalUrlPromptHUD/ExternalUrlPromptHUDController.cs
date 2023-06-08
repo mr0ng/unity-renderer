@@ -114,7 +114,11 @@ public class ExternalUrlPromptHUDController : IHUD
 
     private void OpenUrl(string url)
     {
+#if DCL_VR
+        WebInterface.OpenURL(url,true);
+#else
         WebInterface.OpenURL(url);
+#endif
         AnalyticsHelper.SendExternalLinkAnalytic(url);
     }
 }

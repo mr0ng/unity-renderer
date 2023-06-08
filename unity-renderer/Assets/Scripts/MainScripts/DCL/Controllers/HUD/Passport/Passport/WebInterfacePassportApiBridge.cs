@@ -56,7 +56,11 @@ namespace DCl.Social.Passports
 
         public void OpenURL(string url)
         {
+            #if DCL_VR
             WebInterface.OpenURL(url);
+            #else
+            WebInterface.OpenURL(url);
+            #endif
         }
 
         public void SendBlockPlayer(string playerId)

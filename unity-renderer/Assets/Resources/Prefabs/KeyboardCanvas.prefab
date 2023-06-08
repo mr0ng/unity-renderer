@@ -1228,8 +1228,12 @@ PrefabInstance:
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 22335612, guid: c4e389e44d96da64ea974ab237ce1a9a, type: 3}
+      propertyPath: m_SortingOrder
+      value: 105
+      objectReference: {fileID: 0}
+    - target: {fileID: 22335612, guid: c4e389e44d96da64ea974ab237ce1a9a, type: 3}
       propertyPath: m_SortingLayerID
-      value: -1524345185
+      value: -175788821
       objectReference: {fileID: 0}
     - target: {fileID: 22458684, guid: c4e389e44d96da64ea974ab237ce1a9a, type: 3}
       propertyPath: m_Pivot.x

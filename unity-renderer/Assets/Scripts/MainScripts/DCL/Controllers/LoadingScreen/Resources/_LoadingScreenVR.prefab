@@ -27,6 +27,16 @@ PrefabInstance:
       propertyPath: m_SizeDelta.x
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 1589542080228151454, guid: ab94f4a6f36c1cd44bfc5dc64fd8d4c8,
+        type: 3}
+      propertyPath: m_SortingLayer
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1589542080615075731, guid: ab94f4a6f36c1cd44bfc5dc64fd8d4c8,
+        type: 3}
+      propertyPath: m_SortingLayer
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 2355457883833974318, guid: ab94f4a6f36c1cd44bfc5dc64fd8d4c8,
         type: 3}
       propertyPath: m_PresetInfoIsWorld
@@ -235,6 +245,9 @@ MonoBehaviour:
   sortingOrder: 0
   showHideAnimator: {fileID: 3138565913595905760}
   loadingMask:
+    serializedVersion: 2
+    m_Bits: 32
+  signupMask:
     serializedVersion: 2
     m_Bits: 33
   view: {fileID: 8018554533010483902}

@@ -64,7 +64,7 @@ public class NativeBridgeCommunication : IKernelCommunication
 
     public void Dispose()
     {
-        
+
     }
 #if !UNITY_ANDROID || UNITY_EDITOR
     // [MonoPInvokeCallback(typeof(JS_Delegate_VSSS))]
@@ -185,7 +185,7 @@ public class NativeBridgeCommunication : IKernelCommunication
         EnqueueSceneMessage(MessagingTypes.OPEN_NFT_DIALOG, new Protocol.OpenNftDialog { contactAddress = contactAddress, comment = comment, tokenId = tokenId });
 
     [DllImport("__Internal")] private static extern void SetCallback_Query(JS_Delegate_Query callback);
-
+#endif
     [MonoPInvokeCallback(typeof(JS_Delegate_Query))]
     internal static void Query(Protocol.QueryPayload payload)
     {
@@ -219,7 +219,7 @@ public class NativeBridgeCommunication : IKernelCommunication
         queueHandler.EnqueueSceneMessage(queuedMessage);
 
         QueuedSceneMessage_Scene GetSceneMessageInstance()
-		
+
 
         {
             ConcurrentQueue<QueuedSceneMessage_Scene> sceneMessagesPool = queueHandler.sceneMessagesPool;
@@ -233,7 +233,7 @@ public class NativeBridgeCommunication : IKernelCommunication
 
             return message;
         }
-		#endif
+
     }
 
 #region DEPRECATED

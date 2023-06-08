@@ -264,7 +264,7 @@ internal class NFTPromptHUDView : MonoBehaviour, INFTPromptHUDView
 
         buttonCancel.gameObject.SetActive(true);
         buttonOpenMarket.gameObject.SetActive(true);
-
+        gameObject.SetActive(true);
         fetchNFTImageRoutine = StartCoroutine(FetchNFTImage(info));
     }
 
@@ -281,7 +281,7 @@ internal class NFTPromptHUDView : MonoBehaviour, INFTPromptHUDView
 
         nftAssetRetriever?.Dispose();
         nftAsset?.Dispose();
-        
+
         nftAssetRetriever = new NFTAssetRetriever();
         yield return nftAssetRetriever.LoadNFTAsset(
             nftInfo.previewImageUrl,
@@ -315,9 +315,9 @@ internal class NFTPromptHUDView : MonoBehaviour, INFTPromptHUDView
     private void SetNFTImageSize(Texture2D texture)
     {
         RectTransform rt = (RectTransform)imageNft.transform.parent;
-        
+
         float h, w;
-        
+
         if (texture.height > texture.width)
         {
             h = rt.rect.height;
@@ -335,7 +335,7 @@ internal class NFTPromptHUDView : MonoBehaviour, INFTPromptHUDView
     private string ShortDecimals(string value, int decimalCount)
     {
         int pointPosition = value.IndexOf('.');
-        
+
         if (pointPosition <= 0)
             return value;
 
@@ -376,7 +376,12 @@ internal class NFTPromptHUDView : MonoBehaviour, INFTPromptHUDView
     {
         if (!string.IsNullOrEmpty(marketUrl))
         {
+            #if DCL_VR
+            WebInterface.OpenURL(marketUrl, true);
+            #else
             WebInterface.OpenURL(marketUrl);
+            #endif
+
             AnalyticsHelper.SendExternalLinkAnalytic(marketUrl, nftTokenId);
         }
         else

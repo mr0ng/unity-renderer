@@ -39,7 +39,7 @@ public abstract class VRHUDHelper : MonoBehaviour
         canvas.renderMode = RenderMode.WorldSpace;
         canvas.overrideSorting = true;
         canvas.sortingOrder = sortingOrder;
-        canvas.sortingLayerName = "Menu";
+        canvas.sortingLayerName = "menu";
         if (GetComponent<GraphicRaycaster>() == null)
         {
             var caster = gameObject.AddComponent<GraphicRaycaster>();

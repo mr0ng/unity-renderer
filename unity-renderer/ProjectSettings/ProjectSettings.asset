@@ -134,8 +134,12 @@ PlayerSettings:
     16:10: 1
     16:9: 1
     Others: 1
-  bundleVersion: 0.1
-  preloadedAssets: []
+  bundleVersion: 1.1
+  preloadedAssets:
+  - {fileID: 11400000, guid: ed92f4994d89900418375e16b663e852, type: 2}
+  - {fileID: 6703885487727502143, guid: 64ffe5463b3a4e84e852a82cea687469, type: 2}
+  - {fileID: 11400000, guid: c35f85f4de4b3c147a106d22c71fae7b, type: 2}
+  - {fileID: 9171797508319984906, guid: 6282d2254e4b7b946bbfa2fcce697753, type: 2}
   metroInputSource: 0
   wsaTransparentSwapchain: 0
   m_HolographicPauseOnTrackingLoss: 1
@@ -148,7 +152,7 @@ PlayerSettings:
   enableOpenGLProfilerGPURecorders: 1
   useHDRDisplay: 0
   D3DHDRBitDepth: 0
-  m_ColorGamuts: 00000000
+  m_ColorGamuts: 0000000003000000
   targetPixelDensity: 30
   resolutionScalingMode: 0
   resetResolutionOnWindowResize: 0
@@ -170,7 +174,7 @@ PlayerSettings:
   stripEngineCode: 1
   iPhoneStrippingLevel: 0
   iPhoneScriptCallOptimization: 0
-  ForceInternetPermission: 0
+  ForceInternetPermission: 1
   ForceSDCardPermission: 0
   CreateWallpaper: 0
   APKExpansionFiles: 0
@@ -239,26 +243,26 @@ PlayerSettings:
   clonedFromGUID: c0afd0d1d80e3634a9dac47e8a0426ea
   templatePackageId: com.unity.3d@1.0.2
   templateDefaultScene: Assets/Scenes/SampleScene.unity
-  useCustomMainManifest: 0
+  useCustomMainManifest: 1
   useCustomLauncherManifest: 0
   useCustomMainGradleTemplate: 0
   useCustomLauncherGradleManifest: 0
   useCustomBaseGradleTemplate: 0
   useCustomGradlePropertiesTemplate: 0
   useCustomProguardFile: 0
-  AndroidTargetArchitectures: 5
+  AndroidTargetArchitectures: 2
   AndroidTargetDevices: 0
   AndroidSplashScreenScale: 0
   androidSplashScreen: {fileID: 0}
-  AndroidKeystoreName: '{inproject}: '
-  AndroidKeyaliasName: 
+  AndroidKeystoreName: '{dedicated}: DCLVR.keystore'
+  AndroidKeyaliasName: dclvr
   AndroidBuildApkPerCpuArchitecture: 0
   AndroidTVCompatibility: 1
   AndroidIsGame: 1
   AndroidEnableTango: 0
   androidEnableBanner: 1
   androidUseLowAccuracyLocation: 0
-  androidUseCustomKeystore: 0
+  androidUseCustomKeystore: 1
   m_AndroidBanners:
   - width: 320
     height: 180
@@ -561,7 +565,7 @@ PlayerSettings:
     m_GraphicsJobMode: 0
   m_BuildTargetGraphicsAPIs:
   - m_BuildTarget: AndroidPlayer
-    m_APIs: 0b00000008000000
+    m_APIs: 0b000000
     m_Automatic: 0
   - m_BuildTarget: iOSSupport
     m_APIs: 10000000
@@ -583,9 +587,9 @@ PlayerSettings:
     - OpenVR
   m_DefaultShaderChunkSizeInMB: 16
   m_DefaultShaderChunkCount: 0
-  openGLRequireES31: 0
-  openGLRequireES31AEP: 0
-  openGLRequireES32: 0
+  openGLRequireES31: 1
+  openGLRequireES31AEP: 1
+  openGLRequireES32: 1
   m_TemplateCustomTags: {}
   mobileMTRendering:
     Android: 1
@@ -849,7 +853,7 @@ PlayerSettings:
   webGLPowerPreference: 2
   scriptingDefineSymbols:
     : UNITY_POST_PROCESSING_STACK_V2;GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE;GLTFAST_SAFE
-    Android: UNITY_POST_PROCESSING_STACK_V2
+    Android: UNITY_POST_PROCESSING_STACK_V2;GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE;GLTFAST_SAFE;UNITASK_DOTWEEN_SUPPORT;VUPLEX_CCU;VUPLEX_MRTK;VUPLEX_STANDALONE;VUPLEX_OCULUS;VUPLEX_DISABLE_SRP_WARNING;MRTK_GLTF_IMPORTER_OFF;DCL_VR;USE_INPUT_SYSTEM_POSE_CONTROL
     CloudRendering: UNITY_POST_PROCESSING_STACK_V2
     EmbeddedLinux: UNITY_POST_PROCESSING_STACK_V2
     GameCoreXboxOne: UNITY_POST_PROCESSING_STACK_V2
@@ -858,14 +862,15 @@ PlayerSettings:
     PS4: UNITY_POST_PROCESSING_STACK_V2
     PS5: UNITY_POST_PROCESSING_STACK_V2
     Stadia: UNITY_POST_PROCESSING_STACK_V2
-    Standalone: UNITY_POST_PROCESSING_STACK_V2;GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE;GLTFAST_SAFE;UNITASK_DOTWEEN_SUPPORT;VUPLEX_CCU;VUPLEX_MRTK;VUPLEX_STANDALONE;VUPLEX_OCULUS;MRTK_GLTF_IMPORTER_OFF;DCL_VR_disabled
+    Standalone: UNITY_POST_PROCESSING_STACK_V2;GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE;GLTFAST_SAFE;UNITASK_DOTWEEN_SUPPORT;VUPLEX_CCU;VUPLEX_MRTK;VUPLEX_STANDALONE;VUPLEX_OCULUS;MRTK_GLTF_IMPORTER_OFF;DCL_VR;USE_INPUT_SYSTEM_POSE_CONTROL
     WebGL: UNITY_POST_PROCESSING_STACK_V2;GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE;GLTFAST_SAFE;UNITASK_DOTWEEN_SUPPORT
-    Windows Store Apps: UNITY_POST_PROCESSING_STACK_V2
+    Windows Store Apps: UNITY_POST_PROCESSING_STACK_V2;USE_INPUT_SYSTEM_POSE_CONTROL
     XboxOne: UNITY_POST_PROCESSING_STACK_V2
     tvOS: UNITY_POST_PROCESSING_STACK_V2
   additionalCompilerArguments: {}
   platformArchitecture: {}
   scriptingBackend:
+    Android: 1
     Standalone: 0
   il2cppCompilerConfiguration:
     WebGL: 2
@@ -875,8 +880,8 @@ PlayerSettings:
   allowUnsafeCode: 1
   useDeterministicCompilation: 1
   enableRoslynAnalyzers: 1
-  selectedPlatform: 0
-  additionalIl2CppArgs: 
+  selectedPlatform: 2
+  additionalIl2CppArgs: ' --emit-source-mapping'
   scriptingRuntimeVersion: 1
   gcIncremental: 0
   assemblyVersionValidation: 1

@@ -79,7 +79,9 @@ namespace DCL.LoadingScreen
         {
             if (!isVisible) return;
             rawImage.gameObject.SetActive(false);
-
+            #if DCL_VR
+            CrossPlatformManager.SetCameraForGame();
+            #endif
             Hide();
         }
 

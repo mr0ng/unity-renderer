@@ -27,7 +27,6 @@ namespace DCL.Backpack
         [SerializeField] internal ColorPresetsSO colorPresetsSO;
         [SerializeField] internal ColorPresetsSO skinColorPresetsSO;
         [SerializeField] private BackpackFiltersComponentView backpackFiltersComponentView;
-
         public override bool isVisible => gameObject.activeInHierarchy;
         public Transform EmotesSectionTransform => emotesSection.transform;
         public WearableGridComponentView WearableGridComponentView => wearableGridComponentView;
@@ -46,6 +45,10 @@ namespace DCL.Backpack
 
             thisTransform = transform;
             backpackPreviewPanel.SetLoadingActive(false);
+            #if DCL_VR
+            CanvasGroup canvasGroup = GetComponent<CanvasGroup>();
+            canvasGroup.blocksRaycasts = false;
+            #endif
         }
 
         public void Initialize(ICharacterPreviewFactory characterPreviewFactory)
@@ -75,17 +78,30 @@ namespace DCL.Backpack
             colorPickerComponentView.OnColorChanged -= OnColorPickerColorChanged;
         }
 
+        #if DCL_VR
+        public static BackpackEditorHUDV2ComponentView Create() =>
+            Instantiate(Resources.Load<BackpackEditorHUDV2ComponentView>("BackpackEditorHUDV2VR"));
+        #else
         public static BackpackEditorHUDV2ComponentView Create() =>
             Instantiate(Resources.Load<BackpackEditorHUDV2ComponentView>("BackpackEditorHUDV2"));
-
+        #endif
         public override void Show(bool instant = false)
         {
+            #if DCL_VR
+            CanvasGroup canvasGroup = GetComponent<CanvasGroup>();
+            canvasGroup.blocksRaycasts = true;
+            Position();
+            #endif
             gameObject.SetActive(true);
             backpackPreviewPanel.SetPreviewEnabled(true);
         }
 
         public override void Hide(bool instant = false)
         {
+            #if DCL_VR
+            CanvasGroup canvasGroup = GetComponent<CanvasGroup>();
+            canvasGroup.blocksRaycasts = false;
+            #endif
             gameObject.SetActive(false);
             backpackPreviewPanel.SetPreviewEnabled(false);
             colorPickerComponentView.SetActive(false);
@@ -206,5 +222,15 @@ namespace DCL.Backpack
 
         private void OnColorPickerColorChanged(Color newColor) =>
             OnColorChanged?.Invoke(newColor);
+
+        private void Position()
+        {
+            transform.localScale = 0.0024f*Vector3.one;
+            var rawForward = CommonScriptableObjects.cameraForward.Get();
+            var forward = new Vector3(rawForward.x, 0, rawForward.z).normalized;
+            transform.position = Camera.main.transform.position + 3 * forward;// + 1.0f * Vector3.up;
+            transform.forward =  forward;
+
+        }
     }
 }

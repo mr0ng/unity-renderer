@@ -29,6 +29,11 @@ namespace DCL.Interface
             canvasKeyboard = Instantiate((GameObject)Resources.Load("Prefabs/KeyboardCanvas"));
             keyboard = NonNativeKeyboard.Instance;
             _keyboardTrans = canvasKeyboard.transform;
+            Canvas canvas = keyboard.transform.GetComponent<Canvas>();
+            canvas.renderMode = RenderMode.WorldSpace;
+            canvas.overrideSorting = true;
+            canvas.sortingOrder = 105;
+            canvas.sortingLayerName = "menu";
             // Set the layer of the keyboard and all its children to UI.
             SetLayerRecursively(canvasKeyboard, LayerMask.NameToLayer("UI"));
             SetLayerRecursively(keyboard.gameObject, LayerMask.NameToLayer("UI"));
@@ -74,9 +79,9 @@ namespace DCL.Interface
             SetupEvents();
             keyboard.PresentKeyboard(NonNativeKeyboard.LayoutType.URL);
             var rawForward = CommonScriptableObjects.cameraForward.Get();
-            keyboardTrans.position = CommonScriptableObjects.cameraPosition.Get() + (.7f * rawForward) + new UnityEngine.Vector3(0, -0.35f, 0);
+            keyboardTrans.position = CommonScriptableObjects.cameraPosition.Get() + (.7f * rawForward) + new UnityEngine.Vector3(0, -0.38f, 0);
             // Tilt the keyboard upwards by adjusting the x rotation
-            keyboardTrans.rotation = Quaternion.Euler(-10f, keyboardTrans.rotation.eulerAngles.y, keyboardTrans.rotation.eulerAngles.z);
+            keyboardTrans.rotation = Quaternion.Euler(-30f, keyboardTrans.rotation.eulerAngles.y, keyboardTrans.rotation.eulerAngles.z);
 
             keyboardTrans.forward = new UnityEngine.Vector3(rawForward.x, 0, rawForward.z);
             canvasKeyboard.SetActive(true);

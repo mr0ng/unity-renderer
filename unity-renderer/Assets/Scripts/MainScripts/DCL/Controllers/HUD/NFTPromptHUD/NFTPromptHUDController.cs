@@ -30,8 +30,11 @@ public class NFTPromptHUDController : IHUD
     {
         view = Object.Instantiate(Resources.Load<GameObject>(VIEW_PREFAB_PATH))
             .GetComponent<NFTPromptHUDView>();
+        #if !DCL_VR
         view.SetActive(false);
-
+        #else
+        view.SetActive(true);
+        #endif
         view.OnOwnerLabelPointerEnter += ShowOwnersTooltip;
         view.OnOwnerLabelPointerExit += TryHideOwnersTooltip;
         view.OnOwnersTooltipFocusLost += OnOwnersTooltipFocusLost;
@@ -110,6 +113,7 @@ public class NFTPromptHUDController : IHUD
 
     private void SetNFT(NFTInfoSingleAsset info, string comment, bool shouldRefreshOwners)
     {
+        view.SetActive(true);
         lastNFTInfo = info;
         view.SetNFTInfo(info, comment);
         if (shouldRefreshOwners)

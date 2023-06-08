@@ -11,25 +11,37 @@ public class LoadingHudHelper : VRHUDHelper
 {
     [SerializeField]
     private LayerMask loadingMask;
-    // [SerializeField]
-    // private LoadingScreenView view;
+    [SerializeField]
+    private LayerMask signupMask;
+     [SerializeField]
+    private LoadingScreenView view;
     [SerializeField]
     private ShowHideAnimator animator;
     private SignupHUDView signUpScreen;
-
-
+    private bool signedUp = false;
+    // protected void Start()
+    // {
+    //     CrossPlatformManager.SetCameraForLoading(signupMask);
+    // }
 
 private IEnumerator FindSignupView()
 {
+    if (signedUp) yield break;
+    CrossPlatformManager.SetCameraForLoading(signupMask);
     while (signUpScreen == null)
     {
         yield return null;
         signUpScreen = SignupHUDView.I;
-
+    }
+    if (signUpScreen != null)
+    {
+        CrossPlatformManager.SetCameraForLoading(signupMask);
+        signedUp = true;
+        if (DataStore.i.common.isSignUpFlow.Get())
+            signUpScreen.OnTermsOfServiceAgreed += OnTermsOfServiceAgreed;
 
     }
-    if( signUpScreen != null)
-        signUpScreen.OnTermsOfServiceAgreed += OnTermsOfServiceAgreed;
+
     yield break;
 }
     protected void OnDestroy()
@@ -39,6 +51,10 @@ private IEnumerator FindSignupView()
 
     protected override void SetupHelper()
     {
+        #if !DCL_VR
+        return;
+        #endif
+        CrossPlatformManager.SetCameraForLoading(signupMask);
         //signUpScreen = SignupHUDView.I;
         StartCoroutine(FindSignupView());
         myTrans.localScale = 0.00075f * Vector3.one;
@@ -55,7 +71,7 @@ private IEnumerator FindSignupView()
 
             if (DataStore.i.common.isSignUpFlow.Get())
             {
-
+                CrossPlatformManager.SetCameraForLoading(signupMask);
                 // Hide loading screen
                 animator.Hide();
                 myTrans.position += 10 * Vector3.down;
@@ -63,7 +79,7 @@ private IEnumerator FindSignupView()
                 // Show signup screen
                 signUpScreen.SetVisibility(true);
                 // Set camera for game
-                CrossPlatformManager.SetCameraForGame();
+                //CrossPlatformManager.SetCameraForGame();
                 DebugConfigComponent.i.HideWebViewScreens();
                 // Set signup visibility in DataStore
                 DataStore.i.HUDs.signupVisible.Set(true);
@@ -76,18 +92,39 @@ private IEnumerator FindSignupView()
             myTrans.position = Camera.main.transform.position + forward;// + Vector3.up;
             DebugConfigComponent.i.HideWebViewScreens();
             myTrans.forward = forward;
+            VRHUDController.LoadingEnd += () =>
+            {
+                StartCoroutine(ResetLoadingScreen());
+            };
+
         };
         VRHUDController.LoadingEnd += CrossPlatformManager.SetCameraForGame;
         #endif
     }
+    private IEnumerator ResetLoadingScreen(){
+        CrossPlatformManager.SetCameraForGame();
+        view.FadeOut();
+        view.gameObject.SetActive(false);
+        CrossPlatformManager.SetCameraForGame();
+        yield return new WaitForSeconds(0.5f);
+        view.gameObject.SetActive(true);
+        CrossPlatformManager.SetCameraForGame();
+    }
     public void OnTermsOfServiceAgreed()
     {
+        // Stop listening to this event
+        signUpScreen.OnTermsOfServiceAgreed -= OnTermsOfServiceAgreed;
         DataStore.i.common.isSignUpFlow.Set(false);
+        animator.Show();
+        VRHUDController.LoadingStart.Invoke();
         CrossPlatformManager.SetCameraForLoading(loadingMask);
         // view.SetVisible(true,true);
         var forward = VRHUDController.I.GetForward();
         myTrans.position = Camera.main.transform.position + forward;
         DebugConfigComponent.i.HideWebViewScreens();
         myTrans.forward = forward;
+        view.FadeIn(false, false);
+
+
     }
 }

@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace DCL.SettingsCommon.SettingsControllers.SpecificControllers
 {
-    [CreateAssetMenu(menuName = "Settings/Controllers/Controls/Hide UI", fileName = "HideUIControlController")]
+    [CreateAssetMenu(menuName = "Settings/Controllers/Controls/Hide UI", fileName = "ControlController")]
     public class HideUIControlController : ToggleSettingsControlController
     {
         public override void Initialize()

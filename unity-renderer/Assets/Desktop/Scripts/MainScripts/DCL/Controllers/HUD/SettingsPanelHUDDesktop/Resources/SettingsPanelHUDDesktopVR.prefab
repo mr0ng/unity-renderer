@@ -130,17 +130,32 @@ PrefabInstance:
     - target: {fileID: 4350856256311207005, guid: d97b634532a3d40ce92a93858f79c274,
         type: 3}
       propertyPath: m_AnchorMax.x
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4350856256311207005, guid: d97b634532a3d40ce92a93858f79c274,
         type: 3}
       propertyPath: m_AnchorMax.y
-      value: 1
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4350856256311207005, guid: d97b634532a3d40ce92a93858f79c274,
+        type: 3}
+      propertyPath: m_AnchorMin.y
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4788018966739028475, guid: d97b634532a3d40ce92a93858f79c274,
         type: 3}
       propertyPath: m_fontSize
       value: 14.3
+      objectReference: {fileID: 0}
+    - target: {fileID: 4992901020966635494, guid: d97b634532a3d40ce92a93858f79c274,
+        type: 3}
+      propertyPath: m_Size
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4992901020966635494, guid: d97b634532a3d40ce92a93858f79c274,
+        type: 3}
+      propertyPath: m_Value
+      value: 0.9999998
       objectReference: {fileID: 0}
     - target: {fileID: 5515094998631221567, guid: d97b634532a3d40ce92a93858f79c274,
         type: 3}
@@ -172,10 +187,30 @@ PrefabInstance:
       propertyPath: m_Name
       value: SettingsPanelHUDDesktopVR
       objectReference: {fileID: 0}
+    - target: {fileID: 7625209895318004863, guid: d97b634532a3d40ce92a93858f79c274,
+        type: 3}
+      propertyPath: m_SizeDelta.x
+      value: -1932.9
+      objectReference: {fileID: 0}
+    - target: {fileID: 7625209895318004863, guid: d97b634532a3d40ce92a93858f79c274,
+        type: 3}
+      propertyPath: m_SizeDelta.y
+      value: -1199.8999
+      objectReference: {fileID: 0}
+    - target: {fileID: 7625209895318004863, guid: d97b634532a3d40ce92a93858f79c274,
+        type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 5.1000366
+      objectReference: {fileID: 0}
+    - target: {fileID: 7625209895318004863, guid: d97b634532a3d40ce92a93858f79c274,
+        type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 3.100006
+      objectReference: {fileID: 0}
     - target: {fileID: 7676592460586027942, guid: d97b634532a3d40ce92a93858f79c274,
         type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8775980089445056514, guid: d97b634532a3d40ce92a93858f79c274,
         type: 3}

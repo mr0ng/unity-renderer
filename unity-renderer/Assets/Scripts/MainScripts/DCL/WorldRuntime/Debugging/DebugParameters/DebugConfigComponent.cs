@@ -8,6 +8,8 @@ using Utils = DCL.Helpers.Utils;
 //VR additions
 using TMPro;
 using DCL.Interface;
+using DCL.SettingsCommon;
+using System.Collections.Generic;
 using UnityEngine.UI;
 using Vuplex.WebView;
 using QualitySettings = UnityEngine.QualitySettings;
@@ -35,7 +37,8 @@ namespace DCL
         private string webViewURL = "";
         private bool isMainTab = true;
 		public bool openInternalBrowser;
-//end VR
+        private GeneralSettings currentSettings;
+        //end VR
         private readonly DataStoreRef<DataStore_LoadingScreen> dataStoreLoadingScreen;
 
         public static DebugConfigComponent i
@@ -134,6 +137,8 @@ namespace DCL
             if (disableGLTFDownloadThrottle) DataStore.i.performance.maxDownloads.Set(999);
             Texture.allowThreadedTextureCreation = multithreaded;
 #if DCL_VR
+            useInternalBrowser.isOn = currentSettings.useInternalBrowser;
+            useInternalBrowser.onValueChanged.AddListener(UpdateBrowserType);
 	// options.Initialized += (sender, eventArgs) =>
             // {
             //     Debug.Log($"Secondary Webview loading {htmlServerTest}");
@@ -208,18 +213,19 @@ namespace DCL
 
 
 #else
-                openInternalBrowser = false;
-                //webSocketSSL = true;
-                //baseUrlMode = BaseUrl.ORG;
-                // parcelRadiusToLoad = 4;
-
+                // openInternalBrowser = false;
+                //openInternalBrowser = true;
+                webSocketSSL = true;
+                baseUrlMode = BaseUrl.ORG;
 
 #endif
                 //startInCoords = Vector2.zero;
                 //disableAssetBundles = true;
             }
-            useInternalBrowser.isOn = openInternalBrowser;
-            WebInterface.openURLInternal = openInternalBrowser;
+
+            //openInternalBrowser = CommonScriptableObjects.useInternalBrowser;
+            //useInternalBrowser.isOn = openInternalBrowser;
+            // WebInterface.openURLInternal = openInternalBrowser;
             if (openInternalBrowser)
             {
                 browserMessage.transform.parent.gameObject.SetActive(true);
@@ -250,6 +256,11 @@ namespace DCL
             }
         }
 
+        private void UpdateBrowserType(bool current)
+        {
+            openInternalBrowser = current;
+            currentSettings.useInternalBrowser = current;
+        }
         private void OnCommunicationReadyChangedValue(bool newState, bool prevState)
         {
             if (newState && !prevState)
@@ -593,7 +604,7 @@ namespace DCL
         {
 
             openInternalBrowser = useInternalBrowser.isOn;
-            WebInterface.openURLInternal = openInternalBrowser;
+            // WebInterface.openURLInternal = openInternalBrowser;
             // if (useInternalBrowser.isOn)
             // {
             //     DCLWebview.gameObject.SetActive(true);

@@ -211,6 +211,8 @@ public static class CommonScriptableObjects
 
     private static BooleanVariable allUIHiddenValue;
     public static BooleanVariable allUIHidden => GetOrLoad(ref allUIHiddenValue, "ScriptableObjects/AllUIHidden");
+    private static BooleanVariable useInternalBrowserValue;
+    public static BooleanVariable useInternalBrowser => GetOrLoad(ref useInternalBrowserValue, "ScriptableObjects/UseInternalBrowser");
 
     private static LatestOpenChatsList latestOpenChatsValue;
     public static LatestOpenChatsList latestOpenChats => GetOrLoad(ref latestOpenChatsValue, "ScriptableObjects/LatestOpenChats");

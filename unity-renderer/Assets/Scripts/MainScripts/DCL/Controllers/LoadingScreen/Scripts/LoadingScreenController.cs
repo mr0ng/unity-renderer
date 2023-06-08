@@ -109,6 +109,7 @@ namespace DCL.LoadingScreen
                 FadeOutView();
             else
             #if DCL_VR
+                view.FadeIn(false, false);
                 view.SetVisible(true,false);
             #else
                 view.FadeIn(false, false);
@@ -170,7 +171,7 @@ namespace DCL.LoadingScreen
         private bool IsSceneLoaded(Vector2Int candidate) =>
             worldState.GetScene(worldState.GetSceneNumberByCoords(candidate))?.loadingProgress >= 100;
 
-        private void HandlePlayerLoading()
+        public void HandlePlayerLoading()
         {
             //We have to check if the player is loaded
             if (commonDataStore.isPlayerRendererLoaded.Get())
