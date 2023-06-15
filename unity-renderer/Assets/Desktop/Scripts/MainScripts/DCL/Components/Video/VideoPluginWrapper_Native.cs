@@ -1,4 +1,5 @@
-﻿using System;
+﻿#if !UNITY_ANDROID
+using System;
 using System.Collections.Generic;
 using DCL.Components.Video.Plugin;
 using UnityEngine;
@@ -107,3 +108,4 @@ public class VideoPluginWrapper_Native : IVideoPluginWrapper
         videoPlayers[id].SetLoop(loop);
     }
 }
+#endif

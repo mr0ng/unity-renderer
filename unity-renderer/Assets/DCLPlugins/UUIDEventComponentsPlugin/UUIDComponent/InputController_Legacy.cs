@@ -202,41 +202,26 @@ namespace DCL
 
                 switch (btnMap.type)
                 {
-//<<<<<<< HEAD
-                    case BUTTON_TYPE.MOUSE:
-                        if (CommonScriptableObjects.allUIHidden.Get())
-                            break;
-                        #if DCL_VR
-                        if (GetButtonDown(btnMap) && !btnMap.lastState)
-                            #else
-                        if (Input.GetMouseButtonDown(btnMap.buttonNum))
-                            #endif
-                            RaiseEvent(btnMap.buttonId, EVENT.BUTTON_DOWN, btnMap.useRaycast,
-                                btnMap.enablePointerEvent);
-                        #if DCL_VR
-                        else if (GetButtonUp(btnMap) && btnMap.lastState)
-                        #else
-                        else if (Input.GetMouseButtonUp(btnMap.buttonNum))
-                        #endif
-                            RaiseEvent(btnMap.buttonId, EVENT.BUTTON_UP, btnMap.useRaycast, btnMap.enablePointerEvent);
-                        break;
-                    case BUTTON_TYPE.KEYBOARD:
-                        if (CommonScriptableObjects.allUIHidden.Get())
-                            break;
-                        #if DCL_VR
-                        if (GetKeyDown((KeyCode) btnMap.buttonNum) && !btnMap.lastState)
-                        #else
-                        if (Input.GetKeyDown((KeyCode) btnMap.buttonNum))
-                        #endif
-                            RaiseEvent(btnMap.buttonId, EVENT.BUTTON_DOWN, btnMap.useRaycast,
-                                btnMap.enablePointerEvent);
-                        #if DCL_VR
-                        else if (!GetKeyDown((KeyCode) btnMap.buttonNum)&& btnMap.lastState)
-                        #else
-                        else if (!Input.GetKeyDown((KeyCode) btnMap.buttonNum))
-                        #endif
-                            RaiseEvent(btnMap.buttonId, EVENT.BUTTON_UP, btnMap.useRaycast, btnMap.enablePointerEvent);
-//=======
+#if DCL_VR
+                     case BUTTON_TYPE.MOUSE:
+                         // if (CommonScriptableObjects.allUIHidden.Get())
+                         //     break;
+
+                         if (GetButtonDown(btnMap) && !btnMap.lastState)
+                             RaiseEvent(btnMap.buttonId, EVENT.BUTTON_DOWN, btnMap.useRaycast,
+                                 btnMap.enablePointerEvent);
+                         else if (GetButtonUp(btnMap) && btnMap.lastState)
+                             RaiseEvent(btnMap.buttonId, EVENT.BUTTON_UP, btnMap.useRaycast, btnMap.enablePointerEvent);
+                         break;
+                     case BUTTON_TYPE.KEYBOARD:
+                         if (CommonScriptableObjects.allUIHidden.Get())
+                             break;
+                         if (GetKeyDown((KeyCode) btnMap.buttonNum) && !btnMap.lastState)
+                             RaiseEvent(btnMap.buttonId, EVENT.BUTTON_DOWN, btnMap.useRaycast,
+                                 btnMap.enablePointerEvent);
+                         else if (!GetKeyDown((KeyCode) btnMap.buttonNum)&& btnMap.lastState)
+                             RaiseEvent(btnMap.buttonId, EVENT.BUTTON_UP, btnMap.useRaycast, btnMap.enablePointerEvent);
+#else
                     case BUTTON_TYPE.MOUSE when Input.GetMouseButtonDown(btnMap.buttonNum):
                     case BUTTON_TYPE.KEYBOARD when Input.GetKeyDown((KeyCode)btnMap.buttonNum):
                         RaiseEvent(btnMap.buttonId, EVENT.BUTTON_DOWN, btnMap.useRaycast, btnMap.enablePointerEvent);
@@ -244,8 +229,8 @@ namespace DCL
                     case BUTTON_TYPE.MOUSE when Input.GetMouseButtonUp(btnMap.buttonNum):
                     case BUTTON_TYPE.KEYBOARD when Input.GetKeyUp((KeyCode)btnMap.buttonNum):
                         RaiseEvent(btnMap.buttonId, EVENT.BUTTON_UP, btnMap.useRaycast, btnMap.enablePointerEvent);
-//>>>>>>> dev
-                        break;
+#endif
+                         break;
                 }
             }
         }

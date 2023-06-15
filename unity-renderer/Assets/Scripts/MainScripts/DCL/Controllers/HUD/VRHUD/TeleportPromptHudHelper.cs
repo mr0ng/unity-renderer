@@ -41,7 +41,7 @@ public class TeleportPromptHudHelper : VRHUDHelper
             myTrans.position = Camera.main.transform.position+ 1.9f*forward;
 
         myTrans.forward = forward;
-        myTrans.localPosition = Vector3.zero;
+
     }
     private void ConvertUI()
     {

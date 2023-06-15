@@ -97,7 +97,7 @@ namespace DCL
         private void DesktopDestroy()
         {
             //preloadingController.Dispose();
-#if !AV_PRO_PRESENT
+#if !AV_PRO_PRESENT && !UNITY_ANDROID
             DCLVideoPlayer.StopAllThreads();
 #endif
         }

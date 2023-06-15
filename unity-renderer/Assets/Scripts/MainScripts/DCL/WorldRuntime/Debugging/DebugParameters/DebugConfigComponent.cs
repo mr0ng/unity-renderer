@@ -12,6 +12,7 @@ using DCL.SettingsCommon;
 using System.Collections.Generic;
 using UnityEngine.UI;
 using Vuplex.WebView;
+
 using QualitySettings = UnityEngine.QualitySettings;
 //end VR additions
 namespace DCL
@@ -77,7 +78,7 @@ namespace DCL
             GOERLI,
         }
 
-        [Header("General Settings")] public bool OpenBrowserOnStart;
+        [Header("General Settings")] public bool OpenBrowserOnStart = true;
         public bool webSocketSSL = false;
 
         [Header("Kernel General Settings")] public string kernelVersion;
@@ -202,12 +203,16 @@ namespace DCL
 #if DCL_VR
 			if (!Debug.isDebugBuild)
             {
-
+                //openInternalBrowser = CommonScriptableObjects.useInternalBrowser;
+                useInternalBrowser.isOn = openInternalBrowser;
 #if UNITY_ANDROID && !UNITY_EDITOR
 //don't have a method of using external browser on quest2.
                 openInternalBrowser = true;
-                //webSocketSSL = false;
-                //baseUrlMode = BaseUrl.ZONE;
+                CommonScriptableObjects.useInternalBrowser.Set(true);
+
+                webSocketSSL = false;
+                baseUrlMode = BaseUrl.CUSTOM;
+
                 // parcelRadiusToLoad = 3;
 
 
@@ -218,12 +223,12 @@ namespace DCL
                 baseUrlMode = BaseUrl.ORG;
 
 #endif
+
                 //startInCoords = Vector2.zero;
                 //disableAssetBundles = true;
             }
 
-            //openInternalBrowser = CommonScriptableObjects.useInternalBrowser;
-            //useInternalBrowser.isOn = openInternalBrowser;
+
             // WebInterface.openURLInternal = openInternalBrowser;
             if (openInternalBrowser)
             {
@@ -262,14 +267,20 @@ namespace DCL
         }
         private void OnCommunicationReadyChangedValue(bool newState, bool prevState)
         {
+            Debug.Log("Clint: before Init after OnCommunicationReadyChangedValue.");
+
             if (newState && !prevState)
+            {
                 InitConfig();
+                Debug.Log("Clint: before Init after OnCommunicationReadyChangedValue.");
+            }
 
             DataStore.i.wsCommunication.communicationReady.OnChange -= OnCommunicationReadyChangedValue;
         }
 
         private void InitConfig()
         {
+            Debug.Log($"Clint: InitConfig started");
             if (useCustomContentServer)
             {
                 RendereableAssetLoadHelper.useCustomContentServerUrl = true;
@@ -277,7 +288,10 @@ namespace DCL
             }
 
             if (OpenBrowserOnStart)
+            {
                 OpenWebBrowser();
+                Debug.Log($"Clint: InitConfig started. Open Browser");
+            }
 
             if (runPerformanceMeterToolDuringLoading)
             {
@@ -309,7 +323,7 @@ namespace DCL
 
         private void OpenWebBrowser()
         {
-
+            Debug.Log($"Clint: OpenBrowser started");
             string baseUrl = "";
             string debugString = "";
 
@@ -420,7 +434,7 @@ namespace DCL
             //don't have a method of using external browser on quest2.
             openInternalBrowser = true;
 #endif
-
+            Debug.Log($"Clint: OpenBrowser Middle: internal - {openInternalBrowser}");
             if (openInternalBrowser)
             {
                 browserMessage.text = "Browser Loading";

@@ -60,14 +60,16 @@ public class TeleportPromptHUDView : MonoBehaviour
         hudCanvasCameraModeController = new HUDCanvasCameraModeController(content.GetComponent<Canvas>(), DataStore.i.camera.hudsCamera);
         cancelButton.onClick.AddListener(OnClosePressed);
         backgroundCatcher.onClick.AddListener(OnClosePressed);
-        // #if DCL_VR
-        // continueButton.onClick.AddListener(OnTeleportPressed);
-        // contentAnimator.OnWillFinishHide += (animator) => Hide();
-        //
-        // contentAnimator.Hide();
-        // OnSetVisibility?.Invoke(false);
-        // content.GetComponent<Canvas>().enabled = false;
-        // #endif
+
+         continueButton.onClick.AddListener(OnTeleportPressed);
+         teleportRaycaster.enabled = false;
+         #if DCL_VR
+         // contentAnimator.OnWillFinishHide += (animator) => Hide();
+
+         contentAnimator.Hide();
+         OnSetVisibility?.Invoke(false);
+         //content.GetComponent<Canvas>().enabled = false;
+         #endif
     }
 
     public void Reset()

@@ -21,7 +21,8 @@
         "GUID:cc6bfabbfe87b7949aa248893f89ce37",
         "GUID:ca4a649888a64e2e9da36b8fb694230b",
         "UnityEditor.UI",
-        "UnityEngine.UI"
+        "UnityEngine.UI",
+        "GUID:555c1f3c6d18648df910b7a1de75b424"
     ],
     "includePlatforms": [
         "Editor"

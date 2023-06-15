@@ -23,7 +23,8 @@
         "GUID:0e967802b778d404eac1ca5ea340e290",
         "GUID:fbcc413e192ef9048811d47ab0aca0c0",
         "UnityEditor.UI",
-        "UnityEngine.UI"
+        "UnityEngine.UI",
+        "GUID:555c1f3c6d18648df910b7a1de75b424"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

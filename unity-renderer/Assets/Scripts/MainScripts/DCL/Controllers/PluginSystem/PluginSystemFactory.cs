@@ -40,7 +40,9 @@ namespace DCL
             pluginSystem.Register<DebugShapesBoundingBoxDisplayer>(() => new DebugShapesBoundingBoxDisplayer());
             pluginSystem.Register<TransactionFeature>(() => new TransactionFeature());
             pluginSystem.Register<PreviewMenuPlugin>(() => new PreviewMenuPlugin());
+#if !UNITY_ANDROID
             pluginSystem.Register<SkyboxController>(() => new SkyboxController(DataStore.i));
+#endif
             pluginSystem.Register<ExperiencesViewerFeature>(() => new ExperiencesViewerFeature());
             pluginSystem.Register<EmoteAnimationsPlugin>(() => new EmoteAnimationsPlugin());
             pluginSystem.Register<TeleportHUDPlugin>(() => new TeleportHUDPlugin());

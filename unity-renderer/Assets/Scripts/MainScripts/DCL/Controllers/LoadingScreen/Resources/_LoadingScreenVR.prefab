@@ -249,7 +249,7 @@ MonoBehaviour:
     m_Bits: 32
   signupMask:
     serializedVersion: 2
-    m_Bits: 33
+    m_Bits: 2080
   view: {fileID: 8018554533010483902}
   animator: {fileID: 3138565913595905760}
 --- !u!114 &305164323875273945

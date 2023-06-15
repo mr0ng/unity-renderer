@@ -210,8 +210,11 @@ namespace DCL.Backpack
             colorPickerComponentView.UpdateSliderValues(color);
         }
 
-        public void ShowContinueSignup() =>
+        public void ShowContinueSignup()
+        {
+
             saveAvatarButton.gameObject.SetActive(true);
+        }
 
         public void HideContinueSignup() =>
             saveAvatarButton.gameObject.SetActive(false);

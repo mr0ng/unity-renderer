@@ -4,6 +4,7 @@ using DCLServices.MapRendererV2.MapLayers.ParcelHighlight;
 using MainScripts.DCL.Helpers.Utils;
 using UnityEngine;
 using UnityEngine.Pool;
+using UnityEngine.UIElements;
 
 namespace DCLServices.MapRendererV2.MapCameraController
 {

@@ -7,8 +7,12 @@ using UnityEngine.Events;
 
 public class ExploreV2MenuComponentView : BaseComponentView, IExploreV2MenuComponentView
 {
+    #if DCL_VR
+    internal const string REALM_SELECTOR_MODAL_ID = "RealmSelector_ModalVR";
+    #else
     internal const string REALM_SELECTOR_MODAL_ID = "RealmSelector_Modal";
 
+#endif
     [Header("Assets References")]
     [SerializeField] internal RealmSelectorComponentView realmSelectorModalPrefab;
 

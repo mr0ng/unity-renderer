@@ -6,6 +6,7 @@
         "GUID:7fe146b43e76fe745aeaf2020feb54b7"
     ],
     "includePlatforms": [
+        "Android",
         "Editor",
         "LinuxStandalone64",
         "macOSStandalone",

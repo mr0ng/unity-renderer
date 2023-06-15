@@ -817,8 +817,8 @@ MonoBehaviour:
     soloSceneCoords: {x: 0, y: 0}
     ignoreGlobalScenes: 0
     msgStepByStep: 0
-    openInternalBrowser: 1
     logWs: 0
+    overrideUserID: 
   OpenBrowserOnStart: 1
   webSocketSSL: 0
   kernelVersion: 
@@ -828,17 +828,17 @@ MonoBehaviour:
   customURL: https://play.decentraland.zone/?
   network: 0
   realm: 
-  startInCoords: {x: -127, y: -23}
+  startInCoords: {x: 0, y: 0}
+  overrideUserID: 
   forceLocalComms: 0
   enableTutorial: 0
   builderInWorld: 0
   soloScene: 0
-  disableAssetBundles: 1
-  enableGLTFast: 1
+  disableAssetBundles: 0
   enableDebugMode: 0
   debugPanelMode: 0
   disableGLTFDownloadThrottle: 0
-  multithreaded: 1
+  multithreaded: 0
   runPerformanceMeterToolDuringLoading: 0
 --- !u!1 &1472591252
 GameObject:
@@ -1303,7 +1303,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1755198060}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: bf98dd1206224111a38765365e98e207, type: 3}
   m_Name: 
@@ -2117,7 +2117,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2082185492}
   - component: {fileID: 2082185491}
-  m_Layer: 0
+  m_Layer: 11
   m_Name: MixedRealityToolkit
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -3347,10 +3347,10 @@ RectTransform:
   m_Father: {fileID: 7058951490178360952}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 92.865, y: 0}
-  m_SizeDelta: {x: 0, y: 46}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 92.865, y: -23}
+  m_SizeDelta: {x: 185.73, y: 46}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &3616591237603156634
 MonoBehaviour:
@@ -3720,10 +3720,10 @@ RectTransform:
   m_Father: {fileID: 3499144761984172502}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 77.865, y: -23}
+  m_SizeDelta: {x: 135.73, y: 19.14}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!224 &5217665709899266339
 RectTransform:
@@ -4365,10 +4365,10 @@ RectTransform:
   m_Father: {fileID: 3499144761984172502}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 164.73, y: -23}
+  m_SizeDelta: {x: 22, y: 22}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &8904485680689217276
 GameObject:
@@ -4391,7 +4391,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!1 &9099755197336188195
 GameObject:
   m_ObjectHideFlags: 0

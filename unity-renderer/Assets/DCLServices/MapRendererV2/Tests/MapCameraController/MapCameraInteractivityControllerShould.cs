@@ -43,7 +43,7 @@ namespace DCLServices.MapRendererV2.Tests.MapCameraController
                            return true;
                        });
 
-            controller = new MapCameraInteractivityController(null, camera, pool, coordUtils);
+            controller = new MapCameraInteractivityController(null, camera, pool, coordUtils );
         }
 
         [Test]

@@ -134,7 +134,11 @@ namespace DCLServices.MapRendererV2.ConsumerUtils
 
         private bool TryGetParcelUnderPointer(PointerEventData eventData, out Vector2Int parcel, out Vector2 localPosition, out Vector3 worldPosition)
         {
+            #if DCL_VR
+            var screenPoint = PointerHelper.Instance.GetPointerPos();
+            #else
             var screenPoint = eventData.position;
+#endif
             if (RectTransformUtility.ScreenPointToWorldPointInRectangle(rectTransform, screenPoint, hudCamera, out worldPosition))
             {
                 var rectSize = rectTransform.rect.size;

@@ -1,11 +1,11 @@
-using DCL.Huds.QuestsTracker;
+//using DCL.Huds.QuestsTracker;
 using SignupHUD;
 using UnityEngine;
 
 public class QuestsTrackerHudHelper : VRHUDHelper
 {
     [SerializeField]
-    private QuestsTrackerHUDView view;
+    //private QuestsTrackerHUDView view;
     private Transform camTrans;
     protected override void Awake()
     {
@@ -15,7 +15,7 @@ public class QuestsTrackerHudHelper : VRHUDHelper
         base.Awake();
         myTrans = transform;
 #if DCL_VR
-        view.OnSetVisibility += OnVisiblityChange;
+        //view.OnSetVisibility += OnVisiblityChange;
 #endif
         if (myTrans is RectTransform rect)
         {

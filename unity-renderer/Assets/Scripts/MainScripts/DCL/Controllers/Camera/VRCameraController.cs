@@ -33,7 +33,7 @@ namespace DCL.Camera
         private Transform camTrans;
         private Vector3 cameraDifferenceRot;
         private Vector3 lastCameraRot;
-        private bool smoothRotate;
+        private bool smoothRotate = true;
 
         [SerializeField]
         private float rotationThreshold = 0.001f;

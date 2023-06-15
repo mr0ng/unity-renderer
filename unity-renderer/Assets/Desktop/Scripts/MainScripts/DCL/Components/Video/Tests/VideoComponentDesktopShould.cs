@@ -34,7 +34,9 @@ public class VideoComponentDesktopShould : IntegrationTestSuite
 
     protected override void InitializeServices(ServiceLocator serviceLocator)
     {
+        #if !UNITY_ANDROID
         DCLVideoTexture.videoPluginWrapperBuilder = () => new VideoPluginWrapper_Native();
+        #endif
         serviceLocator.Register<ISceneController>(() => new SceneController());
         serviceLocator.Register<IWorldState>(() => new WorldState());
         serviceLocator.Register<IRuntimeComponentFactory>(() => new RuntimeComponentFactory());

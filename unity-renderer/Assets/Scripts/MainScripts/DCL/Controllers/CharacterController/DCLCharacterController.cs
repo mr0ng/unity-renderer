@@ -596,7 +596,11 @@ public class DCLCharacterController : MonoBehaviour
 
     void OnRenderingStateChanged(bool isEnable, bool prevState)
     {
+        #if DCL_VR
+        SetEnabled(isEnable);
+    #else
         SetEnabled(isEnable && !DataStore.i.common.isSignUpFlow.Get());
+    #endif
     }
 
     bool IsLastCollisionGround()

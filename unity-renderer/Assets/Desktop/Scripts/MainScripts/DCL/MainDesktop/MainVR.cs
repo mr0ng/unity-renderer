@@ -37,9 +37,9 @@ namespace DCL
         {
             #if !DCL_VR
             Debug.LogError("DCL_VR not added in Player Compiler Defines. Please add DCL_VR under player setting Defines to enable full VR capabilities");
-#else
-            UnityThread.initUnityThread(true);
+
 #endif
+            UnityThread.initUnityThread(true);
             CommandLineParserUtils.ParseArguments();
             isConnectionLost = false;
 
@@ -86,7 +86,7 @@ namespace DCL
         protected override void InitializeCommunication()
         {
             DataStore.i.debugConfig.logWs = logWs;
-
+            Debug.Log($"Clint: OpenBrowser started");
             // TODO(Brian): Remove this branching once we finish migrating all tests out of the
             //              IntegrationTestSuite_Legacy base class.
             if (!Configuration.EnvironmentSettings.RUNNING_TESTS)
@@ -94,12 +94,12 @@ namespace DCL
                 var withSSL = true;
                 int startPort = CommandLineParserUtils.startPort;
 
-#if UNITY_EDITOR
+// #if UNITY_EDITOR
                 withSSL = DebugConfigComponent.i.webSocketSSL;
                 startPort = 7666;
-#else
-                withSSL = CommandLineParserUtils.withSSL;
-#endif
+//  #else
+//                 withSSL = CommandLineParserUtils.withSSL;
+// #endif
 
                 int endPort = startPort + 100;
                 kernelCommunication = new WebSocketCommunication(withSSL, startPort, endPort);
@@ -135,7 +135,7 @@ namespace DCL
         private void VRDestroy()
         {
             //preloadingController.Dispose();
-#if !AV_PRO_PRESENT
+#if !AV_PRO_PRESENT && !UNITY_ANDROID
             DCLVideoPlayer.StopAllThreads();
 #endif
         }

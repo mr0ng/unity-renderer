@@ -20,6 +20,8 @@ namespace DCL.Interface
                 return _keyboardTrans;
             }
         }
+        // Add static field for active KeyboardCreator
+        private static KeyboardCreator activeCreator;
 
         private static void Create()
         {
@@ -38,6 +40,7 @@ namespace DCL.Interface
             SetLayerRecursively(canvasKeyboard, LayerMask.NameToLayer("UI"));
             SetLayerRecursively(keyboard.gameObject, LayerMask.NameToLayer("UI"));
         }
+
         private static void SetLayerRecursively(GameObject obj, int newLayer)
         {
             if (null == obj)
@@ -68,14 +71,26 @@ namespace DCL.Interface
             tmpInputField.onSelect.AddListener(OpenKeyboard);
         }
 
-        private void Close(string arg0) { CleanUpEvents(); }
+        private void Close(string arg0)
+        {
+            // Check if this was the active input field
+            if (activeCreator == this)
+            {
+                // Clear the active field
+                activeCreator = null;
+            }
+
+            CleanUpEvents();
+        }
 
         private void OpenKeyboard(string arg0)
         {
-
             if (keyboardTrans == null)
                 return;
             CleanUpEvents();
+            // Set this KeyboardCreator as the active one
+            activeCreator = this;
+
             SetupEvents();
             keyboard.PresentKeyboard(NonNativeKeyboard.LayoutType.URL);
             var rawForward = CommonScriptableObjects.cameraForward.Get();
@@ -89,8 +104,12 @@ namespace DCL.Interface
 
         private void HandleSubmit(object sender, EventArgs e)
         {
-            tmpInputField.text = keyboard.InputField.text;
-            tmpInputField.onSubmit.Invoke(tmpInputField.text);
+            // Only set the text if this is the active input field
+            if (activeCreator == this)
+            {
+                tmpInputField.text = keyboard.InputField.text;
+                tmpInputField.onSubmit.Invoke(tmpInputField.text);
+            }
         }
 
         private void CleanUpEvents() { keyboard.OnTextSubmitted -= HandleSubmit; }

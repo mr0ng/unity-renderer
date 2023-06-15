@@ -23,7 +23,6 @@ namespace DCL.LoadingScreen
             showHideAnimator.OnWillFinishStart += FadeInFinish;
 
 
-            betaTag.SetActive(!Application.isEditor && Application.platform != RuntimePlatform.WebGLPlayer);
 #if DCL_VR
             //CrossPlatformManager.SetCameraForGame();
 			//WebSocketCommunication.OnProfileLoading += OnProfileLoading;
