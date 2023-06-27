@@ -54,6 +54,9 @@ private IEnumerator FindSignupView()
         #if !DCL_VR
         return;
         #endif
+        view.showHideAnimator.OnStartHide+= ()=>{CrossPlatformManager.SetCameraForGame();};
+        view.showHideAnimator.OnStartShow+= ()=>{CrossPlatformManager.SetCameraForLoading(loadingMask);};
+
         CrossPlatformManager.SetCameraForLoading(signupMask);
         //signUpScreen = SignupHUDView.I;
         StartCoroutine(FindSignupView());
@@ -74,7 +77,7 @@ private IEnumerator FindSignupView()
                 CrossPlatformManager.SetCameraForLoading(signupMask);
                 // Hide loading screen
                 animator.Hide();
-                myTrans.position += 10 * Vector3.down;
+                myTrans.position += 100 * Vector3.down;
                 // view.SetVisible(false,true);
                 // Show signup screen
                 signUpScreen.SetVisibility(true);
@@ -104,10 +107,10 @@ private IEnumerator FindSignupView()
     private IEnumerator ResetLoadingScreen(){
         CrossPlatformManager.SetCameraForGame();
         view.FadeOut();
-        view.gameObject.SetActive(false);
+        view.enabled = false;
         CrossPlatformManager.SetCameraForGame();
         yield return new WaitForSeconds(0.5f);
-        view.gameObject.SetActive(true);
+        view.enabled = true;
         CrossPlatformManager.SetCameraForGame();
     }
     public void OnTermsOfServiceAgreed()
@@ -121,7 +124,9 @@ private IEnumerator FindSignupView()
         // view.SetVisible(true,true);
         var forward = VRHUDController.I.GetForward();
         myTrans.position = Camera.main.transform.position + forward;
+        #if DCL_VR
         DebugConfigComponent.i.HideWebViewScreens();
+        #endif
         myTrans.forward = forward;
         view.FadeIn(false, false);
 

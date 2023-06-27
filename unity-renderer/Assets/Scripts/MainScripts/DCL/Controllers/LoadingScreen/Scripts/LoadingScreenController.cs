@@ -133,11 +133,11 @@ namespace DCL.LoadingScreen
                 percentageController.StartLoading(currentDestination);
 
                 timeoutController.StartTimeout(currentDestination);
-                #if DCL_VR
-                view.SetVisible(true,true);
-#else
+//                 #if DCL_VR
+//                 view.SetVisible(true,true);
+// #else
                 view.FadeIn(false, true);
-#endif
+// #endif
             }
             else if (IsSceneLoaded(currentDestinationCandidate))
                 HandlePlayerLoading();

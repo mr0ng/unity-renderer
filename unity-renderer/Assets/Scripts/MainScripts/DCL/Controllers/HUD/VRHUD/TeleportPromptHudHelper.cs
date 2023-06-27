@@ -25,7 +25,7 @@ public class TeleportPromptHudHelper : VRHUDHelper
         myTrans.position = Vector3.zero;
         if (!visible) {
 
-            // myTrans.position += 10 * Vector3.down;
+             myTrans.position += 100 * Vector3.down;
             // myTrans.localRotation = Quaternion.identity;
         }
         else
@@ -38,7 +38,7 @@ public class TeleportPromptHudHelper : VRHUDHelper
 
         var forward = VRHUDController.I.GetForward();
         if (Camera.main != null)
-            myTrans.position = Camera.main.transform.position+ 1.9f*forward;
+            myTrans.position = Camera.main.transform.position+ (1.9f*forward);
 
         myTrans.forward = forward;
 

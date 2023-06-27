@@ -57,6 +57,11 @@ PrefabInstance:
       propertyPath: animSpeedFactor
       value: 0.5
       objectReference: {fileID: 0}
+    - target: {fileID: 2561194068439323888, guid: ab94f4a6f36c1cd44bfc5dc64fd8d4c8,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 5696763185950597558, guid: ab94f4a6f36c1cd44bfc5dc64fd8d4c8,
         type: 3}
       propertyPath: m_Pivot.x
@@ -181,6 +186,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: _LoadingScreenVR
+      objectReference: {fileID: 0}
+    - target: {fileID: 8357128369511491275, guid: ab94f4a6f36c1cd44bfc5dc64fd8d4c8,
+        type: 3}
+      propertyPath: m_Enabled
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8357128369511491275, guid: ab94f4a6f36c1cd44bfc5dc64fd8d4c8,
         type: 3}

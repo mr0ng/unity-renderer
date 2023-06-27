@@ -21,25 +21,40 @@ namespace DCL.SettingsCommon.SettingsControllers.SpecificControllers
         {
             base.Initialize();
 
-            urpAsset = GraphicsSettings.renderPipelineAsset as UniversalRenderPipelineAsset;
+            // We check if renderPipelineAsset is not null and if it's a UniversalRenderPipelineAsset
+            if (GraphicsSettings.renderPipelineAsset is UniversalRenderPipelineAsset urpAsset)
+            {
+                this.urpAsset = urpAsset;
 
-            ScriptableRenderer forwardRenderer = urpAsset.GetRenderer(0) as ScriptableRenderer;
-            var featuresField = typeof(ScriptableRenderer).GetField("m_RendererFeatures", BindingFlags.NonPublic | BindingFlags.Instance);
+                ScriptableRenderer forwardRenderer = urpAsset.GetRenderer(0) as ScriptableRenderer;
+                var featuresField = typeof(ScriptableRenderer).GetField("m_RendererFeatures", BindingFlags.NonPublic | BindingFlags.Instance);
 
-            IList features = featuresField.GetValue(forwardRenderer) as IList;
-            ssaoFeature = features[0] as ScriptableRendererFeature;
+                IList features = featuresField.GetValue(forwardRenderer) as IList;
+                ssaoFeature = features[0] as ScriptableRendererFeature;
 
-            FieldInfo settingsField = ssaoFeature.GetType().GetField("m_Settings", BindingFlags.NonPublic | BindingFlags.Instance);
-            settings = settingsField.GetValue(ssaoFeature);
+                FieldInfo settingsField = ssaoFeature.GetType().GetField("m_Settings", BindingFlags.NonPublic | BindingFlags.Instance);
+                settings = settingsField.GetValue(ssaoFeature);
 
-            sourceField = settings.GetType().GetField("Source", BindingFlags.NonPublic | BindingFlags.Instance);
-            downsampleField = settings.GetType().GetField("Downsample", BindingFlags.NonPublic | BindingFlags.Instance);
+                sourceField = settings.GetType().GetField("Source", BindingFlags.NonPublic | BindingFlags.Instance);
+                downsampleField = settings.GetType().GetField("Downsample", BindingFlags.NonPublic | BindingFlags.Instance);
+            }
+            else
+            {
+                Debug.LogError("No UniversalRenderPipelineAsset is set in GraphicsSettings or the type of renderPipelineAsset is not UniversalRenderPipelineAsset!");
+            }
         }
+
 
         public override object GetStoredValue() { return currentQualitySetting.ssaoQuality; }
 
         public override void UpdateSetting(object newValue)
         {
+            if (ssaoFeature == null)
+            {
+                Debug.LogError("SSAO Feature not found! Can't update settings.");
+                return;
+            }
+
             int value = (int)newValue;
             switch ( value )
             {
@@ -65,5 +80,6 @@ namespace DCL.SettingsCommon.SettingsControllers.SpecificControllers
 
             currentQualitySetting.ssaoQuality = (QualitySettings.SSAOQualityLevel)value;
         }
+
     }
 }

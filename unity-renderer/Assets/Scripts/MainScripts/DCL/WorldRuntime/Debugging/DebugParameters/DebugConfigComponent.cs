@@ -203,6 +203,7 @@ namespace DCL
 #if DCL_VR
 			if (!Debug.isDebugBuild)
             {
+                startMenu.gameObject.SetActive(true);
                 //openInternalBrowser = CommonScriptableObjects.useInternalBrowser;
                 useInternalBrowser.isOn = openInternalBrowser;
 #if UNITY_ANDROID && !UNITY_EDITOR

@@ -15,20 +15,16 @@ namespace DCL.LoadingScreen
         [SerializeField] private RawImage rawImage;
         private RenderTexture renderTexture;
         private RectTransform rawImageRectTransform;
-
+    #if DCL_VR
+        private LoadingHudHelper loadingHudHelper;
+        #endif
         public event Action<ShowHideAnimator> OnFadeInFinish;
 
         public void Start()
         {
             showHideAnimator.OnWillFinishStart += FadeInFinish;
-
-
 #if DCL_VR
-            //CrossPlatformManager.SetCameraForGame();
-			//WebSocketCommunication.OnProfileLoading += OnProfileLoading;
-             LoadingHudHelper loadingHudHelper;
              loadingHudHelper = gameObject.GetComponent<LoadingHudHelper>();
-
             loadingHudHelper.showHideAnimator = showHideAnimator;
 #endif
 
@@ -56,7 +52,10 @@ namespace DCL.LoadingScreen
 	//VR setVisible
         public void SetVisible(bool isVisible, bool instant)
         {
-            if (isVisible) { showHideAnimator.Show(instant); }
+            if (isVisible)
+            {
+                showHideAnimator.Show(instant);
+            }
             else { showHideAnimator.Hide(instant); }
         }
 
@@ -81,8 +80,11 @@ namespace DCL.LoadingScreen
             rawImage.gameObject.SetActive(false);
             #if DCL_VR
             CrossPlatformManager.SetCameraForGame();
-            #endif
             Hide();
+#else
+            Hide();
+#endif
+
         }
 
         public override void RefreshControl() { }
