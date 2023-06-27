@@ -48,8 +48,21 @@ namespace DCL.Social.Passports
 
         public void SetVisibility(bool visible)
         {
-            OnSetVisibility(visible);
+            OnSetVisibility?.Invoke(visible);
             gameObject.SetActive(visible);
+            #if DCL_VR
+            Position();
+            #endif
+        }
+
+        public void Position()
+        {
+            transform.localScale = 0.0020f*Vector3.one;
+            var rawForward = CommonScriptableObjects.cameraForward.Get();
+            var forward = new Vector3(rawForward.x, 0, rawForward.z).normalized;
+            transform.position = Camera.main.transform.position + 3 * forward;// + 1.0f * Vector3.up;
+            transform.forward =  forward;
+
         }
 
         public void SetPassportPanelVisibility(bool visible)
@@ -58,7 +71,7 @@ namespace DCL.Social.Passports
             {
                 mouseCatcher.UnlockCursor();
             }
-
+            OnSetVisibility?.Invoke(visible);
             animationCancellationToken.Cancel();
             animationCancellationToken = new CancellationTokenSource();
 

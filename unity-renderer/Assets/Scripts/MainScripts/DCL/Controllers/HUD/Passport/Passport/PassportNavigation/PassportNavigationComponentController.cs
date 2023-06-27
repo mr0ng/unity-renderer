@@ -213,8 +213,8 @@ namespace DCL.Social.Passports
                     MAX_NFT_COUNT,
                     true,
                     ct);
-
-                namesResult = names.names.ToArray();
+                if(names.names != null)
+                    namesResult = names.names.ToArray();
                 showViewAllButton = names.totalAmount > MAX_NFT_COUNT;
             }
             catch (OperationCanceledException) { }
@@ -242,8 +242,8 @@ namespace DCL.Social.Passports
                     MAX_NFT_COUNT,
                     true,
                     ct);
-
-                landsResult = lands.lands.ToArray();
+                if (lands.lands != null)
+                    landsResult = lands.lands.ToArray();
                 showViewAllButton = lands.totalAmount > MAX_NFT_COUNT;
             }
             catch (OperationCanceledException) { }

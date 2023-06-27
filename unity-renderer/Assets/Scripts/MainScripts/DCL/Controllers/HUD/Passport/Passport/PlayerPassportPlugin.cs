@@ -18,7 +18,7 @@ public class PlayerPassportPlugin : IPlugin
     public PlayerPassportPlugin()
     {
         #if DCL_VR
-        PlayerPassportReferenceContainer referenceContainer = Object.Instantiate(Resources.Load<GameObject>("PlayerPassport")).GetComponent<PlayerPassportReferenceContainer>();
+        PlayerPassportReferenceContainer referenceContainer = Object.Instantiate(Resources.Load<GameObject>("PlayerPassportVR")).GetComponent<PlayerPassportReferenceContainer>();
         #else
         PlayerPassportReferenceContainer referenceContainer = Object.Instantiate(Resources.Load<GameObject>("PlayerPassport")).GetComponent<PlayerPassportReferenceContainer>();
         #endif

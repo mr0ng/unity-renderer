@@ -165,7 +165,7 @@ PrefabInstance:
     - target: {fileID: 1623333685718768873, guid: caebda186eba94b46b64e38bb4b7ca27,
         type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: 68.61
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 1623333685718768873, guid: caebda186eba94b46b64e38bb4b7ca27,
         type: 3}
@@ -200,7 +200,7 @@ PrefabInstance:
     - target: {fileID: 2774146298148716148, guid: caebda186eba94b46b64e38bb4b7ca27,
         type: 3}
       propertyPath: m_PresetInfoIsWorld
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 2790748033126381831, guid: caebda186eba94b46b64e38bb4b7ca27,
         type: 3}
@@ -245,7 +245,7 @@ PrefabInstance:
     - target: {fileID: 2866234400657368098, guid: caebda186eba94b46b64e38bb4b7ca27,
         type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: 931
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 2866234400657368098, guid: caebda186eba94b46b64e38bb4b7ca27,
         type: 3}
@@ -290,7 +290,7 @@ PrefabInstance:
     - target: {fileID: 3379511975970923974, guid: caebda186eba94b46b64e38bb4b7ca27,
         type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: 59.085
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 3379511975970923974, guid: caebda186eba94b46b64e38bb4b7ca27,
         type: 3}
@@ -692,6 +692,16 @@ PrefabInstance:
       propertyPath: m_SortingLayerID
       value: -175788821
       objectReference: {fileID: 0}
+    - target: {fileID: 7882713882581435087, guid: caebda186eba94b46b64e38bb4b7ca27,
+        type: 3}
+      propertyPath: m_OverrideSorting
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7882713882581435087, guid: caebda186eba94b46b64e38bb4b7ca27,
+        type: 3}
+      propertyPath: m_OverridePixelPerfect
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 8114439979106705424, guid: caebda186eba94b46b64e38bb4b7ca27,
         type: 3}
       propertyPath: m_Name
@@ -845,6 +855,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ed23ecf2d9570954db34e3fa944e9f6a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  sortingOrder: 0
+  sortingOrder: 6
   showHideAnimator: {fileID: 0}
   view: {fileID: 2126279251483585728}

@@ -103,7 +103,8 @@ namespace DCL.Social.Passports
         public void SetVisibility(bool visible)
         {
             view.SetVisibility(visible);
-        }
+
+                }
 
         private void OnCloseButtonPressed(DCLAction_Trigger action = DCLAction_Trigger.CloseWindow)
         {
