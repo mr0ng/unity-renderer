@@ -4,16 +4,12 @@ using DCLServices.MapRendererV2.ComponentsFactory;
 using DCLServices.MapRendererV2.Culling;
 using DCLServices.MapRendererV2.MapCameraController;
 using DCLServices.MapRendererV2.MapLayers;
-using KernelConfigurationTypes;
 using MainScripts.DCL.Helpers.Utils;
 using System;
 using System.Collections.Generic;
 using System.Threading;
-using TMPro;
 using UnityEngine;
-using UnityEngine.EventSystems;
 using UnityEngine.Pool;
-using UnityEngine.UI;
 
 namespace DCLServices.MapRendererV2
 {
@@ -41,30 +37,6 @@ namespace DCLServices.MapRendererV2
         private MapRendererConfiguration configurationInstance;
 
         private IObjectPool<IMapCameraControllerInternal> mapCameraPool;
-
-        #if DCL_VR
-        [SerializeField] private Image parcelHighlightImage;
-        [SerializeField] private Image parcelHighlighImagePrefab;
-        [SerializeField] private Image parcelHighlighWithContentImagePrefab;
-        [SerializeField] private Image selectParcelHighlighImagePrefab;
-        [HideInInspector] public bool showCursorCoords = true;
-        public TextMeshProUGUI highlightedParcelText;
-        private float parcelSizeInMap;
-        [HideInInspector] public Vector2Int cursorMapCoords;
-        public RectTransform centeredReferenceParcel;
-        private PointerEventData uiRaycastPointerEventData = new PointerEventData(EventSystem.current);
-        private List<RaycastResult> uiRaycastResults = new List<RaycastResult>();
-        private int NAVMAP_CHUNK_LAYER;
-        // private Vector3Variable playerRotation => CommonScriptableObjects.cameraForward;
-        private Vector3[] mapWorldspaceCorners = new Vector3[4];
-        private Vector3 worldCoordsOriginInMap;
-        List<WorldRange> validWorldRanges = new List<WorldRange>
-        {
-            new WorldRange(-150, -150, 150, 150) // default range
-        };
-        [HideInInspector]
-        public event System.Action<float, float> OnMovedParcelCursor;
-        #endif
 
         internal IMapCullingController cullingController { get; private set; }
 
@@ -99,93 +71,7 @@ namespace DCLServices.MapRendererV2
                 Debug.LogException(e);
             }
         }
-#if DCL_VR
-        void Update()
-        {
 
-
-            var scale = centeredReferenceParcel.lossyScale.x < 1f ? 1f : centeredReferenceParcel.lossyScale.x;
-            parcelSizeInMap = centeredReferenceParcel.rect.width * scale;
-
-            //the reference parcel has a bottom-left pivot
-            PointerHelper.Instance.UpdateCorners(mapWorldspaceCorners, centeredReferenceParcel, ref worldCoordsOriginInMap);
-
-            UpdateCursorMapCoords();
-
-             UpdateParcelHighlight();
-
-            // UpdateParcelHold();
-        }
-        #endif
-
-        void UpdateCursorMapCoords()
-        {
-            if (!IsCursorOverMapChunk())
-                return;
-
-#if DCL_VR
-            cursorMapCoords.x = (int) (PointerHelper.Instance.GetPointerPos().x - worldCoordsOriginInMap.x);
-            cursorMapCoords.y = (int) (PointerHelper.Instance.GetPointerPos().y - worldCoordsOriginInMap.y);
-            cursorMapCoords /= (int) parcelSizeInMap;
-
-            cursorMapCoords.x = (int)Mathf.Floor(cursorMapCoords.x);
-            cursorMapCoords.y = (int)Mathf.Floor(cursorMapCoords.y);
-#else
-            const int OFFSET = -60; //Map is a bit off centered, we need to adjust it a little.
-            RectTransformUtility.ScreenPointToLocalPointInRectangle(atlas.chunksParent, Input.mousePosition, DataStore.i.camera.hudsCamera.Get(), out var mapPoint);
-            mapPoint -= Vector2.one * OFFSET;
-            mapPoint -= (atlas.chunksParent.sizeDelta / 2f);
-            cursorMapCoords = Vector2Int.RoundToInt(mapPoint / MapUtils.PARCEL_SIZE);
-#endif
-        }
-        void UpdateParcelHighlight()
-        {
-            if (!CoordinatesAreInsideTheWorld((int)cursorMapCoords.x, (int)cursorMapCoords.y))
-            {
-                if (parcelHighlightImage.gameObject.activeSelf)
-                    parcelHighlightImage.gameObject.SetActive(false);
-
-                return;
-            }
-
-            if (!parcelHighlightImage.gameObject.activeSelf)
-                parcelHighlightImage.gameObject.SetActive(true);
-
-            string previousText = highlightedParcelText.text;
-            parcelHighlightImage.rectTransform.SetAsLastSibling();
-            parcelHighlightImage.rectTransform.anchoredPosition = MapUtils.CoordsToPosition(cursorMapCoords);
-            highlightedParcelText.text = showCursorCoords ? $"{cursorMapCoords.x}, {cursorMapCoords.y}" : string.Empty;
-
-            if (highlightedParcelText.text != previousText && !Input.GetMouseButton(0)) { OnMovedParcelCursor?.Invoke(cursorMapCoords.x, cursorMapCoords.y); }
-
-            // ----------------------------------------------------
-            // TODO: Use sceneInfo to highlight whole scene parcels and populate scenes hover info on navmap once we can access all the scenes info
-            // var sceneInfo = mapMetadata.GetSceneInfo(cursorMapCoords.x, cursorMapCoords.y);
-        }
-        private void OnKernelConfigChanged(KernelConfigModel current, KernelConfigModel previous)
-        {
-            validWorldRanges = current.validWorldRanges;
-        }
-        bool CoordinatesAreInsideTheWorld(int xCoord, int yCoord)
-        {
-            foreach (WorldRange worldRange in validWorldRanges)
-            {
-                if (worldRange.Contains(xCoord, yCoord)) { return true; }
-            }
-
-            return false;
-        }
-        bool IsCursorOverMapChunk()
-        {
-#if DCL_VR
-            uiRaycastPointerEventData.position = Input.mousePosition;// helper.GetPointerPos();
-#else
-            uiRaycastPointerEventData.position = Input.mousePosition;
-#endif
-            EventSystem.current.RaycastAll(uiRaycastPointerEventData, uiRaycastResults);
-
-            return uiRaycastResults.Count > 0 && uiRaycastResults[0].gameObject.layer == NAVMAP_CHUNK_LAYER;
-        }
         public IMapCameraController RentCamera(in MapCameraInput cameraInput)
         {
             const int MIN_ZOOM = 5;

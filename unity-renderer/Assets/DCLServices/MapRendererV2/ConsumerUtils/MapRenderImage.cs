@@ -36,10 +36,16 @@ namespace DCLServices.MapRendererV2.ConsumerUtils
 
         private bool highlightEnabled;
         private IMapInteractivityController interactivityController;
-        private Camera hudCamera;
-
+        [SerializeField] private Camera hudCamera;
+        private PointerHelper pointerHelper;
         private bool isActive;
+        [SerializeField] private Camera vrCamera;
+        private Vector2Int parcel;
 
+        private void Awake()
+        {
+           pointerHelper = GetComponent<PointerHelper>();
+        }
         public void EmbedMapCameraDragBehavior(MapCameraDragBehavior.MapCameraDragBehaviorData data)
         {
             dragBehavior = new MapCameraDragBehavior(rectTransform, data);
@@ -76,7 +82,9 @@ namespace DCLServices.MapRendererV2.ConsumerUtils
 
             if (dragging)
                 return;
-
+#if DCL_VR
+            eventData.position = pointerHelper.cursorMapCoords;
+#endif
             Profiler.BeginSample(POINTER_MOVE_SAMPLE_NAME);
 
             ProcessHover(eventData);
@@ -91,24 +99,45 @@ namespace DCLServices.MapRendererV2.ConsumerUtils
 
             if (!highlightEnabled)
                 return;
-
+#if DCL_VR
+            eventData.position = pointerHelper.cursorMapCoords;
+#endif
             interactivityController.RemoveHighlight();
         }
 
         public void OnPointerClick(PointerEventData eventData)
         {
+#if DCL_VR
+            eventData.position = pointerHelper.cursorMapCoords;
+
             Profiler.BeginSample(POINTER_CLICK_SAMPLE_NAME);
 
-            if (isActive && !dragging && TryGetParcelUnderPointer(eventData, out var parcel, out _, out _))
+            if (isActive && !eventData.dragging && TryGetParcelUnderPointer(eventData, out parcel, out var localPosition, out var worldPosition))
             {
+                Debug.Log($"OnPointerClick: p{parcel}, local{localPosition}, w{worldPosition}, gwp{GetParcelWorldPosition(parcel)}");
                 ParcelClicked?.Invoke(new ParcelClickData
                 {
                     Parcel = parcel,
                     WorldPosition = GetParcelWorldPosition(parcel),
                 });
             }
+            Profiler.EndSample();
+            #else
+                        Profiler.BeginSample(POINTER_CLICK_SAMPLE_NAME);
+
+            if (isActive && !dragging && TryGetParcelUnderPointer(eventData, out parcel, out var localPosition, out var worldPosition))
+            {
+                Debug.Log($"OnPointerClick: p{parcel}, local{localPosition}, w{worldPosition}, gwp{GetParcelWorldPosition(parcel)}");
+                ParcelClicked?.Invoke(new ParcelClickData
+                {
+                    Parcel = parcel,
+                    WorldPosition = GetParcelWorldPosition(parcel),
+
+                });
+            }
 
             Profiler.EndSample();
+#endif
         }
 
         private bool dragging => dragBehavior is { dragging: true };
@@ -121,6 +150,9 @@ namespace DCLServices.MapRendererV2.ConsumerUtils
 
         private void ProcessHover(PointerEventData eventData)
         {
+#if DCL_VR
+            eventData.position = pointerHelper.cursorMapCoords;
+#endif
             if (TryGetParcelUnderPointer(eventData, out var parcel, out _, out var worldPosition))
             {
                 if (highlightEnabled)
@@ -134,11 +166,21 @@ namespace DCLServices.MapRendererV2.ConsumerUtils
 
         private bool TryGetParcelUnderPointer(PointerEventData eventData, out Vector2Int parcel, out Vector2 localPosition, out Vector3 worldPosition)
         {
-            #if DCL_VR
-            var screenPoint = PointerHelper.Instance.GetPointerPos();
-            #else
-            var screenPoint = eventData.position;
+#if DCL_VR
+
+            eventData.position = pointerHelper.cursorMapCoords;
+
+            if (!pointerHelper.isCursorOverMap)
+            {
+                parcel = Vector2Int.zero;
+                localPosition = Vector2.zero;
+                worldPosition = default;
+                return false;
+            }
+            if (hudCamera == null)
+                hudCamera = vrCamera;
 #endif
+            var screenPoint = eventData.position;
             if (RectTransformUtility.ScreenPointToWorldPointInRectangle(rectTransform, screenPoint, hudCamera, out worldPosition))
             {
                 var rectSize = rectTransform.rect.size;
@@ -155,6 +197,10 @@ namespace DCLServices.MapRendererV2.ConsumerUtils
         {
             if (!isActive) return;
 
+#if DCL_VR
+            eventData.position = pointerHelper.cursorMapCoords;
+#endif
+
             Profiler.BeginSample(DRAG_SAMPLE_NAME);
 
             dragBehavior?.OnDrag(eventData);
@@ -165,6 +211,9 @@ namespace DCLServices.MapRendererV2.ConsumerUtils
         public void OnBeginDrag(PointerEventData eventData)
         {
             if (!isActive) return;
+            #if DCL_VR
+            eventData.position = pointerHelper.cursorMapCoords;
+            #endif
 
             DragStarted?.Invoke();
             dragBehavior?.OnBeginDrag(eventData);
@@ -173,6 +222,9 @@ namespace DCLServices.MapRendererV2.ConsumerUtils
         public void OnEndDrag(PointerEventData eventData)
         {
             if (!isActive) return;
+#if DCL_VR
+            eventData.position = pointerHelper.cursorMapCoords;
+#endif
 
             dragBehavior?.OnEndDrag(eventData);
 

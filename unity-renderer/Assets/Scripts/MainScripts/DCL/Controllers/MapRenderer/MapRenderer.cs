@@ -27,7 +27,7 @@ namespace DCL
 
         [SerializeField] private float parcelHightlightScale = 1.25f;
         [SerializeField] private Button ParcelHighlightButton;
-        [SerializeField] private PointerHelper helper;
+        //[SerializeField] private PointerHelper helper;
         [SerializeField] private MapParcelHighlight highlight;
         [SerializeField] private Image parcelHighlightImage;
         [SerializeField] private Image parcelHighlighImagePrefab;
@@ -129,7 +129,7 @@ void Update()
     parcelSizeInMap = centeredReferenceParcel.rect.width * scale;
 
     //the reference parcel has a bottom-left pivot
-    helper.UpdateCorners(mapWorldspaceCorners, centeredReferenceParcel, ref worldCoordsOriginInMap);
+    //helper.UpdateCorners(mapWorldspaceCorners, centeredReferenceParcel, ref worldCoordsOriginInMap);
 
     UpdateCursorMapCoords();
 
@@ -363,8 +363,8 @@ void Update()
                 return;
 
 #if DCL_VR
-            cursorMapCoords.x = (int) (helper.GetPointerPos().x - worldCoordsOriginInMap.x);
-            cursorMapCoords.y = (int) (helper.GetPointerPos().y - worldCoordsOriginInMap.y);
+//            cursorMapCoords.x = (int) (helper.GetPointerPos().x - worldCoordsOriginInMap.x);
+//            cursorMapCoords.y = (int) (helper.GetPointerPos().y - worldCoordsOriginInMap.y);
             cursorMapCoords /= (int) parcelSizeInMap;
 
             cursorMapCoords.x = (int)Mathf.Floor(cursorMapCoords.x);

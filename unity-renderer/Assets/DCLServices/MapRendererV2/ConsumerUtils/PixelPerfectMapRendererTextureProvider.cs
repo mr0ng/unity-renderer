@@ -56,17 +56,10 @@ namespace DCLServices.MapRendererV2.ConsumerUtils
 #else
         public Vector2Int GetPixelPerfectTextureResolution()
         {
-            var rectSize = rectTransform.rect.size;
-            var ratio = rectSize.x / rectSize.y;
-            var scale = rectTransform.lossyScale; // Takes into account all parent scaling
-
-            var worldSize = new Vector2(rectSize.x * scale.x, rectSize.y * scale.y);
-
-            // Convert worldSize to the screen size using the canvas camera.
-            var screenSize = RectTransformUtility.WorldToScreenPoint(hudCamera, worldSize);
-
+           //our map is always the same size for VR in the menu.
             return new Vector2Int(1920, 1080);
         }
+
 #endif
         private void OnRectTransformDimensionsChange()
         {

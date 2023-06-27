@@ -41,6 +41,7 @@ namespace DCLServices.MapRendererV2.MapCameraController
 
             marker.Activate();
             marker.SetCoordinates(parcel, localPosition);
+            // Debug.Log($"HighlightParcel: p{parcel}, lp{localPosition}");
         }
 
         public void Initialize(MapLayer layers)

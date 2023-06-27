@@ -32,7 +32,14 @@ namespace DCL
         private readonly BaseVariable<bool> navmapIsRendered = DataStore.i.HUDs.navmapIsRendered;
 
         private IMapCameraController cameraController;
-        private Camera hudCamera => DataStore.i.camera.hudsCamera.Get();
+#if !DCL_VR
+        public Camera hudCamera => DataStore.i.camera.hudsCamera.Get();
+         }
+#else
+        public Camera hudCamera;
+#endif
+
+
 
         public NavmapVisibilityBehaviour(BaseVariable<bool> navmapVisible, NavmapZoom zoom, NavmapToastView toastView,
             NavmapRendererConfiguration rendererConfiguration)
@@ -51,8 +58,13 @@ namespace DCL
             this.rendererConfiguration.RenderImage.EmbedMapCameraDragBehavior(rendererConfiguration.MapCameraDragBehaviorData);
 
             SetRenderImageTransparency(true);
+            if (hudCamera == null)
+                rendererConfiguration.PixelPerfectMapRendererTextureProvider.SetHudCamera(Camera.main);
+            else
+            {
+                rendererConfiguration.PixelPerfectMapRendererTextureProvider.SetHudCamera(hudCamera);
+            }
 
-            rendererConfiguration.PixelPerfectMapRendererTextureProvider.SetHudCamera(hudCamera);
         }
 
         public void Dispose()

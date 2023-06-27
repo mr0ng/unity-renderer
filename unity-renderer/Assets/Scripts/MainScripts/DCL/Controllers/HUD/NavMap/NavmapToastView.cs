@@ -125,8 +125,12 @@ namespace DCL
         {
             if (toastContainer == null || rectTransform == null)
                 return;
-
+#if DCL_VR
+            toastContainer.position.Set(worldPosition.x,worldPosition.y, 1000);
+            #else
             toastContainer.position = worldPosition;
+
+#endif
 
             bool useBottom = toastContainer.localPosition.y > 0;
 
@@ -136,10 +140,15 @@ namespace DCL
             if (shouldOffsetHorizontally)
                 useLeft = toastContainer.localPosition.x > 0;
 
+
+#if DCL_VR
+            toastContainer.position.Set(worldPosition.x,worldPosition.y, 1000);
+#else
             // By setting the pivot accordingly BEFORE we position the toast, we can have it always visible in an easier way
             toastContainer.pivot = new Vector2(shouldOffsetHorizontally ? (useLeft ? 1 : 0) : 0.5f, useBottom ? 1 : 0);
             toastContainer.position = worldPosition;
 
+#endif
         }
 
         public void Close()
