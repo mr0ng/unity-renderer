@@ -10,7 +10,7 @@ PrefabInstance:
     - target: {fileID: 2296289379664879046, guid: 5e3131a9dbbd3f94fb90e3f7ba33d58d,
         type: 3}
       propertyPath: m_PresetInfoIsWorld
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5518088804749935907, guid: 5e3131a9dbbd3f94fb90e3f7ba33d58d,
         type: 3}
@@ -25,7 +25,7 @@ PrefabInstance:
     - target: {fileID: 5759081851182207893, guid: 5e3131a9dbbd3f94fb90e3f7ba33d58d,
         type: 3}
       propertyPath: m_Name
-      value: _AvatarModifierAreaFeedbackHUD Variant
+      value: _AvatarModifierAreaFeedbackHUDVR
       objectReference: {fileID: 0}
     - target: {fileID: 8097679517560586846, guid: 5e3131a9dbbd3f94fb90e3f7ba33d58d,
         type: 3}

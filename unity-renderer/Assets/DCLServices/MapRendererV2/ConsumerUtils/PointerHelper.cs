@@ -13,7 +13,7 @@ using UnityEngine.UI;
 public class PointerHelper : MonoBehaviour, IMixedRealityPointerHandler
 {
 
-    #if UNITY_ANDROID && !Unity_EDITOR
+    #if UNITY_ANDROID && !UNITY_EDITOR
     private Vector3 offset = new Vector3( 1273, 655, 0);
     private float scaleFactor = 1.445f;
     // private float heightFactor = 1.445f;

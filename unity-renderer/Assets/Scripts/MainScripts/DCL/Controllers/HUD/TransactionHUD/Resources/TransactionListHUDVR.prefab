@@ -142,14 +142,58 @@ PrefabInstance:
       propertyPath: m_RenderMode
       value: 2
       objectReference: {fileID: 0}
+    - target: {fileID: 8765831106391079321, guid: 8b6b8c164249e4b259dde98f3dc27bde,
+        type: 3}
+      propertyPath: m_SortingLayerID
+      value: -175788821
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 8b6b8c164249e4b259dde98f3dc27bde, type: 3}
+--- !u!114 &915578825349601769 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 6510873107651449072, guid: 8b6b8c164249e4b259dde98f3dc27bde,
+    type: 3}
+  m_PrefabInstance: {fileID: 6264382353135651097}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5398879725519224760}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c452af4a28add4c0785a59f3a3654c00, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &5398879725519224760 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 2018494505262642849, guid: 8b6b8c164249e4b259dde98f3dc27bde,
     type: 3}
   m_PrefabInstance: {fileID: 6264382353135651097}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &-3109935137770622737
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5398879725519224760}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e1310d97fdbc2b04fba98e7452db4d2e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  sortingOrder: 2
+  showHideAnimator: {fileID: 0}
+  view: {fileID: 915578825349601769}
+--- !u!114 &4455377739122359573
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5398879725519224760}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ff4e3b9019304b5aaec5664de0778d21, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!114 &7283362924778511503
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -167,15 +211,3 @@ MonoBehaviour:
   m_BlockingMask:
     serializedVersion: 2
     m_Bits: 4294967295
---- !u!114 &4455377739122359573
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5398879725519224760}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ff4e3b9019304b5aaec5664de0778d21, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
