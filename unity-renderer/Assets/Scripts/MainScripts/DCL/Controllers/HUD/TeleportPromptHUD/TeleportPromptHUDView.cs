@@ -65,8 +65,8 @@ public class TeleportPromptHUDView : MonoBehaviour
          teleportRaycaster.enabled = false;
          #if DCL_VR
          // contentAnimator.OnWillFinishHide += (animator) => Hide();
-
-         contentAnimator.Hide();
+         //
+         // contentAnimator.Hide();
          OnSetVisibility?.Invoke(false);
          //content.GetComponent<Canvas>().enabled = false;
          #endif
@@ -209,7 +209,7 @@ public class TeleportPromptHUDView : MonoBehaviour
         OnTeleportEvent?.Invoke();
  #if DCL_VR
          OnSetVisibility?.Invoke(false);
-         contentAnimator.Hide(true);
+         contentAnimator?.Hide(true);
          //transform.position += 20*Vector3.down;
  #endif
     }
