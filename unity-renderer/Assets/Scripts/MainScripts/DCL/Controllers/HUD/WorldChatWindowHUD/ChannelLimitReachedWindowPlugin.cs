@@ -13,12 +13,16 @@ namespace DCL.Chat.HUD
         {
             Initialize(cts.Token);
         }
-        
+
         private async void Initialize(CancellationToken ct)
         {
+            #if DCL_VR
             var view = await Environment.i.serviceLocator.Get<IAddressableResourceProvider>()
-                                        .Instantiate<ChannelLimitReachedWindowComponentView>("ChannelLimitReachedModal", cancellationToken: ct);
-
+                                        .Instantiate<ChannelLimitReachedWindowComponentView>("ChannelLimitReachedModalVR", cancellationToken: ct);
+            #else
+            var view = await Environment.i.serviceLocator.Get<IAddressableResourceProvider>()
+                                                    .Instantiate<ChannelLimitReachedWindowComponentView>("ChannelLimitReachedModal", cancellationToken: ct);
+#endif
             channelLimitReachedWindow = new ChannelLimitReachedWindowController(view, DataStore.i);
         }
 

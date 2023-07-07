@@ -2536,6 +2536,8 @@ MonoBehaviour:
     y: 0
     width: 1
     height: 1
+  hudCamera: {fileID: 0}
+  vrCamera: {fileID: 0}
 --- !u!114 &244661080836339971
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2548,7 +2550,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 28407059c31940cfa0d064b806a39a0e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  maxHeight: 1440
 --- !u!1 &5205895603988779860
 GameObject:
   m_ObjectHideFlags: 0
@@ -2676,7 +2677,7 @@ MonoBehaviour:
   m_VerticalFit: 2
 --- !u!95 &5331274538259527739
 Animator:
-  serializedVersion: 4
+  serializedVersion: 5
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -2693,7 +2694,8 @@ Animator:
   m_WarningMessage: 
   m_HasTransformHierarchy: 1
   m_AllowConstantClipSamplingOptimization: 1
-  m_KeepAnimatorControllerStateOnDisable: 0
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
 --- !u!1 &5378312362899332021
 GameObject:
   m_ObjectHideFlags: 0
@@ -3413,6 +3415,7 @@ MonoBehaviour:
     <MapCameraDragBehaviorData>k__BackingField:
       inertia: 1
       decelerationRate: 0.00001
+  vrCamera: {fileID: 0}
 --- !u!114 &1481270875036362003
 MonoBehaviour:
   m_ObjectHideFlags: 0

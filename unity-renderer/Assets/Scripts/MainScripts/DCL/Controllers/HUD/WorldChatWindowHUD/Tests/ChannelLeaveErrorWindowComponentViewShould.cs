@@ -11,9 +11,15 @@ namespace DCL.Chat.HUD
         [SetUp]
         public void SetUp()
         {
+            #if DCL_VR
+            view = Object.Instantiate(
+                AssetDatabase.LoadAssetAtPath<ChannelLeaveErrorWindowComponentView>(
+                    "Assets/Scripts/MainScripts/DCL/Controllers/HUD/SocialBarPrefabs/SocialBarV1/Addressables/ChannelLeaveErrorModalVR.prefab"));
+            #else
             view = Object.Instantiate(
                 AssetDatabase.LoadAssetAtPath<ChannelLeaveErrorWindowComponentView>(
                     "Assets/Scripts/MainScripts/DCL/Controllers/HUD/SocialBarPrefabs/SocialBarV1/Addressables/ChannelLeaveErrorModal.prefab"));
+#endif
         }
 
         [Test]

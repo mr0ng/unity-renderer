@@ -16,9 +16,13 @@ namespace DCL.Chat.HUD
 
         private async void Initialize(CancellationToken ct)
         {
+            #if DCL_VR
+            var view = await Environment.i.serviceLocator.Get<IAddressableResourceProvider>()
+                                        .Instantiate<ChannelLeaveErrorWindowComponentView>("ChannelLeaveErrorModalVR", cancellationToken: ct);
+            #else
             var view = await Environment.i.serviceLocator.Get<IAddressableResourceProvider>()
                                         .Instantiate<ChannelLeaveErrorWindowComponentView>("ChannelLeaveErrorModal", cancellationToken: ct);
-
+#endif
             controller = new ChannelLeaveErrorWindowController(view, Environment.i.serviceLocator.Get<IChatController>(), DataStore.i);
         }
 

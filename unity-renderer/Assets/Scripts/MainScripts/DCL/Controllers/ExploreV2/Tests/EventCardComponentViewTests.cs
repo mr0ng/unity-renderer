@@ -16,7 +16,11 @@ public class EventCardComponentViewTests
     public void SetUp()
     {
         eventCardComponent = BaseComponentView.Create<EventCardComponentView>("Sections/PlacesAndEventsSection/EventsSubSection/EventCard");
+        #if DCL_VR
+        eventCardModalComponent = BaseComponentView.Create<EventCardComponentView>("Sections/PlacesAndEventsSection/EventsSubSection/EventCard_ModalVR");
+        #else
         eventCardModalComponent = BaseComponentView.Create<EventCardComponentView>("Sections/PlacesAndEventsSection/EventsSubSection/EventCard_Modal");
+        #endif
         eventCardComponent.eventImage.imageObserver = Substitute.For<ILazyTextureObserver>();
         eventCardModalComponent.eventImage.imageObserver = Substitute.For<ILazyTextureObserver>();
         testTexture = new Texture2D(20, 20);

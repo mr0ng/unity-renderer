@@ -1,4 +1,3 @@
-
 using DCL;
 using DCLServices.MapRendererV2.ConsumerUtils;
 using Microsoft.MixedReality.Toolkit;
@@ -12,22 +11,19 @@ using UnityEngine.UI;
 
 public class PointerHelper : MonoBehaviour, IMixedRealityPointerHandler
 {
+    [SerializeField] private Vector3 offset = new Vector3(3332, 1356, 0);
+    [SerializeField] private float scaleFactor = 0.15f;
+    private GameObject dockParent;
 
-    #if UNITY_ANDROID && !UNITY_EDITOR
-    private Vector3 offset = new Vector3( 1273, 655, 0);
-    private float scaleFactor = 1.445f;
-    // private float heightFactor = 1.445f;
-    #else
-    private Vector3 offset = new Vector3( 1504, 651, 0);
-     private float widthFactor = 0.22f;
-    private float heightFactor = 0.22f;
-#endif
     private RectTransform referenceTrans;
-
     public Vector3 localPointerPos;
     private Vector3 origin;
     public bool isCursorOverMap;
-    private bool isDragging = false;
+    private Dictionary<uint, bool> isDragging = new Dictionary<uint, bool>();
+    private Dictionary<uint, bool> isTriggerDown = new Dictionary<uint, bool>();
+    private Dictionary<uint,bool> triggerLastState = new Dictionary<uint, bool>();
+    private Dictionary<uint,Vector2> initialPressPosition = new Dictionary<uint, Vector2>();
+    private Dictionary<uint,float> initialPressTime = new Dictionary<uint, float>();
     private readonly BaseVariable<bool> navmapIsRendered = DataStore.i.HUDs.navmapIsRendered;
 
     [SerializeField] private MapRenderImage mapRenderImage;
@@ -36,56 +32,36 @@ public class PointerHelper : MonoBehaviour, IMixedRealityPointerHandler
     public Vector2Int cursorMapCoords;
     private int NAVMAP_CHUNK_LAYER;
     private Vector3 worldCoordsOriginInMap;
-    private bool isTriggerDown = false;
-    private bool triggerLastState = false;
-    private Vector2 initialPressPosition;
-    private float initialPressTime;
+
     [SerializeField] private double dragDistance = 10;
     [SerializeField] private double dragTime = 0.5f;
     private WaitForSeconds waitTime;
 
     [SerializeField] private Text xscale;
-    [SerializeField] private Text yscale;
     [SerializeField] private Text xoffset;
     [SerializeField] private Text yoffset;
+    [SerializeField] private Vector3 mapScale;
+    [SerializeField] private Vector2 resolution;
     public static PointerHelper Instance { get; set; }
-    // void Update()
-    // {
-    //     if (!navmapIsRendered.Get())
-    //         return;
-    //
-    //     if (IsCursorOverMapChunk())
-    //     {
-    //         if (isTriggerDown && !triggerLastState && !isDragging)  // When the trigger is first pressed
-    //             mapRenderImage.OnBeginDrag(new PointerEventData(EventSystem.current) { position = cursorMapCoords, dragging = isDragging });
-    //
-    //         else if(isTriggerDown && isDragging) // While dragging
-    //             mapRenderImage.OnDrag(new PointerEventData(EventSystem.current) { position = cursorMapCoords, dragging = isDragging });
-    //
-    //         else if(!isTriggerDown && triggerLastState && isDragging) // When the trigger is released
-    //         {
-    //             mapRenderImage.OnEndDrag(new PointerEventData(EventSystem.current) { position = cursorMapCoords, dragging = isDragging });
-    //             isDragging = false;  // End dragging after firing the event
-    //         }
-    //         else //regular hover
-    //             mapRenderImage.OnPointerMove(new PointerEventData(EventSystem.current) { position = cursorMapCoords, dragging = isDragging });
-    //
-    //     }
-    //     triggerLastState = isTriggerDown;
-    // }
-
     private void Awake()
     {
-        LoadAdjustments();
-        waitTime = new WaitForSeconds(0.1f);
+        waitTime = new WaitForSeconds(0.01f);
         Instance = this;
         referenceTrans = GetComponent<RectTransform>();
         mapRenderImage = GetComponent<MapRenderImage>();
-        // isVR = CrossPlatformManager.IsVRPlatform();
     }
 
     private void Start()
     {
+        dockParent = GameObject.Find("Dock");
+
+        #if UNITY_ANDROID && !UNITY_EDITOR
+        offset = new Vector3(3004, 1712, 0);
+        scaleFactor = .72f;
+        #else
+        offset = new Vector3(3682, 1716, 0);
+        scaleFactor = 0.155f;
+        #endif
         StartCoroutine(UpdateCoRoutine());
     }
 
@@ -93,42 +69,52 @@ public class PointerHelper : MonoBehaviour, IMixedRealityPointerHandler
     {
         while (true)
         {
+            yield return waitTime;
             if (!navmapIsRendered.Get())
             {
-                yield return waitTime;
                 continue;
             }
 
-
-            yield return waitTime;
-
-            if (IsCursorOverMapChunk())
+            UpdateScale();
+            foreach (var pointerId in isTriggerDown.Keys)
             {
-                if (isTriggerDown && !triggerLastState && !isDragging) // When the trigger is first pressed
-                    mapRenderImage.OnBeginDrag(new PointerEventData(EventSystem.current) { position = cursorMapCoords, dragging = isDragging });
-
-                else if (isTriggerDown && isDragging) // While dragging
-                    mapRenderImage.OnDrag(new PointerEventData(EventSystem.current) { position = cursorMapCoords, dragging = isDragging });
-
-                else if (!isTriggerDown && triggerLastState && isDragging) // When the trigger is released
+                if (IsCursorOverMapChunk(pointerId))
                 {
-                    mapRenderImage.OnEndDrag(new PointerEventData(EventSystem.current) { position = cursorMapCoords, dragging = isDragging });
-                    isDragging = false; // End dragging after firing the event
+                    if (isTriggerDown[pointerId] && !triggerLastState[pointerId] && !isDragging[pointerId])
+                    {
+                        mapRenderImage.OnBeginDrag(new PointerEventData(EventSystem.current) { position = cursorMapCoords, dragging = isDragging[pointerId] });
+                    }
+                    else if (!isTriggerDown[pointerId] && triggerLastState[pointerId] && isDragging[pointerId])
+                    {
+                        mapRenderImage.OnEndDrag(new PointerEventData(EventSystem.current) { position = cursorMapCoords, dragging = isDragging[pointerId] });
+                        isDragging[pointerId] = false;
+                    }
+                    else
+                    {
+                        mapRenderImage.OnPointerMove(new PointerEventData(EventSystem.current) { position = cursorMapCoords, dragging = isDragging[pointerId] });
+                    }
+
+                    triggerLastState[pointerId] = isTriggerDown[pointerId];
                 }
-                else //regular hover
-                    mapRenderImage.OnPointerMove(new PointerEventData(EventSystem.current) { position = cursorMapCoords, dragging = isDragging });
-                triggerLastState = isTriggerDown;
+                else
+                {
+                    if (isDragging[pointerId] && !isTriggerDown[pointerId])
+                    {
+                        mapRenderImage.OnEndDrag(new PointerEventData(EventSystem.current) { position = cursorMapCoords, dragging = isDragging[pointerId] });
+                        isDragging[pointerId] = false;
+                    }
+                }
+
+                if (isTriggerDown[pointerId] && isDragging[pointerId])
+                    mapRenderImage.OnDrag(new PointerEventData(EventSystem.current) { position = cursorMapCoords, dragging = isDragging[pointerId] });
             }
-
-
         }
     }
-    public bool IsCursorOverMapChunk()
+
+    public bool IsCursorOverMapChunk(uint pointerId)
     {
         if (CoreServices.FocusProvider.PrimaryPointer == null || CoreServices.FocusProvider.PrimaryPointer.Result.Details.Object == null)
         {
-            // cursorMapCoords.x = -50000;
-            // cursorMapCoords.y = -50000;
             isCursorOverMap = false;
             return false;
         }
@@ -156,40 +142,65 @@ public class PointerHelper : MonoBehaviour, IMixedRealityPointerHandler
         return false;
     }
 
+    private void UpdateScale()
+    {
+        if (mapScale == dockParent.transform.localScale && resolution.x == Screen.width && resolution.y == Screen.height) return;
+        resolution = new Vector2(Screen.width, Screen.height);
+        mapScale = dockParent.transform.localScale;
+        scaleFactor = (204.4004788f * mapScale.x) + ((mapScale.x*0.496038287f) * resolution.y)- (0.1510055f*mapScale.x/0.00075f);
+        xscale.text = scaleFactor.ToString("F3");
+        // offset.x = 10.7458680858f * Mathf.Pow( mapScale.x,-0.8137811006f);
+        // offset.x = 2.4498915534f * (1/mapScale.x) + 1340.39437145239f*( resolution.x/resolution.y) - 2796;
+        float offsetRatio = 0.79540889f * (resolution.x / resolution.y)  - ((mapScale.x - 0.00075f) / 0.00075f * 0.0644f) + 0.24355365f ;
+
+        offset.x = -0.0000084957f * (1/mapScale.x*(resolution.x/resolution.y))*(1/mapScale.x*(resolution.x/resolution.y)) + 1.067531384f * (1/mapScale.x*(resolution.x/resolution.y)) + 365.9912663f;
+        xoffset.text = offset.x.ToString("F2");
+        offset.y = offset.x/offsetRatio;
+        yoffset.text = offset.y.ToString("F2");
+    }
+
     public void OnPointerDown(MixedRealityPointerEventData eventData)
     {
-        initialPressPosition = cursorMapCoords;
-        initialPressTime = Time.time;
-        isTriggerDown = true;
+        uint pointerId = eventData.Pointer.PointerId;
+
+        if (!isTriggerDown.ContainsKey(pointerId))
+        {
+            isTriggerDown[pointerId] = false;
+            isDragging[pointerId] = false;
+            triggerLastState[pointerId] = false;
+        }
+
+        initialPressPosition[pointerId] = cursorMapCoords;
+        initialPressTime[pointerId] = Time.time;
+        isTriggerDown[pointerId] = true;
     }
 
     public void OnPointerDragged(MixedRealityPointerEventData eventData)
     {
-        if (!navmapIsRendered.Get())
+        uint pointerId = eventData.Pointer.PointerId;
+        if (!navmapIsRendered.Get() || !isTriggerDown.ContainsKey(pointerId))
             return;
 
-        float distance = Vector2.Distance(initialPressPosition, cursorMapCoords);
-        float time = Time.time - initialPressTime;
+        float distance = Vector2.Distance(initialPressPosition[pointerId], cursorMapCoords);
+        float time = Time.time - initialPressTime[pointerId];
 
-        if (!isDragging && (distance > dragDistance || time > dragTime))
+        if (!isDragging[pointerId] && (distance > dragDistance || time > dragTime))
         {
-            isDragging = true; // set the flag when drag starts
+            isDragging[pointerId] = true;
         }
     }
 
     public void OnPointerUp(MixedRealityPointerEventData eventData)
     {
-        isTriggerDown = false;
-        if(isDragging)
+        uint pointerId = eventData.Pointer.PointerId;
+        isTriggerDown[pointerId] = false;
+        if(isDragging[pointerId])
         {
-            // Perform actions necessary when drag ends (if any)
-
-            mapRenderImage.OnEndDrag(new PointerEventData(EventSystem.current) { position = cursorMapCoords, dragging = isDragging });
-            isDragging = false; // reset the flag when drag ends
+            mapRenderImage.OnEndDrag(new PointerEventData(EventSystem.current) { position = cursorMapCoords, dragging = isDragging[pointerId] });
+            isDragging[pointerId] = false;
         }
         else
         {
-            // Handle click event here
             PointerEventData data = new PointerEventData(EventSystem.current)
             {
                 position = cursorMapCoords,
@@ -199,20 +210,31 @@ public class PointerHelper : MonoBehaviour, IMixedRealityPointerHandler
         }
     }
 
-
     public void OnPointerClicked(MixedRealityPointerEventData eventData)
     {
-        if (!navmapIsRendered.Get() || isDragging) // Also check if we're not dragging
+        uint pointerId = eventData.Pointer.PointerId;
+        if (!navmapIsRendered.Get() || isDragging[pointerId])
             return;
 
-        if (IsCursorOverMapChunk())
+        if (IsCursorOverMapChunk(pointerId))
         {
             PointerEventData data = new PointerEventData(EventSystem.current)
             {
                 position = cursorMapCoords,
-                dragging = isDragging,
+                dragging = isDragging[pointerId],
             };
             mapRenderImage.OnPointerClick(data);
+        }
+    }
+
+    public void OnPointerExited(MixedRealityPointerEventData eventData)
+    {
+        uint pointerId = eventData.Pointer.PointerId;
+        if (isDragging[pointerId])
+        {
+            mapRenderImage.OnEndDrag(new PointerEventData(EventSystem.current) { position = cursorMapCoords, dragging = isDragging[pointerId] });
+            isDragging[pointerId] = false;
+            isTriggerDown[pointerId] = false;
         }
     }
 
@@ -222,7 +244,7 @@ public class PointerHelper : MonoBehaviour, IMixedRealityPointerHandler
         xscale.text = scaleFactor.ToString("F3");
         SaveAdjustments();
     }
-    public void DecreaseXScale()
+    public void DecreaseScale()
     {
         scaleFactor -= 0.005f;
         xscale.text = scaleFactor.ToString("F3");
@@ -231,24 +253,28 @@ public class PointerHelper : MonoBehaviour, IMixedRealityPointerHandler
 
     public void IncreaseXOffset()
     {
-        offset.x += 5f;
+        offset.x += 10f;
         xoffset.text = offset.x.ToString("F2");
+        offset.y = 0.4113556452f * offset.x + 196.2841761183f;
+        yoffset.text = offset.y.ToString("F2");
         SaveAdjustments();
     }
     public void DecreaseXOffset()
     {
-        offset.x -= 5f;
+        offset.x -= 10f;
         xoffset.text = offset.x.ToString("F2");
+        offset.y = 0.4113556452f * offset.x + 196.2841761183f;
+        yoffset.text = offset.y.ToString("F2");
         SaveAdjustments();
     }
     public void IncreaseYOffset()
     {
-        offset.y += 5f;
+        offset.y += 10f;
         yoffset.text = offset.y.ToString("F2");
     }
     public void DecreaseYOffset()
     {
-        offset.y -= 5f;
+        offset.y -= 10f;
         yoffset.text = offset.y.ToString("F2");
     }
     public void SaveAdjustments()
@@ -256,8 +282,8 @@ public class PointerHelper : MonoBehaviour, IMixedRealityPointerHandler
         PlayerPrefs.SetFloat("mapOffsetX", offset.x);
         PlayerPrefs.SetFloat("mapOffsetY", offset.y);
         PlayerPrefs.SetFloat("mapScale", scaleFactor);
-        // similarly save for other offsets or scaling factors.
         PlayerPrefs.Save();
+        Debug.Log($"NavMapOffsets Saved; x {offset.x}, y {offset.y}, scale {scaleFactor}");
     }
 
     public void LoadAdjustments()
@@ -271,7 +297,10 @@ public class PointerHelper : MonoBehaviour, IMixedRealityPointerHandler
         }
         if (PlayerPrefs.HasKey("mapScale"))
             scaleFactor = PlayerPrefs.GetFloat("mapScale");
-
+        Debug.Log($"PointerHelper Offsets for NavMap loaded: o{offset}, s{scaleFactor}");
 
     }
 }
+
+
+

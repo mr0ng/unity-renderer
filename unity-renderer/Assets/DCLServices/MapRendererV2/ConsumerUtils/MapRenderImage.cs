@@ -42,9 +42,10 @@ namespace DCLServices.MapRendererV2.ConsumerUtils
         [SerializeField] private Camera vrCamera;
         private Vector2Int parcel;
 
-        private void Awake()
+        protected override void Awake()
         {
-           pointerHelper = GetComponent<PointerHelper>();
+            base.Awake();
+            pointerHelper = GetComponent<PointerHelper>();
         }
         public void EmbedMapCameraDragBehavior(MapCameraDragBehavior.MapCameraDragBehaviorData data)
         {
