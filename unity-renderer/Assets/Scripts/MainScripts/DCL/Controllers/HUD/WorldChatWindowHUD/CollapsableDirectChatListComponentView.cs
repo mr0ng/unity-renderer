@@ -2,21 +2,22 @@ using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using DCL;
+using DCL.Chat.HUD;
 using UIComponents.CollapsableSortedList;
 using UnityEngine;
 
 public class CollapsableDirectChatListComponentView : CollapsableSortedListComponentView<string, PrivateChatEntry>
 {
     private const string POOL_NAME_PREFIX = "DirectChatEntriesPool_";
-    
+
     [SerializeField] private PrivateChatEntry entryPrefab;
     [SerializeField] private UserContextMenu userContextMenu;
 
     private readonly Dictionary<string, PoolableObject> pooleableEntries = new Dictionary<string, PoolableObject>();
     private Pool entryPool;
     private IChatController chatController;
-    private ILastReadMessagesService lastReadMessagesService;
     private bool releaseEntriesFromPool = true;
+    private DataStore_Mentions mentionsDataStore;
 
     public event Action<PrivateChatEntry> OnOpenChat;
     public event Action<string> OnUnfriend
@@ -25,10 +26,12 @@ public class CollapsableDirectChatListComponentView : CollapsableSortedListCompo
         remove => userContextMenu.OnUnfriend -= value;
     }
 
-    public void Initialize(IChatController chatController, ILastReadMessagesService lastReadMessagesService)
+    public void Initialize(
+        IChatController chatController,
+        DataStore_Mentions mentionsDataStore)
     {
         this.chatController = chatController;
-        this.lastReadMessagesService = lastReadMessagesService;
+        this.mentionsDataStore = mentionsDataStore;
     }
 
     public void Filter(string search)
@@ -55,13 +58,13 @@ public class CollapsableDirectChatListComponentView : CollapsableSortedListCompo
         {
             if (pooleableEntries.ContainsKey(key))
                 pooleableEntries[key].Release();
-            pooleableEntries.Remove(key);    
+            pooleableEntries.Remove(key);
         }
-        
+
         return base.Remove(key);
     }
 
-    public void Set(string userId, PrivateChatEntry.PrivateChatEntryModel entryModel)
+    public void Set(string userId, PrivateChatEntryModel entryModel)
     {
         if (!Contains(entryModel.userId))
             CreateEntry(userId);
@@ -78,6 +81,12 @@ public class CollapsableDirectChatListComponentView : CollapsableSortedListCompo
         }
     }
 
+    public void RefreshPresence(string userId, bool isOnline)
+    {
+        if (Entries.TryGetValue(userId, out PrivateChatEntry directMessage))
+            directMessage.SetPresence(isOnline);
+    }
+
     private void CreateEntry(string userId)
     {
         entryPool = GetEntryPool();
@@ -85,7 +94,7 @@ public class CollapsableDirectChatListComponentView : CollapsableSortedListCompo
         pooleableEntries.Add(userId, newFriendEntry);
         var entry = newFriendEntry.gameObject.GetComponent<PrivateChatEntry>();
         Add(userId, entry);
-        entry.Initialize(chatController, userContextMenu, lastReadMessagesService);
+        entry.Initialize(chatController, userContextMenu, mentionsDataStore);
         entry.OnOpenChat -= OnEntryOpenChat;
         entry.OnOpenChat += OnEntryOpenChat;
     }

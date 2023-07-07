@@ -29,8 +29,10 @@ namespace DCL.SettingsCommon.SettingsControllers.SpecificControllers
             currentGeneralSettings.mouseSensitivity = (float)newValue;
 
             var povSpeed = Mathf.Lerp(FIRST_PERSON_MIN_SPEED, FIRST_PERSON_MAX_SPEED, currentGeneralSettings.mouseSensitivity);
+            if (null != povCamera) { 
             povCamera.m_HorizontalAxis.m_MaxSpeed = povSpeed;
             povCamera.m_VerticalAxis.m_MaxSpeed = povSpeed;
+            }
             SceneReferences.i.thirdPersonCamera.m_XAxis.m_MaxSpeed = Mathf.Lerp(THIRD_PERSON_X_MIN_SPEED, THIRD_PERSON_X_MAX_SPEED, currentGeneralSettings.mouseSensitivity);
             SceneReferences.i.thirdPersonCamera.m_YAxis.m_MaxSpeed = Mathf.Lerp(THIRD_PERSON_Y_MIN_SPEED, THIRD_PERSON_Y_MAX_SPEED, currentGeneralSettings.mouseSensitivity);
         }

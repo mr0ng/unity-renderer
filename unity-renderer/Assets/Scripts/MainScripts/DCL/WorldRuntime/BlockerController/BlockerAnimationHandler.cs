@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using DCL.Helpers;
+using DCL.Shaders;
 using UnityEngine;
 
 namespace DCL.Controllers
@@ -35,6 +36,7 @@ namespace DCL.Controllers
             while (color.a < 0.5f)
             {
                 color.a += Time.deltaTime;
+                
                 rend.material.SetColor(ShaderUtils.BaseColor, color);
                 yield return null;
             }

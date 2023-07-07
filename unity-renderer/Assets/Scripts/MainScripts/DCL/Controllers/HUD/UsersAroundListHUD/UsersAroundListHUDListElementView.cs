@@ -2,10 +2,12 @@
 using System.Collections;
 using DCL;
 using DCL.Components;
+using DCL.Social.Friends;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
+using Environment = DCL.Environment;
 
 internal class UsersAroundListHUDListElementView : MonoBehaviour, IPoolLifecycleHandler, IPointerEnterHandler, IPointerExitHandler
 {
@@ -106,9 +108,9 @@ internal class UsersAroundListHUDListElementView : MonoBehaviour, IPoolLifecycle
             profile = null;
         }
 
-        if (FriendsController.i != null)
+        if (Environment.i.serviceLocator.Get<IFriendsController>() != null)
         {
-            FriendsController.i.OnUpdateFriendship -= OnFriendActionUpdate;
+            Environment.i.serviceLocator.Get<IFriendsController>().OnUpdateFriendship -= OnFriendActionUpdate;
         }
 
         gameObject.SetActive(false);
@@ -131,22 +133,18 @@ internal class UsersAroundListHUDListElementView : MonoBehaviour, IPoolLifecycle
 
     void SetupFriends(string userId)
     {
-        if (FriendsController.i == null)
+        var friendsController = Environment.i.serviceLocator.Get<IFriendsController>();
+        if (friendsController == null)
         {
             return;
         }
 
-        if (FriendsController.i.friends.TryGetValue(userId, out FriendsController.UserStatus status))
-        {
-            SetupFriendship(status.friendshipStatus);
-        }
-        else
-        {
-            SetupFriendship(FriendshipStatus.NOT_FRIEND);
-        }
 
-        FriendsController.i.OnUpdateFriendship -= OnFriendActionUpdate;
-        FriendsController.i.OnUpdateFriendship += OnFriendActionUpdate;
+        UserStatus status = friendsController.GetUserStatus(userId);
+        SetupFriendship(status?.friendshipStatus ?? FriendshipStatus.NOT_FRIEND);
+
+        friendsController.OnUpdateFriendship -= OnFriendActionUpdate;
+        friendsController.OnUpdateFriendship += OnFriendActionUpdate;
     }
 
     void SetAvatarSnapshotImage(Texture2D texture) { avatarPreview.texture = texture; }

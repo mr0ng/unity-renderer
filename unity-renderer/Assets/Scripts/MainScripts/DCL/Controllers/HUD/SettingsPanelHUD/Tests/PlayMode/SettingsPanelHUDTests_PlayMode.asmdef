@@ -16,7 +16,8 @@
     "SettingsControllers",
     "UIHelpers",
     "HUDInterfaces",
-    "BaseVariable"
+    "BaseVariable",
+    "UnityEngine.UI"
   ],
   "includePlatforms": [],
   "excludePlatforms": [],

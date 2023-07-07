@@ -7,12 +7,15 @@ namespace DCL.SettingsCommon.SettingsControllers.BaseControllers
     /// </summary>
     public class SettingsControlController : ScriptableObject
     {
-        protected GeneralSettings currentGeneralSettings;
-        protected QualitySettings currentQualitySetting;
+        public static GeneralSettings currentGeneralSettings;
+        public static QualitySettings currentQualitySetting;
         protected AudioSettings currentAudioSettings;
 
         public virtual void Initialize()
         {
+            if (Settings.i == null)
+                Settings.CreateSharedInstance(new DefaultSettingsFactory());
+
             currentGeneralSettings = Settings.i.generalSettings.Data;
             currentQualitySetting = Settings.i.qualitySettings.Data;
             currentAudioSettings = Settings.i.audioSettings.Data;

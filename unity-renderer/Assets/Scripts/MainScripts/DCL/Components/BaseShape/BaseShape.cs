@@ -3,6 +3,7 @@ using DCL.Controllers;
 using DCL.Helpers;
 using DCL.Models;
 using UnityEngine;
+using Decentraland.Sdk.Ecs6;
 
 namespace DCL.Components
 {
@@ -15,12 +16,20 @@ namespace DCL.Components
             public bool isPointerBlocker = true;
             public bool visible = true;
 
-            public override BaseModel GetDataFromJSON(string json) { return Utils.SafeFromJson<Model>(json); }
+            public override BaseModel GetDataFromJSON(string json) =>
+                Utils.SafeFromJson<Model>(json);
+
+            public override BaseModel GetDataFromPb(ComponentBodyPayload pbModel) =>
+                default;
         }
 
-        public BaseShape() { model = new Model(); }
+        protected BaseShape()
+        {
+            model = new Model();
+        }
 
-        new public Model GetModel() { return (Model) model; }
+        public new Model GetModel() =>
+            (Model) model;
 
         public override void AttachTo(IDCLEntity entity, System.Type overridenAttachedType = null)
         {
@@ -56,16 +65,6 @@ namespace DCL.Components
             if (meshGameObject == null)
                 return;
 
-            if (!shouldBeVisible)
-            {
-                MaterialTransitionController[] materialTransitionControllers = meshGameObject.GetComponentsInChildren<MaterialTransitionController>();
-
-                for (var i = 0; i < materialTransitionControllers.Length; i++)
-                {
-                    Object.Destroy(materialTransitionControllers[i]);
-                }
-            }
-
             if (meshRenderers == null)
                 meshRenderers = meshGameObject.GetComponentsInChildren<Renderer>(true);
 
@@ -73,6 +72,9 @@ namespace DCL.Components
 
             for (var i = 0; i < meshRenderers.Length; i++)
             {
+                if (meshRenderers[i] == null)
+                    continue;
+
                 meshRenderers[i].enabled = shouldBeVisible;
 
                 if (meshRenderers[i].transform.childCount > 0)

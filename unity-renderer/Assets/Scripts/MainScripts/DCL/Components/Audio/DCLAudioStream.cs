@@ -6,23 +6,38 @@ using DCL.Models;
 using DCL.SettingsCommon;
 using UnityEngine;
 using AudioSettings = DCL.SettingsCommon.AudioSettings;
+using Decentraland.Sdk.Ecs6;
 
 namespace DCL.Components
 {
     public class DCLAudioStream : BaseComponent, IOutOfSceneBoundariesHandler
     {
-        [System.Serializable]
+        [Serializable]
         public class Model : BaseModel
         {
             public string url;
-            public bool playing = false;
+            public bool playing;
             public float volume = 1;
 
-            public override BaseModel GetDataFromJSON(string json) { return Utils.SafeFromJson<Model>(json); }
+            public override BaseModel GetDataFromJSON(string json) =>
+                Utils.SafeFromJson<Model>(json);
+
+            public override BaseModel GetDataFromPb(ComponentBodyPayload pbModel)
+            {
+                if (pbModel.PayloadCase != ComponentBodyPayload.PayloadOneofCase.AudioStream)
+                    return Utils.SafeUnimplemented<DCLAudioStream, Model>(expected: ComponentBodyPayload.PayloadOneofCase.AudioStream, actual: pbModel.PayloadCase);
+
+                var pb = new Model();
+                if (pbModel.AudioStream.HasPlaying) pb.playing = pbModel.AudioStream.Playing;
+                if (pbModel.AudioStream.HasUrl) pb.url = pbModel.AudioStream.Url;
+                if (pbModel.AudioStream.HasVolume) pb.volume = pbModel.AudioStream.Volume;
+
+                return pb;
+            }
         }
 
         private void Awake() { model = new Model(); }
-        
+
         public override void Initialize(IParcelScene scene, IDCLEntity entity)
         {
             base.Initialize(scene, entity);
@@ -58,7 +73,7 @@ namespace DCL.Components
 
         private void Start()
         {
-            CommonScriptableObjects.sceneID.OnChange += OnSceneChanged;
+            CommonScriptableObjects.sceneNumber.OnChange += OnSceneChanged;
             CommonScriptableObjects.rendererState.OnChange += OnRendererStateChanged;
             Settings.i.audioSettings.OnChanged += OnSettingsChanged;
             DataStore.i.virtualAudioMixer.sceneSFXVolume.OnChange += SceneSFXVolume_OnChange;
@@ -67,7 +82,7 @@ namespace DCL.Components
         private void OnDestroy()
         {
             isDestroyed = true;
-            CommonScriptableObjects.sceneID.OnChange -= OnSceneChanged;
+            CommonScriptableObjects.sceneNumber.OnChange -= OnSceneChanged;
             CommonScriptableObjects.rendererState.OnChange -= OnRendererStateChanged;
             Settings.i.audioSettings.OnChanged -= OnSettingsChanged;
             DataStore.i.virtualAudioMixer.sceneSFXVolume.OnChange -= SceneSFXVolume_OnChange;
@@ -82,9 +97,9 @@ namespace DCL.Components
                 return;
             }
 
-            bool canPlayStream = scene.isPersistent || scene.sceneData.id == CommonScriptableObjects.sceneID.Get();
+            bool canPlayStream = scene.isPersistent || scene.sceneData.sceneNumber == CommonScriptableObjects.sceneNumber.Get();
             canPlayStream &= CommonScriptableObjects.rendererState;
-            
+
             Model model = (Model) this.model;
             bool shouldStopStream = (isPlaying && !model.playing) || (isPlaying && !canPlayStream);
             bool shouldStartStream = !isPlaying && canPlayStream && model.playing;
@@ -110,7 +125,7 @@ namespace DCL.Components
             }
         }
 
-        private void OnSceneChanged(string sceneId, string prevSceneId) { UpdatePlayingState(false); }
+        private void OnSceneChanged(int currentSceneNumber, int previousSceneNumber) { UpdatePlayingState(false); }
 
         private void OnRendererStateChanged(bool isEnable, bool prevState)
         {

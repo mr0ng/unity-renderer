@@ -1,7 +1,9 @@
 ﻿using AvatarSystem;
 using DCL;
+using DCL.Emotes;
 using NSubstitute;
 using NUnit.Framework;
+using UnityEditor;
 using UnityEngine;
 
 namespace Test.AvatarSystem
@@ -17,8 +19,8 @@ namespace Test.AvatarSystem
         [SetUp]
         public void SetUp()
         {
-            tikAnim = Resources.Load<AnimationClip>("tik");
-            discoAnim = Resources.Load<AnimationClip>("disco");
+            tikAnim = AssetDatabase.LoadAssetAtPath<AnimationClip>("Assets/Scripts/MainScripts/DCL/Components/Avatar/Animations/Addressables/tik.anim");
+            discoAnim = AssetDatabase.LoadAssetAtPath<AnimationClip>("Assets/Scripts/MainScripts/DCL/Components/Avatar/Animations/Addressables/disco.anim");
 
             animator = Substitute.For<IAnimator>();
             dataStore = new DataStore_Emotes();
@@ -69,14 +71,16 @@ namespace Test.AvatarSystem
                 new WearableItem { id = "emote2" },
             });
 
-            animator.DidNotReceive().EquipEmote(Arg.Any<string>(), Arg.Any<AnimationClip>());
+            animator.DidNotReceive().EquipEmote(Arg.Any<string>(), Arg.Any<EmoteClipData>());
         }
 
         [Test]
         public void EquipReadyEmotes()
         {
-            dataStore.animations.Add(("female", "emote0"), tikAnim);
-            dataStore.animations.Add(("female", "emote1"), discoAnim);
+            var tikEmoteData = new EmoteClipData(tikAnim);
+            var discoEmoteData = new EmoteClipData(discoAnim);
+            dataStore.animations.Add(("female", "emote0"), tikEmoteData);
+            dataStore.animations.Add(("female", "emote1"), discoEmoteData);
             equipper.SetEquippedEmotes("female", new []
             {
                 new WearableItem { id = "emote0" },
@@ -84,9 +88,9 @@ namespace Test.AvatarSystem
                 new WearableItem { id = "emote2" },
             });
 
-            animator.Received().EquipEmote("emote0", tikAnim);
-            animator.Received().EquipEmote("emote1", discoAnim);
-            animator.DidNotReceive().EquipEmote("emote2", Arg.Any<AnimationClip>());
+            animator.Received().EquipEmote("emote0", tikEmoteData);
+            animator.Received().EquipEmote("emote1", discoEmoteData);
+            animator.DidNotReceive().EquipEmote("emote2", Arg.Any<EmoteClipData>());
         }
 
         [Test]
@@ -119,9 +123,11 @@ namespace Test.AvatarSystem
             equipper.bodyShapeId = "female";
             equipper.emotes.AddRange(new [] { "old0", "old1", "old2" });
 
-            dataStore.animations.Add(("female", "old0"), tikAnim);
+            var emoteClipData = new EmoteClipData(tikAnim);
 
-            animator.Received().EquipEmote("old0", tikAnim);
+            dataStore.animations.Add(("female", "old0"), emoteClipData);
+
+            animator.Received().EquipEmote("old0", emoteClipData);
         }
 
         [Test]
@@ -130,9 +136,11 @@ namespace Test.AvatarSystem
             equipper.bodyShapeId = "female";
             equipper.emotes.AddRange(new [] { "old0", "old1", "old2" });
 
-            dataStore.animations.Add(("male", "old0"), tikAnim);
+            var emoteClipData = new EmoteClipData(tikAnim);
 
-            animator.DidNotReceive().EquipEmote(Arg.Any<string>(), Arg.Any<AnimationClip>());
+            dataStore.animations.Add(("male", "old0"), emoteClipData);
+
+            animator.DidNotReceive().EquipEmote(Arg.Any<string>(), Arg.Any<EmoteClipData>());
         }
     }
 }

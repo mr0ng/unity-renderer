@@ -1,18 +1,20 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using DCL;
 using DCL.Helpers;
+using DCL.Social.Friends;
+using System;
+using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
-using UnityEngine.Assertions;
 using UnityEngine.Events;
 using UnityEngine.UI;
 
 public class PlayerInfoCardHUDView : MonoBehaviour
 {
+    #if DCL_VR
+    private const string PREFAB_PATH = "PlayerInfoCardHUDVR";
+    #else
     private const string PREFAB_PATH = "PlayerInfoCardHUD";
-
+#endif
     public enum Tabs
     {
         Passport,
@@ -33,11 +35,11 @@ public class PlayerInfoCardHUDView : MonoBehaviour
     [SerializeField] internal TabsMapping[] tabsMapping;
     [SerializeField] internal Button hideCardButton;
 
-    [Space] [SerializeField] internal RawImage avatarPicture;
+    [Space][SerializeField] internal RawImage avatarPicture;
     [SerializeField] internal Image blockedAvatarOverlay;
     [SerializeField] internal TextMeshProUGUI name;
 
-    [Header("Friends")] [SerializeField] internal GameObject friendStatusContainer;
+    [Header("Friends")][SerializeField] internal GameObject friendStatusContainer;
     [SerializeField] internal Button requestSentButton;
     [SerializeField] internal Button addFriendButton;
     [SerializeField] internal GameObject alreadyFriendsContainer;
@@ -45,12 +47,12 @@ public class PlayerInfoCardHUDView : MonoBehaviour
     [SerializeField] internal Button acceptRequestButton;
     [SerializeField] internal Button rejectRequestButton;
 
-    [Header("Passport")] [SerializeField] internal TextMeshProUGUI description;
+    [Header("Passport")][SerializeField] internal TextMeshProUGUI description;
 
-    [Header("Trade")] [SerializeField] private RectTransform wearablesContainer;
+    [Header("Trade")][SerializeField] private RectTransform wearablesContainer;
     [SerializeField] private GameObject emptyCollectiblesImage;
 
-    [Header("Block")] [SerializeField] internal Button reportPlayerButton;
+    [Header("Block")][SerializeField] internal Button reportPlayerButton;
     [SerializeField] internal Button blockPlayerButton;
     [SerializeField] internal Button unblockPlayerButton;
 
@@ -58,6 +60,9 @@ public class PlayerInfoCardHUDView : MonoBehaviour
     private UnityAction<bool> toggleChangedDelegate => (x) => UpdateTabs();
 
     private MouseCatcher mouseCatcher;
+    private HUDCanvasCameraModeController hudCanvasCameraModeController;
+
+    private void Awake() { hudCanvasCameraModeController = new HUDCanvasCameraModeController(GetComponent<Canvas>(), DataStore.i.camera.hudsCamera); }
 
     public static PlayerInfoCardHUDView CreateView()
     {
@@ -115,7 +120,7 @@ public class PlayerInfoCardHUDView : MonoBehaviour
 
         if (SceneReferences.i != null)
         {
-            var mouseCatcher = DCL.SceneReferences.i.mouseCatcher;
+            var mouseCatcher = SceneReferences.i.mouseCatcher;
 
             if (mouseCatcher != null)
             {
@@ -133,7 +138,6 @@ public class PlayerInfoCardHUDView : MonoBehaviour
         }
 
         cardCanvas.enabled = active;
-        CommonScriptableObjects.playerInfoCardVisibleState.Set(active);
     }
 
     private void UpdateTabs()
@@ -151,7 +155,11 @@ public class PlayerInfoCardHUDView : MonoBehaviour
 
     public void SetName(string name) => this.name.text = name;
 
-    public void SetDescription(string description) => this.description.text = description;
+    public void SetDescription(string description)
+    {
+        if (description != null)
+            this.description.text = description;
+    }
 
     public void HideFriendshipInteraction()
     {
@@ -162,7 +170,7 @@ public class PlayerInfoCardHUDView : MonoBehaviour
     }
 
     public void UpdateFriendshipInteraction(bool canUseFriendButton,
-        FriendsController.UserStatus status)
+        UserStatus status)
     {
         if (status == null)
         {
@@ -263,6 +271,7 @@ public class PlayerInfoCardHUDView : MonoBehaviour
 
     private void OnDestroy()
     {
+        hudCanvasCameraModeController?.Dispose();
         if (mouseCatcher != null)
             mouseCatcher.OnMouseDown -= OnPointerDown;
     }

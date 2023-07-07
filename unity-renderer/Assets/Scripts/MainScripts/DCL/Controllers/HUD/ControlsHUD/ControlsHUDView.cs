@@ -7,14 +7,17 @@ public class ControlsHUDView : MonoBehaviour
     [SerializeField] internal ShowHideAnimator showHideAnimator;
     [SerializeField] internal Button_OnPointerDown closeButton;
     [SerializeField] internal GameObject voiceChatButton;
-    [SerializeField] internal GameObject builderInWorldButton;
 
     public event Action<bool> onCloseActionTriggered;
 
     private void Awake()
     {
+        #if DCL_VR
+        OnCloseActionTriggered(DCLAction_Trigger.CloseWindow);
+#else
         closeAction.OnTriggered += OnCloseActionTriggered;
         closeButton.onPointerDown += () => Close(true);
+        #endif
     }
 
     private void OnDestroy() { closeAction.OnTriggered -= OnCloseActionTriggered; }

@@ -9,8 +9,11 @@ public class TransactionListHUDView : MonoBehaviour
 
     public event Action<ITransactionHUD> OnTransactionAcceptedEvent;
     public event Action<ITransactionHUD> OnTransactionRejectedEvent;
-
+#if DCL_VR
+    private const string VIEW_PATH = "TransactionListHUDVR";
+    #else
     private const string VIEW_PATH = "TransactionListHUD";
+    #endif
     private const string VIEW_CHILD_PATH = "TransactionHUD";
     private const string VIEW_OBJECT_NAME = "_TransactionListHUD";
 
@@ -36,7 +39,7 @@ public class TransactionListHUDView : MonoBehaviour
     {
         if (transactionModel == null)
             return null;
-        
+
         TransactionHUD transactionHUD = Instantiate(Resources.Load<TransactionHUD>(VIEW_CHILD_PATH), transactionPanel);
         ShowTransaction(transactionHUD, transactionModel);
         return transactionHUD;
@@ -51,6 +54,6 @@ public class TransactionListHUDView : MonoBehaviour
     {
         OnTransactionRejectedEvent?.Invoke(transaction);
     }
-    
+
     public void SetActive(bool active) { gameObject.SetActive(active); }
 }

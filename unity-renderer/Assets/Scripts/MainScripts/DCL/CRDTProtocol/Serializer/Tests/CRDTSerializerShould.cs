@@ -1,6 +1,5 @@
 using System.IO;
 using DCL.CRDT;
-using KernelCommunication;
 using NUnit.Framework;
 using BinaryWriter = KernelCommunication.BinaryWriter;
 
@@ -10,28 +9,52 @@ namespace Tests
     {
         [Test]
         [TestCase(0, 1, 100, null,
-            ExpectedResult = new byte[] { 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 100, 0, 0, 0, 0 })]
-        [TestCase(32424, 67867, 2423423423, new byte[] { 42, 33, 67, 22 },
-            ExpectedResult = new byte[] { 0, 0, 126, 168, 0, 1, 9, 27, 0, 0, 0, 0, 144, 114, 129, 191, 0, 0, 0, 4, 42, 33, 67, 22 })]
-        public byte[] SerializeCorrectly(int entityId, int componentId, long timestamp, byte[] data)
-        {
-            var message = new CRDTMessage()
+            ExpectedResult = new byte[]
             {
-                key = CRDTUtils.KeyFromIds(entityId, componentId),
-                timestamp = timestamp,
-                data = data
-            };
+                24, 0, 0, 0,    //msg_length
+                1, 0, 0, 0,     //msg_type
+                0, 0, 0, 0,     //entityId
+                1, 0, 0, 0,     //componentId
+                100, 0, 0, 0,   //timestamp
+                0, 0, 0, 0      //data_length
+            })]
+
+        [TestCase(32424, 67867, 2138996092, new byte[] { 42, 33, 67, 22 },
+            ExpectedResult = new byte[]
+            {
+                28, 0, 0, 0,        //msg_length
+                1, 0, 0, 0,         //msg_type
+                168, 126, 0, 0,     //entityId
+                27, 9, 1, 0,        //componentId
+                124, 125, 126, 127, //timestamp
+                4, 0, 0, 0,         //data_length
+                42, 33, 67, 22      //data
+            })]
+
+        public byte[] SerializeCorrectlyPutComponent(int entityId, int componentId, int timestamp, byte[] data)
+        {
+            var message = new CrdtMessage
+            (
+                type: CrdtMessageType.PUT_COMPONENT,
+                entityId: entityId,
+                componentId: componentId,
+                timestamp: timestamp,
+                data: data
+            );
 
             var memoryStream = new MemoryStream();
             var binaryWriter = new BinaryWriter(memoryStream);
             CRDTSerializer.Serialize(binaryWriter, message);
             var bytes = memoryStream.ToArray();
 
-            CRDTMessage result = CRDTDeserializer.Deserialize(new ByteArrayReader(bytes));
+            CrdtMessageType crdtMessageType = CrdtMessageType.PUT_COMPONENT;
+            int memoryPosition = 8; // skip the CrdtMessageHeader
+            CrdtMessage? result = CRDTDeserializer.DeserializePutComponent(bytes, ref memoryPosition);
+            object expextedData = message.Data ?? new byte[0]; // NULL data for a PUT operation will be converted to byte[0]
 
-            Assert.AreEqual(message.key, result.key);
-            Assert.AreEqual(message.timestamp, result.timestamp);
-            Assert.IsTrue(AreEqual((byte[])message.data, (byte[])result.data));
+            Assert.AreEqual(message.EntityId, result.Value.EntityId);
+            Assert.AreEqual(message.Timestamp, result.Value.Timestamp);
+            Assert.IsTrue(AreEqual((byte[])expextedData, (byte[])result.Value.Data));
 
             return bytes;
         }

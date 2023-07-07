@@ -1,14 +1,18 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
+using Object = UnityEngine.Object;
 
 namespace DCL
 {
     public class Asset_AB : Asset
     {
         const string METADATA_FILENAME = "metadata.json";
+        const string METRICS_FILENAME = "metrics.json";
 
         private AssetBundle assetBundle;
         private Dictionary<string, List<Object>> assetsByExtension;
+        public AssetBundleMetrics metrics { get; private set; } = new AssetBundleMetrics { meshesEstimatedSize = 0, animationsEstimatedSize = 0 };
 
         public Asset_AB()
         {
@@ -67,12 +71,12 @@ namespace DCL
 
                 return;
             }
-            
+
             if (!assetsByExtension.ContainsKey(ext))
             {
                 assetsByExtension.Add(ext, new List<Object>());
             }
-            
+
             assetsByExtension[ext].Add(loadedAsset);
         }
         public void SetAssetBundle(AssetBundle ab)
@@ -80,13 +84,25 @@ namespace DCL
             assetBundle = ab;
         }
 
+        public void LoadMetrics()
+        {
+            var metricsFile = assetBundle.LoadAsset<TextAsset>(METRICS_FILENAME);
+            if (metricsFile != null)
+                metrics = JsonUtility.FromJson<AssetBundleMetrics>(metricsFile.text);
+        }
+
         public TextAsset GetMetadata()
         {
-            return assetBundle.LoadAsset<TextAsset>(METADATA_FILENAME);
+            return GetMetadata(assetBundle);
         }
         public AssetBundleRequest LoadAllAssetsAsync()
         {
             return assetBundle.LoadAllAssetsAsync();
+        }
+
+        public static TextAsset GetMetadata(AssetBundle assetBundle)
+        {
+            return assetBundle.LoadAsset<TextAsset>(METADATA_FILENAME);
         }
     }
 }

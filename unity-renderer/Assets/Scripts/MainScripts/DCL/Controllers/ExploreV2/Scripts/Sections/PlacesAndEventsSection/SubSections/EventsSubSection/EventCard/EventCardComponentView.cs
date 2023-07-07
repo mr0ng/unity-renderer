@@ -1,5 +1,6 @@
 using DCL;
 using DCL.Helpers;
+using System;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -117,12 +118,10 @@ public interface IEventCardComponentView
     void SetLoadingIndicatorVisible(bool isVisible);
 }
 
-public class EventCardComponentView : BaseComponentView, IEventCardComponentView, IComponentModelConfig
+public class EventCardComponentView : BaseComponentView, IEventCardComponentView, IComponentModelConfig<EventCardComponentModel>
 {
     internal const string USERS_CONFIRMED_MESSAGE = "{0} confirmed";
     internal const string NOBODY_CONFIRMED_MESSAGE = "Nobody confirmed yet";
-
-    internal static readonly int ON_FOCUS_CARD_COMPONENT_BOOL = Animator.StringToHash("OnFocus");
 
     [Header("Prefab References")]
     [SerializeField] internal ImageComponentView eventImage;
@@ -138,22 +137,22 @@ public class EventCardComponentView : BaseComponentView, IEventCardComponentView
     [SerializeField] internal TMP_Text eventPlaceText;
     [SerializeField] internal TMP_Text subscribedUsersTitleForLive;
     [SerializeField] internal TMP_Text subscribedUsersTitleForNotLive;
+    [SerializeField] internal GameObject goingUsersGameObject;
     [SerializeField] internal TMP_Text subscribedUsersText;
     [SerializeField] internal Button modalBackgroundButton;
     [SerializeField] internal ButtonComponentView closeCardButton;
     [SerializeField] internal InputAction_Trigger closeAction;
     [SerializeField] internal ButtonComponentView infoButton;
     [SerializeField] internal ButtonComponentView jumpinButton;
-    [SerializeField] internal ButtonComponentView jumpinButtonForNotLive;
     [SerializeField] internal ButtonComponentView subscribeEventButton;
     [SerializeField] internal ButtonComponentView unsubscribeEventButton;
     [SerializeField] internal GameObject imageContainer;
     [SerializeField] internal GameObject eventInfoContainer;
     [SerializeField] internal GameObject loadingSpinner;
-    [SerializeField] internal Animator cardAnimator;
     [SerializeField] internal VerticalLayoutGroup contentVerticalLayout;
     [SerializeField] internal VerticalLayoutGroup infoVerticalLayout;
     [SerializeField] internal HorizontalLayoutGroup timeAndPlayersHorizontalLayout;
+    [SerializeField] internal EventCardAnimator cardAnimator;
 
     [Header("Configuration")]
     [SerializeField] internal Sprite defaultPicture;
@@ -161,12 +160,11 @@ public class EventCardComponentView : BaseComponentView, IEventCardComponentView
     [SerializeField] internal EventCardComponentModel model;
 
     public Button.ButtonClickedEvent onJumpInClick => jumpinButton?.onClick;
-    public Button.ButtonClickedEvent onJumpInForNotLiveClick => jumpinButtonForNotLive?.onClick;
     public Button.ButtonClickedEvent onInfoClick => infoButton?.onClick;
     public Button.ButtonClickedEvent onSubscribeClick => subscribeEventButton?.onClick;
     public Button.ButtonClickedEvent onUnsubscribeClick => unsubscribeEventButton?.onClick;
 
-    public override void Start()
+    public void Start()
     {
         if (closeCardButton != null)
             closeCardButton.onClick.AddListener(CloseModal);
@@ -176,11 +174,31 @@ public class EventCardComponentView : BaseComponentView, IEventCardComponentView
 
         if (modalBackgroundButton != null)
             modalBackgroundButton.onClick.AddListener(CloseModal);
+
+        onSubscribeClick.AddListener(PressedSubscribe);
+        onUnsubscribeClick.AddListener(PressedUnsubscribe);
+        #if DCL_VR
+        transform.localRotation = Quaternion.identity;
+        #endif
     }
 
-    public void Configure(BaseComponentModel newModel)
+    private void PressedSubscribe()
     {
-        model = (EventCardComponentModel)newModel;
+        model.isSubscribed = true;
+        model.eventFromAPIInfo.attending = true;
+        RefreshControl();
+    }
+
+    private void PressedUnsubscribe()
+    {
+        model.isSubscribed = false;
+        model.eventFromAPIInfo.attending = false;
+        RefreshControl();
+    }
+
+    public void Configure(EventCardComponentModel newModel)
+    {
+        model = newModel;
         RefreshControl();
     }
 
@@ -217,16 +235,14 @@ public class EventCardComponentView : BaseComponentView, IEventCardComponentView
     {
         base.OnFocus();
 
-        if (cardAnimator != null)
-            cardAnimator.SetBool(ON_FOCUS_CARD_COMPONENT_BOOL, true);
+        cardAnimator?.Focus();
     }
 
     public override void OnLoseFocus()
     {
         base.OnLoseFocus();
 
-        if (cardAnimator != null)
-            cardAnimator.SetBool(ON_FOCUS_CARD_COMPONENT_BOOL, false);
+        cardAnimator?.Idle();
     }
 
     public override void Show(bool instant = false)
@@ -258,6 +274,9 @@ public class EventCardComponentView : BaseComponentView, IEventCardComponentView
 
         if (modalBackgroundButton != null)
             modalBackgroundButton.onClick.RemoveAllListeners();
+
+        onSubscribeClick.RemoveAllListeners();
+        onUnsubscribeClick.RemoveAllListeners();
     }
 
     public void SetEventPicture(Sprite sprite)
@@ -324,14 +343,11 @@ public class EventCardComponentView : BaseComponentView, IEventCardComponentView
         if (jumpinButton != null)
             jumpinButton.gameObject.SetActive(isEventCardModal || isLive);
 
-        if (jumpinButtonForNotLive)
-            jumpinButtonForNotLive.gameObject.SetActive(!isEventCardModal && !isLive);
-
         if (subscribeEventButton != null)
-            subscribeEventButton.gameObject.SetActive(!isLive && !model.isSubscribed);
+            subscribeEventButton.gameObject.SetActive(!isLive && !model.eventFromAPIInfo.attending);
 
         if (unsubscribeEventButton != null)
-            unsubscribeEventButton.gameObject.SetActive(!isLive && model.isSubscribed);
+            unsubscribeEventButton.gameObject.SetActive(!isLive && model.eventFromAPIInfo.attending);
 
         if (eventStartedInTitleForLive)
             eventStartedInTitleForLive.gameObject.SetActive(isLive);
@@ -344,6 +360,9 @@ public class EventCardComponentView : BaseComponentView, IEventCardComponentView
 
         if (subscribedUsersTitleForNotLive != null)
             subscribedUsersTitleForNotLive.gameObject.SetActive(!isLive);
+
+        if(goingUsersGameObject != null)
+            goingUsersGameObject.SetActive(!isLive);
     }
 
     public void SetLiveTagText(string newText)
@@ -429,20 +448,16 @@ public class EventCardComponentView : BaseComponentView, IEventCardComponentView
     public void SetSubscribersUsers(int newNumberOfUsers)
     {
         model.subscribedUsers = newNumberOfUsers;
-
         if (subscribedUsersText == null)
             return;
 
         if (!isEventCardModal)
         {
-            subscribedUsersText.text = newNumberOfUsers.ToString();
+            subscribedUsersText.text = $"{newNumberOfUsers.ToString()} going";
         }
         else
         {
-            if (newNumberOfUsers > 0)
-                subscribedUsersText.text = string.Format(USERS_CONFIRMED_MESSAGE, newNumberOfUsers);
-            else
-                subscribedUsersText.text = NOBODY_CONFIRMED_MESSAGE;
+            subscribedUsersText.text = newNumberOfUsers > 0 ? string.Format(USERS_CONFIRMED_MESSAGE, newNumberOfUsers) : NOBODY_CONFIRMED_MESSAGE;
         }
     }
 

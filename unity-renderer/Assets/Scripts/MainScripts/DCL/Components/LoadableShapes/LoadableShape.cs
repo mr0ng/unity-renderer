@@ -1,59 +1,80 @@
 using System;
-using DCL.Controllers;
 using DCL.Helpers;
 using DCL.Models;
 using System.Collections;
 using UnityEngine;
-using Object = UnityEngine.Object;
-using System.Collections.Generic;
+using Decentraland.Sdk.Ecs6;
 
 namespace DCL.Components
 {
     public class LoadableShape : BaseShape, IAssetCatalogReferenceHolder
     {
-        [System.Serializable]
+        [Serializable]
         public new class Model : BaseShape.Model
         {
             public string src;
             public string assetId;
 
-            public override BaseModel GetDataFromJSON(string json) { return Utils.SafeFromJson<Model>(json); }
+            public override BaseModel GetDataFromJSON(string json) =>
+                Utils.SafeFromJson<Model>(json);
+
+            public override BaseModel GetDataFromPb(ComponentBodyPayload pbModel)
+            {
+                switch (pbModel.PayloadCase)
+                {
+                    case ComponentBodyPayload.PayloadOneofCase.GltfShape:
+                        var gltfModel = new Model();
+                        if (pbModel.GltfShape.HasSrc) gltfModel.src = pbModel.GltfShape.Src;
+                        if (pbModel.GltfShape.HasWithCollisions) gltfModel.withCollisions = pbModel.GltfShape.WithCollisions;
+                        if (pbModel.GltfShape.HasVisible) gltfModel.visible = pbModel.GltfShape.Visible;
+                        if (pbModel.GltfShape.HasIsPointerBlocker) gltfModel.isPointerBlocker = pbModel.GltfShape.IsPointerBlocker;
+
+                        return gltfModel;
+                    case ComponentBodyPayload.PayloadOneofCase.ObjShape:
+                        var objModel = new Model();
+                        if (pbModel.ObjShape.HasSrc) objModel.src = pbModel.ObjShape.Src;
+                        if (pbModel.ObjShape.HasWithCollisions) objModel.withCollisions = pbModel.ObjShape.WithCollisions;
+                        if (pbModel.ObjShape.HasVisible) objModel.visible = pbModel.ObjShape.Visible;
+                        if (pbModel.ObjShape.HasIsPointerBlocker) objModel.isPointerBlocker = pbModel.ObjShape.IsPointerBlocker;
+
+                        return objModel;
+                    default:
+                        return Utils.SafeUnimplemented<LoadableShape, Model>(
+                            expected: ComponentBodyPayload.PayloadOneofCase.GltfShape, actual: pbModel.PayloadCase);
+                }
+            }
         }
 
         public bool isLoaded { get; protected set; }
 
         public Action<LoadableShape> OnLoaded;
 
-        protected Model previousModel = new Model();
-        
-        protected LoadableShape() { model = new Model(); }
+        protected Model previousModel = new ();
 
-        public override int GetClassId() { return -1; }
-
-        public override IEnumerator ApplyChanges(BaseModel newModel) { return null; }
-
-        public override bool IsVisible()
+        protected LoadableShape()
         {
-            Model model = (Model) this.model;
-            return model.visible;
+            model = new Model();
         }
 
-        public override bool HasCollisions()
-        {
-            Model model = (Model) this.model;
-            return model.withCollisions;
-        }
+        public override int GetClassId() =>
+            -1;
 
-        public string GetAssetId()
-        {
-            Model model = (Model) this.model;
-            return model.assetId;
-        }
+        public override IEnumerator ApplyChanges(BaseModel newModel) =>
+            null;
+
+        public override bool IsVisible() =>
+            ((Model)this.model).visible;
+
+        public override bool HasCollisions() =>
+            ((Model)this.model).withCollisions;
+
+        public string GetAssetId() =>
+            ((Model)this.model).assetId;
     }
 
     public class LoadableShape<LoadWrapperType, LoadWrapperModelType> : LoadableShape
-        where LoadWrapperType : LoadWrapper, new()
-        where LoadWrapperModelType : LoadableShape.Model, new()
+        where LoadWrapperType: LoadWrapper, new()
+        where LoadWrapperModelType: LoadableShape.Model, new()
     {
         private bool failed = false;
         private event Action<BaseDisposable> OnFinishCallbacks;
@@ -68,7 +89,11 @@ namespace DCL.Components
 
                 return base.model as LoadWrapperModelType;
             }
-            set { base.model = value; }
+
+            set
+            {
+                base.model = value;
+            }
         }
 
         new protected LoadWrapperModelType previousModel
@@ -80,7 +105,11 @@ namespace DCL.Components
 
                 return base.previousModel as LoadWrapperModelType;
             }
-            set { base.previousModel = value; }
+
+            set
+            {
+                base.previousModel = value;
+            }
         }
 
         public LoadableShape()
@@ -91,7 +120,7 @@ namespace DCL.Components
 
         public override IEnumerator ApplyChanges(BaseModel newModel)
         {
-            LoadWrapperModelType model = (LoadWrapperModelType) newModel;
+            LoadWrapperModelType model = (LoadWrapperModelType)newModel;
 
             bool updateVisibility = true;
             bool updateCollisions = true;
@@ -101,6 +130,7 @@ namespace DCL.Components
             {
                 updateVisibility = previousModel.visible != model.visible;
                 updateCollisions = previousModel.withCollisions != model.withCollisions || previousModel.isPointerBlocker != model.isPointerBlocker;
+
                 triggerAttachment = (!string.IsNullOrEmpty(model.src) && previousModel.src != model.src) ||
                                     (!string.IsNullOrEmpty(model.assetId) && previousModel.assetId != model.assetId);
             }
@@ -130,9 +160,11 @@ namespace DCL.Components
             if (!string.IsNullOrEmpty(model.assetId))
             {
                 provider = AssetCatalogBridge.i.GetContentProviderForAssetIdInSceneObjectCatalog(model.assetId);
+
                 if (string.IsNullOrEmpty(model.src))
                 {
                     SceneObject sceneObject = AssetCatalogBridge.i.GetSceneObjectById(model.assetId);
+
                     if (sceneObject == null)
                     {
 #if UNITY_EDITOR
@@ -164,15 +196,31 @@ namespace DCL.Components
                 entity.meshesInfo.currentShape = this;
 
                 loadableShape.entity = entity;
-                loadableShape.useVisualFeedback = Configuration.ParcelSettings.VISUAL_LOADING_ENABLED;
-                loadableShape.initialVisibility = model.visible;
+
+                bool initialVisibility = model.visible;
+
+                if (!DataStore.i.debugConfig.isDebugMode.Get())
+                    initialVisibility &= entity.isInsideSceneBoundaries;
+
+                loadableShape.initialVisibility = initialVisibility;
+
                 loadableShape.Load(model.src, OnLoadCompleted, OnLoadFailed);
             }
             else
             {
+                var message = $"LoadableShape '{model.src}' not found";
+
+                if (DataStore.i.debugConfig.isDebugMode.Get())
+                {
+                    Debug.LogError(message);
+                }
+                else
+                {
 #if UNITY_EDITOR
-                Debug.LogWarning($"LoadableShape '{model.src}' not found in scene '{scene.sceneData.id}' mappings");
+                    Debug.LogWarning(message);
 #endif
+                }
+
                 failed = true;
             }
         }
@@ -181,16 +229,30 @@ namespace DCL.Components
         {
             var loadable = Environment.i.world.state.GetLoaderForEntity(entity);
 
-            if (loadable != null)
-                loadable.initialVisibility = model.visible;
+            bool initialVisibility = model.visible;
 
-            ConfigureVisibility(entity.meshRootGameObject, model.visible, entity.meshesInfo.renderers);
-            
-            if(!scene.componentsManagerLegacy.HasComponent(entity, CLASS_ID_COMPONENT.ANIMATOR) && entity.meshesInfo.animation != null)
-                entity.meshesInfo.animation.enabled = model.visible;
+            if (!DataStore.i.debugConfig.isDebugMode.Get())
+                initialVisibility &= entity.isInsideSceneBoundaries;
+
+            if (loadable != null)
+                loadable.initialVisibility = initialVisibility;
+
+            ConfigureVisibility(entity.meshRootGameObject, initialVisibility, entity.meshesInfo.renderers);
+
+            UpdateAnimationStatus(entity, initialVisibility);
         }
 
-        protected virtual void ConfigureColliders(IDCLEntity entity) { CollidersManager.i.ConfigureColliders(entity.meshRootGameObject, model.withCollisions, true, entity, CalculateCollidersLayer(model)); }
+        private void UpdateAnimationStatus(IDCLEntity entity, bool enabled)
+        {
+            if (!scene.componentsManagerLegacy.HasComponent(entity, CLASS_ID_COMPONENT.ANIMATOR) &&
+                entity.meshesInfo.animation != null)
+                entity.meshesInfo.animation.enabled = enabled;
+        }
+
+        protected virtual void ConfigureColliders(IDCLEntity entity)
+        {
+            CollidersManager.i.ConfigureColliders(entity.meshRootGameObject, model.withCollisions && entity.isInsideSceneBoundaries, true, entity, CalculateCollidersLayer(model));
+        }
 
         protected void OnLoadFailed(LoadWrapper loadWrapper, Exception exception)
         {
@@ -202,27 +264,20 @@ namespace DCL.Components
             OnFinishCallbacks = null;
         }
 
-        void CleanFailedWrapper(LoadWrapper loadWrapper)
+        private void CleanFailedWrapper(LoadWrapper loadWrapper)
         {
             if (loadWrapper == null)
                 return;
+
             if (loadWrapper.entity == null)
                 return;
+
             if (loadWrapper.entity.gameObject == null)
                 return;
 
             GameObject go = loadWrapper.entity.gameObject;
 
             go.name += " - Failed loading";
-
-            MaterialTransitionController[] transitionController =
-                go.GetComponentsInChildren<MaterialTransitionController>(true);
-
-            for (int i = 0; i < transitionController.Length; i++)
-            {
-                MaterialTransitionController material = transitionController[i];
-                Object.Destroy(material);
-            }
         }
 
         protected void OnLoadCompleted(LoadWrapper loadWrapper)
@@ -239,10 +294,9 @@ namespace DCL.Components
             OnLoaded?.Invoke(this);
 
             entity.meshesInfo.meshRootGameObject = entity.meshRootGameObject;
+            entity.OnInsideBoundariesChanged += OnInsideBoundariesChanged;
 
-            var model = (Model) (entity.meshesInfo.currentShape as LoadableShape).GetModel();
-
-            ConfigureVisibility(entity.meshRootGameObject, model.visible, loadWrapper.entity.meshesInfo.renderers);
+            ConfigureVisibility(entity);
             ConfigureColliders(entity);
             RaiseOnShapeUpdated(entity);
             RaiseOnShapeLoaded(entity);
@@ -251,27 +305,32 @@ namespace DCL.Components
             OnFinishCallbacks = null;
         }
 
+        private void OnInsideBoundariesChanged(IDCLEntity entity, bool isInsideBoundaries)
+        {
+            UpdateAnimationStatus(entity, isInsideBoundaries);
+        }
+
         protected virtual void DetachShape(IDCLEntity entity)
         {
             if (entity == null || entity.meshRootGameObject == null)
                 return;
 
             LoadWrapper loadWrapper = Environment.i.world.state.GetLoaderForEntity(entity);
-            loadWrapper?.Unload();
+
+            if (loadWrapper != null)
+            {
+                entity.OnInsideBoundariesChanged -= OnInsideBoundariesChanged;
+                loadWrapper.Unload();
+            }
+
             Environment.i.world.state.RemoveLoaderForEntity(entity);
             entity.meshesInfo.CleanReferences();
         }
 
         public override void CallWhenReady(Action<ISharedComponent> callback)
         {
-            if (attachedEntities.Count == 0 || isLoaded || failed)
-            {
-                callback.Invoke(this);
-            }
-            else
-            {
-                OnFinishCallbacks += callback;
-            }
+            if (attachedEntities.Count == 0 || isLoaded || failed) { callback.Invoke(this); }
+            else { OnFinishCallbacks += callback; }
         }
 
         private void RaiseOnShapeUpdated(IDCLEntity entity)

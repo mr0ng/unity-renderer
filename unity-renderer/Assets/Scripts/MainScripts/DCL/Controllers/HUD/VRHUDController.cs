@@ -9,14 +9,17 @@ namespace DCL.Huds
     {
         public static Action LoadingStart;
         public static Action LoadingEnd;
+        private bool isProfileLoaded = false;
         public static VRHUDController I { get; private set; }
         private HUDController controller => HUDController.i;
         private readonly Vector3 hidenPos = new Vector3(0, -10, 0);
         private readonly List<VRHUDHelper> huds = new List<VRHUDHelper>();
         private readonly List<VRHUDHelper> submenu = new List<VRHUDHelper>();
 
-        BaseVariable<bool> exploreV2IsOpen => DataStore.i.exploreV2.isOpen;
-        
+        private BaseVariable<bool> exploreV2IsOpen => DataStore.i.exploreV2.isOpen;
+
+        [SerializeField]
+        private BooleanVariable hudOpen;
         [SerializeField]
         private GameObject visuals;
         [SerializeField]
@@ -26,7 +29,7 @@ namespace DCL.Huds
         private Transform mainCam;
         private DCLPlayerInput.PlayerActions actions;
         private bool loading;
-        
+
         private void Awake()
         {
             if (I != null)
@@ -55,6 +58,7 @@ namespace DCL.Huds
         {
             if (loading) return;
             visuals.SetActive(!visuals.activeSelf);
+            hudOpen.Set(visuals.activeSelf);
             DeactivateHud();
         }
 
@@ -63,7 +67,7 @@ namespace DCL.Huds
             for (int i = 0; i < submenu.Count; i++)
             {
                 VRHUDHelper menu = submenu[i];
-                if (current) menu.Hide(hidenPos);
+                if (current) menu.Hide();
                 else menu.ResetHud();
             }
         }
@@ -72,7 +76,7 @@ namespace DCL.Huds
         {
             loading = false;
         }
-        
+
         private void OnLoadingStart()
         {
             loading = true;
@@ -103,7 +107,7 @@ namespace DCL.Huds
             if (Vector3.Distance(dock.position, mainCam.position) > 2f) PositionHud(forward);
             else DeactivateHud();
         }
-        
+
         public Vector3 GetForward()
         {
             var rawForward = mainCam.forward;
@@ -115,12 +119,16 @@ namespace DCL.Huds
         {
             for (int i = 0; i < huds.Count; i++)
             {
-                huds[i].ResetHud();
+                var hud = huds[i];
+                hud.ResetHud();
+                if (submenu.Contains(hud))
+                    hud.Show();
             }
+
             dock.position = mainCam.position + forward;
             dock.forward = forward;
         }
-        
+
         public void DeactivateHud()
         {
             if (exploreV2IsOpen.Get()) exploreV2IsOpen.Set(false);
@@ -132,6 +140,13 @@ namespace DCL.Huds
         public void SetupLoading(ShowHideAnimator animator)
         {
             animator.OnWillFinishStart += (ani) => { LoadingStart.Invoke(); };
+            WebSocketCommunication.OnProfileLoading += (ani) => {
+                if (!isProfileLoaded)
+                {
+                    LoadingStart.Invoke();
+                    isProfileLoaded = true;
+                } };
+            if (animator == null) return;
             animator.OnWillFinishHide += (ani) => { LoadingEnd.Invoke(); };
         }
     }

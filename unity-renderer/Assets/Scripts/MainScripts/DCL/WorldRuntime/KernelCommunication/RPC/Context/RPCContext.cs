@@ -4,6 +4,8 @@ namespace RPC
 {
     public class RPCContext
     {
-        public CRDTServiceContext crdtContext = new CRDTServiceContext();
+        public CRDTServiceContext crdt = new CRDTServiceContext();
+        public TransportServiceContext transport = new TransportServiceContext();
+        public RestrictedActionsContext restrictedActions = new RestrictedActionsContext();
     }
 }

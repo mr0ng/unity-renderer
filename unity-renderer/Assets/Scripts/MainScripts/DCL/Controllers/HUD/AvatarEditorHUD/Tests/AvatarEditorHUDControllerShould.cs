@@ -1,13 +1,14 @@
-using AvatarShape_Tests;
 using DCL;
+using DCLServices.WearablesCatalogService;
+using MainScripts.DCL.Controllers.HUD.CharacterPreview;
+using MainScripts.DCL.Models.AvatarAssets.Tests.Helpers;
+using NSubstitute;
 using NUnit.Framework;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using DCL.Helpers;
 using UnityEngine;
 using UnityEngine.TestTools;
-using NSubstitute;
 
 namespace AvatarEditorHUD_Tests
 {
@@ -18,8 +19,7 @@ namespace AvatarEditorHUD_Tests
 
         private UserProfile userProfile;
         private AvatarEditorHUDController_Mock controller;
-        private CatalogController catalogController;
-        private BaseDictionary<string, WearableItem> catalog;
+        private IWearablesCatalogService wearablesCatalogService;
         private ColorList skinColorList;
         private ColorList hairColorList;
         private ColorList eyeColorList;
@@ -40,14 +40,18 @@ namespace AvatarEditorHUD_Tests
             }
 
             analytics = Substitute.For<IAnalytics>();
-            catalogController = TestUtils.CreateComponentWithGameObject<CatalogController>("CatalogController");
-            catalog = AvatarAssetsTestHelpers.CreateTestCatalogLocal();
-            controller = new AvatarEditorHUDController_Mock(DataStore.i.featureFlags, analytics);
+            wearablesCatalogService = AvatarAssetsTestHelpers.CreateTestCatalogLocal();
+            IUserProfileBridge userProfileBridge = Substitute.For<IUserProfileBridge>();
+            userProfileBridge.GetOwn().Returns(userProfile);
+
+            controller = new AvatarEditorHUDController_Mock(DataStore.i.featureFlags, analytics, wearablesCatalogService,
+                userProfileBridge);
+
             // TODO: We should convert the WearablesFetchingHelper static class into a non-static one and make it implement an interface. It would allow us to inject it
             //       into AvatarEditorHUDController and we would be able to replace the GetThirdPartyCollections() call by a mocked one in this test, allowing us to avoid
             //       the use of 'collectionsAlreadyLoaded = true'.
             controller.collectionsAlreadyLoaded = true;
-            controller.Initialize(userProfile, catalog);
+            controller.Initialize(false, Substitute.For<IPreviewCameraRotationController>());
             controller.SetVisibility(true);
             DataStore.i.common.isPlayerRendererLoaded.Set(true);
 
@@ -61,12 +65,14 @@ namespace AvatarEditorHUD_Tests
                     wearables = new List<string>() { },
                 }
             });
+
+            controller.avatarIsDirty = false;
         }
 
         [UnityTearDown]
         protected override IEnumerator TearDown()
         {
-            Object.Destroy(catalogController.gameObject);
+            wearablesCatalogService.Dispose();
             controller.Dispose();
             yield return base.TearDown();
         }
@@ -86,12 +92,10 @@ namespace AvatarEditorHUD_Tests
             });
 
             var categoriesEquiped = controller.myModel.wearables.Select(x => x.data.category).ToArray();
+
             foreach (string category in controller.myCategoriesThatMustHaveSelection)
             {
-                if (category != "body_shape")
-                {
-                    Assert.Contains(category, categoriesEquiped);
-                }
+                if (category != "body_shape") { Assert.Contains(category, categoriesEquiped); }
             }
         }
 
@@ -249,10 +253,8 @@ namespace AvatarEditorHUD_Tests
 
             Assert.AreEqual(WearableLiterals.BodyShapes.FEMALE, controller.myModel.bodyShape.id);
             var categoriesEquiped = controller.myModel.wearables.Select(x => x.data.category).ToArray();
-            foreach (string category in categoriesEquiped)
-            {
-                Assert.Contains(category, controller.myCategoriesToRandomize);
-            }
+
+            foreach (string category in categoriesEquiped) { Assert.Contains(category, controller.myCategoriesToRandomize); }
         }
 
         [Test]
@@ -338,9 +340,9 @@ namespace AvatarEditorHUD_Tests
                 i18n = new i18n[] { new i18n { code = "en", text = "testWearableIdEquipped2" } }
             };
 
-            catalog.Add(alreadyExistingTestWearable.id, alreadyExistingTestWearable);
-            catalog.Add(newTestWearableequipped1.id, newTestWearableequipped1);
-            catalog.Add(newTestWearableequipped2.id, newTestWearableequipped2);
+            wearablesCatalogService.WearablesCatalog.Add(alreadyExistingTestWearable.id, alreadyExistingTestWearable);
+            wearablesCatalogService.WearablesCatalog.Add(newTestWearableequipped1.id, newTestWearableequipped1);
+            wearablesCatalogService.WearablesCatalog.Add(newTestWearableequipped2.id, newTestWearableequipped2);
 
             List<string> oldWearables = new List<string>
             {
@@ -366,10 +368,8 @@ namespace AvatarEditorHUD_Tests
             Assert.AreEqual(avatarModel.bodyShape, avatarEditorHUDModel.bodyShape.id);
 
             Assert.AreEqual(avatarModel.wearables.Count, avatarEditorHUDModel.wearables.Count);
-            for (var i = 0; i < avatarModel.wearables.Count; i++)
-            {
-                Assert.AreEqual(avatarModel.wearables[i], avatarEditorHUDModel.wearables[i].id);
-            }
+
+            for (var i = 0; i < avatarModel.wearables.Count; i++) { Assert.AreEqual(avatarModel.wearables[i], avatarEditorHUDModel.wearables[i].id); }
 
             Assert.AreEqual(avatarModel.skinColor, avatarEditorHUDModel.skinColor);
             Assert.AreEqual(avatarModel.hairColor, avatarEditorHUDModel.hairColor);

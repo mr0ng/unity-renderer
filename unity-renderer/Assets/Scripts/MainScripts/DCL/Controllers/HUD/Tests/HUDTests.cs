@@ -1,9 +1,11 @@
-using System.Collections;
+using Cysharp.Threading.Tasks;
 using DCL;
-using DCL.Helpers;
+using DCL.Providers;
+using DCL.Social.Friends;
 using NUnit.Framework;
-using UnityEngine;
 using NSubstitute;
+using System;
+using System.Collections;
 using UnityEngine.TestTools;
 
 namespace Tests
@@ -11,24 +13,18 @@ namespace Tests
     public class HUDControllerShould : IntegrationTestSuite_Legacy
     {
         private IHUDController hudController;
-        private FriendsController friendsController;
-        private ChatController chatController;
 
         protected override IEnumerator SetUp()
         {
             yield return base.SetUp();
-            
-            friendsController = TestUtils.CreateComponentWithGameObject<FriendsController>("FriendsController");
-            chatController = TestUtils.CreateComponentWithGameObject<ChatController>("ChatController");
-            hudController = new HUDController(new HUDFactory());
+            hudController = new HUDController(new DataStore(), new HUDFactory(new AddressableResourceProvider()));
+
             hudController.Initialize();
             yield return null;
         }
 
         protected override IEnumerator TearDown()
         {
-            Object.Destroy(chatController.gameObject);
-            Object.Destroy(friendsController.gameObject);
             hudController.Dispose();
             yield return base.TearDown();
         }
@@ -37,6 +33,9 @@ namespace Tests
         {
             var serviceLocator = base.InitializeServiceLocator();
             serviceLocator.Register<IWebRequestController>(() => Substitute.For<IWebRequestController>());
+            serviceLocator.Register<IFriendsController>(() => Substitute.For<IFriendsController>());
+            serviceLocator.Register<IFriendsController>(() => Substitute.For<IFriendsController>());
+            serviceLocator.Register<ISocialApiBridge>(() => Substitute.For<ISocialApiBridge>());
             return serviceLocator;
         }
 
@@ -47,11 +46,10 @@ namespace Tests
             Assert.IsNotNull(hudController, "There must be a HUDController in the scene");
 
             hudController.Cleanup();
+
             // HUD controllers are created
-            for (int i = 1; i < (int) HUDElementID.COUNT; i++)
-            {
-                Assert.IsNull(hudController.GetHUDElement((HUDElementID) i));
-            }
+            foreach (HUDElementID element in Enum.GetValues(typeof(HUDElementID)))
+                Assert.IsNull(hudController.GetHUDElement(element));
 
             yield break;
         }
@@ -64,21 +62,18 @@ namespace Tests
 
             HUDConfiguration config = new HUDConfiguration() { active = true, visible = true };
 
-            for (int i = 1; i < (int) HUDElementID.COUNT; i++)
+            foreach (HUDElementID element in Enum.GetValues(typeof(HUDElementID)))
             {
-                hudController.ConfigureHUDElement((HUDElementID) i, config, null);
-            }
-
-            yield return null;
-
-            // HUD controllers are created
-            for (int i = 1; i < (int) HUDElementID.COUNT; i++)
-            {
-                HUDElementID elementID = (HUDElementID) i;
-                if (HUDController.IsHUDElementDeprecated(elementID))
+                if (HUDController.IsHUDElementDeprecated(element) || element == HUDElementID.NONE)
                     continue;
 
-                Assert.IsNotNull(hudController.GetHUDElement(elementID), $"Failed to create {elementID}");
+                yield return hudController.ConfigureHUDElement(element, config).ToCoroutine();
+
+                // HUD controllers are created
+                for (var i = 0; i < 5; i++)
+                    yield return null;
+
+                Assert.IsNotNull(hudController.GetHUDElement(element), $"Failed to create {element}");
             }
         }
     }

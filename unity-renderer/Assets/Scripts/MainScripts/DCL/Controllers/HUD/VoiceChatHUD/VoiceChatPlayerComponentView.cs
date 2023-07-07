@@ -3,7 +3,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class VoiceChatPlayerComponentView : BaseComponentView, IVoiceChatPlayerComponentView, IComponentModelConfig
+public class VoiceChatPlayerComponentView : BaseComponentView, IVoiceChatPlayerComponentView, IComponentModelConfig<VoiceChatPlayerComponentModel>
 {
     [Header("Prefab References")]
     [SerializeField] internal ImageComponentView avatarPreview;
@@ -46,13 +46,13 @@ public class VoiceChatPlayerComponentView : BaseComponentView, IVoiceChatPlayerC
         menuButton.onClick.AddListener(() => OnContextMenuOpen?.Invoke(model.userId));
     }
 
-    public void Configure(BaseComponentModel newModel)
+    public void Configure(VoiceChatPlayerComponentModel newModel)
     {
-        model = (VoiceChatPlayerComponentModel)newModel;
+        model = newModel;
         RefreshControl();
     }
 
-    public override void RefreshControl() 
+    public override void RefreshControl()
     {
         if (model == null)
             return;
@@ -189,7 +189,11 @@ public class VoiceChatPlayerComponentView : BaseComponentView, IVoiceChatPlayerC
 
     internal static VoiceChatPlayerComponentView Create()
     {
+        #if DCL_VR
+        VoiceChatPlayerComponentView voiceChatPlayerComponentView = Instantiate(Resources.Load<GameObject>("SocialBarV1/VoiceChatPlayerVR")).GetComponent<VoiceChatPlayerComponentView>();
+        #else
         VoiceChatPlayerComponentView voiceChatPlayerComponentView = Instantiate(Resources.Load<GameObject>("SocialBarV1/VoiceChatPlayer")).GetComponent<VoiceChatPlayerComponentView>();
+        #endif
         voiceChatPlayerComponentView.name = "_VoiceChatPlayer";
 
         return voiceChatPlayerComponentView;

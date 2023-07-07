@@ -1,6 +1,12 @@
 using DCL;
 using DCL.Interface;
+using DCLServices.MapRendererV2;
+using DCLServices.MapRendererV2.ConsumerUtils;
+using DCLServices.MapRendererV2.MapCameraController;
+using DCLServices.MapRendererV2.MapLayers;
+using System;
 using UnityEngine;
+using Object = UnityEngine.Object;
 
 public class MinimapHUDController : IHUD
 {
@@ -8,64 +14,130 @@ public class MinimapHUDController : IHUD
 
     public MinimapHUDView view;
     private FloatVariable minimapZoom => CommonScriptableObjects.minimapZoom;
-    private StringVariable currentSceneId => CommonScriptableObjects.sceneID;
+    private IntVariable currentSceneNumber => CommonScriptableObjects.sceneNumber;
+    private Vector2IntVariable playerCoords => CommonScriptableObjects.playerCoords;
+    private Vector2Int currentCoords;
+    private Vector2Int homeCoords = new Vector2Int(0,0);
+    private MinimapMetadataController metadataController;
+    private IHomeLocationController locationController;
+    private DCL.Environment.Model environment;
+    private BaseVariable<bool> minimapVisible = DataStore.i.HUDs.minimapVisible;
 
-    public MinimapHUDModel model { get; private set; } = new MinimapHUDModel();
+    private static readonly MapLayer RENDER_LAYERS
+        = MapLayer.Atlas | MapLayer.HomePoint | MapLayer.PlayerMarker | MapLayer.HotUsersMarkers | MapLayer.ScenesOfInterest;
 
-    public MinimapHUDController() : this(new MinimapHUDModel()) { }
+    private Service<IMapRenderer> mapRenderer;
+    private IMapCameraController mapCameraController;
+    private MapRendererTrackPlayerPosition mapRendererTrackPlayerPosition;
 
-    public MinimapHUDController(MinimapHUDModel model)
+    public MinimapHUDModel model { get; private set; } = new ();
+
+    public MinimapHUDController(MinimapMetadataController minimapMetadataController, IHomeLocationController locationController, DCL.Environment.Model environment)
     {
-        CommonScriptableObjects.playerCoords.OnChange += OnPlayerCoordsChange;
-        CommonScriptableObjects.builderInWorldNotNecessaryUIVisibilityStatus.OnChange += ChangeVisibilityForBuilderInWorld;
         minimapZoom.Set(1f);
-        UpdateData(model);
+        metadataController = minimapMetadataController;
+        this.locationController = locationController;
+        this.environment = environment;
+        if(metadataController != null)
+            metadataController.OnHomeChanged += SetNewHome;
+        minimapVisible.OnChange += SetVisibility;
     }
 
-    protected internal virtual MinimapHUDView CreateView() { return MinimapHUDView.Create(this); }
+    protected virtual MinimapHUDView CreateView() =>
+        MinimapHUDView.Create(this);
 
-    public void Initialize() 
+    public void Initialize()
     {
         view = CreateView();
-        UpdateData(model);
+        InitializeMapRenderer();
+
+        OnPlayerCoordsChange(CommonScriptableObjects.playerCoords.Get(), Vector2Int.zero);
+        SetVisibility(minimapVisible.Get());
+
+        CommonScriptableObjects.playerCoords.OnChange += OnPlayerCoordsChange;
+        MinimapMetadata.GetMetadata().OnSceneInfoUpdated += OnSceneInfoUpdated;
     }
 
     public void Dispose()
     {
         if (view != null)
-            UnityEngine.Object.Destroy(view.gameObject);
+        {
+            DisposeMapRenderer();
+            Object.Destroy(view.gameObject);
+        }
 
         CommonScriptableObjects.playerCoords.OnChange -= OnPlayerCoordsChange;
-        CommonScriptableObjects.builderInWorldNotNecessaryUIVisibilityStatus.OnChange -= ChangeVisibilityForBuilderInWorld;
-        MinimapMetadata.GetMetadata().OnSceneInfoUpdated -= OnOnSceneInfoUpdated;
+        MinimapMetadata.GetMetadata().OnSceneInfoUpdated -= OnSceneInfoUpdated;
+
+        if (metadataController != null)
+            metadataController.OnHomeChanged -= SetNewHome;
+        minimapVisible.OnChange -= SetVisibility;
+    }
+
+    private void InitializeMapRenderer()
+    {
+        view.pixelPerfectMapRendererTextureProvider.SetHudCamera(DataStore.i.camera.hudsCamera.Get());
+
+        mapCameraController = mapRenderer.Ref.RentCamera(
+            new MapCameraInput(RENDER_LAYERS,
+                Vector2Int.RoundToInt(MapRendererTrackPlayerPosition.GetPlayerCentricCoords(playerCoords.Get())),
+                1,
+                view.pixelPerfectMapRendererTextureProvider.GetPixelPerfectTextureResolution(),
+                new Vector2Int(view.mapRendererVisibleParcels, view.mapRendererVisibleParcels)));
+
+        mapRendererTrackPlayerPosition = new MapRendererTrackPlayerPosition(mapCameraController, DataStore.i.player.playerWorldPosition);
+        view.mapRendererTargetImage.texture = mapCameraController.GetRenderTexture();
+        view.pixelPerfectMapRendererTextureProvider.Activate(mapCameraController);
+
+        DataStore.i.HUDs.navmapIsRendered.OnChange += OnNavMapIsRenderedChange;
+    }
+
+    private void OnNavMapIsRenderedChange(bool current, bool previous)
+    {
+        if (current)
+            mapCameraController.SuspendRendering();
+        else
+            mapCameraController.ResumeRendering();
+    }
+
+    private void DisposeMapRenderer()
+    {
+        if (mapCameraController != null)
+        {
+            DataStore.i.HUDs.navmapIsRendered.OnChange -= OnNavMapIsRenderedChange;
+            view.pixelPerfectMapRendererTextureProvider.Deactivate();
+            mapRendererTrackPlayerPosition.Dispose();
+            mapCameraController.Release();
+            mapCameraController = null;
+        }
     }
 
     private void OnPlayerCoordsChange(Vector2Int current, Vector2Int previous)
     {
-        UpdatePlayerPosition(current);
+        currentCoords = current;
+        UpdatePlayerPosition(currentCoords);
+        UpdateSetHomePanel();
+        MinimapMetadata.MinimapSceneInfo sceneInfo = MinimapMetadata.GetMetadata().GetSceneInfo(currentCoords.x, currentCoords.y);
 
-        MinimapMetadata.GetMetadata().OnSceneInfoUpdated -= OnOnSceneInfoUpdated;
-        MinimapMetadata.MinimapSceneInfo sceneInfo = MinimapMetadata.GetMetadata().GetSceneInfo(current.x, current.y);
         UpdateSceneName(sceneInfo?.name);
-
-        // NOTE: in some cases playerCoords OnChange is triggered before kernel's message with the scene info arrives.
-        // so in that scenario we subscribe to MinimapMetadata event to wait for the scene info.
-        if (sceneInfo == null)
-        {
-            MinimapMetadata.GetMetadata().OnSceneInfoUpdated += OnOnSceneInfoUpdated;
-        }
     }
 
-    public void UpdateData(MinimapHUDModel model)
+    private void SetNewHome(Vector2Int newHomeCoordinates)
+    {
+        homeCoords = newHomeCoordinates;
+        UpdateSetHomePanel();
+    }
+
+    private void UpdateData(MinimapHUDModel model)
     {
         this.model = model;
-        view?.UpdateData(this.model);
+        view.UpdateData(this.model);
     }
 
     public void UpdateSceneName(string sceneName)
     {
         model.sceneName = sceneName;
-        view?.UpdateData(model);
+        view.UpdateData(model);
     }
 
     public void UpdatePlayerPosition(Vector2 position)
@@ -74,10 +146,15 @@ public class MinimapHUDController : IHUD
         UpdatePlayerPosition(string.Format(format, position.x, position.y));
     }
 
+    private void UpdateSetHomePanel()
+    {
+        view.UpdateSetHomePanel(currentCoords == homeCoords);
+    }
+
     public void UpdatePlayerPosition(string position)
     {
         model.playerPosition = position;
-        view?.UpdateData(model);
+        view.UpdateData(model);
     }
 
     public void AddZoomDelta(float delta) { minimapZoom.Set(Mathf.Clamp01(minimapZoom.Get() + delta)); }
@@ -97,13 +174,29 @@ public class MinimapHUDController : IHUD
 
     public void ReportScene()
     {
-        if (!string.IsNullOrEmpty(currentSceneId))
-            WebInterface.SendReportScene(currentSceneId);
+        var coords = playerCoords.Get();
+        WebInterface.SendReportScene(environment.world.state.GetSceneNumberByCoords(coords));
     }
 
-    public void ChangeVisibilityForBuilderInWorld(bool current, bool previus) { view.gameObject.SetActive(current); }
+    public void SetHomeScene(bool isOn)
+    {
+        var coords = playerCoords.Get();
+        if (playerCoords == homeCoords)
+        {
+            if (!isOn)
+                locationController.SetHomeScene(new Vector2(0,0));
+        }
+        else
+        {
+            if(isOn)
+                locationController.SetHomeScene(new Vector2(coords.x,coords.y));
+        }
+    }
 
-    public void SetVisibility(bool visible) { view.SetVisibility(visible); }
+    public void SetVisibility(bool visible)
+    {
+        view.SetVisibility(visible && minimapVisible.Get());
+    }
 
     /// <summary>
     /// Enable user's around button/indicator that shows the amount of users around player
@@ -118,12 +211,12 @@ public class MinimapHUDController : IHUD
         KernelConfig.i.EnsureConfigInitialized().Then(kc => controller.ToggleUsersCount(kc.features.enablePeopleCounter));
     }
 
-    private void OnOnSceneInfoUpdated(MinimapMetadata.MinimapSceneInfo sceneInfo)
+    private void OnSceneInfoUpdated(MinimapMetadata.MinimapSceneInfo sceneInfo)
     {
         if (sceneInfo.parcels.Contains(CommonScriptableObjects.playerCoords.Get()))
-        {
-            MinimapMetadata.GetMetadata().OnSceneInfoUpdated -= OnOnSceneInfoUpdated;
             UpdateSceneName(sceneInfo.name);
-        }
     }
+
+    private void SetVisibility(bool current, bool _) =>
+        SetVisibility(current);
 }

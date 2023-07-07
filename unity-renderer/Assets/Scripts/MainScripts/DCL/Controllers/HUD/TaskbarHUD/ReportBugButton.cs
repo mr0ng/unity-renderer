@@ -21,7 +21,7 @@ namespace MainScripts.DCL.Controllers.HUD.TaskbarHUD
             var userProfile = UserProfile.GetOwnUserProfile();
             var nametag = UnityWebRequest.EscapeURL(userProfile.userName);
             var kernelConfig = KernelConfig.i.Get();
-            var realm = DataStore.i.realm.playerRealm.Get()?.serverName;
+            var realm = DataStore.i.realm.realmName.Get();
             var unityVersion = kernelConfig.rendererVersion;
             var kernelVersion = kernelConfig.kernelVersion;
 
@@ -40,8 +40,11 @@ namespace MainScripts.DCL.Controllers.HUD.TaskbarHUD
                          $"&nametag={nametag}" +
                          $"&realm={realm}" +
                          $"&labels={GetLabels()}";
-
+            #if DCL_VR
+            WebInterface.OpenURL(url,true);
+            #else
             WebInterface.OpenURL(url);
+            #endif
         }
 
         private string GetLabels()

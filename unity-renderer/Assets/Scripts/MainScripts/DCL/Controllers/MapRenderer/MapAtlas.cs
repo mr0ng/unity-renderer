@@ -1,5 +1,7 @@
+using System.Collections;
 using DCL.Helpers;
 using System.Collections.Generic;
+using DCL.Helpers;
 using UnityEngine;
 
 namespace DCL
@@ -8,7 +10,7 @@ namespace DCL
     {
         public RectTransform viewport;
         public GameObject container;
-        public GameObject chunksParent;
+        public RectTransform chunksParent;
         public GameObject overlayLayerGameobject;
 
         Dictionary<Vector2Int, MapChunk> chunks = new Dictionary<Vector2Int, MapChunk>();
@@ -55,19 +57,18 @@ namespace DCL
         [ContextMenu("Force Update Culling")]
         public void UpdateCulling()
         {
-            using (var it = chunks.GetEnumerator())
-            {
-                while (it.MoveNext())
-                {
-                    it.Current.Value.UpdateCulling();
-                }
-            }
+            using var it = chunks.GetEnumerator();
+            while (it.MoveNext())
+                it.Current.Value.UpdateCulling();
         }
-
         public void InitializeChunks()
         {
+            StartCoroutine(InitializeChunksCR());
+        }
+        public IEnumerator InitializeChunksCR()
+        {
             if (chunksInitialized)
-                return;
+                yield break;
 
             chunksInitialized = true;
             int tileCoverageX = MapUtils.CHUNK_SIZE.x / MapUtils.PARCEL_SIZE;
@@ -102,11 +103,13 @@ namespace DCL
 
                     chunks[new Vector2Int(xTile, yTile)] = chunk;
                     yTile++;
+                    yield return null;
                 }
 
                 xTile++;
                 yTile = 0;
             }
+            overlayLayerGameobject.transform.SetAsLastSibling();
         }
     }
 }

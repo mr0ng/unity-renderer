@@ -134,7 +134,7 @@ namespace DCL.SettingsCommon.SettingsControllers.Tests
             settingController.Initialize();
 
             // Act
-            QualitySettings.BaseResolution newValue = QualitySettings.BaseResolution.BaseRes_1080;
+            QualitySettings.BaseResolution newValue = QualitySettings.BaseResolution.BaseRes_Normal;
             settingController.UpdateSetting(newValue);
 
             // Assert
@@ -397,11 +397,11 @@ namespace DCL.SettingsCommon.SettingsControllers.Tests
             settingController.Initialize();
 
             // Act
-            bool newValue = true;
+            AudioSettings.ChatNotificationType newValue = AudioSettings.ChatNotificationType.All;
             settingController.UpdateSetting(newValue);
 
             // Assert
-            Assert.AreEqual(newValue, settingController.GetStoredValue(), "Chat SFX Toggle stored value mismatch");
+            Assert.AreEqual((int) newValue, settingController.GetStoredValue(), "Chat SFX Toggle stored value mismatch");
         }
 
         [Test]

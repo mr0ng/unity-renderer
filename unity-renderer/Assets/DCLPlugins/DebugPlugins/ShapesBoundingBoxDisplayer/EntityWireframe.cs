@@ -57,9 +57,12 @@ internal class EntityWireframe : IShapeListener
     {
         CleanWireframe();
     }
-
+    //private int updateSkip =  0;
     internal void LateUpdate()
     {
+        // = (updateSkip + 1 ) % 25;
+        //if (updateSkip != 0)
+        //    return;
         int renderersCount = meshesInfo.renderers.Length;
 
         for (int i = 0; i < renderersCount; i++)

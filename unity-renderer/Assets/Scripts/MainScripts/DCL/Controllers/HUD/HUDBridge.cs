@@ -1,11 +1,26 @@
-using System.Collections;
-using System.Collections.Generic;
+using Cysharp.Threading.Tasks;
 using DCL;
+using JetBrains.Annotations;
+using System;
+using System.Threading;
 using UnityEngine;
 
 public class HUDBridge : MonoBehaviour
 {
-    #region MessagesFromKernel
+    private CancellationTokenSource cancellationTokenSource;
+
+    private void Awake()
+    {
+        cancellationTokenSource = new CancellationTokenSource();
+    }
+
+    private void OnDestroy()
+    {
+        cancellationTokenSource.Cancel();
+        cancellationTokenSource.Dispose();
+    }
+
+#region MessagesFromKernel
 
     [System.Serializable]
     class ConfigureHUDElementMessage
@@ -15,6 +30,7 @@ public class HUDBridge : MonoBehaviour
         public string extraPayload;
     }
 
+    [UsedImplicitly]
     public void ConfigureHUDElement(string payload)
     {
         ConfigureHUDElementMessage message = JsonUtility.FromJson<ConfigureHUDElementMessage>(payload);
@@ -23,16 +39,10 @@ public class HUDBridge : MonoBehaviour
         HUDConfiguration configuration = message.configuration;
         string extraPayload = message.extraPayload;
 
-        HUDController.i.ConfigureHUDElement(id, configuration, extraPayload);
+        HUDController.i.ConfigureHUDElement(id, configuration, cancellationTokenSource.Token, extraPayload).Forget();
     }
 
     public void TriggerSelfUserExpression(string id) { UserProfile.GetOwnUserProfile().SetAvatarExpression(id, UserProfile.EmoteSource.Command); }
-
-    public void AirdroppingRequest(string payload)
-    {
-        var model = JsonUtility.FromJson<AirdroppingHUDController.Model>(payload);
-        HUDController.i.airdroppingHud.AirdroppingRequested(model);
-    }
 
     public void ShowTermsOfServices(string payload)
     {
@@ -60,16 +70,24 @@ public class HUDBridge : MonoBehaviour
         HUDController.i.voiceChatHud?.SetUsersMuted(model.usersId, model.muted);
     }
 
-    public void RequestTeleport(string teleportDataJson) { HUDController.i.teleportHud?.RequestTeleport(teleportDataJson); }
+    public void RequestTeleport(string teleportDataJson) { DataStore.i.world.requestTeleportData.Set(teleportDataJson, true); }
 
     public void UpdateBalanceOfMANA(string balance) { HUDController.i.profileHud?.SetManaBalance(balance); }
 
+    [Obsolete("Old kernel might be using this call")]
     public void ShowAvatarEditorInSignUp()
     {
-        if (HUDController.i.avatarEditorHud != null)
+        SetSignupFlow();
+    }
+
+    public void SetSignupFlow()
+    {
+        if (DataStore.i.featureFlags.flags.Get().IsFeatureEnabled("seamless_login_variant:enabled"))
+            DataStore.i.HUDs.tosPopupVisible.Set(true, true);
+        else
         {
             DataStore.i.common.isSignUpFlow.Set(true);
-            HUDController.i.avatarEditorHud?.SetVisibility(true);
+            DataStore.i.HUDs.avatarEditorVisible.Set(true, true);
         }
     }
 

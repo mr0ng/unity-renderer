@@ -15,7 +15,11 @@ public class ControlsHUDController : IHUD
 
     public ControlsHUDController()
     {
+        #if DCL_VR
+        view = UnityEngine.Object.Instantiate(Resources.Load<GameObject>("ControlsHUDVR")).GetComponent<ControlsHUDView>();
+        #else
         view = UnityEngine.Object.Instantiate(Resources.Load<GameObject>("ControlsHUD")).GetComponent<ControlsHUDView>();
+#endif
         view.name = "_ControlsHUD";
         view.gameObject.SetActive(false);
 
@@ -95,6 +99,5 @@ public class ControlsHUDController : IHUD
     private void OnKernelConfigChanged(KernelConfigModel current, KernelConfigModel previous)
     {
         view?.voiceChatButton.SetActive(current.comms.voiceChatEnabled);
-        view?.builderInWorldButton.SetActive(current.features.enableBuilderInWorld);
     }
 }

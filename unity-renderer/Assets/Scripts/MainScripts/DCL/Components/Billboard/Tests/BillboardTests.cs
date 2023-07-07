@@ -1,6 +1,7 @@
 using DCL;
 using DCL.Helpers;
 using System.Collections;
+using DCL.CameraTool;
 using DCL.Controllers;
 using UnityEngine;
 using UnityEngine.Assertions;
@@ -53,13 +54,14 @@ namespace Tests
             yield return billboard.routine;
 
             Transform entityTransform = scene.entities[entityId].gameObject.transform;
+            yield return billboard.ApplyChanges(billboard.GetModel());
+            entityTransform.eulerAngles = Vector3.zero;
             Vector3 lookAt = GetLookAtVector(billboard.GetModel(), entityTransform);
-
             yield return null;
+
             Assert.AreApproximatelyEqual(lookAt.x, entityTransform.forward.x, "billboard entity forward vector should be the same as the calculated one");
             Assert.AreApproximatelyEqual(lookAt.y, entityTransform.forward.y, "billboard entity forward vector should be the same as the calculated one");
             Assert.AreApproximatelyEqual(lookAt.z, entityTransform.forward.z, "billboard entity forward vector should be the same as the calculated one");
-
             var billboardModel = new Billboard.Model()
             {
                 x = true,
@@ -96,9 +98,11 @@ namespace Tests
 
             yield return billboard.routine;
 
-            var entity = scene.entities[entityId];
-            Transform entityTransform = entity.gameObject.transform;
+            Transform entityTransform = scene.entities[entityId].gameObject.transform;
+            yield return billboard.ApplyChanges(billboard.GetModel());
+            entityTransform.eulerAngles = Vector3.zero;
             Vector3 lookAt = GetLookAtVector(billboard.GetModel(), entityTransform);
+            yield return null;
 
             Assert.AreApproximatelyEqual(lookAt.x, entityTransform.forward.x, "billboard entity forward vector should be the same as the calculated one");
             Assert.AreApproximatelyEqual(lookAt.y, entityTransform.forward.y, "billboard entity forward vector should be the same as the calculated one");

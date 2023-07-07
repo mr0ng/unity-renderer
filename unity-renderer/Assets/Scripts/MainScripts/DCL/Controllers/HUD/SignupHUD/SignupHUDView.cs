@@ -1,3 +1,4 @@
+using DCL;
 using System;
 using System.Net.Mail;
 using System.Text.RegularExpressions;
@@ -24,6 +25,7 @@ namespace SignupHUD
 
     public class SignupHUDView : MonoBehaviour, ISignupHUDView
     {
+        public static SignupHUDView I;
         private const int MIN_NAME_LENGTH = 1;
         private const int MAX_NAME_LENGTH = 15;
 
@@ -31,7 +33,9 @@ namespace SignupHUD
         public event Action OnEditAvatar;
         public event Action OnTermsOfServiceAgreed;
         public event Action OnTermsOfServiceBack;
-
+        #if DCL_VR
+        public event Action<bool> OnSetVisibility;
+        #endif
         [Header("Name and Email Screen")]
         [SerializeField] internal RectTransform nameAndEmailPanel;
 
@@ -58,6 +62,7 @@ namespace SignupHUD
 
         private void Awake()
         {
+            I = this;
             InitNameAndEmailScreen();
             InitTermsOfServicesScreen();
         }
@@ -106,24 +111,32 @@ namespace SignupHUD
 
             termsOfServiceAgreeButton.interactable = false;
             termsOfServiceBackButton.onClick.AddListener(() => OnTermsOfServiceBack?.Invoke());
-            termsOfServiceAgreeButton.onClick.AddListener(() => OnTermsOfServiceAgreed?.Invoke());
+            termsOfServiceAgreeButton.onClick.AddListener(() =>
+            {
+#if DCL_VR
+                DataStore.i.common.isSignUpFlow.Set(false);
+#endif
+                OnTermsOfServiceAgreed?.Invoke();
+            });
         }
 
         private void OnFaceSnapshotReady(Texture2D texture) { avatarPic.texture = texture; }
 
-        public static SignupHUDView CreateView()
+        public void SetVisibility(bool visible)
         {
-            SignupHUDView view = Instantiate(Resources.Load<GameObject>("SignupHUD")).GetComponent<SignupHUDView>();
-            view.gameObject.name = "_SignupHUD";
-            return view;
+            gameObject.SetActive(visible);
+            #if DCL_VR
+            OnSetVisibility?.Invoke(visible);
+            #endif
         }
-
-        public void SetVisibility(bool visible) { gameObject.SetActive(visible); }
 
         public void ShowNameScreen()
         {
             nameAndEmailPanel.gameObject.SetActive(true);
             termsOfServicePanel.gameObject.SetActive(false);
+            // #if DCL_VR
+            // OnSetVisibility?.Invoke(true);
+            // #endif
         }
 
         public void ShowTermsOfServiceScreen()

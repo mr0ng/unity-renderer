@@ -5,32 +5,40 @@ using NUnit.Framework;
 using System.Collections;
 using DCL.Components;
 using DCL.Controllers;
-using DCL.Interface;
 using UnityEngine;
 using UnityEngine.TestTools;
-using AvatarSystem;
+using DCLServices.WearablesCatalogService;
+using MainScripts.DCL.Models.AvatarAssets.Tests.Helpers;
 
 namespace Tests
 {
     public class AvatarShapeTests : IntegrationTestSuite_Legacy
     {
         private ParcelScene scene;
-        private CatalogController catalogController;
         private CoreComponentsPlugin coreComponentsPlugin;
+        private IWearablesCatalogService wearablesCatalogService;
 
         protected override IEnumerator SetUp()
         {
             yield return base.SetUp();
+
             coreComponentsPlugin = new CoreComponentsPlugin();
             scene = TestUtils.CreateTestScene();
-            catalogController = TestUtils.CreateComponentWithGameObject<CatalogController>("CatalogController");
+        }
+
+        protected override ServiceLocator InitializeServiceLocator()
+        {
+            ServiceLocator serviceLocator = base.InitializeServiceLocator();
+            wearablesCatalogService = AvatarAssetsTestHelpers.CreateTestCatalogLocal();
+            serviceLocator.Register<IWearablesCatalogService>(() => wearablesCatalogService);
+            return serviceLocator;
         }
 
         protected override IEnumerator TearDown()
         {
             DataStore.Clear();
             coreComponentsPlugin.Dispose();
-            Object.Destroy(catalogController.gameObject);
+            wearablesCatalogService.Dispose();
             yield return base.TearDown();
         }
 
@@ -45,7 +53,7 @@ namespace Tests
                 for (int i1 = 0; i1 < renderer.sharedMaterials.Length; i1++)
                 {
                     Material material = renderer.sharedMaterials[i1];
-                    Assert.IsTrue(!material.shader.name.Contains("Lit"), $"Material must not be LWRP Lit. found {material.shader.name} instead!");
+                    Assert.IsTrue(material.shader.name.Contains("DCL"), $"Material must be from DCL. found {material.shader.name} instead!");
                 }
             }
         }
@@ -71,7 +79,6 @@ namespace Tests
         [Test]
         public void SetLayersProperly()
         {
-            AvatarAssetsTestHelpers.CreateTestCatalogLocal();
             AvatarShape avatar = AvatarShapeTestHelpers.CreateAvatarShape(scene, "Abortit", "TestAvatar.json");
             Assert.AreEqual(avatar.gameObject.layer, LayerMask.NameToLayer("ViewportCullingIgnored"));
             Assert.AreEqual(avatar.avatarCollider.gameObject.layer, LayerMask.NameToLayer("AvatarTriggerDetection"));
@@ -82,7 +89,6 @@ namespace Tests
         [UnityTest]
         public IEnumerator DestroyWhileLoading()
         {
-            AvatarAssetsTestHelpers.CreateTestCatalogLocal();
             AvatarShape avatar = AvatarShapeTestHelpers.CreateAvatarShape(scene, "Abortit", "TestAvatar.json");
 
             GameObject goEntity = avatar.entity.gameObject;
@@ -96,11 +102,8 @@ namespace Tests
         }
 
         [UnityTest]
-        [Category("Explicit")]
-        [Explicit("Test too slow")]
         public IEnumerator InterpolatePosition()
         {
-            AvatarAssetsTestHelpers.CreateTestCatalogLocal();
             AvatarShape avatar = AvatarShapeTestHelpers.CreateAvatarShape(scene, "Abortitus", "TestAvatar.json");
 
             // We must wait for the AvatarShape to finish or the OnTransformChanged event is not used
@@ -121,11 +124,8 @@ namespace Tests
         }
 
         [UnityTest]
-        [Category("Explicit")]
-        [Explicit("Test too slow")]
         public IEnumerator MaterialsSetCorrectly()
         {
-            AvatarAssetsTestHelpers.CreateTestCatalogLocal();
             AvatarShape avatar = AvatarShapeTestHelpers.CreateAvatarShape(scene, "Joan Darteis", "TestAvatar.json");
             yield return new DCL.WaitUntil(() => avatar.everythingIsLoaded, 20);
 
@@ -133,12 +133,9 @@ namespace Tests
         }
 
         [UnityTest]
-        [Category("Explicit")]
-        [Explicit("Test too slow")]
         public IEnumerator WhenTwoAvatarsLoadAtTheSameTimeTheyHaveProperMaterials()
         {
             //NOTE(Brian): Avatars must be equal to share their meshes.
-            AvatarAssetsTestHelpers.CreateTestCatalogLocal();
             AvatarShape avatar = AvatarShapeTestHelpers.CreateAvatarShape(scene, "Naicholas Keig", "TestAvatar.json");
             AvatarShape avatar2 = AvatarShapeTestHelpers.CreateAvatarShape(scene, "Naicholas Keig", "TestAvatar2.json");
 

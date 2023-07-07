@@ -2,7 +2,7 @@ using System;
 using DCL.NotificationModel;
 using UnityEngine;
 
-public class NotificationHUDView : MonoBehaviour
+public class NotificationHUDView : MonoBehaviour, IDisposable
 {
     public NotificationFactory notificationFactory;
 
@@ -11,17 +11,23 @@ public class NotificationHUDView : MonoBehaviour
 
     public event Action<INotification> OnNotificationDismissedEvent;
 
+    #if DCL_VR
+    private const string VIEW_PATH = "NotificationHUDVR";
+    #else
     private const string VIEW_PATH = "NotificationHUD";
+    #endif
+
     private const string VIEW_OBJECT_NAME = "_NotificationHUD";
 
-    internal static NotificationHUDView Create()
-    {
-        NotificationHUDView view = Instantiate(Resources.Load<GameObject>(VIEW_PATH)).GetComponent<NotificationHUDView>();
-        view.Initialize();
-        return view;
-    }
+   // internal static NotificationHUDView Create()
+   // {
+   //     NotificationHUDView view = Instantiate(Resources.Load<GameObject>(VIEW_PATH)).GetComponent<NotificationHUDView>();
+   //     view.Initialize();
+   //     return view;
+   // }
 
-    private void Initialize() { gameObject.name = VIEW_OBJECT_NAME; }
+   // private void Initialize() { gameObject.name = VIEW_OBJECT_NAME; }
+
 
     public void ShowNotification(INotification notification, Model model = null)
     {
@@ -48,4 +54,10 @@ public class NotificationHUDView : MonoBehaviour
     private void OnNotificationDismissed(INotification notification) { OnNotificationDismissedEvent?.Invoke(notification); }
 
     public void SetActive(bool active) { gameObject.SetActive(active); }
+
+
+    public void Dispose()
+    {
+    }
+
 }

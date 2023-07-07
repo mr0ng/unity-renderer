@@ -28,7 +28,11 @@ public class UsersAroundListHUDController : IHUD
 
     public UsersAroundListHUDController(ISocialAnalytics socialAnalytics)
     {
+        #if DCL_VR
+        UsersAroundListHUDListView view = Object.Instantiate(Resources.Load<GameObject>("UsersAroundListHUDVR")).GetComponent<UsersAroundListHUDListView>();
+        #else
         UsersAroundListHUDListView view = Object.Instantiate(Resources.Load<GameObject>("UsersAroundListHUD")).GetComponent<UsersAroundListHUDListView>();
+        #endif
         view.name = "_UsersAroundListHUD";
         view.gameObject.SetActive(false);
         Initialize(view, socialAnalytics);
@@ -208,7 +212,10 @@ public class UsersAroundListHUDController : IHUD
         OnMuteUsers(trackedUsersHashSet, mute);
     }
 
-    void OnGoToCrowd() { WebInterface.GoToCrowd(); }
+    void OnGoToCrowd()
+    {
+        DCL.Environment.i.world.teleportController.GoToCrowd();
+    }
 
     void OnListOpen() { OnOpen?.Invoke(); }
 

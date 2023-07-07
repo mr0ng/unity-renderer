@@ -31,6 +31,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading;
+using UnityEngine;
 
 namespace WebSocketSharp.Server
 {
@@ -524,7 +525,7 @@ namespace WebSocketSharp.Server
                 {
                     host.Start();
                 }
-
+                Debug.Log("WebSocketServiceManager: Server Started");
                 _state = ServerState.Start;
             }
         }

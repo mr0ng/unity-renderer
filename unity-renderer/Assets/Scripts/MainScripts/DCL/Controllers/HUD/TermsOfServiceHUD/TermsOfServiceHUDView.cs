@@ -5,8 +5,11 @@ using UnityEngine.UI;
 
 public class TermsOfServiceHUDView : MonoBehaviour
 {
+    #if DCL_VR
+    private const string VIEW_PATH = "TermsOfServiceHUDVR";
+    #else
     private const string VIEW_PATH = "TermsOfServiceHUD";
-
+    #endif
     private const string SCENE_NAME_VAR = "$sceneName";
     private static readonly string TITLE = $"Terms of Service - {SCENE_NAME_VAR}";
     private static readonly string DESCRIPTION = $"Welcome to {SCENE_NAME_VAR}. Before you proceed, please read carefully.";
@@ -26,7 +29,9 @@ public class TermsOfServiceHUDView : MonoBehaviour
     [SerializeField] internal Button tosLinkButton;
     [SerializeField] internal Button privacyLinkButton;
     [SerializeField] internal Button emailLinkButton;
-
+    #if DCL_VR
+    public event Action<bool> OnSetVisibility;
+    #endif
     public void Initialize(Action<bool> agreedCallback, Action<bool> declinedCallback, Action tosClickedCallback, Action privacyClickedCallback, Action emailClickedCallback)
     {
         agreedButton.onClick.RemoveAllListeners();
@@ -54,10 +59,16 @@ public class TermsOfServiceHUDView : MonoBehaviour
         if (visible)
         {
             AudioScriptableObjects.dialogOpen.Play(true);
+            #if DCL_VR
+            OnSetVisibility?.Invoke(visible);
+            #endif
         }
         else
         {
             AudioScriptableObjects.dialogClose.Play(true);
+            #if DCL_VR
+            OnSetVisibility?.Invoke(visible);
+            #endif
         }
     }
 

@@ -1,4 +1,5 @@
 using System;
+using DCL.CameraTool;
 using UnityEngine;
 
 namespace DCL.Camera
@@ -30,14 +31,20 @@ namespace DCL.Camera
         private readonly Vector3 offset = new Vector3(0f, -1f, 0f);
         private Transform myTrans;
         private Transform camTrans;
+        private Vector3 cameraDifferenceRot;
+        private Vector3 lastCameraRot;
+        private bool smoothRotate = true;
 
-        private bool smoothRotate;
-
+        [SerializeField]
+        private float rotationThreshold = 0.001f;
         void Start()
         {
+            #if !DCL_VR
+                return;
+            #endif
             myTrans = transform;
             camTrans = UnityEngine.Camera.main.transform;
-            
+            lastCameraRot = camTrans.localEulerAngles;
             CommonScriptableObjects.cameraBlocked.OnChange += CameraBlockedOnchange;
             controller.SetCameraMode(CameraMode.ModeId.FirstPerson);
             cameraChangeAction.isTriggerBlocked = CommonScriptableObjects.cameraBlocked;
@@ -49,13 +56,25 @@ namespace DCL.Camera
 
         private void Update()
         {
+#if !DCL_VR
+                return;
+#endif
             DisableCamera();
             if (!camTrans.hasChanged)
                 return;
+            var localEulerAngles = camTrans.localEulerAngles;
+            cameraDifferenceRot = localEulerAngles-lastCameraRot  ;
+            //remove off angle from camera parent
+            camTrans.parent.localEulerAngles = new Vector3(0,  -localEulerAngles.y, 0);
+            //add to CharacterController
+            myTrans.eulerAngles += new Vector3(0f, cameraDifferenceRot.y, 0f);
+            lastCameraRot = localEulerAngles;
+
             CommonScriptableObjects.cameraForward.Set(camTrans.forward);
             CommonScriptableObjects.cameraRight.Set(camTrans.right);
+            CommonScriptableObjects.cameraPosition.Set(camTrans.position);
         }
-        
+
         private void DisableCamera()
         {
             if (!cam.enabled)
@@ -69,7 +88,7 @@ namespace DCL.Camera
             {
                 SmoothRotate(value);
                 return;
-            } 
+            }
             SnapRotate(value);
         }
 
@@ -81,9 +100,9 @@ namespace DCL.Camera
             lastTurned = DateTime.Now;
         }
 
-        private void SmoothRotate(float value)
+        public void SmoothRotate(float value)
         {
-            myTrans.eulerAngles += new Vector3(0f, value * rotation * Time.deltaTime, 0f);
+            myTrans.eulerAngles += new Vector3(0f, value * 1.3f * rotation * Time.deltaTime, 0f);
         }
 
         private void FollowCharacter(float deltaTime)

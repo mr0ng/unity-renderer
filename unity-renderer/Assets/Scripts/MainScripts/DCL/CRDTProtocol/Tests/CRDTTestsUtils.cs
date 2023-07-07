@@ -1,15 +1,14 @@
+using DCL.CRDT;
+using DCL.Helpers;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using DCL.CRDT;
-using DCL;
-using DCL.Helpers;
-using Newtonsoft.Json;
 using UnityEngine;
 
 namespace Tests
 {
-    public class CRDTTestsUtils
+    internal class CRDTTestsUtils
     {
         public static string[] GetTestFilesPath()
         {
@@ -45,7 +44,7 @@ namespace Tests
                     continue;
                 }
 
-                if (!line.StartsWith("{") || !line.EndsWith("}"))
+                if (!(line.StartsWith("{") && line.EndsWith("}")))
                     continue;
 
                 if (nextLineIsState)
@@ -70,12 +69,25 @@ namespace Tests
                         instructionType = ParsedCRDTTestFile.InstructionType.MESSAGE,
                         instructionValue = line,
                         lineNumber = lineNumber,
-                        testSpect = string.Empty
+                        testSpect = testSpecName
                     });
                 }
             }
+
             return parsedFile;
         }
+    }
+
+    internal class CrdtEntity
+    {
+        public int entityNumber;
+        public int entityVersion;
+    }
+
+    internal class CrdtJsonState
+    {
+        public List<CRDTProtocol.CrdtEntityComponentData> components;
+        public List<CrdtEntity> deletedEntities;
     }
 
     public class ParsedCRDTTestFile
@@ -95,15 +107,25 @@ namespace Tests
             public string testSpect;
         }
 
+        public class CrdtMessageJson
+        {
+            public CrdtMessageType type = CrdtMessageType.NONE;
+            public long entityId;
+            public int componentId;
+            public int timestamp;
+            public object data;
+        }
+
         public string fileName;
         public List<TestFileInstruction> fileInstructions = new List<TestFileInstruction>();
 
-        public static CRDTMessage InstructionToMessage(TestFileInstruction instruction)
+        public static CrdtMessage InstructionToMessage(TestFileInstruction instruction)
         {
-            CRDTMessage msg = null;
+            CrdtMessageJson msg = null;
+
             try
             {
-                msg = JsonConvert.DeserializeObject<CRDTMessage>(instruction.instructionValue);
+                msg = JsonConvert.DeserializeObject<CrdtMessageJson>(instruction.instructionValue);
             }
             catch (Exception e)
             {
@@ -111,22 +133,67 @@ namespace Tests
                                $"{instruction.instructionValue} for file {instruction.fileName}, {e}");
             }
 
-            return msg;
+            // move from crdt message type from crdt library to crdt protocol
+            int crdtLibType = (int)msg.type;
+
+            if (crdtLibType == 1)
+            {
+                crdtLibType = (int)CrdtMessageType.PUT_COMPONENT;
+            }
+            else if (crdtLibType == 2)
+            {
+                crdtLibType = (int)CrdtMessageType.DELETE_ENTITY;
+            }
+
+            return new CrdtMessage(
+                (CrdtMessageType)crdtLibType,
+                msg.entityId,
+                msg.componentId,
+                msg.timestamp,
+                msg.data);
         }
 
-        public static Dictionary<long, CRDTMessage> InstructionToFinalState(TestFileInstruction instruction)
+        internal static CRDTProtocol.CrdtState InstructionToFinalState(TestFileInstruction instruction)
         {
-            Dictionary<long, CRDTMessage> finalState = new Dictionary<long, CRDTMessage>();
+            CrdtJsonState finalState = null;
+
             try
             {
-                finalState = JsonConvert.DeserializeObject<Dictionary<long, CRDTMessage>>(instruction.instructionValue);
+                finalState = JsonConvert.DeserializeObject<CrdtJsonState>(instruction.instructionValue);
             }
             catch (Exception e)
             {
                 Debug.LogError($"Error parsing line for state (ln: {instruction.lineNumber}) " +
                                $"{instruction.instructionValue} for file {instruction.fileName}, {e}");
             }
-            return finalState;
+
+            CRDTProtocol.CrdtState state = new CRDTProtocol.CrdtState();
+
+            foreach (var entityComponentData in finalState.components)
+            {
+                long entityId = entityComponentData.entityId;
+                int componentId = entityComponentData.componentId;
+
+                CRDTProtocol.EntityComponentData realData = new CRDTProtocol.EntityComponentData
+                {
+                    timestamp = entityComponentData.timestamp,
+                    data = entityComponentData.data
+                };
+
+                if (!state.singleComponents.TryGetValue(componentId, out var componentCollection))
+                {
+                    state.singleComponents.Add(componentId, new Dictionary<long, CRDTProtocol.EntityComponentData>());
+                }
+
+                state.singleComponents[componentId].Add(entityId, realData);
+            }
+
+            foreach (var entity in finalState.deletedEntities)
+            {
+                state.deletedEntitiesSet.Add(entity.entityNumber, entity.entityVersion);
+            }
+
+            return state;
         }
     }
 }

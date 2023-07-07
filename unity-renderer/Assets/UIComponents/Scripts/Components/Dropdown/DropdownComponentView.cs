@@ -102,7 +102,7 @@ public interface IDropdownComponentView
     /// <param name="maxHeight">Max height to apply.</param>
     void SetOptionsPanelHeightAsDynamic(bool isDynamic, float maxHeight);
 }
-public class DropdownComponentView : BaseComponentView, IDropdownComponentView, IComponentModelConfig
+public class DropdownComponentView : BaseComponentView, IDropdownComponentView, IComponentModelConfig<DropdownComponentModel>
 {
     internal const string SELECT_ALL_OPTION_ID = "select_all";
     internal const string SELECT_ALL_OPTION_TEXT = "Select All";
@@ -133,7 +133,7 @@ public class DropdownComponentView : BaseComponentView, IDropdownComponentView, 
     internal ToggleComponentView selectAllOptionComponent;
     internal Coroutine refreshOptionsPanelCoroutine;
 
-    public bool isMultiselect 
+    public bool isMultiselect
     {
         get => model.isMultiselect;
         set => model.isMultiselect = value;
@@ -154,9 +154,9 @@ public class DropdownComponentView : BaseComponentView, IDropdownComponentView, 
         searchBar.OnSearchText += FilterOptions;
     }
 
-    public void Configure(BaseComponentModel newModel)
+    public void Configure(DropdownComponentModel newModel)
     {
-        model = (DropdownComponentModel)newModel;
+        model = newModel;
         RefreshControl();
     }
 
@@ -258,6 +258,17 @@ public class DropdownComponentView : BaseComponentView, IDropdownComponentView, 
         refreshOptionsPanelCoroutine = CoroutineStarter.Start(RefreshOptionsPanelSize());
     }
 
+    public IToggleComponentView GetOption(string id)
+    {
+        foreach (var component in availableOptions.GetItems())
+        {
+            if (component is not IToggleComponentView toggle) continue;
+            if (toggle.id == id) return toggle;
+        }
+
+        return null;
+    }
+
     public IToggleComponentView GetOption(int index)
     {
         if (index >= availableOptions.GetItems().Count - 1)
@@ -266,7 +277,7 @@ public class DropdownComponentView : BaseComponentView, IDropdownComponentView, 
         return availableOptions.GetItems()[index + 1] as IToggleComponentView;
     }
 
-    public List<IToggleComponentView> GetAllOptions() 
+    public List<IToggleComponentView> GetAllOptions()
     {
         return availableOptions
             .GetItems()
@@ -356,6 +367,35 @@ public class DropdownComponentView : BaseComponentView, IDropdownComponentView, 
         CoroutineStarter.Stop(refreshOptionsPanelCoroutine);
     }
 
+    public IToggleComponentView SelectOption(string id, bool notify)
+    {
+        IToggleComponentView selectedOption = null;
+
+        foreach (BaseComponentView component in availableOptions.GetItems())
+        {
+            if (component is not IToggleComponentView toggle) continue;
+
+            if (toggle.id == id)
+            {
+                if (notify)
+                    toggle.isOn = true;
+                else
+                    toggle.SetIsOnWithoutNotify(true);
+
+                selectedOption = toggle;
+            }
+            else if (!isMultiselect)
+            {
+                if (notify)
+                    toggle.isOn = false;
+                else
+                    toggle.SetIsOnWithoutNotify(false);
+            }
+        }
+
+        return selectedOption;
+    }
+
     internal void ToggleOptionsList()
     {
         if (isOpen)
@@ -385,7 +425,7 @@ public class DropdownComponentView : BaseComponentView, IDropdownComponentView, 
         ToggleComponentView newGO = Instantiate(togglePrefab);
         newGO.gameObject.SetActive(true);
         newGO.Configure(newOptionModel);
-        availableOptions.AddItem(newGO);
+        availableOptions.AddItemWithResize(newGO);
         newGO.name = name;
 
         if (newOptionModel.id == SELECT_ALL_OPTION_ID)
@@ -466,7 +506,7 @@ public class DropdownComponentView : BaseComponentView, IDropdownComponentView, 
 
         RectTransform optionsPanelTransform = optionsPanel.transform as RectTransform;
         optionsPanelTransform.sizeDelta = new Vector2(
-            optionsPanelTransform.sizeDelta.x, 
+            optionsPanelTransform.sizeDelta.x,
             Mathf.Clamp(availableOptionsParent.sizeDelta.y + BOTTOM_MARGIN_SIZE, 0f, model.maxValueForDynamicHeight));
     }
 }

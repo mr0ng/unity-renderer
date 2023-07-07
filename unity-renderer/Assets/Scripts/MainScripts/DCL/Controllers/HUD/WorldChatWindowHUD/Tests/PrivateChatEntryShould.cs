@@ -1,5 +1,9 @@
-﻿using NSubstitute;
+﻿using DCL;
+using DCL.Chat.HUD;
+using NSubstitute;
 using NUnit.Framework;
+using UnityEditor;
+using UnityEngine;
 
 public class PrivateChatEntryShould
 {
@@ -9,9 +13,12 @@ public class PrivateChatEntryShould
     [SetUp]
     public void SetUp()
     {
-        view = PrivateChatEntry.Create();
+        view = Object.Instantiate(
+            AssetDatabase.LoadAssetAtPath<PrivateChatEntry>(
+                "Assets/Scripts/MainScripts/DCL/Controllers/HUD/SocialBarPrefabs/SocialBarV1/Prefabs/WhisperChannelElement.prefab"));
+
         userContextMenu = Substitute.ForPartsOf<UserContextMenu>();
-        view.Initialize(Substitute.For<IChatController>(), userContextMenu, Substitute.For<ILastReadMessagesService>());
+        view.Initialize(Substitute.For<IChatController>(), userContextMenu, new DataStore_Mentions());
     }
 
     [TearDown]
@@ -26,7 +33,7 @@ public class PrivateChatEntryShould
     [TestCase(true, true)]
     public void Configure(bool online, bool blocked)
     {
-        var model = new PrivateChatEntry.PrivateChatEntryModel("userId", "name", "hello", "someUrl", blocked, online,
+        var model = new PrivateChatEntryModel("userId", "name", "hello", "someUrl", blocked, online,
             0);
         model.imageFetchingEnabled = false;
         view.Configure(model);
@@ -55,7 +62,7 @@ public class PrivateChatEntryShould
         var picture = Substitute.ForPartsOf<ImageComponentView>();
         picture.WhenForAnyArgs(component => component.Configure(default)).DoNotCallBase();
         view.picture = picture;
-        var model = new PrivateChatEntry.PrivateChatEntryModel("userId", "name", "hello", "someUrl", false, true, 0)
+        var model = new PrivateChatEntryModel("userId", "name", "hello", "someUrl", false, true, 0)
         {
             imageFetchingEnabled = false
         };
@@ -65,7 +72,7 @@ public class PrivateChatEntryShould
 
         picture.Received(1).Configure(Arg.Is<ImageComponentModel>(im => im.uri == "someUrl"));
     }
-    
+
     [Test]
     public void DisableAvatarSnapshotFetching()
     {
@@ -73,7 +80,7 @@ public class PrivateChatEntryShould
         picture.WhenForAnyArgs(component => component.Configure(default)).DoNotCallBase();
         picture.WhenForAnyArgs(component => component.SetImage((string) default)).DoNotCallBase();
         view.picture = picture;
-        var model = new PrivateChatEntry.PrivateChatEntryModel("userId", "name", "hello", "someUrl", false, true, 0)
+        var model = new PrivateChatEntryModel("userId", "name", "hello", "someUrl", false, true, 0)
         {
             imageFetchingEnabled = true
         };

@@ -5,14 +5,17 @@ using Cinemachine;
 using DCL.Helpers;
 using DCL.Interface;
 using DCL;
+using DCL.CameraTool;
 using UnityEngine;
+using UnityEngine.Rendering.Universal;
 
 namespace DCL.Camera
 {
     public class CameraController : MonoBehaviour
     {
-        [SerializeField]
-        internal new UnityEngine.Camera camera;
+
+        private readonly DataStoreRef<DataStore_LoadingScreen> dataStoreLoadingScreen;
+        [SerializeField] internal new UnityEngine.Camera camera;
 
         private Transform cameraTransform;
 
@@ -60,9 +63,9 @@ namespace DCL.Camera
         private void Awake()
         {
             cameraTransform = this.camera.transform;
+            DataStore.i.camera.transform.Set(cameraTransform);
 
-            CommonScriptableObjects.rendererState.OnChange += OnRenderingStateChanged;
-            OnRenderingStateChanged(CommonScriptableObjects.rendererState.Get(), false);
+            SetCameraEnabledState(CommonScriptableObjects.rendererState.Get());
 
             CommonScriptableObjects.cameraBlocked.OnChange += CameraBlocked_OnChange;
 
@@ -76,17 +79,19 @@ namespace DCL.Camera
                 }
             }
 
+
             cameraChangeAction.OnTriggered += OnCameraChangeAction;
+#if !DCL_VR
             mouseWheelAction.OnValueChanged += OnMouseWheelChangeValue;
+            #endif
             worldOffset.OnChange += OnWorldReposition;
             CommonScriptableObjects.cameraMode.OnChange += OnCameraModeChange;
 
             OnCameraModeChange(CommonScriptableObjects.cameraMode, CameraMode.ModeId.FirstPerson);
 
-            if (CommonScriptableObjects.isFullscreenHUDOpen)
-                OnFullscreenUIVisibilityChange(CommonScriptableObjects.isFullscreenHUDOpen.Get(), !CommonScriptableObjects.isFullscreenHUDOpen.Get());
-
+            dataStoreLoadingScreen.Ref.decoupledLoadingHUD.visible.OnChange += OnDecoupledLoadingScreenChange;
             CommonScriptableObjects.isFullscreenHUDOpen.OnChange += OnFullscreenUIVisibilityChange;
+            CommonScriptableObjects.isLoadingHUDOpen.OnChange += OnFullscreenUIVisibilityChange;
 
             DataStore.i.camera.outputTexture.OnChange += OnOutputTextureChange;
             OnOutputTextureChange(DataStore.i.camera.outputTexture.Get(), null);
@@ -95,6 +100,14 @@ namespace DCL.Camera
             SetInvertYAxis(DataStore.i.camera.invertYAxis.Get(), false);
 
             wasBlendingLastFrame = false;
+        }
+
+        private void OnDecoupledLoadingScreenChange(bool visibleState, bool prevVisibleState)
+        {
+            if (visibleState == prevVisibleState)
+                return;
+
+            SetCameraEnabledState(!visibleState);
         }
 
         void OnFullscreenUIVisibilityChange(bool visibleState, bool prevVisibleState)
@@ -121,8 +134,6 @@ namespace DCL.Camera
             searchedCameraState = null;
             return false;
         }
-
-        private void OnRenderingStateChanged(bool enabled, bool prevState) { SetCameraEnabledState(enabled && !CommonScriptableObjects.isFullscreenHUDOpen); }
 
         private void CameraBlocked_OnChange(bool current, bool previous)
         {
@@ -183,7 +194,6 @@ namespace DCL.Camera
             cameraForward.Set(cameraTransform.forward);
             cameraRight.Set(cameraTransform.right);
             DataStore.i.camera.rotation.Set(cameraTransform.rotation);
-            DataStore.i.camera.transform.Set(cameraTransform);
             cameraPosition.Set(cameraTransform.position);
             cameraIsBlending.Set(cameraBrain.IsBlending);
 
@@ -229,7 +239,6 @@ namespace DCL.Camera
         private void SetCameraEnabledState(bool enabled)
         {
             camera.enabled = enabled;
-            DataStore.i.camera.mainCamEnabled.Set(enabled);
         }
 
         private void OnDestroy()
@@ -246,14 +255,18 @@ namespace DCL.Camera
             }
 
             worldOffset.OnChange -= OnWorldReposition;
+
             cameraChangeAction.OnTriggered -= OnCameraChangeAction;
+#if !DCL_VR
             mouseWheelAction.OnValueChanged -= OnMouseWheelChangeValue;
-            CommonScriptableObjects.rendererState.OnChange -= OnRenderingStateChanged;
+            #endif
             CommonScriptableObjects.cameraBlocked.OnChange -= CameraBlocked_OnChange;
             CommonScriptableObjects.isFullscreenHUDOpen.OnChange -= OnFullscreenUIVisibilityChange;
+            CommonScriptableObjects.isLoadingHUDOpen.OnChange -= OnFullscreenUIVisibilityChange;
             CommonScriptableObjects.cameraMode.OnChange -= OnCameraModeChange;
             DataStore.i.camera.outputTexture.OnChange -= OnOutputTextureChange;
             DataStore.i.camera.invertYAxis.OnChange -= SetInvertYAxis;
+            dataStoreLoadingScreen.Ref.decoupledLoadingHUD.visible.OnChange -= OnFullscreenUIVisibilityChange;
         }
 
         [Serializable]

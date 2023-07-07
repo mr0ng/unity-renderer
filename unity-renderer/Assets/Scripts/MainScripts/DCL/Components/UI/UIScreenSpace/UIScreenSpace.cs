@@ -20,10 +20,12 @@ namespace DCL.Components
         private CanvasGroup canvasGroup;
         private bool isInsideSceneBounds;
         private BaseVariable<bool> isUIEnabled => DataStore.i.HUDs.isSceneUIEnabled;
+        private HUDCanvasCameraModeController hudCanvasCameraModeController;
+        private readonly DataStore_Player dataStorePlayer = DataStore.i.player;
 
         public UIScreenSpace()
         {
-            CommonScriptableObjects.playerWorldPosition.OnChange += OnPlayerWorldPositionChanged;
+            dataStorePlayer.playerGridPosition.OnChange += OnPlayerCoordinatesChanged;
             DataStore.i.HUDs.isSceneUIEnabled.OnChange += OnChangeSceneUI;
             OnChangeSceneUI(isUIEnabled.Get(), true);
             model = new Model();
@@ -50,7 +52,7 @@ namespace DCL.Components
             }
             else
             {
-                OnPlayerWorldPositionChanged(CommonScriptableObjects.playerWorldPosition.Get(), CommonScriptableObjects.playerWorldPosition.Get());
+                OnPlayerCoordinatesChanged(dataStorePlayer.playerGridPosition.Get(), dataStorePlayer.playerGridPosition.Get());
             }
 
             //We have to wait a frame for the Canvas Scaler to act
@@ -59,7 +61,8 @@ namespace DCL.Components
 
         public override void Dispose()
         {
-            CommonScriptableObjects.playerWorldPosition.OnChange -= OnPlayerWorldPositionChanged;
+            hudCanvasCameraModeController?.Dispose();
+            dataStorePlayer.playerGridPosition.OnChange -= OnPlayerCoordinatesChanged;
             DataStore.i.HUDs.isSceneUIEnabled.OnChange -= OnChangeSceneUI;
             CommonScriptableObjects.allUIHidden.OnChange -= AllUIHidden_OnChange;
 
@@ -74,7 +77,7 @@ namespace DCL.Components
             UpdateCanvasVisibility();
         }
 
-        void OnPlayerWorldPositionChanged(Vector3 current, Vector3 previous)
+        void OnPlayerCoordinatesChanged(Vector2Int current, Vector2Int previous)
         {
             if (canvas == null)
                 return;
@@ -96,13 +99,13 @@ namespace DCL.Components
 
             var model = (Model) this.model;
 
-            isInsideSceneBounds = scene.IsInsideSceneBoundaries(Utils.WorldToGridPosition(CommonScriptableObjects.playerWorldPosition));
+            isInsideSceneBounds = scene.IsInsideSceneBoundaries(dataStorePlayer.playerGridPosition.Get());
 
             if (isInsideSceneBounds)
             {
                 DataStore.i.Get<DataStore_World>().currentRaycaster.Set(graphicRaycaster);
             }
-            
+
             bool shouldBeVisible = model.visible && isInsideSceneBounds && !CommonScriptableObjects.allUIHidden.Get() && isUIEnabled.Get();
 
             canvasGroup.alpha = shouldBeVisible ? 1f : 0f;
@@ -123,20 +126,25 @@ namespace DCL.Components
 
             // Canvas
             canvas = canvasGameObject.AddComponent<Canvas>();
-            canvas.renderMode = RenderMode.ScreenSpaceOverlay;
+            hudCanvasCameraModeController = new HUDCanvasCameraModeController(canvas, DataStore.i.camera.hudsCamera);
 
+            #if DCL_VR
+            var rect = canvasGameObject.transform as RectTransform;
+            rect.sizeDelta = new Vector2(1250, 720);
+            #endif
             // Canvas Scaler (for maintaining ui aspect ratio)
-            CanvasScaler canvasScaler = canvasGameObject.AddComponent<CanvasScaler>();
-            canvasScaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
-            canvasScaler.referenceResolution = new Vector2(1280f, 720f);
-            canvasScaler.matchWidthOrHeight = 1f; // Match height, recommended for landscape projects
-
+            #if !DCL_VR
+             CanvasScaler canvasScaler = canvasGameObject.AddComponent<CanvasScaler>();
+             canvasScaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+             canvasScaler.referenceResolution = new Vector2(1280f, 720f);
+             canvasScaler.matchWidthOrHeight = 1f; // Match height, recommended for landscape projects
+            #endif
             // Graphics Raycaster (for allowing touch/click input on the ui components)
             graphicRaycaster = canvasGameObject.AddComponent<GraphicRaycaster>();
 
             canvas.sortingOrder = -1;
 
-            if (scene.isPersistent && scene.sceneData.id != EnvironmentSettings.AVATAR_GLOBAL_SCENE_ID)
+            if (scene.isPersistent && scene.sceneData.sceneNumber != EnvironmentSettings.AVATAR_GLOBAL_SCENE_NUMBER)
             {
                 canvas.sortingOrder -= 1;
             }
@@ -153,7 +161,11 @@ namespace DCL.Components
             childHookRectTransform.anchorMax = new Vector2(1, 0);
 
             // We scale the panel downwards to subtract the viewport's top 10%
+            #if DCL_VR
+            float canvasHeight = 720;
+            #else
             float canvasHeight = canvasScaler.referenceResolution.y;
+            #endif
             childHookRectTransform.pivot = new Vector2(0.5f, 0f);
             float canvasSubtraction = canvasHeight * UISettings.RESERVED_CANVAS_TOP_PERCENTAGE / 100;
             childHookRectTransform.sizeDelta = new Vector2(0, canvasHeight - canvasSubtraction);
@@ -175,7 +187,7 @@ namespace DCL.Components
                 Debug.Log("canvas initialized, height: " + childHookRectTransform.rect.height);
             }
 
-            OnPlayerWorldPositionChanged(CommonScriptableObjects.playerWorldPosition, CommonScriptableObjects.playerWorldPosition);
+            OnPlayerCoordinatesChanged(dataStorePlayer.playerGridPosition.Get(), dataStorePlayer.playerGridPosition.Get());
 
             if (VERBOSE)
             {
@@ -184,6 +196,9 @@ namespace DCL.Components
 
             UpdateCanvasVisibility();
             CommonScriptableObjects.allUIHidden.OnChange += AllUIHidden_OnChange;
+            #if DCL_VR
+            canvasGameObject.AddComponent<UIScreenSpaceHelper>();
+            #endif
         }
     }
 }

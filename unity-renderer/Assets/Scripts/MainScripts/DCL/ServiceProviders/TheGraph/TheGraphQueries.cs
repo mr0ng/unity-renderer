@@ -65,6 +65,15 @@ public static class TheGraphQueries
   }
 ";
 
+    public static readonly string getEthereumManaQuery = @"
+    query MANA($address: ID){
+        accounts(where: {id:$address}){
+            id,
+            mana
+        }
+    }
+";
+
     public static readonly string getPolygonManaQuery = @"
     query MANA($address: ID){
         accounts(where: {id:$address}){
@@ -77,6 +86,18 @@ public static class TheGraphQueries
     public static readonly string getNftCollectionsQuery = @"
     query WearablesCollections($address: ID){
         nfts(where: { owner: $address }) {
+            urn,
+            collection {
+                id
+            }
+            tokenId
+        }
+    }
+";
+
+    public static readonly string getNftCollectionByUserAndUrnQuery = @"
+    query WearablesCollectionsByUrn($address: ID, $urn: ID){
+        nfts(where: { owner: $address, urn: $urn}) {
             urn,
             collection {
                 id

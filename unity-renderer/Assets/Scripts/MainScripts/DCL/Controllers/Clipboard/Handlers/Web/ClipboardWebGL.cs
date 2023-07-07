@@ -14,6 +14,8 @@ internal class ClipboardWebGL : Singleton<ClipboardWebGL>, IClipboardHandler, ID
     private delegate void OnPasteInputCallback(IntPtr ptrText);
 
     private delegate void OnCopyInputCallback();
+    
+    #if !UNITY_ANDROID
 
     [DllImport("__Internal")]
     private static extern void initialize(Action<IntPtr, int> readTextCallback, Action<IntPtr> pasteCallback,
@@ -69,7 +71,8 @@ internal class ClipboardWebGL : Singleton<ClipboardWebGL>, IClipboardHandler, ID
         if (i != null)
             i.copyInput = true;
     }
-
+#endif
+    
     public ClipboardWebGL() { Application.onBeforeRender += OnBeforeRender; }
 
     public void Dispose() { Application.onBeforeRender -= OnBeforeRender; }
@@ -77,12 +80,24 @@ internal class ClipboardWebGL : Singleton<ClipboardWebGL>, IClipboardHandler, ID
     void IClipboardHandler.Initialize(Action<string, bool> onRead)
     {
         this.OnRead = onRead;
+#if !UNITY_ANDROID
         initialize(OnReceiveReadText, OnReceivePasteInput, OnReceiveCopyInput);
+#endif
     }
 
-    void IClipboardHandler.RequestWriteText(string text) { writeText(text); }
+    void IClipboardHandler.RequestWriteText(string text)
+    {
+#if !UNITY_ANDROID
+        writeText(text);
+#endif
+    }
 
-    void IClipboardHandler.RequestGetText() { readText(); }
+    void IClipboardHandler.RequestGetText()
+    {
+#if !UNITY_ANDROID
+        readText();
+#endif
+    }
 
     void OnBeforeRender()
     {
@@ -93,7 +108,9 @@ internal class ClipboardWebGL : Singleton<ClipboardWebGL>, IClipboardHandler, ID
         if (copyInput)
         {
             copyInput = false;
+#if !UNITY_ANDROID
             writeText(GUIUtility.systemCopyBuffer);
+#endif
         }
     }
 }

@@ -1,23 +1,15 @@
-using System;
-using System.Collections.Generic;
-using DCL;
-using rpc_csharp;
-using rpc_csharp.transport;
+using DCl.Social.Friends;
 using RPC.Services;
 using RPC.Transports;
-using Environment = DCL.Environment;
+using rpc_csharp;
+using rpc_csharp.transport;
+using System;
+using System.Collections.Generic;
 
 namespace RPC
 {
     public static class RPCServerBuilder
     {
-        public static void BuildDefaultServer()
-        {
-            RPCContext context = DataStore.i.rpcContext.context;
-            context.crdtContext.messageQueueHandler = Environment.i.world.sceneController;
-            BuildDefaultServer(context);
-        }
-
         public static RpcServer<RPCContext> BuildDefaultServer(RPCContext context)
         {
 #if UNITY_WEBGL && !UNITY_EDITOR
@@ -31,8 +23,13 @@ namespace RPC
         public static RpcServer<RPCContext> BuildDefaultServer(RPCContext context, ITransport transport)
         {
             return BuildServer(context, transport)
-                   .RegisterService(CRDTServiceImpl.RegisterService)
-                   .Build();
+                  .RegisterService(CRDTServiceImpl.RegisterService)
+                  .RegisterService(TransportServiceImpl.RegisterService)
+                  .RegisterService(EmotesRendererServiceImpl.RegisterService)
+                  .RegisterService(RPCFriendsApiBridge.RegisterService)
+                  .RegisterService(SceneControllerServiceImpl.RegisterService)
+                  .RegisterService(RestrictedActionsServiceImpl.RegisterService)
+                  .Build();
         }
 
         public static RPCServerBuilder<RPCContext> BuildServer(RPCContext context, ITransport transport)

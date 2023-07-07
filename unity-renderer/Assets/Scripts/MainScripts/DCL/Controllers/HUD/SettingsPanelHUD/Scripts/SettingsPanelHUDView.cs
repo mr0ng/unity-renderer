@@ -46,8 +46,11 @@ namespace DCL.SettingsPanelHUD
         [SerializeField] private ShowHideAnimator settingsAnimator;
 
         public bool isOpen { get; private set; }
-
+#if DCL_VR
+        private const string PATH = "SettingsPanelHUDVR";
+        #else
         private const string PATH = "SettingsPanelHUD";
+        #endif
         private const float WORLD_PREVIEW_MIN_WIDTH_TO_BE_SHOWED = 200f;
         private const float WORLD_PREVIEW_ORIGINAL_WIDTH = 400f;
         private const float WORLD_PREVIEW_ORIGINAL_HEIGHT = 250f;
@@ -89,6 +92,9 @@ namespace DCL.SettingsPanelHUD
 
             DataStore.i.screen.size.OnChange += ScreenSizeChanged;
             ScreenSizeChanged(DataStore.i.screen.size.Get(), Vector2Int.zero);
+
+            //WorldPreviewWindow is not being used at the moment. If we decide to reuse it, remove this activation
+            worldPreviewWindowTransform.gameObject.SetActive(false);
         }
 
         public void Initialize(IHUD hudController, ISettingsPanelHUDController settingsPanelController, SettingsSectionList sections)
@@ -166,7 +172,7 @@ namespace DCL.SettingsPanelHUD
                 settingsPanelController.SaveSettings();
                 SetWorldPreviewActive(false);
             }
-            
+
             isOpen = visible;
         }
 
@@ -177,8 +183,9 @@ namespace DCL.SettingsPanelHUD
 
             transform.SetParent(parentTransform);
             transform.localScale = Vector3.one;
+            #if DCL_VR
             transform.localRotation = Quaternion.identity;
-
+            #endif
             RectTransform rectTransform = transform as RectTransform;
             rectTransform.anchorMin = Vector2.zero;
             rectTransform.anchorMax = Vector2.one;
@@ -198,11 +205,11 @@ namespace DCL.SettingsPanelHUD
 
         public void SetWorldPreviewActive(bool isActive)
         {
-            isActive = false;
-
+            //WorldPreviewWindow is not being used at the moment. Leaving this code here
+            //in case we decide to reuse it someday.
+            return;
             worldPreviewWindowTransform.gameObject.SetActive(isActive);
             DataStore.i.camera.outputTexture.Set(isActive ? worldPreviewRawImage.texture as RenderTexture : null);
-            CommonScriptableObjects.isFullscreenHUDOpen.Set(DataStore.i.exploreV2.isOpen.Get() && !isActive);
         }
 
         private void OpenAction_OnTriggered(DCLAction_Trigger action)

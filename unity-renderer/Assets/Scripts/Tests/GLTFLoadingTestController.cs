@@ -2,28 +2,27 @@ using DCL.Helpers;
 using System;
 using System.Collections;
 using DCL.Controllers;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.Networking;
-using UnityGLTF;
 using Environment = DCL.Environment;
 
 public class GLTFLoadingTestController : MonoBehaviour
 {
     public string dataTrackingURL = "https://tracking.decentraland.org/track";
 
-    GLTFComponent[] gltfRenderers;
     float loadingStartingTime;
 
     void Start()
     {
         // ---------
         var sceneController = Environment.i.world.sceneController;
-        var scenesToLoad = (Resources.Load("TestJSON/SceneLoadingTest") as TextAsset).text;
+        string scenesToLoad = AssetDatabase.LoadAssetAtPath<TextAsset>("Assets/Scripts/Tests/TestJSON/SceneLoadingTest").text;
 
         sceneController.UnloadAllScenes();
         sceneController.LoadParcelScenes(scenesToLoad);
 
-        var scene = Environment.i.world.state.loadedScenes["0,0"] as ParcelScene;
+        var scene = Environment.i.world.state.GetScene(666) as ParcelScene;
 
         // FULL GLB
         TestUtils.InstantiateEntityWithShape(scene, 1, DCL.Models.CLASS_ID.GLTF_SHAPE, new Vector3(-2.5f, 1, 0),

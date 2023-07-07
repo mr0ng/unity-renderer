@@ -16,7 +16,7 @@ MonoBehaviour:
   pointingExtent: 10
   pointingRaycastLayerMasks:
   - serializedVersion: 2
-    m_Bits: 4294967291
+    m_Bits: 4176419
   debugDrawPointingRays: 1
   debugDrawPointingRayColors:
   - {r: 1, g: 0.58280706, b: 0, a: 1}
@@ -24,7 +24,7 @@ MonoBehaviour:
   - {r: 0, g: 1, b: 0.2163105, a: 1}
   - {r: 0, g: 0.3028021, b: 1, a: 1}
   - {r: 0.44855833, g: 0, b: 1, a: 1}
-  gazeCursorPrefab: {fileID: 1000012072213228, guid: 5b3e2856904e43c680f84f326861032a,
+  gazeCursorPrefab: {fileID: 1000012072213228, guid: 0d0aac983f8ed1c449abbc3b13e1381f,
     type: 3}
   gazeProviderType:
     reference: Microsoft.MixedReality.Toolkit.Input.GazeProvider, Microsoft.MixedReality.Toolkit.Services.InputSystem
@@ -33,31 +33,31 @@ MonoBehaviour:
   pointerOptions:
   - controllerType: 1071
     handedness: 7
-    pointerPrefab: {fileID: 1247086986094436, guid: d5b94136462644c9873bb3347169ae7e,
+    pointerPrefab: {fileID: 1247086986094436, guid: e044e081abcd30f4f81bea3eede3f076,
       type: 3}
   - controllerType: 47
     handedness: 7
-    pointerPrefab: {fileID: 1196247974088106, guid: c4fd3c6fc7ff484eb434775066e7f327,
+    pointerPrefab: {fileID: 1196247974088106, guid: e2aca4f94f77d7746b6f00d486c91c14,
       type: 3}
   - controllerType: 256
     handedness: 7
-    pointerPrefab: {fileID: 1247086986094436, guid: 51e60b8742bc47640923ac9e75ea74e9,
+    pointerPrefab: {fileID: 1247086986094436, guid: c79286efe38d5d540b763016a1bed6de,
       type: 3}
   - controllerType: 512
     handedness: 7
-    pointerPrefab: {fileID: 1247086986094436, guid: 31d81f88cf3f71d4b8392ded50df3f05,
+    pointerPrefab: {fileID: 1247086986094436, guid: 421415c244f26b243b6852e5c60aadac,
       type: 3}
   - controllerType: 1024
     handedness: 7
-    pointerPrefab: {fileID: 1507865967819406, guid: 38b548c6a2c270545a383296ad2bc4d5,
+    pointerPrefab: {fileID: 1507865967819406, guid: 94f9441a028d9e34b9b7a8e5eef8ba17,
       type: 3}
   - controllerType: 1024
     handedness: 7
-    pointerPrefab: {fileID: 1507865967819406, guid: 526b854247016cf47bc5c58e01d82407,
+    pointerPrefab: {fileID: 1507865967819406, guid: ef6a3dc4d2f790748831fbe082b08673,
       type: 3}
   - controllerType: 3072
     handedness: 7
-    pointerPrefab: {fileID: 1247086986094436, guid: 039b325c9e8fd0545a0475fd4aa35b10,
+    pointerPrefab: {fileID: 1247086986094436, guid: ce843aca1654555498d819209ab956b5,
       type: 3}
   pointerMediator:
     reference: Microsoft.MixedReality.Toolkit.Input.DefaultPointerMediator, Microsoft.MixedReality.Toolkit.SDK

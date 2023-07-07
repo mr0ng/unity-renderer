@@ -1,10 +1,7 @@
-using System;
-using DCL.Models;
-using DCL.Components;
 using UnityEngine;
 using TMPro;
-using System.Collections.Generic;
 using DCL;
+using DCL.Helpers;
 
 public class InteractionHoverCanvasController : MonoBehaviour
 {
@@ -12,17 +9,21 @@ public class InteractionHoverCanvasController : MonoBehaviour
     public RectTransform backgroundTransform;
     public TextMeshProUGUI text;
     public GameObject[] icons;
+    public RectTransform anchor;
+    private Vector2 defaultAnchorOffset;
+#if DCL_VR
     private Transform myTrans;
+#endif
 
     bool isHovered = false;
     GameObject hoverIcon;
-    Vector3 meshCenteredPos;
-
+    private Vector3 meshCenteredPos;
+#if DCL_VR
     [SerializeField]
     private float followSpeed = .8f;
     [SerializeField]
     private Vector3 offset = new Vector3(0f, .8f, 0f);
-
+#endif
     const string ACTION_BUTTON_POINTER = "POINTER";
     const string ACTION_BUTTON_PRIMARY = "PRIMARY";
     const string ACTION_BUTTON_SECONDARY = "SECONDARY";
@@ -31,7 +32,10 @@ public class InteractionHoverCanvasController : MonoBehaviour
 
     void Awake()
     {
+        #if DCL_VR
         myTrans = transform;
+        #endif
+        defaultAnchorOffset = anchor.anchoredPosition;
         dataStore = DataStore.i.Get<DataStore_Cursor>();
         backgroundTransform.gameObject.SetActive(false);
 
@@ -77,15 +81,6 @@ public class InteractionHoverCanvasController : MonoBehaviour
         UpdateCanvas();
     }
 
-    private void Update()
-    {
-        if (!isHovered)
-            return;
-        Vector3 offsetPos = CrossPlatformManager.GetPoint() + offset;
-        myTrans.position = Vector3.Lerp(myTrans.position, offsetPos, followSpeed);
-        myTrans.forward = CommonScriptableObjects.cameraForward.Get();
-    }
-
     public void Setup(string button, string feedbackText)
     {
         text.text = feedbackText;
@@ -123,7 +118,9 @@ public class InteractionHoverCanvasController : MonoBehaviour
             return;
 
         isHovered = hoverState;
+        #if DCL_VR
         myTrans.position = CrossPlatformManager.GetPoint() + offset;
+#endif
         UpdateCanvas();
     }
 
@@ -138,5 +135,30 @@ public class InteractionHoverCanvasController : MonoBehaviour
 
         if (canvas.enabled != newValue)
             canvas.enabled = newValue;
+    }
+
+    private void Update()
+    {
+#if DCL_VR
+        if (!isHovered)
+            return;
+        Vector3 offsetPos = CrossPlatformManager.GetPoint() + offset;
+        myTrans.position = Vector3.Lerp(myTrans.position, offsetPos, followSpeed);
+        myTrans.forward = CommonScriptableObjects.cameraForward.Get();
+#else
+        if (Utils.IsCursorLocked)
+        {
+            anchor.anchoredPosition = defaultAnchorOffset;
+            return;
+        }
+
+        RectTransformUtility.ScreenPointToLocalPointInRectangle(
+            (RectTransform)canvas.transform,
+            Input.mousePosition, canvas.worldCamera,
+            out Vector2 movePos);
+
+        anchor.position = canvas.transform.TransformPoint(movePos);
+        anchor.anchoredPosition += defaultAnchorOffset;
+#endif
     }
 }

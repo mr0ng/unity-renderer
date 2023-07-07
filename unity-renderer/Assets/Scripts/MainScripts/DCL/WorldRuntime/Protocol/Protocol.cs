@@ -1,4 +1,3 @@
-using System.Runtime.InteropServices;
 using DCL.Interface;
 using UnityEngine;
 
@@ -13,13 +12,18 @@ namespace DCL.Models
         public const string THIRD_PERSON_CAMERA_ENTITY_REFERENCE = "PlayerEntityReference";
     }
 
-    public enum SpecialEntityId
+    public static class SpecialEntityId
     {
-        SCENE_ROOT_ENTITY = 0,
-        AVATAR_ENTITY_REFERENCE = 1,
-        AVATAR_POSITION_REFERENCE = 2,
-        FIRST_PERSON_CAMERA_ENTITY_REFERENCE = 3,
-        THIRD_PERSON_CAMERA_ENTITY_REFERENCE = 4
+        public const long SCENE_ROOT_ENTITY = 0;
+        public const long PLAYER_ENTITY = 1;
+        public const long CAMERA_ENTITY = 2;
+        public const long INTERNAL_PLAYER_ENTITY_REPRESENTATION = 510;
+
+        // To be deprecated soon
+        public const long AVATAR_ENTITY_REFERENCE = 3;
+        public const long AVATAR_POSITION_REFERENCE = 4;
+        public const long FIRST_PERSON_CAMERA_ENTITY_REFERENCE = 5;
+        public const long THIRD_PERSON_CAMERA_ENTITY_REFERENCE = 6;
     }
 
     public static class ComponentNameLiterals
@@ -51,8 +55,7 @@ namespace DCL.Models
         AUDIO_STREAM = 202,
         AVATAR_MODIFIER_AREA = 205,
         AVATAR_ATTACH = 206,
-        CAMERA_MODE_AREA = 207,
-        QUEST_TRACKING_INFORMATION = 1417815519 // This corresponds with dcl-ecs-quests
+        CAMERA_MODE_AREA = 207
     }
 
     public enum CLASS_ID
@@ -356,7 +359,7 @@ namespace DCL.Models
     [System.Serializable]
     public class RaycastQuery
     {
-        public string sceneId;
+        public int sceneNumber;
         public string id;
         public RaycastType raycastType;
         public Ray ray;

@@ -18,12 +18,13 @@ public class DCLCharacterController : MonoBehaviour
     public float jumpForce = 12f;
     public float movementSpeed = 8f;
     public float runningSpeedMultiplier = 2f;
+    public float moveThreshold = 0.25f;
 
     public DCLCharacterPosition characterPosition;
 
     [Header("Collisions")]
     public LayerMask groundLayers;
-    
+
     [Header("Additional Camera Layers")]
     public LayerMask cameraLayers;
 
@@ -63,6 +64,7 @@ public class DCLCharacterController : MonoBehaviour
     Vector3 groundLastPosition;
     Quaternion groundLastRotation;
     bool jumpButtonPressed = false;
+    private Vector3 lastReportPosition = Vector3.zero;
 
     [Header("InputActions")]
     public InputAction_Hold jumpAction;
@@ -94,6 +96,8 @@ public class DCLCharacterController : MonoBehaviour
     private Vector3Variable cameraForward => CommonScriptableObjects.cameraForward;
     private Vector3Variable cameraRight => CommonScriptableObjects.cameraRight;
 
+    private readonly DataStore_Player dataStorePlayer = DataStore.i.player;
+
     [System.NonSerialized]
     public float movingPlatformSpeed;
     private CollisionFlags lastCharacterControllerCollision;
@@ -101,7 +105,7 @@ public class DCLCharacterController : MonoBehaviour
     public event System.Action OnJump;
     public event System.Action OnHitGround;
     public event System.Action<float> OnMoved;
-    
+
     void Awake()
     {
         if (i != null)
@@ -115,9 +119,9 @@ public class DCLCharacterController : MonoBehaviour
 
         SubscribeToInput();
         CommonScriptableObjects.playerUnityPosition.Set(Vector3.zero);
-        CommonScriptableObjects.playerWorldPosition.Set(Vector3.zero);
+        dataStorePlayer.playerWorldPosition.Set(Vector3.zero);
         CommonScriptableObjects.playerCoords.Set(Vector2Int.zero);
-        DataStore.i.player.playerWorldPosition.Set(Vector2Int.zero);
+        dataStorePlayer.playerGridPosition.Set(Vector2Int.zero);
         CommonScriptableObjects.playerUnityEulerAngles.Set(Vector3.zero);
 
         characterPosition = new DCLCharacterPosition();
@@ -141,6 +145,8 @@ public class DCLCharacterController : MonoBehaviour
         var worldData = DataStore.i.Get<DataStore_World>();
         worldData.avatarTransform.Set(avatarGameObject.transform);
         worldData.fpsTransform.Set(firstPersonCameraGameObject.transform);
+
+        dataStorePlayer.lastTeleportPosition.OnChange += Teleport;
     }
 
     private void SubscribeToInput()
@@ -168,6 +174,7 @@ public class DCLCharacterController : MonoBehaviour
         sprintAction.OnStarted -= walkStartedDelegate;
         sprintAction.OnFinished -= walkFinishedDelegate;
         CommonScriptableObjects.rendererState.OnChange -= OnRenderingStateChanged;
+        dataStorePlayer.lastTeleportPosition.OnChange -= Teleport;
         i = null;
     }
 
@@ -196,11 +203,11 @@ public class DCLCharacterController : MonoBehaviour
         Environment.i.platform.physicsSyncController?.MarkDirty();
 
         CommonScriptableObjects.playerUnityPosition.Set(characterPosition.unityPosition);
-        CommonScriptableObjects.playerWorldPosition.Set(characterPosition.worldPosition);
+        dataStorePlayer.playerWorldPosition.Set(characterPosition.worldPosition);
         Vector2Int playerPosition = Utils.WorldToGridPosition(characterPosition.worldPosition);
         CommonScriptableObjects.playerCoords.Set(playerPosition);
-        DataStore.i.player.playerWorldPosition.Set(playerPosition);
-        DataStore.i.player.playerUnityPosition.Set(characterPosition.unityPosition);
+        dataStorePlayer.playerGridPosition.Set(playerPosition);
+        dataStorePlayer.playerUnityPosition.Set(characterPosition.unityPosition);
 
         if (Moved(lastPosition))
         {
@@ -220,19 +227,20 @@ public class DCLCharacterController : MonoBehaviour
 
     public void Teleport(string teleportPayload)
     {
+        var payload = Utils.FromJsonWithNulls<Vector3>(teleportPayload);
+        dataStorePlayer.lastTeleportPosition.Set(payload, notifyEvent: true);
+    }
+
+    private void Teleport(Vector3 newPosition, Vector3 prevPosition)
+    {
         ResetGround();
 
-        var payload = Utils.FromJsonWithNulls<Vector3>(teleportPayload);
-
-        var newPosition = new Vector3(payload.x, payload.y, payload.z);
         SetPosition(newPosition);
 
         if (OnPositionSet != null)
         {
             OnPositionSet.Invoke(characterPosition);
         }
-
-        DataStore.i.player.lastTeleportPosition.Set(newPosition, true);
 
         if (!initialPositionAlreadySet)
         {
@@ -255,7 +263,7 @@ public class DCLCharacterController : MonoBehaviour
 
     internal void LateUpdate()
     {
-        if(!DataStore.i.player.canPlayerMove.Get())
+        if(!dataStorePlayer.canPlayerMove.Get())
             return;
 
         if (transform.position.y < minimumYPosition)
@@ -300,12 +308,32 @@ public class DCLCharacterController : MonoBehaviour
                 var xzPlaneRight = Vector3.Scale(cameraRight.Get(), new Vector3(1, 0, 1));
 
                 Vector3 forwardTarget = Vector3.zero;
-
+            #if DCL_VR
                 forwardTarget += characterYAxis.GetValue() * xzPlaneForward;
                 forwardTarget += characterXAxis.GetValue() * xzPlaneRight;
-                
+
                 if (forwardTarget.magnitude > 1)
                     forwardTarget.Normalize();
+            #else
+                if (characterYAxis.GetValue() > CONTROLLER_DRIFT_OFFSET)
+                    forwardTarget += xzPlaneForward;
+                if (characterYAxis.GetValue() < -CONTROLLER_DRIFT_OFFSET)
+                    forwardTarget -= xzPlaneForward;
+
+                if (characterXAxis.GetValue() > CONTROLLER_DRIFT_OFFSET)
+                    forwardTarget += xzPlaneRight;
+                if (characterXAxis.GetValue() < -CONTROLLER_DRIFT_OFFSET)
+                    forwardTarget -= xzPlaneRight;
+
+                if (forwardTarget.Equals(Vector3.zero))
+                    isMovingByUserInput = false;
+                else
+                    isMovingByUserInput = true;
+
+
+                forwardTarget.Normalize();
+            #endif
+
                 velocity += forwardTarget * speed;
                 CommonScriptableObjects.playerUnityEulerAngles.Set(transform.eulerAngles);
             }
@@ -410,7 +438,12 @@ public class DCLCharacterController : MonoBehaviour
 
             //NOTE(Kinerius) CameraStateTPS rotates the character between frames so we add the difference.
             //               if we dont do this, the character wont rotate when moving, only when the platform rotates
-            CommonScriptableObjects.characterForward.Set(newCharacterForward + lastFrameDifference);
+            var newForward = newCharacterForward + lastFrameDifference;
+
+            if (newForward is { x: 0, y: 0, z: 0 })
+                newForward = Vector3.forward;
+
+            CommonScriptableObjects.characterForward.Set(newForward);
         }
 
         Transform transformHit = CastGroundCheckingRays();
@@ -524,11 +557,21 @@ public class DCLCharacterController : MonoBehaviour
 
     void ReportMovement()
     {
+#if DCL_VR
         float height = 0.875f;
 
+        //don't report movements under threshold for HMD movements.  Too small make the avatar jitter and not step.
+        //position of hmd calculated in VRCharacterController. Rotation Calculated in VRCameraController.
         var reportPosition = characterPosition.worldPosition + (Vector3.up * height);
+        if (Mathf.Abs((reportPosition - lastReportPosition).magnitude) < moveThreshold)
+        {
+            reportPosition = lastReportPosition;
+        }
+        else lastReportPosition = reportPosition;
+#else
+        var reportPosition = characterPosition.worldPosition;
+#endif
         var compositeRotation = Quaternion.LookRotation(characterForward.HasValue() ? characterForward.Get().Value : cameraForward.Get());
-        var playerHeight = height + (characterController.height / 2);
         var cameraRotation = Quaternion.LookRotation(cameraForward.Get());
 
         //NOTE(Brian): We have to wait for a Teleport before sending the ReportPosition, because if not ReportPosition events will be sent
@@ -538,7 +581,7 @@ public class DCLCharacterController : MonoBehaviour
         //                  - Scenes not being sent for loading, making ActivateRenderer never being sent, only in WSS mode.
         //                  - Random teleports to 0,0 or other positions that shouldn't happen.
         if (initialPositionAlreadySet)
-            DCL.Interface.WebInterface.ReportPosition(reportPosition, compositeRotation, playerHeight, cameraRotation);
+            DCL.Interface.WebInterface.ReportPosition(reportPosition, compositeRotation, characterController.height, cameraRotation);
 
         lastMovementReportTime = DCLTime.realtimeSinceStartup;
     }
@@ -551,7 +594,14 @@ public class DCLCharacterController : MonoBehaviour
 
     public void ResumeGravity() { gravity = originalGravity; }
 
-    void OnRenderingStateChanged(bool isEnable, bool prevState) { SetEnabled(isEnable); }
+    void OnRenderingStateChanged(bool isEnable, bool prevState)
+    {
+        #if DCL_VR
+        SetEnabled(isEnable);
+    #else
+        SetEnabled(isEnable && !DataStore.i.common.isSignUpFlow.Get());
+    #endif
+    }
 
     bool IsLastCollisionGround()
     {

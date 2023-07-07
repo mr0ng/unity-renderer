@@ -1,10 +1,10 @@
 using NUnit.Framework;
 using System.Collections;
-using DCL.Controllers;
-using DCL.Helpers;
+
 using UnityEngine;
 using UnityEngine.TestTools;
 using DCL.NotificationModel;
+using UnityEditor;
 
 namespace Tests
 {
@@ -15,7 +15,9 @@ namespace Tests
         protected override IEnumerator SetUp()
         {
             yield return base.SetUp();
-            controller = new NotificationHUDController();
+            var view = Object.Instantiate(
+                AssetDatabase.LoadAssetAtPath<NotificationHUDView>("Assets/Scripts/MainScripts/DCL/Controllers/HUD/NotificationHUD/Prefabs/NotificationHUD.prefab"));
+            controller = new NotificationHUDController(view);
         }
 
         protected override IEnumerator TearDown()
@@ -52,7 +54,7 @@ namespace Tests
                 type = Type.GENERIC,
                 message = "text",
                 timer = -1,
-                scene = ""
+                scene = -1
             };
 
             controller.ShowNotification(model);
@@ -77,7 +79,7 @@ namespace Tests
                 type = Type.GENERIC,
                 message = "text",
                 timer = -1,
-                scene = ""
+                scene = -1
             };
 
             controller.ShowNotification(model);
@@ -87,7 +89,7 @@ namespace Tests
                 type = Type.SCRIPTING_ERROR,
                 message = "text",
                 timer = -1,
-                scene = ""
+                scene = -1
             };
 
             controller.ShowNotification(model2);
@@ -106,7 +108,7 @@ namespace Tests
                 type = Type.GENERIC,
                 message = "text",
                 timer = 0.25f,
-                scene = ""
+                scene = -1
             };
 
             controller.ShowNotification(model);

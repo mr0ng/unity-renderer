@@ -4,7 +4,7 @@
 	file ext:	cs
 	author:		Alessandro Maione
 	version:	1.0.0
-	
+
 	purpose:	custom editor for BestBefore script
 *********************************************************************/
 
@@ -16,7 +16,7 @@ namespace BestBefore
 {
     [CustomEditor( typeof( BestBefore ) )]
     [CanEditMultipleObjects]
-    public class BestBeforeEditor : Editor
+    public class BestBeforeEditor : UnityEditor.Editor
     {
         private Dictionary<string, SerializedProperty> allProperties = new Dictionary<string, SerializedProperty>();
         private FontStyle headerFontStyle = FontStyle.Bold;
@@ -56,6 +56,7 @@ namespace BestBefore
             #endregion
 
             #region FIXED DATE
+            AddProperty( "DaysOut" );
             AddProperty( "Year" );
             AddProperty( "Month" );
             AddProperty( "Day" );
@@ -104,6 +105,17 @@ namespace BestBefore
                 EditorGUILayout.LabelField( "Minute", bestBefore.Minute.ToString() );
                 EditorGUILayout.LabelField( "Second", bestBefore.Second.ToString() );
             }
+            else if ( bestBefore.ExpirationMode == BestBefore.ExpirationModes.FixedDateFromBuild)
+            {
+                EditorGUILayout.PropertyField(allProperties["DaysOut"]);
+                EditorGUILayout.PropertyField( allProperties["Year"] );
+                EditorGUILayout.PropertyField( allProperties["Month"] );
+                EditorGUILayout.PropertyField( allProperties["Day"] );
+                EditorGUILayout.PropertyField( allProperties["Hour"] );
+                EditorGUILayout.PropertyField( allProperties["Minute"] );
+                EditorGUILayout.PropertyField( allProperties["Second"] );
+            }
+
             else
             {
                 EditorGUILayout.PropertyField( allProperties["Year"] );

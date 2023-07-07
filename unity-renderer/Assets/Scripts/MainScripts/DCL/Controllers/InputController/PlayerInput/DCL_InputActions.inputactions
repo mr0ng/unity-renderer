@@ -11,7 +11,8 @@
                     "id": "85e62bba-27a9-473b-a603-db50e5c40191",
                     "expectedControlType": "Vector2",
                     "processors": "",
-                    "interactions": ""
+                    "interactions": "",
+                    "initialStateCheck": true
                 },
                 {
                     "name": "Look",
@@ -19,7 +20,8 @@
                     "id": "de3fc6e4-219a-4c02-a847-56f4a50027a4",
                     "expectedControlType": "Vector2",
                     "processors": "StickDeadzone(min=0.25)",
-                    "interactions": ""
+                    "interactions": "",
+                    "initialStateCheck": true
                 },
                 {
                     "name": "Select",
@@ -27,7 +29,8 @@
                     "id": "d1aa6bd1-26a0-4d1f-a947-6d1fd4bfb416",
                     "expectedControlType": "Button",
                     "processors": "",
-                    "interactions": ""
+                    "interactions": "",
+                    "initialStateCheck": false
                 },
                 {
                     "name": "ChangeCamera",
@@ -35,7 +38,8 @@
                     "id": "72cb0b57-9e3d-4981-9892-b293025a69a5",
                     "expectedControlType": "Button",
                     "processors": "",
-                    "interactions": ""
+                    "interactions": "",
+                    "initialStateCheck": false
                 },
                 {
                     "name": "OpenMenu",
@@ -43,7 +47,8 @@
                     "id": "054f6836-840e-4099-bd6c-e529fe979d33",
                     "expectedControlType": "Button",
                     "processors": "",
-                    "interactions": ""
+                    "interactions": "",
+                    "initialStateCheck": false
                 },
                 {
                     "name": "Jump",
@@ -51,7 +56,8 @@
                     "id": "d8015a59-2dde-4e61-935f-6aa3f880ffa5",
                     "expectedControlType": "Button",
                     "processors": "",
-                    "interactions": ""
+                    "interactions": "",
+                    "initialStateCheck": false
                 },
                 {
                     "name": "Walk",
@@ -59,7 +65,8 @@
                     "id": "b5c05e64-5480-46b3-a6ed-0dcebb711d0a",
                     "expectedControlType": "Button",
                     "processors": "",
-                    "interactions": ""
+                    "interactions": "",
+                    "initialStateCheck": false
                 },
                 {
                     "name": "ScrollMouse",
@@ -67,7 +74,8 @@
                     "id": "4174dbbb-5a54-4f98-b0ed-3c6d72f301f1",
                     "expectedControlType": "Axis",
                     "processors": "",
-                    "interactions": ""
+                    "interactions": "",
+                    "initialStateCheck": true
                 },
                 {
                     "name": "PrimaryInteraction",
@@ -75,7 +83,8 @@
                     "id": "afa7e912-739a-418e-97c0-94c63ae36f33",
                     "expectedControlType": "Button",
                     "processors": "",
-                    "interactions": ""
+                    "interactions": "",
+                    "initialStateCheck": false
                 },
                 {
                     "name": "SecondaryInteraction",
@@ -83,7 +92,26 @@
                     "id": "c1784f93-1d03-434c-9b45-ca55d75216aa",
                     "expectedControlType": "Button",
                     "processors": "",
-                    "interactions": ""
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "MoveHMD",
+                    "type": "Value",
+                    "id": "ebb2a951-3b82-43dc-9dcc-6f4b5d66116a",
+                    "expectedControlType": "Vector3",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                },
+                {
+                    "name": "RotateHMD",
+                    "type": "Value",
+                    "id": "f5e995fb-61c7-47de-8b8c-53e3dc06ec5d",
+                    "expectedControlType": "Quaternion",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
                 }
             ],
             "bindings": [
@@ -191,7 +219,7 @@
                     "id": "1635d3fe-58b6-4ba9-a4e2-f4b964f6b5c8",
                     "path": "<XRController>{LeftHand}/joystick",
                     "interactions": "",
-                    "processors": "",
+                    "processors": "StickDeadzone",
                     "groups": "XR",
                     "action": "Move",
                     "isComposite": false,
@@ -210,12 +238,12 @@
                 },
                 {
                     "name": "",
-                    "id": "8c8e490b-c610-4785-884f-f04217b23ca4",
-                    "path": "<Mouse>/delta",
+                    "id": "8255d333-5683-4943-a58a-ccb207ff1dce",
+                    "path": "<XRController>/triggerPressed",
                     "interactions": "",
-                    "processors": "ScaleVector2(x=0.25,y=0.25)",
-                    "groups": "Keyboard&Mouse",
-                    "action": "Look",
+                    "processors": "",
+                    "groups": "XR",
+                    "action": "Select",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
@@ -265,17 +293,6 @@
                 },
                 {
                     "name": "",
-                    "id": "8255d333-5683-4943-a58a-ccb207ff1dce",
-                    "path": "<XRController>/triggerPressed",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "XR",
-                    "action": "Select",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
                     "id": "22014342-922a-4f4f-8405-c3eb67a4722e",
                     "path": "<Keyboard>/v",
                     "interactions": "",
@@ -300,6 +317,17 @@
                     "name": "",
                     "id": "1d64adf0-fdda-479c-a0e2-cac73c20be0f",
                     "path": "<XRController>{RightHand}/primaryButton",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "XR",
+                    "action": "OpenMenu",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "7b0f9a1a-e815-45bb-a8ef-bb603119982d",
+                    "path": "<WMRSpatialController>/menu",
                     "interactions": "",
                     "processors": "",
                     "groups": "XR",
@@ -345,7 +373,7 @@
                     "id": "3960d723-8ee3-426c-8c42-42bc2aaaba57",
                     "path": "<XRController>{LeftHand}/thumbstickClicked",
                     "interactions": "",
-                    "processors": "",
+                    "processors": "AxisDeadzone",
                     "groups": "XR",
                     "action": "Walk",
                     "isComposite": false,
@@ -353,11 +381,22 @@
                 },
                 {
                     "name": "",
-                    "id": "67f9a255-200f-4cb9-a4b1-f96279eb3ff4",
-                    "path": "<Mouse>/scroll/y",
+                    "id": "ba175abe-7e03-4096-bec6-3ea7247c721f",
+                    "path": "<OculusTouchController>{LeftHand}/thumbstick/y",
                     "interactions": "",
-                    "processors": "",
-                    "groups": "Keyboard&Mouse",
+                    "processors": "AxisDeadzone",
+                    "groups": "XR",
+                    "action": "ScrollMouse",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "dfac5b16-7750-479c-b4f4-1158b8049794",
+                    "path": "<WMRSpatialController>{LeftHand}/joystick/y",
+                    "interactions": "",
+                    "processors": "AxisDeadzone",
+                    "groups": "XR",
                     "action": "ScrollMouse",
                     "isComposite": false,
                     "isPartOfComposite": false
@@ -405,6 +444,28 @@
                     "action": "SecondaryInteraction",
                     "isComposite": false,
                     "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "de8fc26b-e444-4ef1-9da6-eebc8d977106",
+                    "path": "<XRHMD>/centerEyePosition",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "MoveHMD",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "3d54d33b-5da1-459f-abd6-2cb57a872375",
+                    "path": "<XRHMD>/centerEyeRotation",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "RotateHMD",
+                    "isComposite": false,
+                    "isPartOfComposite": false
                 }
             ]
         },
@@ -418,7 +479,8 @@
                     "id": "c8ac2266-5476-450f-b458-8a79c8b16c92",
                     "expectedControlType": "Vector2",
                     "processors": "",
-                    "interactions": ""
+                    "interactions": "",
+                    "initialStateCheck": true
                 },
                 {
                     "name": "Submit",
@@ -426,7 +488,8 @@
                     "id": "de7ac68f-2822-409f-a4e3-88e8aff8e32c",
                     "expectedControlType": "Button",
                     "processors": "",
-                    "interactions": ""
+                    "interactions": "",
+                    "initialStateCheck": false
                 },
                 {
                     "name": "Cancel",
@@ -434,7 +497,8 @@
                     "id": "7cb6d410-5ec8-4a41-8c67-da27a62c49d2",
                     "expectedControlType": "Button",
                     "processors": "",
-                    "interactions": ""
+                    "interactions": "",
+                    "initialStateCheck": false
                 },
                 {
                     "name": "Point",
@@ -442,7 +506,8 @@
                     "id": "32c810cf-f021-434f-a245-9db79b695d89",
                     "expectedControlType": "Vector2",
                     "processors": "",
-                    "interactions": ""
+                    "interactions": "",
+                    "initialStateCheck": false
                 },
                 {
                     "name": "Click",
@@ -450,7 +515,8 @@
                     "id": "eca11fe2-58a8-4968-bdee-654914e0ee42",
                     "expectedControlType": "Button",
                     "processors": "",
-                    "interactions": ""
+                    "interactions": "",
+                    "initialStateCheck": false
                 },
                 {
                     "name": "ScrollWheel",
@@ -458,7 +524,8 @@
                     "id": "f536b51a-d16d-4ae6-8642-64f539bbf23a",
                     "expectedControlType": "Vector2",
                     "processors": "",
-                    "interactions": ""
+                    "interactions": "",
+                    "initialStateCheck": false
                 },
                 {
                     "name": "MiddleClick",
@@ -466,7 +533,8 @@
                     "id": "4b06065c-93db-49e9-9269-8585909ff95a",
                     "expectedControlType": "",
                     "processors": "",
-                    "interactions": ""
+                    "interactions": "",
+                    "initialStateCheck": false
                 },
                 {
                     "name": "RightClick",
@@ -474,7 +542,8 @@
                     "id": "b0281ca8-5c68-4cbb-b805-ecce32097d56",
                     "expectedControlType": "",
                     "processors": "",
-                    "interactions": ""
+                    "interactions": "",
+                    "initialStateCheck": false
                 },
                 {
                     "name": "TrackedDevicePosition",
@@ -482,7 +551,8 @@
                     "id": "8dbe3947-d440-47e6-81cc-7910db909e3c",
                     "expectedControlType": "Vector3",
                     "processors": "",
-                    "interactions": ""
+                    "interactions": "",
+                    "initialStateCheck": false
                 },
                 {
                     "name": "TrackedDeviceOrientation",
@@ -490,7 +560,8 @@
                     "id": "c76e4c86-d24d-4a65-80e9-3ad29e7309cb",
                     "expectedControlType": "Quaternion",
                     "processors": "",
-                    "interactions": ""
+                    "interactions": "",
+                    "initialStateCheck": false
                 }
             ],
             "bindings": [
@@ -842,17 +913,6 @@
                     "interactions": "",
                     "processors": "",
                     "groups": "Touch",
-                    "action": "Click",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
-                    "id": "bb9e6b34-44bf-4381-ac63-5aa15d19f677",
-                    "path": "<XRController>/trigger",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "XR",
                     "action": "Click",
                     "isComposite": false,
                     "isPartOfComposite": false

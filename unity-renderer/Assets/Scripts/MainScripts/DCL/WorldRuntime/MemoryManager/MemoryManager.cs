@@ -7,7 +7,7 @@ namespace DCL
 {
     public class MemoryManager : IMemoryManager
     {
-        private const long MAX_USED_MEMORY = 1300 * 1024 * 1024; // 1.3GB
+        private const long MAX_USED_MEMORY = 2000 * 1024 * 1024; // 2GB
         private const float TIME_FOR_NEW_MEMORY_CHECK = 60.0f;
 
         private Coroutine autoCleanupCoroutine;
@@ -17,14 +17,14 @@ namespace DCL
 
         public event System.Action OnCriticalMemory;
 
-        public MemoryManager(long memoryThresholdForCleanup, float cleanupInterval)
+        public MemoryManager (long memoryThresholdForCleanup, float cleanupInterval)
         {
             this.memoryThresholdForCleanup = memoryThresholdForCleanup;
             this.cleanupInterval = cleanupInterval;
             autoCleanupCoroutine = CoroutineStarter.Start(AutoCleanup());
         }
 
-        public MemoryManager()
+        public MemoryManager ()
         {
             this.memoryThresholdForCleanup = MAX_USED_MEMORY;
             this.cleanupInterval = TIME_FOR_NEW_MEMORY_CHECK;
@@ -45,8 +45,7 @@ namespace DCL
 
         bool NeedsMemoryCleanup()
         {
-            long usedMemory = Profiler.GetTotalAllocatedMemoryLong() + Profiler.GetMonoUsedSizeLong() +
-                              Profiler.GetAllocatedMemoryForGraphicsDriver();
+            long usedMemory = Profiler.GetTotalAllocatedMemoryLong() + Profiler.GetMonoUsedSizeLong() + Profiler.GetAllocatedMemoryForGraphicsDriver();
             return usedMemory >= this.memoryThresholdForCleanup;
         }
 
@@ -70,13 +69,13 @@ namespace DCL
             bool unusedOnly = true;
             bool nonPersistentOnly = true;
 
-            if (forceCleanup)
+            if ( forceCleanup )
             {
                 unusedOnly = false;
                 nonPersistentOnly = false;
             }
 
-            if (immediate)
+            if ( immediate )
             {
                 PoolManager.i.Cleanup(unusedOnly, nonPersistentOnly);
             }

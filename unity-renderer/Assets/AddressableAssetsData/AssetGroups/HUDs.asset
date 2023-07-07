@@ -1,0 +1,41 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bbb281ee3bf0b054c82ac2347e9e782c, type: 3}
+  m_Name: HUDs
+  m_EditorClassIdentifier: 
+  m_GroupName: HUDs
+  m_Data:
+    m_SerializedData: []
+  m_GUID: b4629246b07e29e46b61c17c64def0fc
+  m_SerializeEntries:
+  - m_GUID: d1d56442dbd2b534faad59e42b3c4a87
+    m_Address: SignupHUD
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+  - m_GUID: 8eeaa25ae02fb784e9b14ed71aae12f5
+    m_Address: HelpAndSupportHUD
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+  - m_GUID: 987f12680f06c40d0a902d4004a36e3c
+    m_Address: NotificationHUD
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+  - m_GUID: 9945fbc075d76034b8836c6068943390
+    m_Address: WalletSectionHUD
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+  m_ReadOnly: 0
+  m_Settings: {fileID: 11400000, guid: 436e0d4fdc1cdfa4aaef13be2e8bcef8, type: 2}
+  m_SchemaSet:
+    m_Schemas:
+    - {fileID: 11400000, guid: 6684f564e33c37b49b337e2386bad385, type: 2}
+    - {fileID: 11400000, guid: ed3e5abb5f4df034f9f31b03c9fbc6fc, type: 2}

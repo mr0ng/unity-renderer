@@ -1,10 +1,8 @@
-﻿using DCL.Controllers;
 using DCL.Helpers;
 using DCL.Models;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
-using UnityEditor;
+using Cysharp.Threading.Tasks;
 using UnityEngine;
 
 namespace DCL.Components
@@ -12,6 +10,8 @@ namespace DCL.Components
     public abstract class ParametrizedShape<T> : BaseShape
         where T : BaseShape.Model, new()
     {
+        private const string PARAMETRIZED_SHAPE_TAG = "FromParametrized";
+
         public Dictionary<IDCLEntity, Rendereable> attachedRendereables = new Dictionary<IDCLEntity, Rendereable>();
         bool visibilityDirty = false;
         bool collisionsDirty = false;
@@ -53,13 +53,17 @@ namespace DCL.Components
 
             if (visibilityDirty)
             {
-                ConfigureVisibility(entity.meshRootGameObject, model.visible, entity.meshesInfo.renderers);
+                bool shouldBeVisible = model.visible;
+                if (!DataStore.i.debugConfig.isDebugMode.Get())
+                    shouldBeVisible &= entity.isInsideSceneBoundaries;
+                
+                ConfigureVisibility(entity.meshRootGameObject, shouldBeVisible, entity.meshesInfo.renderers);
                 visibilityDirty = false;
             }
 
             if (collisionsDirty)
             {
-                CollidersManager.i.ConfigureColliders(entity.meshRootGameObject, model.withCollisions, false, entity, CalculateCollidersLayer(model));
+                CollidersManager.i.ConfigureColliders(entity.meshRootGameObject, model.withCollisions && entity.isInsideSceneBoundaries, false, entity, CalculateCollidersLayer(model));
                 collisionsDirty = false;
             }
 
@@ -67,6 +71,8 @@ namespace DCL.Components
             {
                 entity.meshesInfo.UpdateExistingMeshAtIndex(currentMesh, 0);
             }
+
+            Environment.i.world.sceneBoundsChecker?.AddEntityToBeChecked(entity);
         }
 
         void OnShapeAttached(IDCLEntity entity)
@@ -87,26 +93,13 @@ namespace DCL.Components
             MeshFilter meshFilter = entity.meshRootGameObject.AddComponent<MeshFilter>();
             MeshRenderer meshRenderer = entity.meshRootGameObject.AddComponent<MeshRenderer>();
 
-            entity.meshesInfo.renderers = new Renderer[] { meshRenderer };
+            entity.meshesInfo.OverrideRenderers( new Renderer[] { meshRenderer });
             entity.meshesInfo.currentShape = this;
 
             meshFilter.sharedMesh = currentMesh;
+            meshFilter.gameObject.tag = PARAMETRIZED_SHAPE_TAG;
 
-            if (Configuration.ParcelSettings.VISUAL_LOADING_ENABLED)
-            {
-                MaterialTransitionController transition = entity.meshRootGameObject.AddComponent<MaterialTransitionController>();
-                Material finalMaterial = Utils.EnsureResourcesMaterial("Materials/Default");
-                transition.delay = 0;
-                transition.useHologram = false;
-                transition.fadeThickness = 20;
-                transition.OnDidFinishLoading(finalMaterial);
-
-                transition.onFinishedLoading += () => { OnShapeFinishedLoading(entity); };
-            }
-            else
-            {
-                meshRenderer.sharedMaterial = Utils.EnsureResourcesMaterial("Materials/Default");
-            }
+            meshRenderer.sharedMaterial = Utils.EnsureResourcesMaterial("Materials/Default");
 
             visibilityDirty = true;
             collisionsDirty = true;
@@ -115,9 +108,14 @@ namespace DCL.Components
             AddRendereableToDataStore(entity);
         }
 
-        void OnShapeFinishedLoading(IDCLEntity entity)
+
+        async UniTaskVoid OnShapeFinishedLoading(IDCLEntity entity)
         {
+            // We need to wait for a frame so that MaterialTransitionController has been destroyed.
+            await UniTask.Yield();
+            
             entity.OnShapeUpdated?.Invoke(entity);
+            DCL.Environment.i.world.sceneBoundsChecker?.AddEntityToBeChecked(entity);
         }
 
         void OnShapeDetached(IDCLEntity entity)
@@ -220,7 +218,7 @@ namespace DCL.Components
             if (!attachedRendereables.ContainsKey(entity))
                 return;
 
-            DataStore.i.sceneWorldObjects.RemoveRendereable(entity.scene.sceneData.id, attachedRendereables[entity]);
+            DataStore.i.sceneWorldObjects.RemoveRendereable(entity.scene.sceneData.sceneNumber, attachedRendereables[entity]);
             attachedRendereables.Remove(entity);
         }
 
@@ -244,7 +242,7 @@ namespace DCL.Components
             newRendereable.ownerId = entity.entityId;
 
             attachedRendereables.Add(entity, newRendereable);
-            DataStore.i.sceneWorldObjects.AddRendereable(entity.scene.sceneData.id, newRendereable);
+            DataStore.i.sceneWorldObjects.AddRendereable(entity.scene.sceneData.sceneNumber, newRendereable);
         }
     }
 }

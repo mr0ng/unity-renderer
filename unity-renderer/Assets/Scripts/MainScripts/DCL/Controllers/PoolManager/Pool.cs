@@ -1,5 +1,7 @@
-using System.Collections;
 using System.Collections.Generic;
+using System.Threading;
+using Cysharp.Threading.Tasks;
+using DCL.Configuration;
 using UnityEngine;
 using DCL.Helpers;
 using UnityEngine.Assertions;
@@ -9,6 +11,7 @@ namespace DCL
     public interface IPooledObjectInstantiator
     {
         bool IsValid(GameObject original);
+
         GameObject Instantiate(GameObject gameObject);
     }
 
@@ -38,63 +41,107 @@ namespace DCL
         private readonly LinkedList<PoolableObject> unusedObjects = new LinkedList<PoolableObject>();
         private readonly LinkedList<PoolableObject> usedObjects = new LinkedList<PoolableObject>();
 
-        private int maxPrewarmCount = 0;
+        private readonly int maxPrewarmCount;
+
         private bool isInitialized;
 
         public float lastGetTime { get; private set; }
 
         public int objectsCount => unusedObjectsCount + usedObjectsCount;
 
-        public int unusedObjectsCount { get { return unusedObjects.Count; } }
+        public int unusedObjectsCount => unusedObjects.Count;
 
-        public int usedObjectsCount { get { return usedObjects.Count; } }
+        public int usedObjectsCount => usedObjects.Count;
 
         public Pool(string name, int maxPrewarmCount)
         {
             if (PoolManager.USE_POOL_CONTAINERS)
-                container = new GameObject("Pool - " + name);
+                container = new GameObject("Pool - " + name) { transform = { position = EnvironmentSettings.MORDOR } };
 
             this.maxPrewarmCount = maxPrewarmCount;
         }
 
-        public void ForcePrewarm()
+        public void ForcePrewarm(bool forceActive = true)
         {
             if (maxPrewarmCount <= objectsCount)
                 return;
 
+            Assert.IsTrue(original != null, $"Original should never be null here ({id})");
+            var parent = PoolManager.USE_POOL_CONTAINERS && container != null ? container.transform : null;
+
             int objectsToInstantiate = Mathf.Max(0, maxPrewarmCount - objectsCount);
-            for (int i = 0; i < objectsToInstantiate; i++)
+
+            for (var i = 0; i < objectsToInstantiate; i++)
+                InstantiateOnPrewarm(parent, forceActive);
+        }
+
+        /// <summary>
+        /// Lightweight version of Instantiate() that doesn't activate/deactivate the gameObject and parent it straight away.
+        /// </summary>
+        private void InstantiateOnPrewarm(Transform parent, bool forceActive = true)
+        {
+            GameObject gameObject = Object.Instantiate(original, parent);
+
+            PoolableObject poolable = new PoolableObject(this, gameObject);
+            PoolManager.i.poolables.Add(gameObject, poolable);
+            PoolManager.i.poolableValues.Add(poolable);
+
+            poolable.node = unusedObjects.AddFirst(poolable);
+
+            if (forceActive)
             {
-                Instantiate();
+                gameObject.SetActive(true);
+                gameObject.SetActive(false);
+            }
+#if UNITY_EDITOR
+            RefreshName();
+#endif
+        }
+
+        public async UniTask PrewarmAsync(int createPerFrame, CancellationToken cancellationToken)
+        {
+            int objectsToInstantiate;
+
+            // It is dynamic in case we instantiate manually between frames
+            while ((objectsToInstantiate = Mathf.Max(0, maxPrewarmCount - objectsCount)) > 0)
+            {
+                objectsToInstantiate = Mathf.Min(createPerFrame, objectsToInstantiate);
+
+                for (var i = 0; i < objectsToInstantiate; i++)
+                    Instantiate();
+
+                await UniTask.NextFrame(cancellationToken);
             }
         }
 
+        /// <summary>
+        /// This will return an instance of the poolable object
+        /// </summary>
+        /// <returns></returns>
         public PoolableObject Get()
         {
-            // These extra instantiations during initialization are to populate pools that will be used a lot later  
+            // These extra instantiations during initialization are to populate pools that will be used a lot later
             if (PoolManager.i.initializing && !isInitialized)
             {
                 isInitialized = true;
-                int count = usedObjectsCount;
 
-                for (int i = unusedObjectsCount; i < Mathf.Min(count * PREWARM_ACTIVE_MULTIPLIER, maxPrewarmCount); i++)
-                {
+                for (int i = unusedObjectsCount; i < Mathf.Min(usedObjectsCount * PREWARM_ACTIVE_MULTIPLIER, maxPrewarmCount); i++)
                     Instantiate();
-                }
 
                 Instantiate();
             }
-            else if (unusedObjects.Count == 0)
-            {
-                Instantiate();
-            }
+            else if (unusedObjects.Count == 0) { Instantiate(); }
 
             PoolableObject poolable = Extract();
 
             EnablePoolableObject(poolable);
             poolable.OnPoolGet();
+
             return poolable;
         }
+
+        public T Get<T>() where T: MonoBehaviour =>
+            this.Get().gameObject.GetComponent<T>();
 
         private PoolableObject Extract()
         {
@@ -109,32 +156,27 @@ namespace DCL
             return po;
         }
 
-        public PoolableObject Instantiate()
-        {
-            var gameObject = InstantiateAsOriginal();
-            return SetupPoolableObject(gameObject);
-        }
+        private void Instantiate() =>
+            SetupPoolableObject(
+                InstantiateAsOriginal());
 
         public GameObject InstantiateAsOriginal()
         {
             Assert.IsTrue(original != null, $"Original should never be null here ({id})");
 
-            GameObject gameObject = null;
-
-            if (instantiator != null)
-                gameObject = instantiator.Instantiate(original);
-            else
-                gameObject = GameObject.Instantiate(original);
+            GameObject gameObject = instantiator != null
+                ? instantiator.Instantiate(original)
+                : Object.Instantiate(original);
 
             gameObject.SetActive(true);
 
             return gameObject;
         }
 
-        private PoolableObject SetupPoolableObject(GameObject gameObject, bool active = false)
+        private void SetupPoolableObject(GameObject gameObject, bool active = false)
         {
             if (PoolManager.i.poolables.ContainsKey(gameObject))
-                return PoolManager.i.GetPoolable(gameObject);
+                return;
 
             PoolableObject poolable = new PoolableObject(this, gameObject);
             PoolManager.i.poolables.Add(gameObject, poolable);
@@ -154,7 +196,6 @@ namespace DCL
 #if UNITY_EDITOR
             RefreshName();
 #endif
-            return poolable;
         }
 
         public void Release(PoolableObject poolable)
@@ -174,10 +215,7 @@ namespace DCL
 
         public void ReleaseAll()
         {
-            while (usedObjects.Count > 0)
-            {
-                usedObjects.First.Value.Release();
-            }
+            while (usedObjects.Count > 0) { usedObjects.First.Value.Release(); }
         }
 
         /// <summary>
@@ -189,6 +227,7 @@ namespace DCL
             if (instantiator != null && !instantiator.IsValid(gameObject))
             {
                 Debug.LogError($"ERROR: Trying to add invalid gameObject to pool! -- {gameObject.name}", gameObject);
+
                 return;
             }
 
@@ -197,6 +236,7 @@ namespace DCL
             if (obj != null)
             {
                 Debug.LogError($"ERROR: gameObject is already being tracked by a pool! -- {gameObject.name}", gameObject);
+
                 return;
             }
 
@@ -241,10 +281,9 @@ namespace DCL
             unusedObjects.Clear();
             usedObjects.Clear();
 
-            Object.Destroy(this.original);
+            Utils.SafeDestroy(this.original);
 
-            if (PoolManager.USE_POOL_CONTAINERS)
-                Object.Destroy(this.container);
+            Utils.SafeDestroy(this.container);;
 
             OnCleanup?.Invoke(this);
         }
@@ -280,15 +319,9 @@ namespace DCL
 
             if (PoolManager.USE_POOL_CONTAINERS)
             {
-                if (container != null)
-                {
-                    go.transform.SetParent(container.transform);
-                }
+                if (container != null) { go.transform.SetParent(container.transform); }
             }
-            else
-            {
-                go.transform.SetParent(null);
-            }
+            else { go.transform.SetParent(null); }
         }
 
 #if UNITY_EDITOR
@@ -305,12 +338,16 @@ namespace DCL
             if (PoolManager.i.poolables.TryGetValue(gameObject, out PoolableObject poolable))
             {
                 pool = poolable.pool;
+
                 return true;
             }
 
             return false;
         }
 
-        public bool IsValid() { return original != null; }
+        public bool IsValid()
+        {
+            return original != null;
+        }
     }
 };

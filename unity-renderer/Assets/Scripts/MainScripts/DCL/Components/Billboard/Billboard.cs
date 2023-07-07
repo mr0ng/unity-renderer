@@ -4,10 +4,11 @@ using DCL.Components;
 using DCL.Helpers;
 using DCL.Models;
 using UnityEngine;
+using Decentraland.Sdk.Ecs6;
 
 namespace DCL
 {
-    public class Billboard : BaseComponent
+    public class Billboard : BaseComponent, IBillboard
     {
         [Serializable]
         public class Model : BaseModel
@@ -16,58 +17,51 @@ namespace DCL
             public bool y = true;
             public bool z = true;
 
-            public override BaseModel GetDataFromJSON(string json) { return Utils.SafeFromJson<Model>(json); }
+            public override BaseModel GetDataFromJSON(string json) =>
+                Utils.SafeFromJson<Model>(json);
+
+            public override BaseModel GetDataFromPb(ComponentBodyPayload pbModel) =>
+                pbModel.PayloadCase == ComponentBodyPayload.PayloadOneofCase.Billboard
+                    ? new Model
+                    {
+                        x = pbModel.Billboard.X,
+                        y = pbModel.Billboard.Y,
+                        z = pbModel.Billboard.Z,
+                    }
+                    : Utils.SafeUnimplemented<Billboard, Model>(expected: ComponentBodyPayload.PayloadOneofCase.Billboard, actual: pbModel.PayloadCase);
         }
 
-        Transform entityTransform;
-        Vector3Variable cameraPosition => CommonScriptableObjects.cameraPosition;
-        Vector3 lastPosition;
+        private const string COMPONENT_NAME = "billboard";
 
-        public override string componentName => "billboard";
+        public Transform Tr { get; set; }
+        public Transform EntityTransform { get; set; }
+        public Vector3 LastPosition { get; set; }
 
-        private void Awake() { model = new Model(); }
+
+        public new Model GetModel() => (Model)model;
+
+        public override string componentName => COMPONENT_NAME;
+
+
+        public override int GetClassId()
+        {
+            return (int)CLASS_ID_COMPONENT.BILLBOARD;
+        }
 
         public override IEnumerator ApplyChanges(BaseModel newModel)
         {
-            cameraPosition.OnChange -= CameraPositionChanged;
-            cameraPosition.OnChange += CameraPositionChanged;
-
-            Model model = (Model)newModel;
-
-            ChangeOrientation();
-
-
-            if (entityTransform == null)
+            if (EntityTransform == null)
             {
                 yield return new WaitUntil(() => entity.gameObject != null);
-                entityTransform = entity.gameObject.transform;
+                EntityTransform = entity.gameObject.transform;
             }
         }
 
-        new public Model GetModel() { return (Model)model; }
 
-        public void OnDestroy() { cameraPosition.OnChange -= CameraPositionChanged; }
-
-        // This runs on LateUpdate() instead of Update() to be applied AFTER the transform was moved by the transform component
-        public void LateUpdate()
-        {
-            //NOTE(Brian): This fixes #757 (https://github.com/decentraland/unity-client/issues/757)
-            //             We must find a more performant way to handle this, until that time, this is the approach.
-
-            if (entityTransform == null)
-                return;
-            if (transform.position == lastPosition)
-                return;
-
-            lastPosition = transform.position;
-
-            ChangeOrientation();
-        }
-
-        Vector3 GetLookAtVector()
+        public Vector3 GetLookAtVector(Vector3 cameraPosition)
         {
             bool hasTextShape = scene.componentsManagerLegacy.HasComponent(entity, CLASS_ID_COMPONENT.TEXT_SHAPE);
-            Vector3 lookAtDir = hasTextShape ? (entityTransform.position - cameraPosition) : (cameraPosition - entityTransform.position);
+            Vector3 lookAtDir = hasTextShape ? (EntityTransform.position - cameraPosition) : (cameraPosition - EntityTransform.position);
 
             Model model = (Model) this.model;
             // Note (Zak): This check is here to avoid normalizing twice if not needed
@@ -78,25 +72,23 @@ namespace DCL
                 // Note (Zak): Model x,y,z are axis that we want to enable/disable
                 // while lookAtDir x,y,z are the components of the look-at vector
                 if (!model.x || model.z)
-                    lookAtDir.y = entityTransform.forward.y;
+                    lookAtDir.y = EntityTransform.forward.y;
                 if (!model.y)
-                    lookAtDir.x = entityTransform.forward.x;
+                    lookAtDir.x = EntityTransform.forward.x;
             }
 
             return lookAtDir.normalized;
         }
 
-        void ChangeOrientation()
+
+        private void Awake()
         {
-            if (entityTransform == null)
-                return;
-            Vector3 lookAtVector = GetLookAtVector();
-            if (lookAtVector != Vector3.zero)
-                entityTransform.forward = lookAtVector;
+            model = new Model();
+            Tr = transform;
+            LastPosition = Vector3.up * float.MaxValue;
+
+            IBillboardsController controller = Environment.i.serviceLocator.Get<IBillboardsController>();
+            controller.BillboardAdded(this);
         }
-
-        private void CameraPositionChanged(Vector3 current, Vector3 previous) { ChangeOrientation(); }
-
-        public override int GetClassId() { return (int) CLASS_ID_COMPONENT.BILLBOARD; }
     }
 }

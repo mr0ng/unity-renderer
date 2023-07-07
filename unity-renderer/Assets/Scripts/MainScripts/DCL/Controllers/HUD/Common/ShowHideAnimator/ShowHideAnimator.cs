@@ -1,92 +1,109 @@
+using DG.Tweening;
+using DG.Tweening.Core;
+using DG.Tweening.Plugins.Options;
 using System;
 using UnityEngine;
+using UnityEngine.UI;
 
-[RequireComponent(typeof(Animator))]
+[RequireComponent(typeof(CanvasGroup))] [DisallowMultipleComponent]
 public class ShowHideAnimator : MonoBehaviour
 {
+    private const float BASE_DURATION = 0.2f;
+
     public event System.Action<ShowHideAnimator> OnWillFinishHide;
-    public event Action OnStartHide; 
+    public event Action OnStartHide;
     public event System.Action<ShowHideAnimator> OnWillFinishStart;
     public event Action OnStartShow;
+    //added for ease of triggering VR panel placement.
+    public event System.Action<bool> OnSetVisibility;
+
 
     public bool hideOnEnable = true;
     public float animSpeedFactor = 1.0f;
     public bool disableAfterFadeOut;
-    public string visibleParam = "visible";
 
-    public bool isVisible => animator.GetBool(visibleParamHash);
+    [SerializeField] private CanvasGroup canvasGroup;
 
-    private Animator animatorValue;
+    private GraphicRaycaster raycaster;
 
-    private Animator animator
+    public bool isVisible => canvasGroup == null || canvasGroup.blocksRaycasts;
+
+
+    private void Awake()
     {
-        get
-        {
-            if (animatorValue == null)
-            {
-                animatorValue = GetComponent<Animator>();
-            }
+        if (canvasGroup == null)
+            canvasGroup = GetComponent<CanvasGroup>();
 
-            return animatorValue;
-        }
+        raycaster = GetComponent<GraphicRaycaster>();
     }
 
-    private int? visibleParamHashValue = null;
-
-    private int visibleParamHash
+    private void OnEnable()
     {
-        get
-        {
-            if (!visibleParamHashValue.HasValue)
-                visibleParamHashValue = Animator.StringToHash(visibleParam);
-
-            return visibleParamHashValue.Value;
-        }
+        if (hideOnEnable)
+            Hide(instant: true);
     }
 
     public void Show(bool instant = false)
     {
-        animator.speed = animSpeedFactor;
+        //if (this.gameObject.name.Contains("Loading")) return;
+        OnSetVisibility?.Invoke(true);
+        SetVisibility(visible: true, OnShowCompleted, instant);
 
-        if ( animator.isActiveAndEnabled )
-            animator.SetBool(visibleParamHash, true);
-
-        if (instant)
-            animator.Update(10);
+        void OnShowCompleted()
+        {
+            OnWillFinishStart?.Invoke(this);
+        }
     }
 
     public void Hide(bool instant = false)
     {
-        animator.speed = animSpeedFactor;
+        OnSetVisibility?.Invoke(true);
+        SetVisibility(visible: false, OnHideCompleted, instant);
 
-        if ( animator.isActiveAndEnabled )
-            animator.SetBool(visibleParamHash, false);
-
-        if (instant)
-            animator.Update(10);
-    }
-
-    public void AnimEvent_HideFinished()
-    {
-        OnWillFinishHide?.Invoke(this);
-
-        if (disableAfterFadeOut)
+        void OnHideCompleted()
         {
-            gameObject?.SetActive(false);
+            OnWillFinishHide?.Invoke(this);
+
+            if (disableAfterFadeOut && gameObject != null)
+                gameObject.SetActive(false);
         }
     }
 
-    public void AnimEvent_ShowFinished() { OnWillFinishStart?.Invoke(this); }
-    
-    public void AnimEvent_HideStarted() { OnStartHide?.Invoke(); }
-
-    public void AnimEvent_ShowStarted() { OnStartShow?.Invoke(); }
-
-    private void OnEnable()
+    /// <summary>
+    /// Show and then hide after delay (Show->Delay->Hide)
+    /// </summary>
+    public void ShowDelayHide(float delay)
     {
-        if ( hideOnEnable )
+        SetVisibility(visible: true, onComplete: HideAfterDelay);
+
+        void HideAfterDelay()
         {
-            Hide(true);
+            SetVisibility(visible: false, null).SetDelay(delay);
+            OnWillFinishStart?.Invoke(this);
         }
+
+}
+
+    private TweenerCore<float, float, FloatOptions> SetVisibility(bool visible, TweenCallback onComplete, bool instant = false)
+    {
+        if (canvasGroup == null)
+        {
+            Debug.LogError($"Show Hide Animator in GameObject: {gameObject.name} has no canvasGroup assigned", gameObject);
+            return null;
+        }
+
+        if (raycaster != null)
+            raycaster.enabled = visible;
+
+        // When instant, we use duration 0 instead of just modifying the canvas group to mock the old animator behaviour which needs a frame.
+        float duration = instant ? 0 : BASE_DURATION * animSpeedFactor;
+
+        canvasGroup.blocksRaycasts = visible;
+        canvasGroup.DOKill();
+        return canvasGroup.DOFade(visible ? 1 : 0, duration)
+                   .SetEase(Ease.InOutQuad)
+                   .OnComplete(onComplete)
+                   .SetLink(canvasGroup.gameObject, LinkBehaviour.KillOnDestroy)
+                   .SetLink(canvasGroup.gameObject, LinkBehaviour.KillOnDisable);
     }
 }

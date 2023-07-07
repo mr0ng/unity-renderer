@@ -12,18 +12,31 @@ using ErrorEventArgs = WebSocketSharp.ErrorEventArgs;
 public class DCLWebSocketService : WebSocketBehavior
 {
     public static bool VERBOSE = false;
-    
+
     public event Action OnCloseEvent;
 
     public event Action<string> OnErrorEvent;
 
     public event Action<byte[]> OnMessageEvent;
 
-    public event Action OnConnectEvent;    
+    public event Action OnConnectEvent;
+
+    private bool wantsToQuit;
+
+    public DCLWebSocketService()
+    {
+        Application.wantsToQuit += OnApplicationWantsToQuit;
+    }
+
+    private bool OnApplicationWantsToQuit()
+    {
+        wantsToQuit = true;
+        return true;
+    }
 
     private void SendMessageToWeb(string type, string message)
     {
-#if (UNITY_EDITOR || UNITY_STANDALONE)
+#if (UNITY_EDITOR || UNITY_STANDALONE || UNITY_ANDROID)
         var x = new Message()
         {
             type = type,
@@ -33,9 +46,9 @@ public class DCLWebSocketService : WebSocketBehavior
         if (ConnectionState == WebSocketState.Open)
         {
             var serializeObject = JsonConvert.SerializeObject(x);
-            
+
             Send(serializeObject);
-        
+
             if (VERBOSE)
             {
                 Debug.Log("SendMessageToWeb: " + type);
@@ -60,15 +73,18 @@ public class DCLWebSocketService : WebSocketBehavior
     protected override void OnMessage(MessageEventArgs e)
     {
         base.OnMessage(e);
-        
+
         if (e.IsBinary)
         {
             OnMessageEvent?.Invoke(e.RawData);
             return;
         }
-        
+
         lock (WebSocketCommunication.queuedMessages)
         {
+            if (wantsToQuit)
+                return;
+
             Message finalMessage = JsonUtility.FromJson<Message>(e.Data);
 
             WebSocketCommunication.queuedMessages.Enqueue(finalMessage);
@@ -78,17 +94,19 @@ public class DCLWebSocketService : WebSocketBehavior
 
     protected override void OnError(ErrorEventArgs e)
     {
-        Debug.LogError(e.Message);
+        Debug.LogError($"DCLWebSocketService: error {e.Message}");
         base.OnError(e);
         OnErrorEvent?.Invoke(e.Message);
     }
 
     protected override void OnClose(CloseEventArgs e)
     {
+        Debug.LogError($"DCLWebSocketService: onClose {e.Reason}");
         base.OnClose(e);
         WebInterface.OnMessageFromEngine -= SendMessageToWeb;
         DataStore.i.wsCommunication.communicationEstablished.Set(false);
         OnCloseEvent?.Invoke();
+
     }
 
     protected override void OnOpen()

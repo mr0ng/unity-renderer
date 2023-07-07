@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using DCL.Interface;
+using MainScripts.DCL.Controllers.HotScenes;
 using System.Collections;
 using UpdateMode = DCL.MapGlobalUsersPositionMarkerController.UpdateMode;
 
@@ -11,9 +12,10 @@ namespace DCL
     /// Handle the fetch of hot scenes at intervals.
     /// Interval time may change accordingly if set to update in background or foregraound
     /// </summary>
+    [Obsolete ("Use IHotScenesFetcher instead")]
     internal class FetchScenesHandler : IDisposable
     {
-        public event Action<List<HotScenesController.HotSceneInfo>> OnScenesFetched;
+        public event Action<List<IHotScenesController.HotSceneInfo>> OnScenesFetched;
 
         float initialIntevalTime;
         float backgroundIntervalTime;
@@ -91,6 +93,8 @@ namespace DCL
                     yield return null;
                 }
 
+                if(HotScenesController.i == null) yield break;
+
                 if (HotScenesController.i.timeSinceLastUpdate > updateInterval)
                 {
                     HotScenesController.i.OnHotSceneListFinishUpdating += OnHotSceneListFinishUpdating;
@@ -105,7 +109,7 @@ namespace DCL
 
         private void OnHotSceneListFinishUpdating() { OnHotScenesFetched(HotScenesController.i.hotScenesList); }
 
-        private void OnHotScenesFetched(List<HotScenesController.HotSceneInfo> scenes)
+        private void OnHotScenesFetched(List<IHotScenesController.HotSceneInfo> scenes)
         {
             HotScenesController.i.OnHotSceneListFinishUpdating -= OnHotSceneListFinishUpdating;
 

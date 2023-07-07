@@ -1,11 +1,15 @@
 using DCL;
+using DCL.Helpers;
+using DCL.Social.Friends;
 using ExploreV2Analytics;
 using NSubstitute;
 using NUnit.Framework;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
-using static HotScenesController;
+using MainScripts.DCL.Controllers.HotScenes;
+using System.Threading;
+using static MainScripts.DCL.Controllers.HotScenes.IHotScenesController;
 
 public class HighlightsSubSectionComponentControllerTests
 {
@@ -29,7 +33,8 @@ public class HighlightsSubSectionComponentControllerTests
             placesAPIController,
             eventsAPIController,
             friendsController,
-            exploreV2Analytics);
+            exploreV2Analytics,
+            DataStore.i);
     }
 
     [TearDown]
@@ -49,43 +54,40 @@ public class HighlightsSubSectionComponentControllerTests
     public void DoFirstLoadingCorrectly()
     {
         // Arrange
-        highlightsSubSectionComponentController.reloadHighlights = true;
+        highlightsSubSectionComponentController.cardsReloader.firstLoading = true;
 
         // Act
-        highlightsSubSectionComponentController.FirstLoading();
+        highlightsSubSectionComponentController.RequestAllPlacesAndEvents();
 
         // Assert
         highlightsSubSectionComponentView.Received().RestartScrollViewPosition();
-        highlightsSubSectionComponentView.Received().SetTrendingPlacesAndEventsAsLoading(true);
-        highlightsSubSectionComponentView.Received().SetFeaturedPlacesAsLoading(true);
-        highlightsSubSectionComponentView.Received().SetLiveAsLoading(true);
-        Assert.IsFalse(highlightsSubSectionComponentController.reloadHighlights);
+        highlightsSubSectionComponentView.Received().SetAllAsLoading();
+        Assert.IsFalse(highlightsSubSectionComponentController.cardsReloader.reloadSubSection);
     }
 
-    [Test]
     [TestCase(true)]
     [TestCase(false)]
     public void RaiseOnExploreV2OpenCorrectly(bool isOpen)
     {
         // Arrange
-        highlightsSubSectionComponentController.reloadHighlights = false;
+        highlightsSubSectionComponentController.cardsReloader.reloadSubSection = false;
 
         // Act
-        highlightsSubSectionComponentController.OnExploreV2Open(isOpen, false);
+        highlightsSubSectionComponentController.cardsReloader.OnExploreV2Open(isOpen, false);
 
         // Assert
         if (isOpen)
-            Assert.IsFalse(highlightsSubSectionComponentController.reloadHighlights);
+            Assert.IsFalse(highlightsSubSectionComponentController.cardsReloader.reloadSubSection);
         else
-            Assert.IsTrue(highlightsSubSectionComponentController.reloadHighlights);
+            Assert.IsTrue(highlightsSubSectionComponentController.cardsReloader.reloadSubSection);
     }
 
     [Test]
     public void RequestAllPlacesCorrectly()
     {
         // Arrange
-        highlightsSubSectionComponentController.reloadHighlights = true;
-        highlightsSubSectionComponentController.lastTimeAPIChecked = Time.realtimeSinceStartup - PlacesAndEventsSectionComponentController.MIN_TIME_TO_CHECK_API;
+        highlightsSubSectionComponentController.cardsReloader.reloadSubSection = true;
+        highlightsSubSectionComponentController.cardsReloader.lastTimeAPIChecked = Time.realtimeSinceStartup - PlacesAndEventsSectionComponentController.MIN_TIME_TO_CHECK_API;
         DataStore.i.exploreV2.isInShowAnimationTransiton.Set(false);
 
         // Act
@@ -93,21 +95,19 @@ public class HighlightsSubSectionComponentControllerTests
 
         // Assert
         highlightsSubSectionComponentView.Received().RestartScrollViewPosition();
-        highlightsSubSectionComponentView.Received().SetTrendingPlacesAndEventsAsLoading(true);
-        highlightsSubSectionComponentView.Received().SetFeaturedPlacesAsLoading(true);
-        highlightsSubSectionComponentView.Received().SetLiveAsLoading(true);
-        placesAPIController.Received().GetAllPlaces(Arg.Any<Action<List<HotSceneInfo>>>());
-        Assert.IsFalse(highlightsSubSectionComponentController.reloadHighlights);
+        highlightsSubSectionComponentView.Received().SetAllAsLoading();
+        placesAPIController.Received().GetAllPlacesFromPlacesAPI(Arg.Any<Action<List<PlaceInfo>, int>>(), Arg.Any<int>(), Arg.Any<int>(), Arg.Any<CancellationToken>());
+        Assert.IsFalse(highlightsSubSectionComponentController.cardsReloader.reloadSubSection);
     }
 
     [Test]
     public void RequestAllPlacesAndEventsFromAPICorrectly()
     {
         // Act
-        highlightsSubSectionComponentController.RequestAllPlacesAndEventsFromAPI();
+        highlightsSubSectionComponentController.RequestAllFromAPI();
 
         // Assert
-        placesAPIController.Received().GetAllPlaces(Arg.Any<Action<List<HotSceneInfo>>>());
+        placesAPIController.Received().GetAllPlacesFromPlacesAPI(Arg.Any<Action<List<PlaceInfo>, int>>(), Arg.Any<int>(), Arg.Any<int>(), Arg.Any<CancellationToken>());
     }
 
     [Test]
@@ -123,10 +123,7 @@ public class HighlightsSubSectionComponentControllerTests
         // Assert
         highlightsSubSectionComponentView.Received().SetTrendingPlacesAndEvents(Arg.Any<List<PlaceCardComponentModel>>(), Arg.Any<List<EventCardComponentModel>>());
         highlightsSubSectionComponentView.Received().SetFeaturedPlaces(Arg.Any<List<PlaceCardComponentModel>>());
-        highlightsSubSectionComponentView.Received().SetTrendingPlacesAndEventsAsLoading(false);
-        highlightsSubSectionComponentView.Received().SetFeaturedPlacesAsLoading(false);
         highlightsSubSectionComponentView.Received().SetLiveEvents(Arg.Any<List<EventCardComponentModel>>());
-        highlightsSubSectionComponentView.Received().SetLiveAsLoading(false);
     }
 
     [Test]
@@ -137,11 +134,12 @@ public class HighlightsSubSectionComponentControllerTests
         highlightsSubSectionComponentController.eventsFromAPI = ExploreEventsTestHelpers.CreateTestEventsFromApi(2);
 
         // Act
-        highlightsSubSectionComponentController.LoadTrendingPlacesAndEvents();
+        List<PlaceCardComponentModel> trendingPlaces = PlacesAndEventsCardsFactory.ConvertPlaceResponseToModel(highlightsSubSectionComponentController.FilterTrendingPlaces());
+        List<EventCardComponentModel> trendingEvents = PlacesAndEventsCardsFactory.CreateEventsCards(highlightsSubSectionComponentController.FilterTrendingEvents(trendingPlaces.Count));
+        highlightsSubSectionComponentController.view.SetTrendingPlacesAndEvents(trendingPlaces, trendingEvents);
 
         // Assert
         highlightsSubSectionComponentView.Received().SetTrendingPlacesAndEvents(Arg.Any<List<PlaceCardComponentModel>>(), Arg.Any<List<EventCardComponentModel>>());
-        highlightsSubSectionComponentView.Received().SetTrendingPlacesAndEventsAsLoading(false);
     }
 
     [Test]
@@ -152,11 +150,10 @@ public class HighlightsSubSectionComponentControllerTests
         highlightsSubSectionComponentController.placesFromAPI = ExplorePlacesTestHelpers.CreateTestPlacesFromApi(numberOfPlaces);
 
         // Act
-        highlightsSubSectionComponentController.LoadFeaturedPlaces();
+        highlightsSubSectionComponentController.view.SetFeaturedPlaces(PlacesAndEventsCardsFactory.ConvertPlaceResponseToModel(highlightsSubSectionComponentController.FilterFeaturedPlaces()));
 
         // Assert
         highlightsSubSectionComponentView.Received().SetFeaturedPlaces(Arg.Any<List<PlaceCardComponentModel>>());
-        highlightsSubSectionComponentView.Received().SetFeaturedPlacesAsLoading(false);
     }
 
     [Test]
@@ -167,11 +164,10 @@ public class HighlightsSubSectionComponentControllerTests
         highlightsSubSectionComponentController.eventsFromAPI = ExploreEventsTestHelpers.CreateTestEventsFromApi(numberOfEvents);
 
         // Act
-        highlightsSubSectionComponentController.LoadLiveEvents();
+        highlightsSubSectionComponentController.view.SetLiveEvents(PlacesAndEventsCardsFactory.CreateEventsCards(highlightsSubSectionComponentController.FilterLiveEvents()));
 
         // Assert
         highlightsSubSectionComponentView.Received().SetLiveEvents(Arg.Any<List<EventCardComponentModel>>());
-        highlightsSubSectionComponentView.Received().SetLiveAsLoading(false);
     }
 
     [Test]
@@ -179,14 +175,14 @@ public class HighlightsSubSectionComponentControllerTests
     {
         // Arrange
         PlaceCardComponentModel testPlaceCardModel = new PlaceCardComponentModel();
-        testPlaceCardModel.hotSceneInfo = new HotSceneInfo();
+        testPlaceCardModel.placeInfo = new PlaceInfo();
 
         // Act
         highlightsSubSectionComponentController.ShowPlaceDetailedInfo(testPlaceCardModel);
 
         // Assert
         highlightsSubSectionComponentView.Received().ShowPlaceModal(testPlaceCardModel);
-        exploreV2Analytics.Received().SendClickOnPlaceInfo(testPlaceCardModel.hotSceneInfo.id, testPlaceCardModel.placeName);
+        exploreV2Analytics.Received().SendClickOnPlaceInfo(testPlaceCardModel.placeInfo.id, testPlaceCardModel.placeName);
     }
 
     [Test]
@@ -195,7 +191,7 @@ public class HighlightsSubSectionComponentControllerTests
         // Arrange
         bool exploreClosed = false;
         highlightsSubSectionComponentController.OnCloseExploreV2 += () => exploreClosed = true;
-        HotSceneInfo testPlaceFromAPI = ExplorePlacesTestHelpers.CreateTestHotSceneInfo("1");
+        PlaceInfo testPlaceFromAPI = ExplorePlacesTestHelpers.CreateTestHotSceneInfo("1");
 
         // Act
         highlightsSubSectionComponentController.JumpInToPlace(testPlaceFromAPI);
@@ -203,7 +199,7 @@ public class HighlightsSubSectionComponentControllerTests
         // Assert
         highlightsSubSectionComponentView.Received().HidePlaceModal();
         Assert.IsTrue(exploreClosed);
-        exploreV2Analytics.Received().SendPlaceTeleport(testPlaceFromAPI.id, testPlaceFromAPI.name, testPlaceFromAPI.baseCoords);
+        exploreV2Analytics.Received().SendPlaceTeleport(testPlaceFromAPI.id, testPlaceFromAPI.title, Utils.ConvertStringToVector(testPlaceFromAPI.base_position));
     }
 
     [Test]

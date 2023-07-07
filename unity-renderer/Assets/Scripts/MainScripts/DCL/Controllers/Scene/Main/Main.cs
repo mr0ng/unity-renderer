@@ -1,31 +1,41 @@
-using System;
-using System.Collections.Generic;
+using Cysharp.Threading.Tasks;
 using DCL.Components;
-using DCL.Controllers;
+using DCL.Configuration;
 using DCL.Helpers;
+using DCL.Interface;
+using DCL.Map;
+using DCL.Providers;
 using DCL.SettingsCommon;
-using RPC;
+using DCl.Social.Friends;
+using DCL.Social.Friends;
+using MainScripts.DCL.Controllers.HotScenes;
+using DCLServices.WearablesCatalogService;
+using MainScripts.DCL.Controllers.FriendsController;
 using UnityEngine;
-using UnityEngine.Serialization;
+#if UNITY_EDITOR
+using DG.Tweening;
+#endif
 
 namespace DCL
 {
     /// <summary>
-    /// This is the InitialScene entry point.
-    /// Most of the application subsystems should be initialized from this class Awake() event.
+    ///     This is the InitialScene entry point.
+    ///     Most of the application subsystems should be initialized from this class Awake() event.
     /// </summary>
     public class Main : MonoBehaviour
     {
         [SerializeField] private bool disableSceneDependencies;
-        public static Main i { get; private set; }
 
-        public PoolableComponentFactory componentFactory;
+        private HotScenesController hotScenesController;
 
-        private PerformanceMetricsController performanceMetricsController;
+        private readonly DataStoreRef<DataStore_LoadingScreen> dataStoreLoadingScreen;
         protected IKernelCommunication kernelCommunication;
 
+        private PerformanceMetricsController performanceMetricsController;
+
         protected PluginSystem pluginSystem;
-        
+        public static Main i { get; private set; }
+
         protected virtual void Awake()
         {
             if (i != null)
@@ -39,16 +49,21 @@ namespace DCL
             if (!disableSceneDependencies)
                 InitializeSceneDependencies();
 
+#if UNITY_EDITOR
+
+            // Prevent warning when starting on unity editor mode
+            // TODO: Are we instantiating 500 different kinds of animations?
+            DOTween.SetTweensCapacity(500, 50);
+#endif
+
             Settings.CreateSharedInstance(new DefaultSettingsFactory());
 
-            if (!Configuration.EnvironmentSettings.RUNNING_TESTS)
+            if (!EnvironmentSettings.RUNNING_TESTS)
             {
-                performanceMetricsController = new PerformanceMetricsController();
                 SetupServices();
-
-                DataStore.i.HUDs.loadingHUD.visible.OnChange += OnLoadingScreenVisibleStateChange;
+                performanceMetricsController = new PerformanceMetricsController();
             }
-            
+
 #if UNITY_STANDALONE || UNITY_EDITOR
             Application.quitting += () => DataStore.i.common.isApplicationQuitting.Set(true);
 #endif
@@ -56,17 +71,29 @@ namespace DCL
             InitializeDataStore();
             SetupPlugins();
             InitializeCommunication();
+        }
 
-            // TODO(Brian): This is a temporary fix to address elevators issue in the xmas event.
-            // We should re-enable this later as produces a performance regression.
-            if (!Configuration.EnvironmentSettings.RUNNING_TESTS)
-                Environment.i.platform.cullingController.SetAnimationCulling(false);
+        protected virtual void Start()
+        {
+            // this event should be the last one to be executed after initialization
+            // it is used by the kernel to signal "EngineReady" or something like that
+            // to prevent race conditions like "SceneController is not an object",
+            // aka sending events before unity is ready
+            WebInterface.SendSystemInfoReport();
+
+            // We trigger the Decentraland logic once everything is initialized.
+            WebInterface.StartDecentraland();
+        }
+
+        protected virtual void Update()
+        {
+            performanceMetricsController?.Update();
         }
 
         protected virtual void InitializeDataStore()
         {
-            DataStore.i.textureConfig.gltfMaxSize.Set(512);
-            DataStore.i.textureConfig.generalMaxSize.Set(2048);
+            DataStore.i.textureConfig.gltfMaxSize.Set(TextureCompressionSettings.GLTF_TEX_MAX_SIZE_WEB);
+            DataStore.i.textureConfig.generalMaxSize.Set(TextureCompressionSettings.GENERAL_TEX_MAX_SIZE_WEB);
             DataStore.i.avatarConfig.useHologramAvatar.Set(true);
         }
 
@@ -74,28 +101,14 @@ namespace DCL
         {
 #if UNITY_WEBGL && !UNITY_EDITOR
             Debug.Log("DCL Unity Build Version: " + DCL.Configuration.ApplicationSettings.version);
-            Debug.unityLogger.logEnabled = false;
 
             kernelCommunication = new NativeBridgeCommunication(Environment.i.world.sceneController);
 #else
+
             // TODO(Brian): Remove this branching once we finish migrating all tests out of the
             //              IntegrationTestSuite_Legacy base class.
-            if (!Configuration.EnvironmentSettings.RUNNING_TESTS)
-            {
-                kernelCommunication = new WebSocketCommunication(DebugConfigComponent.i.webSocketSSL);
-            }
+            if (!EnvironmentSettings.RUNNING_TESTS) { kernelCommunication = new WebSocketCommunication(DebugConfigComponent.i.webSocketSSL); }
 #endif
-            RPCServerBuilder.BuildDefaultServer();
-        }
-
-        void OnLoadingScreenVisibleStateChange(bool newVisibleValue, bool previousVisibleValue)
-        {
-            if (newVisibleValue)
-            {
-                // Prewarm shader variants
-                Resources.Load<ShaderVariantCollection>("ShaderVariantCollections/shaderVariants-selected").WarmUp();
-                DataStore.i.HUDs.loadingHUD.visible.OnChange -= OnLoadingScreenVisibleStateChange;
-            }
         }
 
         protected virtual void SetupPlugins()
@@ -106,69 +119,54 @@ namespace DCL
 
         protected virtual void SetupServices()
         {
-            Environment.Setup(ServiceLocatorFactory.CreateDefault());
+            var serviceLocator = ServiceLocatorFactory.CreateDefault();
+            serviceLocator.Register<IHotScenesController>(() => hotScenesController);
+            Environment.Setup(serviceLocator);
         }
 
-        protected virtual void Start()
-        {
-            // this event should be the last one to be executed after initialization
-            // it is used by the kernel to signal "EngineReady" or something like that
-            // to prevent race conditions like "SceneController is not an object",
-            // aka sending events before unity is ready
-            DCL.Interface.WebInterface.SendSystemInfoReport();
-
-            // We trigger the Decentraland logic once everything is initialized.
-            DCL.Interface.WebInterface.StartDecentraland();
-        }
-
-        protected virtual void Update()
-        {
-            performanceMetricsController?.Update();
-        }
-        
         [RuntimeInitializeOnLoadMethod]
-        static void RunOnStart()
+        private static void RunOnStart()
         {
             Application.wantsToQuit += ApplicationWantsToQuit;
         }
+
         private static bool ApplicationWantsToQuit()
         {
             if (i != null)
                 i.Dispose();
-    
+
             return true;
         }
 
         protected virtual void Dispose()
         {
-            DataStore.i.HUDs.loadingHUD.visible.OnChange -= OnLoadingScreenVisibleStateChange;
-
             DataStore.i.common.isApplicationQuitting.Set(true);
+            Settings.i.SaveSettings();
 
             pluginSystem?.Dispose();
 
-            if (!Configuration.EnvironmentSettings.RUNNING_TESTS)
+            if (!EnvironmentSettings.RUNNING_TESTS)
                 Environment.Dispose();
-            
+
             kernelCommunication?.Dispose();
         }
-        
+
         protected virtual void InitializeSceneDependencies()
         {
             gameObject.AddComponent<UserProfileController>();
             gameObject.AddComponent<RenderingController>();
-            gameObject.AddComponent<CatalogController>();
+            gameObject.AddComponent<WebInterfaceWearablesCatalogService>();
+            gameObject.AddComponent<WebInterfaceMinimapApiBridge>();
             gameObject.AddComponent<MinimapMetadataController>();
-            gameObject.AddComponent<ChatController>();
-            gameObject.AddComponent<FriendsController>();
-            gameObject.AddComponent<HotScenesController>();
+            gameObject.AddComponent<WebInterfaceFriendsApiBridge>();
+            hotScenesController = gameObject.AddComponent<HotScenesController>();
+            gameObject.AddComponent<MatrixInitializationBridge>();
             gameObject.AddComponent<GIFProcessingBridge>();
             gameObject.AddComponent<RenderProfileBridge>();
             gameObject.AddComponent<AssetCatalogBridge>();
             gameObject.AddComponent<ScreenSizeWatcher>();
             gameObject.AddComponent<SceneControllerBridge>();
 
-            MainSceneFactory.CreateBuilderInWorldBridge(gameObject);
             MainSceneFactory.CreateBridges();
             MainSceneFactory.CreateMouseCatcher();
             MainSceneFactory.CreatePlayerSystems();
@@ -176,9 +174,12 @@ namespace DCL
             MainSceneFactory.CreateAudioHandler();
             MainSceneFactory.CreateHudController();
             MainSceneFactory.CreateNavMap();
-            MainSceneFactory.CreateEventSystem();
+            if(!CrossPlatformManager.IsVR)
+                MainSceneFactory.CreateEventSystem();
+
         }
 
-        protected virtual void CreateEnvironment() => MainSceneFactory.CreateEnvironment();
+        protected virtual void CreateEnvironment() =>
+            MainSceneFactory.CreateEnvironment();
     }
 }

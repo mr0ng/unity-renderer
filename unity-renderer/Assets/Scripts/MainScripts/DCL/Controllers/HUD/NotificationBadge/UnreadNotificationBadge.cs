@@ -1,4 +1,4 @@
-using DCL.Interface;
+using DCL;
 using TMPro;
 using UnityEngine;
 
@@ -10,11 +10,12 @@ public class UnreadNotificationBadge : MonoBehaviour
     public TextMeshProUGUI notificationText;
     public GameObject notificationContainer;
     public int maxNumberToShow = 9;
+    public GameObject ownPlayerMentionMark;
 
-    private IChatController currentChatController;
+    private IChatController chatController;
+    private DataStore_Mentions mentionsDataStore;
     private string currentUserId;
     private int currentUnreadMessagesValue;
-    private ILastReadMessagesService lastReadMessagesService;
     private bool isInitialized;
 
     public int CurrentUnreadMessages
@@ -23,7 +24,7 @@ public class UnreadNotificationBadge : MonoBehaviour
         set
         {
             currentUnreadMessagesValue = value;
-            
+
             if (currentUnreadMessagesValue > 0)
             {
                 notificationContainer.SetActive(true);
@@ -32,6 +33,9 @@ public class UnreadNotificationBadge : MonoBehaviour
             else
             {
                 notificationContainer.SetActive(false);
+
+                if (ownPlayerMentionMark != null)
+                    ownPlayerMentionMark.SetActive(false);
             }
         }
     }
@@ -41,23 +45,47 @@ public class UnreadNotificationBadge : MonoBehaviour
     /// </summary>
     /// <param name="chatController">Chat Controlled to be listened</param>
     /// <param name="userId">User ID to listen to</param>
-    /// <param name="lastReadMessagesService">Service that handles unread messages</param>
-    public void Initialize(IChatController chatController, string userId, ILastReadMessagesService lastReadMessagesService)
+    public void Initialize(
+        IChatController chatController,
+        string userId,
+        DataStore_Mentions mentionsDataStore)
     {
         if (chatController == null)
             return;
 
-        this.lastReadMessagesService = lastReadMessagesService;
-        currentChatController = chatController;
+        this.chatController = chatController;
         currentUserId = userId;
 
         UpdateUnreadMessages();
 
-        currentChatController.OnAddMessage -= HandleMessageAdded;
-        currentChatController.OnAddMessage += HandleMessageAdded;
-        lastReadMessagesService.OnUpdated += HandleUnreadMessagesUpdated;
+        chatController.OnUserUnseenMessagesUpdated -= HandleUnseenMessagesUpdated;
+        chatController.OnUserUnseenMessagesUpdated += HandleUnseenMessagesUpdated;
+
+        chatController.OnChannelUnseenMessagesUpdated -= HandleChannelUnseenMessagesUpdated;
+        chatController.OnChannelUnseenMessagesUpdated += HandleChannelUnseenMessagesUpdated;
+
+        if (mentionsDataStore != null)
+        {
+            this.mentionsDataStore = mentionsDataStore;
+            mentionsDataStore.ownPlayerMentionedInChannel.OnChange -= HandleOwnPlayerMentioned;
+            mentionsDataStore.ownPlayerMentionedInChannel.OnChange += HandleOwnPlayerMentioned;
+            mentionsDataStore.ownPlayerMentionedInDM.OnChange -= HandleOwnPlayerMentioned;
+            mentionsDataStore.ownPlayerMentionedInDM.OnChange += HandleOwnPlayerMentioned;
+        }
 
         isInitialized = true;
+    }
+
+    private void HandleUnseenMessagesUpdated(string userId, int unseenMessages)
+    {
+        if (userId != currentUserId) return;
+        CurrentUnreadMessages = unseenMessages;
+    }
+
+    private void HandleChannelUnseenMessagesUpdated(string channelId, int unseenMessages)
+    {
+        if (channelId != currentUserId) return;
+        CurrentUnreadMessages = unseenMessages;
     }
 
     private void OnEnable()
@@ -68,19 +96,23 @@ public class UnreadNotificationBadge : MonoBehaviour
 
     private void OnDestroy()
     {
-        if (currentChatController != null)
-            currentChatController.OnAddMessage -= HandleMessageAdded;
-        if (lastReadMessagesService != null)
-            lastReadMessagesService.OnUpdated -= HandleUnreadMessagesUpdated;
+        if (chatController != null)
+        {
+            chatController.OnUserUnseenMessagesUpdated -= HandleUnseenMessagesUpdated;
+            chatController.OnChannelUnseenMessagesUpdated -= HandleChannelUnseenMessagesUpdated;
+        }
+
+        if (mentionsDataStore != null)
+            mentionsDataStore.ownPlayerMentionedInChannel.OnChange -= HandleOwnPlayerMentioned;
     }
 
-    private void HandleMessageAdded(ChatMessage newMessage) => UpdateUnreadMessages();
+    private void UpdateUnreadMessages() =>
+        CurrentUnreadMessages = chatController.GetAllocatedUnseenMessages(currentUserId) + chatController.GetAllocatedUnseenChannelMessages(currentUserId);
 
-    private void HandleUnreadMessagesUpdated(string userId)
+    private void HandleOwnPlayerMentioned(string channelId, string previous)
     {
-        if (userId != currentUserId) return;
-        UpdateUnreadMessages();
+        if (ownPlayerMentionMark == null) return;
+        if (channelId != currentUserId) return;
+        ownPlayerMentionMark.SetActive(true);
     }
-
-    private void UpdateUnreadMessages() => CurrentUnreadMessages = lastReadMessagesService.GetUnreadCount(currentUserId);
 }

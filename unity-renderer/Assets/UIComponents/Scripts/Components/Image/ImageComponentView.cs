@@ -2,6 +2,7 @@ using DCL.Helpers;
 using System;
 using UnityEngine;
 using UnityEngine.UI;
+using Object = UnityEngine.Object;
 
 public interface IImageComponentView
 {
@@ -47,8 +48,10 @@ public interface IImageComponentView
     void SetLoadingIndicatorVisible(bool isVisible);
 }
 
-public class ImageComponentView : BaseComponentView, IImageComponentView, IComponentModelConfig
+public class ImageComponentView : BaseComponentView, IImageComponentView, IComponentModelConfig<ImageComponentModel>
 {
+    private readonly Vector2 vector2oneHalf = new (0.5f, 0.5f);
+
     [Header("Prefab References")]
     [SerializeField] internal Image image;
     [SerializeField] internal GameObject loadingIndicator;
@@ -64,7 +67,13 @@ public class ImageComponentView : BaseComponentView, IImageComponentView, ICompo
     internal string currentUriLoading = null;
     internal string lastLoadedUri = null;
 
-    public override void Start() { imageObserver.AddListener(OnImageObserverUpdated); }
+    public Image ImageComponent => image;
+
+    public void Start()
+    {
+        image.useSpriteMesh = false;
+        imageObserver.AddListener(OnImageObserverUpdated);
+    }
 
     private void LateUpdate()
     {
@@ -72,9 +81,9 @@ public class ImageComponentView : BaseComponentView, IImageComponentView, ICompo
             SetFitParent(model.fitParent);
     }
 
-    public virtual void Configure(BaseComponentModel newModel)
+    public virtual void Configure(ImageComponentModel newModel)
     {
-        model = (ImageComponentModel)newModel;
+        model = newModel;
         RefreshControl();
     }
 
@@ -96,12 +105,22 @@ public class ImageComponentView : BaseComponentView, IImageComponentView, ICompo
 
     public override void Dispose()
     {
-        base.Dispose();
-
         currentUriLoading = null;
         lastLoadedUri = null;
         imageObserver.RemoveListener(OnImageObserverUpdated);
-        Destroy(currentSprite);
+
+        DestroyInterntally(currentSprite);
+
+        base.Dispose();
+    }
+
+    private static void DestroyInterntally(Object obj)
+    {
+#if UNITY_EDITOR
+        DestroyImmediate(obj);
+#else
+        Destroy(obj);
+#endif
     }
 
     public void SetImage(Sprite sprite, bool cleanLastLoadedUri = true)
@@ -112,10 +131,10 @@ public class ImageComponentView : BaseComponentView, IImageComponentView, ICompo
             return;
 
         image.sprite = sprite;
-        
+
         if (cleanLastLoadedUri)
             lastLoadedUri = null;
-        
+
         SetFitParent(model.fitParent);
     }
 
@@ -177,12 +196,10 @@ public class ImageComponentView : BaseComponentView, IImageComponentView, ICompo
 
     internal void OnImageObserverUpdated(Texture2D texture)
     {
-        if (Application.isPlaying)
-            Destroy(currentSprite);
-        else
-            DestroyImmediate(currentSprite);
+        DestroyInterntally(currentSprite);
 
-        currentSprite = texture != null ? Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), new Vector2(0.5f, 0.5f)) : null;
+        currentSprite = texture != null ? Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), vector2oneHalf, 100, 0, SpriteMeshType.FullRect, Vector4.one, false) : null;
+
         SetImage(currentSprite, false);
         SetLoadingIndicatorVisible(false);
         lastLoadedUri = currentUriLoading;
@@ -194,9 +211,9 @@ public class ImageComponentView : BaseComponentView, IImageComponentView, ICompo
     {
         RectTransform imageRectTransform = (RectTransform)image.transform;
 
-        imageRectTransform.anchorMin = new Vector2(0.5f, 0.5f);
-        imageRectTransform.anchorMax = new Vector2(0.5f, 0.5f);
-        imageRectTransform.pivot = new Vector2(0.5f, 0.5f);
+        imageRectTransform.anchorMin = vector2oneHalf;
+        imageRectTransform.anchorMax = vector2oneHalf;
+        imageRectTransform.pivot = vector2oneHalf;
         imageRectTransform.localPosition = Vector2.zero;
 
         if (transform.parent == null)

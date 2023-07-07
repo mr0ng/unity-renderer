@@ -42,14 +42,17 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Net.Security;
 using System.Net.Sockets;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
+using DCL;
 using WebSocketSharp.Net;
 using WebSocketSharp.Net.WebSockets;
+using Debug = UnityEngine.Debug;
 
 namespace WebSocketSharp
 {
@@ -1267,6 +1270,8 @@ namespace WebSocketSharp
 
             try
             {
+                _logger.Error($"websocket Closed {payloadData.Code}, {payloadData.Reason.ToString()}");
+                Debug.LogError($"websocket Closed1 {payloadData.Code}, {payloadData.Reason.ToString()}");
                 OnClose.Emit(this, e);
             }
             catch (Exception ex)
@@ -1417,10 +1422,8 @@ namespace WebSocketSharp
                 {
                     _retryCountForConnect++;
 
-                    _logger.Fatal(ex.Message);
-                    _logger.Debug(ex.ToString());
+                    _logger.Fatal(ex.ToString());
 
-                    UnityEngine.Debug.Log("Ex: " + ex.Message);
                     var msg = "An exception has occurred while attempting to connect.";
                     fatal(msg, ex);
 
@@ -1469,44 +1472,59 @@ namespace WebSocketSharp
         // As client
         private HttpRequest createHandshakeRequest()
         {
+            _logger.Trace("Creating handshake request");
+
             var ret = HttpRequest.CreateWebSocketRequest(_uri);
+
+            _logger.Trace($"Handshake request host: {ret.Headers["Host"]}");
 
             var headers = ret.Headers;
             if (!_origin.IsNullOrEmpty())
             {
+                _logger.Trace($"Handshake request origin: {_origin}");
                 headers["Origin"] = _origin;
             }
 
+            _logger.Trace($"Handshake request Sec-WebSocket-Key: {_base64Key}");
             headers["Sec-WebSocket-Key"] = _base64Key;
 
             _protocolsRequested = _protocols != null;
             if (_protocolsRequested)
             {
-                headers["Sec-WebSocket-Protocol"] = _protocols.ToString(", ");
+                var protocols = _protocols.ToString(", ");
+                _logger.Trace($"Handshake request Sec-WebSocket-Key: {protocols}");
+                headers["Sec-WebSocket-Protocol"] = protocols;
             }
 
             _extensionsRequested = _compression != CompressionMethod.None;
             if (_extensionsRequested)
             {
-                headers["Sec-WebSocket-Extensions"] = createExtensions();
+                string extensions = createExtensions();
+                _logger.Trace($"Handshake request Sec-WebSocket-Extensions: {extensions}");
+                headers["Sec-WebSocket-Extensions"] = extensions;
             }
 
+            _logger.Trace($"Handshake request Sec-WebSocket-Version: {_version}");
             headers["Sec-WebSocket-Version"] = _version;
 
             AuthenticationResponse authRes = null;
             if (_authChallenge != null && _credentials != null)
             {
+                _logger.Trace($"Initializing AuthenticationResponse with _authCallenge");
                 authRes = new AuthenticationResponse(_authChallenge, _credentials, _nonceCount);
                 _nonceCount = authRes.NonceCount;
             }
             else if (_preAuth)
             {
+                _logger.Trace($"Initializing AuthenticationResponse with _credentals");
                 authRes = new AuthenticationResponse(_credentials);
             }
 
             if (authRes != null)
             {
-                headers["Authorization"] = authRes.ToString();
+                var authorization = authRes.ToString();
+                _logger.Trace($"Handshake request Authorization: {authorization}");
+                headers["Authorization"] = authorization;
             }
 
             if (_cookies.Count > 0)
@@ -1625,6 +1643,7 @@ namespace WebSocketSharp
         private void fatal(string message, ushort code)
         {
             var payload = new PayloadData(code, message);
+            Debug.Log($"CloseAsync1630 {code.ToString()}, {message.ToString()}");
             close(payload, !code.IsReserved(), false, false);
         }
 
@@ -1790,6 +1809,7 @@ namespace WebSocketSharp
         private bool processCloseFrame(WebSocketFrame frame)
         {
             var payload = frame.PayloadData;
+            Debug.Log($"CloseAsync1796 {payload.Code.ToString()}, {payload.Reason.ToString()}");
             close(payload, !payload.HasReservedCode, false, true);
 
             return false;
@@ -1924,6 +1944,7 @@ namespace WebSocketSharp
             }
 
             frame.Unmask();
+            
             return frame.IsFragment
                    ? processFragmentFrame(frame)
                    : frame.IsData
@@ -2033,6 +2054,8 @@ namespace WebSocketSharp
 
             try
             {
+                _logger.Error($"websocket Closed {code}, {reason.ToString()}");
+                Debug.LogError($"websocket Closed2 {code}, {reason.ToString()}");
                 OnClose.Emit(this, e);
             }
             catch (Exception ex)
@@ -2369,7 +2392,9 @@ namespace WebSocketSharp
         // As client
         private void sendProxyConnectRequest()
         {
+            _logger.Trace($"Creating proxy connection http request {_uri.DnsSafeHost}:{_uri.Port}");
             var req = HttpRequest.CreateConnectRequest(_uri);
+            _logger.Trace("Sending proxy connection http request");
             var res = sendHttpRequest(req, 90000);
             if (res.IsProxyAuthenticationRequired)
             {
@@ -2418,21 +2443,36 @@ namespace WebSocketSharp
         // As client
         private void setClientStream()
         {
+            _logger.Trace("Initializing client stream");
+
             if (_proxyUri != null)
             {
+                _logger.Trace($"Creating new TcpClient proxyUri: {_proxyUri.DnsSafeHost}:{_proxyUri.Port}");
+
                 _tcpClient = new TcpClient(_proxyUri.DnsSafeHost, _proxyUri.Port);
+
+                _logger.Trace("Getting TcpClient stream");
                 _stream = _tcpClient.GetStream();
+
                 sendProxyConnectRequest();
             }
             else
             {
+                _logger.Trace($"Creating new TcpClient: {_uri.DnsSafeHost}:{_uri.Port}");
                 _tcpClient = new TcpClient(_uri.DnsSafeHost, _uri.Port);
+
+                _logger.Trace("Getting TcpClient stream");
                 _stream = _tcpClient.GetStream();
             }
 
             if (_secure)
             {
+                _logger.Trace("Initializing ssl stream");
+
                 var conf = getSslConfiguration();
+
+                _logger.Trace($"Target host: {conf.TargetHost}. DNS host: {_uri.DnsSafeHost}");
+
                 var host = conf.TargetHost;
                 if (host != _uri.DnsSafeHost)
                 {
@@ -2483,6 +2523,8 @@ namespace WebSocketSharp
                   {
                       if (!processReceivedFrame(frame) || _readyState == WebSocketState.Closed)
                       {
+                          Debug.Log($"ReadFrame 2504 Start receiving exited {frame.IsClose},{frame.IsFragment},{frame.IsClose},{frame.ToString()}, _readyState{_readyState.ToString()}");
+                          _logger.Error($"Start receiving exited: processReceivedFrame(frame), {_readyState}");
                           var exited = _receivingExited;
                           if (exited != null)
                           {
@@ -2669,6 +2711,8 @@ namespace WebSocketSharp
 
             try
             {
+                _logger.Error($"websocket Closed {payloadData.Code}, {payloadData.Reason.ToString()}");
+                Debug.LogError($"websocket Closed3 {payloadData.Code}, {payloadData.Reason.ToString()}");
                 OnClose.Emit(this, e);
             }
             catch (Exception ex)
@@ -3386,7 +3430,7 @@ namespace WebSocketSharp
                 var msg = "MandatoryExtension cannot be used.";
                 throw new ArgumentException(msg, "code");
             }
-
+            Debug.Log($"CloseAsync846 {code.ToString()}");
             closeAsync((ushort)code, String.Empty);
         }
 
@@ -3501,7 +3545,7 @@ namespace WebSocketSharp
                 var msg = "Its size is greater than 123 bytes.";
                 throw new ArgumentOutOfRangeException("reason", msg);
             }
-
+            Debug.Log($"CloseAsync3478 {code.ToString()}, {reason.ToString()}");
             closeAsync(code, reason);
         }
 
@@ -3602,8 +3646,8 @@ namespace WebSocketSharp
                 var msg = "Its size is greater than 123 bytes.";
                 throw new ArgumentOutOfRangeException("reason", msg);
             }
-
-            closeAsync((ushort)code, reason);
+            Debug.Log($"CloseAsync3585 {code.ToString()}, {reason.ToString()}");
+			closeAsync((ushort)code, reason);
         }
 
         /// <summary>
@@ -3703,6 +3747,8 @@ namespace WebSocketSharp
                 var msg = "A series of reconnecting has failed.";
                 throw new InvalidOperationException(msg);
             }
+
+            _logger.Trace("Starting connect async");
 
             Func<bool> connector = connect;
             connector.BeginInvoke(

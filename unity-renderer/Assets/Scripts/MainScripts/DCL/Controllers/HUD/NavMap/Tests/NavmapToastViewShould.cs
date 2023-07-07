@@ -1,7 +1,9 @@
-using DCL;
-using NUnit.Framework;
 using System.Collections;
 using System.Collections.Generic;
+using DCL;
+using DCLServices.MapRendererV2;
+using NSubstitute;
+using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.TestTools;
 
@@ -19,20 +21,27 @@ namespace Tests
             result.Add(MainSceneFactory.CreateNavMap());
             return result;
         }
-        
+
+        protected override ServiceLocator InitializeServiceLocator()
+        {
+            var result = base.InitializeServiceLocator();
+            result.Register<IMapRenderer>(() => Substitute.For<IMapRenderer>());
+            return result;
+        }
+
         [UnitySetUp]
         protected override IEnumerator SetUp()
         {
             yield return base.SetUp();
             yield return null;
 
-            controller = new MinimapHUDController();
+            controller = new MinimapHUDController(Substitute.For<MinimapMetadataController>(), Substitute.For<IHomeLocationController>(), DCL.Environment.i);
             controller.Initialize();
             navmapView = Object.FindObjectOfType<NavmapView>();
             navmapToastView = navmapView.toastView;
 
             if (!DataStore.i.HUDs.navmapVisible.Get())
-                navmapView.SetVisible(true);
+                navmapView.navmapVisibilityBehaviour.SetVisible(true);
         }
 
         protected override IEnumerator TearDown()
@@ -56,9 +65,9 @@ namespace Tests
             MinimapMetadata.GetMetadata().Clear();
             MinimapMetadata.GetMetadata().AddSceneInfo(sceneInfo);
 
-            navmapToastView.Populate(new Vector2Int(10, 11), sceneInfo);
+            navmapToastView.Populate(new Vector2Int(10, 11), new Vector2(10, 11), sceneInfo);
             Assert.IsTrue(navmapToastView.gameObject.activeSelf);
-            navmapToastView.OnCloseClick();
+            navmapToastView.Close();
             Assert.IsFalse(navmapToastView.gameObject.activeSelf);
         }
 
@@ -79,7 +88,7 @@ namespace Tests
             MinimapMetadata.GetMetadata().Clear();
             MinimapMetadata.GetMetadata().AddSceneInfo(sceneInfo);
 
-            navmapToastView.Populate(new Vector2Int(10, 11), sceneInfo);
+            navmapToastView.Populate(new Vector2Int(10, 11), new Vector2(10, 11), sceneInfo);
             Assert.IsTrue(navmapToastView.gameObject.activeSelf);
 
             Assert.IsTrue(navmapToastView.sceneLocationText.transform.parent.gameObject.activeInHierarchy);
@@ -109,7 +118,7 @@ namespace Tests
             MinimapMetadata.GetMetadata().Clear();
             MinimapMetadata.GetMetadata().AddSceneInfo(sceneInfo);
 
-            navmapToastView.Populate(new Vector2Int(10, 10), sceneInfo);
+            navmapToastView.Populate(new Vector2Int(10, 10), new Vector2(10, 11), sceneInfo);
             Assert.IsTrue(navmapToastView.gameObject.activeSelf);
 
             Assert.AreEqual(sceneInfo.name, navmapToastView.sceneTitleText.text);

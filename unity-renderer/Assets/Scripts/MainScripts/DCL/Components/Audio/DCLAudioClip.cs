@@ -3,6 +3,7 @@ using System.Collections;
 using DCL.Helpers;
 using DCL.Models;
 using UnityEngine;
+using Decentraland.Sdk.Ecs6;
 
 namespace DCL.Components
 {
@@ -12,13 +13,27 @@ namespace DCL.Components
         public class Model : BaseModel
         {
             public string url;
-            public bool loop = false;
+            public bool loop;
             public bool shouldTryToLoad = true;
 
             [Range(0f, 1f)]
             public double volume = 1f;
 
-            public override BaseModel GetDataFromJSON(string json) { return Utils.SafeFromJson<Model>(json); }
+            public override BaseModel GetDataFromJSON(string json) =>
+                Utils.SafeFromJson<Model>(json);
+
+            public override BaseModel GetDataFromPb(ComponentBodyPayload pbModel)
+            {
+                if (pbModel.PayloadCase != ComponentBodyPayload.PayloadOneofCase.AudioClip)
+                    return Utils.SafeUnimplemented<DCLAudioClip, Model>(expected: ComponentBodyPayload.PayloadOneofCase.AudioClip, actual: pbModel.PayloadCase);
+
+                var pb = new Model();
+                if (pbModel.AudioClip.HasLoop) pb.loop = pbModel.AudioClip.Loop;
+                if (pbModel.AudioClip.HasVolume) pb.volume = pbModel.AudioClip.Volume;
+                if (pbModel.AudioClip.HasUrl) pb.url = pbModel.AudioClip.Url;
+
+                return pb;
+            }
         }
 
         public AudioClip audioClip;
@@ -56,12 +71,12 @@ namespace DCL.Components
             if (assetAudioClip.audioClip != null)
             {
                 if (this.audioClip != null)
-                    DataStore.i.sceneWorldObjects.RemoveAudioClip(scene.sceneData.id, audioClip);
+                    DataStore.i.sceneWorldObjects.RemoveAudioClip(scene.sceneData.sceneNumber, audioClip);
 
                 this.audioClip = assetAudioClip.audioClip;
                 loadingState = LoadState.LOADING_COMPLETED;
 
-                DataStore.i.sceneWorldObjects.AddAudioClip(scene.sceneData.id, audioClip);
+                DataStore.i.sceneWorldObjects.AddAudioClip(scene.sceneData.sceneNumber, audioClip);
             }
             else
             {
@@ -104,7 +119,7 @@ namespace DCL.Components
             AssetPromiseKeeper_AudioClip.i.Forget(audioClipPromise);
 
             if (this.audioClip != null)
-                DataStore.i.sceneWorldObjects.RemoveAudioClip(scene.sceneData.id, audioClip);
+                DataStore.i.sceneWorldObjects.RemoveAudioClip(scene.sceneData.sceneNumber, audioClip);
         }
 
         public override IEnumerator ApplyChanges(BaseModel newModel)
@@ -136,7 +151,7 @@ namespace DCL.Components
         public override void Dispose()
         {
             if (this.audioClip != null)
-                DataStore.i.sceneWorldObjects.RemoveAudioClip(scene.sceneData.id, audioClip);
+                DataStore.i.sceneWorldObjects.RemoveAudioClip(scene.sceneData.sceneNumber, audioClip);
 
             isDisposed = true;
             AssetPromiseKeeper_AudioClip.i.Forget(audioClipPromise);

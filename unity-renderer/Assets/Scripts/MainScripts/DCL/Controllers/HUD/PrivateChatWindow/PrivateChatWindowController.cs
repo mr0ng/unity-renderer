@@ -1,111 +1,111 @@
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using DCL;
 using DCL.Interface;
+using DCL.Social.Chat;
+using DCL.Social.Chat.Mentions;
+using DCL.Social.Friends;
 using SocialFeaturesAnalytics;
+using UnityEngine;
 
 public class PrivateChatWindowController : IHUD
 {
+    private const int USER_PRIVATE_MESSAGES_TO_REQUEST_FOR_INITIAL_LOAD = 30;
+    private const float REQUEST_MESSAGES_TIME_OUT = 2;
+    internal const int USER_PRIVATE_MESSAGES_TO_REQUEST_FOR_SHOW_MORE = 10;
+
     public IPrivateChatComponentView View { get; private set; }
-    
-    private enum ChatWindowVisualState { NONE_VISIBLE, INPUT_MODE, PREVIEW_MODE }
 
     private readonly DataStore dataStore;
     private readonly IUserProfileBridge userProfileBridge;
     private readonly IChatController chatController;
     private readonly IFriendsController friendsController;
-    private readonly InputAction_Trigger closeWindowTrigger;
-    private readonly ILastReadMessagesService lastReadMessagesService;
     private readonly ISocialAnalytics socialAnalytics;
     private readonly IMouseCatcher mouseCatcher;
-    private readonly InputAction_Trigger toggleChatTrigger;
+    private readonly IChatMentionSuggestionProvider chatMentionSuggestionProvider;
     private ChatHUDController chatHudController;
     private UserProfile conversationProfile;
-    private bool skipChatInputTrigger;
-    private ChatWindowVisualState currentState;
-    private CancellationTokenSource deactivatePreviewCancellationToken = new CancellationTokenSource();
+    private float lastRequestTime;
     private CancellationTokenSource deactivateFadeOutCancellationToken = new CancellationTokenSource();
+    private bool shouldRequestMessages;
+    private ulong oldestTimestamp = ulong.MaxValue;
+    private string oldestMessageId;
+    private string conversationUserId;
+    private BaseVariable<HashSet<string>> visibleTaskbarPanels => dataStore.HUDs.visibleTaskbarPanels;
 
-    private string ConversationUserId { get; set; } = string.Empty;
-
-    public event Action OnPressBack;
+    public event Action OnBack;
     public event Action OnClosed;
-    public event Action<bool> OnPreviewModeChanged;
 
     public PrivateChatWindowController(DataStore dataStore,
         IUserProfileBridge userProfileBridge,
         IChatController chatController,
         IFriendsController friendsController,
-        InputAction_Trigger closeWindowTrigger,
-        ILastReadMessagesService lastReadMessagesService,
         ISocialAnalytics socialAnalytics,
         IMouseCatcher mouseCatcher,
-        InputAction_Trigger toggleChatTrigger)
+        IChatMentionSuggestionProvider chatMentionSuggestionProvider)
     {
         this.dataStore = dataStore;
         this.userProfileBridge = userProfileBridge;
         this.chatController = chatController;
         this.friendsController = friendsController;
-        this.closeWindowTrigger = closeWindowTrigger;
-        this.lastReadMessagesService = lastReadMessagesService;
         this.socialAnalytics = socialAnalytics;
         this.mouseCatcher = mouseCatcher;
-        this.toggleChatTrigger = toggleChatTrigger;
+        this.chatMentionSuggestionProvider = chatMentionSuggestionProvider;
     }
 
-    public void Initialize(IPrivateChatComponentView view = null)
+    public void Initialize(IPrivateChatComponentView view)
     {
-        view ??= PrivateChatWindowComponentView.Create();
         View = view;
+        View.Initialize(friendsController, socialAnalytics);
         view.OnPressBack -= HandlePressBack;
         view.OnPressBack += HandlePressBack;
         view.OnClose -= Hide;
         view.OnClose += Hide;
         view.OnMinimize += MinimizeView;
         view.OnUnfriend += Unfriend;
-        view.OnFocused += HandleViewFocused;
-        view.OnClickOverWindow += HandleViewClicked;
 
-        closeWindowTrigger.OnTriggered -= HandleCloseInputTriggered;
-        closeWindowTrigger.OnTriggered += HandleCloseInputTriggered;
+        if (mouseCatcher != null)
+            mouseCatcher.OnMouseLock += Hide;
 
-        chatHudController = new ChatHUDController(dataStore, userProfileBridge, false);
+        view.OnRequireMoreMessages += RequestOldConversations;
+
+        dataStore.mentions.someoneMentionedFromContextMenu.OnChange += SomeoneMentionedFromContextMenu;
+
+        chatHudController = new ChatHUDController(dataStore, userProfileBridge, false,
+            async (name, count, ct) =>
+            {
+                return await chatMentionSuggestionProvider.GetProfilesStartingWith(name, count, new[]
+                {
+                    userProfileBridge.GetOwn(),
+                    userProfileBridge.Get(conversationUserId)
+                }, ct);
+            },
+            socialAnalytics,
+            chatController);
+
         chatHudController.Initialize(view.ChatHUD);
-        chatHudController.OnInputFieldSelected -= HandleInputFieldSelected;
+        chatHudController.SortingStrategy = new ChatEntrySortingByTimestamp();
         chatHudController.OnInputFieldSelected += HandleInputFieldSelected;
-        chatHudController.OnInputFieldDeselected -= HandleInputFieldDeselected;
-        chatHudController.OnInputFieldDeselected += HandleInputFieldDeselected;
         chatHudController.OnSendMessage += HandleSendChatMessage;
+        chatHudController.OnMessageSentBlockedBySpam += HandleMessageBlockedBySpam;
 
         chatController.OnAddMessage -= HandleMessageReceived;
         chatController.OnAddMessage += HandleMessageReceived;
-
-        if (mouseCatcher != null)
-            mouseCatcher.OnMouseLock += ActivatePreview;
-
-        toggleChatTrigger.OnTriggered += HandleChatInputTriggered;
-
-        currentState = ChatWindowVisualState.INPUT_MODE;
     }
 
     public void Setup(string newConversationUserId)
     {
-        if (string.IsNullOrEmpty(newConversationUserId) || newConversationUserId == ConversationUserId)
+        if (string.IsNullOrEmpty(newConversationUserId) || newConversationUserId == conversationUserId)
             return;
 
         var newConversationUserProfile = userProfileBridge.Get(newConversationUserId);
 
-        ConversationUserId = newConversationUserId;
+        conversationUserId = newConversationUserId;
         conversationProfile = newConversationUserProfile;
-
-        var userStatus = friendsController.GetUserStatus(ConversationUserId);
-
-        View.Setup(newConversationUserProfile,
-            userStatus.presence == PresenceStatus.ONLINE,
-            userProfileBridge.GetOwn().IsBlocked(ConversationUserId));
-
-        ReloadAllChats().Forget();
+        chatHudController.ClearAllEntries();
+        shouldRequestMessages = true;
     }
 
     public void SetVisibility(bool visible)
@@ -113,14 +113,34 @@ public class PrivateChatWindowController : IHUD
         if (View.IsActive == visible)
             return;
 
+        SetVisiblePanelList(visible);
+        chatHudController.SetVisibility(visible);
+        dataStore.HUDs.chatInputVisible.Set(visible);
+
         if (visible)
         {
+            View?.SetLoadingMessagesActive(false);
+            View?.SetOldMessagesLoadingActive(false);
+
             if (conversationProfile != null)
             {
-                var userStatus = friendsController.GetUserStatus(ConversationUserId);
+                var userStatus = friendsController.GetUserStatus(conversationUserId);
+
                 View.Setup(conversationProfile,
                     userStatus.presence == PresenceStatus.ONLINE,
-                    userProfileBridge.GetOwn().IsBlocked(ConversationUserId));
+                    userProfileBridge.GetOwn().IsBlocked(conversationUserId));
+
+                if (shouldRequestMessages)
+                {
+                    ResetPagination();
+
+                    RequestPrivateMessages(
+                        conversationUserId,
+                        USER_PRIVATE_MESSAGES_TO_REQUEST_FOR_INITIAL_LOAD,
+                        null);
+
+                    shouldRequestMessages = false;
+                }
             }
 
             View.Show();
@@ -133,27 +153,21 @@ public class PrivateChatWindowController : IHUD
         }
     }
 
-    public void Focus()
-    {
-        chatHudController.FocusInputField();
-        MarkUserChatMessagesAsRead();
-    }
-
     public void Dispose()
     {
         if (chatHudController != null)
         {
             chatHudController.OnInputFieldSelected -= HandleInputFieldSelected;
-            chatHudController.OnInputFieldDeselected -= HandleInputFieldDeselected;
+            chatHudController.OnSendMessage -= HandleSendChatMessage;
+            chatHudController.OnMessageSentBlockedBySpam -= HandleMessageBlockedBySpam;
+            chatHudController.Dispose();
         }
 
         if (chatController != null)
             chatController.OnAddMessage -= HandleMessageReceived;
 
         if (mouseCatcher != null)
-            mouseCatcher.OnMouseLock -= ActivatePreview;
-
-        toggleChatTrigger.OnTriggered -= HandleChatInputTriggered;
+            mouseCatcher.OnMouseLock -= Hide;
 
         if (View != null)
         {
@@ -162,29 +176,11 @@ public class PrivateChatWindowController : IHUD
             View.OnMinimize -= MinimizeView;
             View.OnUnfriend -= Unfriend;
             View.OnFocused -= HandleViewFocused;
-            View.OnClickOverWindow -= HandleViewClicked;
+            View.OnRequireMoreMessages -= RequestOldConversations;
             View.Dispose();
         }
-    }
 
-    private async UniTaskVoid ReloadAllChats()
-    {
-        chatHudController.ClearAllEntries();
-
-        const int entriesPerFrame = 10;
-        var list = chatController.GetEntries();
-        if (list.Count == 0)
-            return;
-
-        for (var i = list.Count - 1; i >= 0; i--)
-        {
-            var message = list[i];
-            if (i != 0 && i % entriesPerFrame == 0)
-                await UniTask.NextFrame();
-            if (!IsMessageFomCurrentConversation(message))
-                continue;
-            chatHudController.AddChatMessage(message, spamFiltering: false);
-        }
+        dataStore.mentions.someoneMentionedFromContextMenu.OnChange -= SomeoneMentionedFromContextMenu;
     }
 
     private void HandleSendChatMessage(ChatMessage message)
@@ -204,12 +200,10 @@ public class PrivateChatWindowController : IHUD
             chatHudController.ResetInputField();
             chatHudController.FocusInputField();
         }
-
         else
         {
-            skipChatInputTrigger = true;
-            chatHudController.ResetInputField(true);
-            ActivatePreview();
+            SetVisibility(false);
+            OnClosed?.Invoke();
             return;
         }
 
@@ -219,36 +213,55 @@ public class PrivateChatWindowController : IHUD
         chatController.Send(message);
     }
 
-    private void HandleCloseInputTriggered(DCLAction_Trigger action) => Hide();
+    private void MinimizeView() =>
+        SetVisibility(false);
 
-    private void MinimizeView() => SetVisibility(false);
-
-    private void HandleMessageReceived(ChatMessage message)
+    private void HandleMessageReceived(ChatMessage[] messages)
     {
-        if (!IsMessageFomCurrentConversation(message))
-            return;
+        var messageLogUpdated = false;
 
-        chatHudController.AddChatMessage(message, View.IsActive);
+        var ownPlayerAlreadyMentioned = false;
 
-        if (View.IsActive)
+        foreach (var message in messages)
         {
-            // The messages from 'conversationUserId' are marked as read if his private chat window is currently open
-            MarkUserChatMessagesAsRead();
+            if (!ownPlayerAlreadyMentioned)
+                ownPlayerAlreadyMentioned = CheckOwnPlayerMentionInDMs(message);
+
+            if (!IsMessageFomCurrentConversation(message)) continue;
+
+            chatHudController.SetChatMessage(message, limitMaxEntries: false);
+
+            if (message.timestamp < oldestTimestamp)
+            {
+                oldestTimestamp = message.timestamp;
+                oldestMessageId = message.messageId;
+            }
+
+            View?.SetLoadingMessagesActive(false);
+            View?.SetOldMessagesLoadingActive(false);
+
+            messageLogUpdated = true;
         }
 
-        deactivatePreviewCancellationToken.Cancel();
-        deactivatePreviewCancellationToken = new CancellationTokenSource();
         deactivateFadeOutCancellationToken.Cancel();
         deactivateFadeOutCancellationToken = new CancellationTokenSource();
-        
-        if (currentState.Equals(ChatWindowVisualState.NONE_VISIBLE))
-        {
-            ActivatePreview();
-        }
-        else if (currentState.Equals(ChatWindowVisualState.PREVIEW_MODE))
-        {
-            WaitThenFadeOutMessages(deactivateFadeOutCancellationToken.Token).Forget();
-        }
+
+        if (View.IsActive && messageLogUpdated)
+            MarkUserChatMessagesAsRead();
+    }
+
+    private bool CheckOwnPlayerMentionInDMs(ChatMessage message)
+    {
+        var ownUserProfile = userProfileBridge.GetOwn();
+
+        if (message.sender == ownUserProfile.userId ||
+            (message.sender == conversationUserId && View.IsActive) ||
+            message.messageType != ChatMessage.Type.PRIVATE ||
+            !MentionsUtils.IsUserMentionedInText(ownUserProfile.userName, message.body))
+            return false;
+
+        dataStore.mentions.ownPlayerMentionedInDM.Set(message.sender, true);
+        return true;
     }
 
     private void Hide()
@@ -257,138 +270,127 @@ public class PrivateChatWindowController : IHUD
         OnClosed?.Invoke();
     }
 
-    private void HandlePressBack() => OnPressBack?.Invoke();
+    private void Show()
+    {
+        SetVisibility(true);
+    }
+
+    private void HandlePressBack() =>
+        OnBack?.Invoke();
 
     private void Unfriend(string friendId)
     {
-        friendsController.RemoveFriend(friendId);
-        Hide();
+        dataStore.notifications.GenericConfirmation.Set(GenericConfirmationNotificationData.CreateUnFriendData(
+            UserProfileController.userProfilesCatalog.Get(friendId)?.userName,
+            () =>
+            {
+                friendsController.RemoveFriend(friendId);
+                Hide();
+            }), true);
     }
 
     private bool IsMessageFomCurrentConversation(ChatMessage message)
     {
         return message.messageType == ChatMessage.Type.PRIVATE &&
-               (message.sender == ConversationUserId || message.recipient == ConversationUserId);
+               (message.sender == conversationUserId || message.recipient == conversationUserId);
     }
 
     private void MarkUserChatMessagesAsRead() =>
-        lastReadMessagesService.MarkAllRead(ConversationUserId);
+        chatController.MarkMessagesAsSeen(conversationUserId);
 
     private void HandleInputFieldSelected()
     {
-        deactivatePreviewCancellationToken.Cancel();
-        deactivatePreviewCancellationToken = new CancellationTokenSource();
-        DeactivatePreview();
-        // The messages from 'conversationUserId' are marked as read if the player clicks on the input field of the private chat
-        MarkUserChatMessagesAsRead();
-    }
+        Show();
 
-    private void HandleInputFieldDeselected()
-    {
-        if (View.IsFocused) 
-            return;
-        WaitThenActivatePreview(deactivatePreviewCancellationToken.Token).Forget();
+        // The messages from 'conversationUserId' are marked as read if the player clicks on the input field of the private chat
+        //MarkUserChatMessagesAsRead();
     }
 
     private void HandleViewFocused(bool focused)
     {
         if (focused)
         {
-            deactivatePreviewCancellationToken.Cancel();
-            deactivatePreviewCancellationToken = new CancellationTokenSource();
             deactivateFadeOutCancellationToken.Cancel();
             deactivateFadeOutCancellationToken = new CancellationTokenSource();
-            
-            if (currentState.Equals(ChatWindowVisualState.NONE_VISIBLE))
-            {
-                ActivatePreviewOnMessages();
-            }
         }
+    }
+
+    private void SetVisiblePanelList(bool visible)
+    {
+        HashSet<string> newSet = visibleTaskbarPanels.Get();
+
+        if (visible)
+            newSet.Add("PrivateChatChannel");
         else
-        {
-            if (chatHudController.IsInputSelected) 
-                return;
-            
-            if (currentState.Equals(ChatWindowVisualState.INPUT_MODE))
-            {
-                WaitThenActivatePreview(deactivatePreviewCancellationToken.Token).Forget();
-                return;
-            }
-            
-            if (currentState.Equals(ChatWindowVisualState.PREVIEW_MODE))
-            {
-                WaitThenFadeOutMessages(deactivateFadeOutCancellationToken.Token).Forget();
-            }
-        }
+            newSet.Remove("PrivateChatChannel");
+
+        visibleTaskbarPanels.Set(newSet, true);
     }
 
-    private void HandleViewClicked()
+    internal void RequestPrivateMessages(string userId, int limit, string fromMessageId)
     {
-        if (currentState.Equals(ChatWindowVisualState.INPUT_MODE))
-            return;
-        DeactivatePreview();
+        View?.SetLoadingMessagesActive(true);
+        chatController.GetPrivateMessages(userId, limit, fromMessageId);
+        WaitForRequestTimeOutThenHideLoadingFeedback().Forget();
     }
 
-    private async UniTaskVoid WaitThenActivatePreview(CancellationToken cancellationToken)
+    internal void RequestOldConversations()
     {
-        await UniTask.Delay(3000, cancellationToken: cancellationToken);
-        await UniTask.SwitchToMainThread(cancellationToken);
-        if (cancellationToken.IsCancellationRequested)
-            return;
-        currentState = ChatWindowVisualState.PREVIEW_MODE;
-        ActivatePreview();
+        if (IsLoadingMessages()) return;
+
+        chatController.GetPrivateMessages(
+            conversationUserId,
+            USER_PRIVATE_MESSAGES_TO_REQUEST_FOR_SHOW_MORE,
+            oldestMessageId);
+
+        lastRequestTime = Time.realtimeSinceStartup;
+        View?.SetOldMessagesLoadingActive(true);
+        WaitForRequestTimeOutThenHideLoadingFeedback().Forget();
     }
 
-    private async UniTaskVoid WaitThenFadeOutMessages(CancellationToken cancellationToken)
+    private bool IsLoadingMessages() =>
+        Time.realtimeSinceStartup - lastRequestTime < REQUEST_MESSAGES_TIME_OUT;
+
+    private async UniTaskVoid WaitForRequestTimeOutThenHideLoadingFeedback()
     {
-        await UniTask.Delay(30000, cancellationToken: cancellationToken);
-        await UniTask.SwitchToMainThread(cancellationToken);
-        if (cancellationToken.IsCancellationRequested)
-            return;
-        chatHudController.FadeOutMessages();
-        currentState = ChatWindowVisualState.NONE_VISIBLE;
+        lastRequestTime = Time.realtimeSinceStartup;
+
+        await UniTask.WaitUntil(() => Time.realtimeSinceStartup - lastRequestTime > REQUEST_MESSAGES_TIME_OUT);
+
+        View?.SetLoadingMessagesActive(false);
+        View?.SetOldMessagesLoadingActive(false);
     }
 
-    public void ActivatePreview()
+    private void HandleMessageBlockedBySpam(ChatMessage message)
     {
-        View.ActivatePreview();
-        chatHudController.ActivatePreview();
-        currentState = ChatWindowVisualState.PREVIEW_MODE;
-        WaitThenFadeOutMessages(deactivateFadeOutCancellationToken.Token).Forget();
-        OnPreviewModeChanged?.Invoke(true);
+        chatHudController.SetChatMessage(new ChatEntryModel
+                          {
+                              timestamp = (ulong)DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
+                              bodyText = "You sent too many messages in a short period of time. Please wait and try again later.",
+                              messageId = Guid.NewGuid().ToString(),
+                              messageType = ChatMessage.Type.SYSTEM,
+                              subType = ChatEntryModel.SubType.RECEIVED
+                          })
+                         .Forget();
     }
 
-    public void ActivatePreviewOnMessages()
+    private void ResetPagination()
     {
-        chatHudController.ActivatePreview();
-        currentState = ChatWindowVisualState.PREVIEW_MODE;
-        OnPreviewModeChanged?.Invoke(true);
+        oldestTimestamp = long.MaxValue;
+        oldestMessageId = null;
     }
 
-    public void DeactivatePreview()
+    private void Focus()
     {
-        deactivatePreviewCancellationToken.Cancel();
-        deactivatePreviewCancellationToken = new CancellationTokenSource();
-        deactivateFadeOutCancellationToken.Cancel();
-        deactivateFadeOutCancellationToken = new CancellationTokenSource();
-
-        View.DeactivatePreview();
-        chatHudController.DeactivatePreview();
-        OnPreviewModeChanged?.Invoke(false);
-        currentState = ChatWindowVisualState.INPUT_MODE;
+        chatHudController.FocusInputField();
+        MarkUserChatMessagesAsRead();
     }
 
-    private void HandleChatInputTriggered(DCLAction_Trigger action)
+    private void SomeoneMentionedFromContextMenu(string mention, string _)
     {
-        // race condition patch caused by unfocusing input field from invalid message on SendChatMessage
-        // chat input trigger is the same key as sending the chat message from the input field
-        if (skipChatInputTrigger)
-        {
-            skipChatInputTrigger = false;
-            return;
-        }
         if (!View.IsActive)
             return;
-        chatHudController.FocusInputField();
+
+        View.ChatHUD.AddTextIntoInputField(mention);
     }
 }

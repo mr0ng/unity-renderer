@@ -1,26 +1,21 @@
-using System;
+using Cysharp.Threading.Tasks;
 using DCL.Components;
 using DCL.Controllers;
 using DCL.Helpers;
 using DCL.Models;
 using Newtonsoft.Json;
 using NUnit.Framework;
-using System.Collections;
-using System.IO;
 using System.Linq;
 using DCL;
-using DCL.Helpers.NFT;
-using NFTShape_Internal;
-using NSubstitute;
+using System.Threading.Tasks;
 using UnityEngine;
-using UnityGLTF.Loader;
 using Environment = DCL.Environment;
 
 namespace SceneBoundariesCheckerTests
 {
     public static class SBC_Asserts
     {
-        public static IEnumerator EntitiesAreBeingCorrectlyRegistered(ParcelScene scene)
+        public static async Task EntitiesAreBeingCorrectlyRegistered(ParcelScene scene)
         {
             var boxShape1 = TestUtils.CreateEntityWithBoxShape(scene, new Vector3(20, 2, 20));
             var boxShape2 = TestUtils.CreateEntityWithBoxShape(scene, new Vector3(20, 2, 20));
@@ -33,7 +28,7 @@ namespace SceneBoundariesCheckerTests
             Assert.AreEqual(2, scene.entities.Count, "scene entities count can't be zero!");
             Assert.AreEqual(2, Environment.i.world.sceneBoundsChecker.entitiesToCheckCount, "entities to check can't be zero!");
 
-            yield return null;
+            await UniTask.WaitForFixedUpdate();
 
             TestUtils.RemoveSceneEntity(scene, entity2.entityId);
 
@@ -43,15 +38,34 @@ namespace SceneBoundariesCheckerTests
             Assert.AreEqual(0, Environment.i.world.sceneBoundsChecker.entitiesToCheckCount, "entities to check should be zero!");
         }
 
-        public static IEnumerator PShapeIsInvalidatedWhenStartingOutOfBounds(ParcelScene scene)
+        public static async Task EntityIsEvaluatedOnReparenting(ParcelScene scene)
         {
-            var boxShape = TestUtils.CreateEntityWithBoxShape(scene, new Vector3(20, 2, 20));
-            yield return null;
+            var boxShape = TestUtils.CreateEntityWithBoxShape(scene, new Vector3(8, 2, 8));
+            var shapeEntity = boxShape.attachedEntities.First();
 
-            AssertMeshIsInvalid(boxShape.attachedEntities.First().meshesInfo);
+            await UniTask.WaitForFixedUpdate();
+            AssertMeshesAndCollidersValidState(shapeEntity.meshesInfo, true);
+
+            var newParentEntity = TestUtils.CreateSceneEntity(scene);
+            TestUtils.SetEntityTransform(scene, newParentEntity, new DCLTransform.Model { position = new Vector3(100, 1, 100) });
+
+            // Our entities parenting moves the child's local position to Vector3.zero by default...
+            TestUtils.SetEntityParent(scene, shapeEntity, newParentEntity);
+
+            await UniTask.WaitForFixedUpdate();
+            AssertMeshesAndCollidersValidState(shapeEntity.meshesInfo, false);
         }
 
-        public static IEnumerator GLTFShapeIsInvalidatedWhenStartingOutOfBounds(ParcelScene scene)
+        public static async Task PShapeIsInvalidatedWhenStartingOutOfBounds(ParcelScene scene)
+        {
+            var boxShape = TestUtils.CreateEntityWithBoxShape(scene, new Vector3(20, 2, 20));
+
+            await WaitForFixedUpdates();
+
+            AssertMeshesAndCollidersValidState(boxShape.attachedEntities.First().meshesInfo, false);
+        }
+
+        public static async Task GLTFShapeIsInvalidatedWhenStartingOutOfBounds(ParcelScene scene)
         {
             var entity = TestUtils.CreateSceneEntity(scene);
 
@@ -62,14 +76,129 @@ namespace SceneBoundariesCheckerTests
                 {
                     src = TestAssetsUtils.GetPath() + "/GLB/PalmTree_01.glb"
                 }));
-            LoadWrapper gltfShape = Environment.i.world.state.GetLoaderForEntity(entity);
-            yield return new UnityEngine.WaitUntil(() => gltfShape.alreadyLoaded);
-            yield return null;
 
-            AssertMeshIsInvalid(entity.meshesInfo);
+            LoadWrapper gltfShape = Environment.i.world.state.GetLoaderForEntity(entity);
+            await UniTask.WaitUntil(() => gltfShape.alreadyLoaded);
+            await WaitForFixedUpdates();
+
+            AssertMeshesAndCollidersValidState(entity.meshesInfo, false);
         }
-        
-        public static IEnumerator NFTShapeIsInvalidatedWhenStartingOutOfBounds(ParcelScene scene)
+
+        public static async Task GLTFShapeWithCollidersAndNoRenderersIsInvalidatedWhenStartingOutOfBounds(ParcelScene scene)
+        {
+            var entity = TestUtils.CreateSceneEntity(scene);
+
+            TestUtils.SetEntityTransform(scene, entity, new DCLTransform.Model { position = new Vector3(18, 1, 18) });
+
+            TestUtils.CreateAndSetShape(scene, entity.entityId, DCL.Models.CLASS_ID.GLTF_SHAPE, JsonConvert.SerializeObject(
+                new
+                {
+                    src = TestAssetsUtils.GetPath() + "/GLB/gltfshape-asset-bundle-colliders-no-renderers.glb"
+                }));
+
+            LoadWrapper gltfShape = Environment.i.world.state.GetLoaderForEntity(entity);
+            await UniTask.WaitUntil(() => gltfShape.alreadyLoaded);
+            await WaitForFixedUpdates();
+
+            AssertMeshesAndCollidersValidState(entity.meshesInfo, false);
+        }
+
+        public static async Task GLTFShapeCollidersCheckedWhenEvaluatingSceneInnerBoundaries(ParcelScene scene)
+        {
+            var entity = TestUtils.CreateSceneEntity(scene);
+
+            TestUtils.SetEntityTransform(scene, entity, new DCLTransform.Model { position = new Vector3(18, 1, 18) });
+
+            TestUtils.CreateAndSetShape(scene, entity.entityId, DCL.Models.CLASS_ID.GLTF_SHAPE, JsonConvert.SerializeObject(
+                new
+                {
+                    src = TestAssetsUtils.GetPath() + "/GLB/gltfshape-asset-bundle-colliders-no-renderers.glb"
+                }));
+
+            LoadWrapper gltfShape = Environment.i.world.state.GetLoaderForEntity(entity);
+            await UniTask.WaitUntil(() => gltfShape.alreadyLoaded);
+            await WaitForFixedUpdates();
+
+            // Force entity evaluation avoiding outer boundaries check
+            Environment.i.world.sceneBoundsChecker.RunEntityEvaluation(entity, onlyOuterBoundsCheck: false);
+
+            AssertMeshesAndCollidersValidState(entity.meshesInfo, false);
+        }
+
+        public static async Task PShapeIsInvalidatedWhenStartingOutOfBoundsWithoutTransform(ParcelScene scene)
+        {
+            var entity = TestUtils.CreateSceneEntity(scene);
+
+            TestUtils.CreateAndSetShape(scene, entity.entityId, DCL.Models.CLASS_ID.BOX_SHAPE,
+                JsonConvert.SerializeObject(new BoxShape.Model { })
+            );
+
+            await WaitForFixedUpdates();
+
+            AssertMeshesAndCollidersValidState(entity.meshesInfo, false);
+        }
+
+        public static async Task GLTFShapeIsInvalidatedWhenStartingOutOfBoundsWithoutTransform(ParcelScene scene)
+        {
+            var entity = TestUtils.CreateSceneEntity(scene);
+
+            TestUtils.CreateAndSetShape(scene, entity.entityId, DCL.Models.CLASS_ID.GLTF_SHAPE, JsonConvert.SerializeObject(
+                new
+                {
+                    src = TestAssetsUtils.GetPath() + "/GLB/PalmTree_01.glb"
+                }));
+
+            LoadWrapper gltfShape = Environment.i.world.state.GetLoaderForEntity(entity);
+            await UniTask.WaitUntil(() => gltfShape.alreadyLoaded);
+
+            await WaitForFixedUpdates();
+            AssertMeshesAndCollidersValidState(entity.meshesInfo, false);
+        }
+
+        public static async Task PShapeIsEvaluatedAfterCorrectTransformAttachment(ParcelScene scene)
+        {
+            var entity = TestUtils.CreateSceneEntity(scene);
+
+            TestUtils.CreateAndSetShape(scene, entity.entityId, DCL.Models.CLASS_ID.BOX_SHAPE,
+                JsonConvert.SerializeObject(new BoxShape.Model { })
+            );
+
+            await WaitForFixedUpdates();
+
+            AssertMeshesAndCollidersValidState(entity.meshesInfo, false);
+
+            TestUtils.SetEntityTransform(scene, entity, new DCLTransform.Model { position = new Vector3(8, 1, 8) });
+
+            await UniTask.WaitUntil(() => entity.isInsideSceneBoundaries);
+
+            AssertMeshesAndCollidersValidState(entity.meshesInfo, true);
+        }
+
+        public static async Task GLTFShapeIsEvaluatedAfterCorrectTransformAttachment(ParcelScene scene)
+        {
+            var entity = TestUtils.CreateSceneEntity(scene);
+
+            TestUtils.CreateAndSetShape(scene, entity.entityId, DCL.Models.CLASS_ID.GLTF_SHAPE, JsonConvert.SerializeObject(
+                new
+                {
+                    src = TestAssetsUtils.GetPath() + "/GLB/PalmTree_01.glb"
+                }));
+
+            LoadWrapper gltfShape = Environment.i.world.state.GetLoaderForEntity(entity);
+            await UniTask.WaitUntil(() => gltfShape.alreadyLoaded);
+
+            await WaitForFixedUpdates();
+
+            AssertMeshesAndCollidersValidState(entity.meshesInfo, false);
+
+            TestUtils.SetEntityTransform(scene, entity, new DCLTransform.Model { position = new Vector3(8, 1, 8) });
+
+            await WaitForFixedUpdates();
+
+            AssertMeshesAndCollidersValidState(entity.meshesInfo, true);
+        }
+
+        public static async Task NFTShapeIsInvalidatedWhenStartingOutOfBounds(ParcelScene scene)
         {
             var entity = TestUtils.CreateSceneEntity(scene);
 
@@ -81,38 +210,37 @@ namespace SceneBoundariesCheckerTests
             };
 
             NFTShape component = TestUtils.SharedComponentCreate<NFTShape, NFTShape.Model>(scene, CLASS_ID.NFT_SHAPE, componentModel);
-            yield return component.routine;
+            await UniTask.WaitUntil(() => !component.isRoutineRunning);
 
             TestUtils.SharedComponentAttach(component, entity);
 
             LoadWrapper shapeLoader = Environment.i.world.state.GetLoaderForEntity(entity);
-            yield return new UnityEngine.WaitUntil(() => shapeLoader.alreadyLoaded);
+            await UniTask.WaitUntil(() => shapeLoader.alreadyLoaded);
 
-            yield return null;
+            await UniTask.WaitForFixedUpdate();
 
-            AssertMeshIsInvalid(entity.meshesInfo);
+            AssertMeshesAndCollidersValidState(entity.meshesInfo, false);
         }
 
-        public static IEnumerator PShapeIsInvalidatedWhenLeavingBounds(ParcelScene scene)
+        public static async Task PShapeIsInvalidatedWhenLeavingBounds(ParcelScene scene)
         {
             var boxShape = TestUtils.CreateEntityWithBoxShape(scene, new Vector3(8, 1, 8));
-            yield return null;
 
+            await WaitForFixedUpdates();
             var entity = boxShape.attachedEntities.First();
 
-            AssertMeshIsValid(entity.meshesInfo);
+            AssertMeshesAndCollidersValidState(entity.meshesInfo, true);
 
             // Move object to surpass the scene boundaries
             var transformModel = new DCLTransform.Model { position = new Vector3(18, 1, 18) };
             TestUtils.SetEntityTransform(scene, entity, transformModel);
 
-            yield return null;
-            yield return null;
+            await WaitForFixedUpdates();
 
-            AssertMeshIsInvalid(entity.meshesInfo);
+            AssertMeshesAndCollidersValidState(entity.meshesInfo, false);
         }
 
-        public static IEnumerator GLTFShapeIsInvalidatedWhenLeavingBounds(ParcelScene scene)
+        public static async Task GLTFShapeIsInvalidatedWhenLeavingBounds(ParcelScene scene)
         {
             var entity = TestUtils.CreateSceneEntity(scene);
 
@@ -123,21 +251,21 @@ namespace SceneBoundariesCheckerTests
                 {
                     src = TestAssetsUtils.GetPath() + "/GLB/PalmTree_01.glb"
                 }));
-            LoadWrapper gltfShape = Environment.i.world.state.GetLoaderForEntity(entity);
-            yield return new UnityEngine.WaitUntil(() => gltfShape.alreadyLoaded);
 
-            AssertMeshIsValid(entity.meshesInfo);
+            LoadWrapper gltfShape = Environment.i.world.state.GetLoaderForEntity(entity);
+            await UniTask.WaitUntil(() => gltfShape.alreadyLoaded);
+
+            AssertMeshesAndCollidersValidState(entity.meshesInfo, true);
 
             // Move object to surpass the scene boundaries
             TestUtils.SetEntityTransform(scene, entity, new DCLTransform.Model { position = new Vector3(18, 1, 18) });
 
-            yield return null;
-            yield return null;
+            await WaitForFixedUpdates();
 
-            AssertMeshIsInvalid(entity.meshesInfo);
+            AssertMeshesAndCollidersValidState(entity.meshesInfo, false);
         }
 
-        public static IEnumerator NFTShapeIsInvalidatedWhenLeavingBounds(ParcelScene scene)
+        public static async Task NFTShapeIsInvalidatedWhenLeavingBounds(ParcelScene scene)
         {
             var entity = TestUtils.CreateSceneEntity(scene);
 
@@ -149,55 +277,53 @@ namespace SceneBoundariesCheckerTests
             };
 
             NFTShape component = TestUtils.SharedComponentCreate<NFTShape, NFTShape.Model>(scene, CLASS_ID.NFT_SHAPE, componentModel);
-            yield return component.routine;
+            await UniTask.WaitUntil(() => !component.isRoutineRunning);
 
             TestUtils.SharedComponentAttach(component, entity);
 
             LoadWrapper shapeLoader = Environment.i.world.state.GetLoaderForEntity(entity);
-            yield return new UnityEngine.WaitUntil(() => shapeLoader.alreadyLoaded);
+            await UniTask.WaitUntil(() => shapeLoader.alreadyLoaded);
 
-            AssertMeshIsValid(entity.meshesInfo);
+            AssertMeshesAndCollidersValidState(entity.meshesInfo, true);
 
             // Move object to surpass the scene boundaries
             TestUtils.SetEntityTransform(scene, entity, new DCLTransform.Model { position = new Vector3(18, 1, 18) });
 
-            yield return null;
+            await WaitForFixedUpdates();
 
-            AssertMeshIsInvalid(entity.meshesInfo);
+            AssertMeshesAndCollidersValidState(entity.meshesInfo, false);
         }
 
-        public static IEnumerator HeightIsEvaluated(ParcelScene scene)
+        public static async Task HeightIsEvaluated(ParcelScene scene)
         {
             var boxShape = TestUtils.CreateEntityWithBoxShape(scene, new Vector3(8, 5, 8));
             var entity = boxShape.attachedEntities.First();
-            yield return null;
 
-            AssertMeshIsValid(entity.meshesInfo);
+            await WaitForFixedUpdates();
+            AssertMeshesAndCollidersValidState(entity.meshesInfo, true);
 
             // Move object to surpass the scene height boundaries
             var transformModel = new DCLTransform.Model { position = new Vector3(8, 30, 8) };
             TestUtils.SetEntityTransform(scene, entity, transformModel);
 
-            yield return null;
-            yield return null;
-
-            AssertMeshIsInvalid(entity.meshesInfo);
+            await WaitForFixedUpdates();
+            AssertMeshesAndCollidersValidState(entity.meshesInfo, false);
         }
 
-        public static IEnumerator ChildShapeIsEvaluated(ParcelScene scene)
+        public static async Task ChildShapeIsEvaluated(ParcelScene scene)
         {
             long entityId = 11;
             TestUtils.InstantiateEntityWithShape(scene, entityId, DCL.Models.CLASS_ID.BOX_SHAPE, new Vector3(8, 1, 8));
-            yield return null;
 
-            AssertMeshIsValid(scene.entities[entityId].meshesInfo);
+            await WaitForFixedUpdates();
+            AssertMeshesAndCollidersValidState(scene.entities[entityId].meshesInfo, true);
 
             // Attach child
             long childEntityId = 20;
             TestUtils.InstantiateEntityWithShape(scene, childEntityId, DCL.Models.CLASS_ID.BOX_SHAPE, new Vector3(8, 1, 8));
-            yield return null;
 
-            AssertMeshIsValid(scene.entities[childEntityId].meshesInfo);
+            await WaitForFixedUpdates();
+            AssertMeshesAndCollidersValidState(scene.entities[childEntityId].meshesInfo, true);
 
             TestUtils.SetEntityParent(scene, childEntityId, entityId);
 
@@ -205,62 +331,101 @@ namespace SceneBoundariesCheckerTests
             var transformModel = new DCLTransform.Model { position = new Vector3(18, 1, 18) };
             TestUtils.SetEntityTransform(scene, scene.entities[entityId], transformModel);
 
-            yield return null;
-            yield return null;
-
-            AssertMeshIsInvalid(scene.entities[childEntityId].meshesInfo);
+            await WaitForFixedUpdates();
+            AssertMeshesAndCollidersValidState(scene.entities[childEntityId].meshesInfo, false);
         }
 
-        public static IEnumerator ChildShapeIsEvaluatedOnShapelessParent(ParcelScene scene)
+        public static async Task ChildShapeIsEvaluatedOnShapelessParent(ParcelScene scene)
         {
             // create shapeless parent entity
             long entityId = 11;
             TestUtils.CreateSceneEntity(scene, entityId);
             TestUtils.SetEntityTransform(scene, scene.entities[entityId], new Vector3(18, 1, 18), Quaternion.identity, Vector3.one);
-            yield return null;
+            await WaitForFixedUpdates();
 
-            AssertMeshIsValid(scene.entities[entityId].meshesInfo);
+            AssertMeshesAndCollidersValidState(scene.entities[entityId].meshesInfo, true);
 
             // Attach child
             long childEntityId = 20;
             TestUtils.InstantiateEntityWithShape(scene, childEntityId, DCL.Models.CLASS_ID.BOX_SHAPE, new Vector3(0, 0, 0));
-            yield return null;
+            await WaitForFixedUpdates();
 
             TestUtils.SetEntityParent(scene, childEntityId, entityId);
-            yield return null;
+            await WaitForFixedUpdates();
+            IDCLEntity child = scene.entities[childEntityId];
 
-            AssertMeshIsInvalid(scene.entities[childEntityId].meshesInfo);
+            AssertMeshesAndCollidersValidState(child.meshesInfo, false);
 
             // Move parent object to re-enter the scene boundaries
             TestUtils.SetEntityTransform(scene, scene.entities[entityId], new Vector3(8, 1, 8), Quaternion.identity, Vector3.one);
 
-            yield return null;
-            yield return null;
+            await UniTask.WaitUntil(() => child.isInsideSceneBoundaries);
 
-            AssertMeshIsValid(scene.entities[childEntityId].meshesInfo);
+            AssertMeshesAndCollidersValidState(child.meshesInfo, true);
         }
 
-        public static IEnumerator PShapeIsResetWhenReenteringBounds(ParcelScene scene)
+        public static async Task PShapeIsResetWhenReenteringBounds(ParcelScene scene)
         {
             var boxShape = TestUtils.CreateEntityWithBoxShape(scene, new Vector3(18, 1, 18));
-            yield return null;
+            await UniTask.WaitForFixedUpdate();
 
             var entity = boxShape.attachedEntities.First();
-            yield return null;
+            await UniTask.WaitForFixedUpdate();
 
-            AssertMeshIsInvalid(entity.meshesInfo);
+            AssertMeshesAndCollidersValidState(entity.meshesInfo, false);
 
             // Move object to re-enter the scene boundaries
             var transformModel = new DCLTransform.Model { position = new Vector3(8, 1, 8) };
             TestUtils.SetEntityTransform(scene, entity, transformModel);
 
-            yield return null;
-            yield return null;
+            await WaitForFixedUpdates();
 
-            AssertMeshIsValid(entity.meshesInfo);
+            AssertMeshesAndCollidersValidState(entity.meshesInfo, true);
         }
 
-        public static IEnumerator GLTFShapeIsResetWhenReenteringBounds(ParcelScene scene)
+        public static async Task OnPointerEventCollidersAreResetWhenReenteringBounds(ParcelScene scene)
+        {
+            var boxShape = TestUtils.CreateEntityWithBoxShape(scene, new Vector3(18, 1, 18));
+            await UniTask.WaitUntil(() => !boxShape.isRoutineRunning);
+
+            var entity = boxShape.attachedEntities.First();
+
+            // Attach onpointer event component
+            string onPointerId = "pointerevent-1";
+
+            var OnPointerDownModel = new OnPointerDown.Model()
+            {
+                type = "pointerUp",
+                uuid = onPointerId
+            };
+
+            // Grab onpointer event collider
+            var component = TestUtils.EntityComponentCreate<OnPointerDown, OnPointerDown.Model>(scene, entity,
+                OnPointerDownModel, CLASS_ID_COMPONENT.UUID_CALLBACK);
+
+            await WaitForFixedUpdates();
+
+            var meshFilter = entity.gameObject.GetComponentInChildren<MeshFilter>();
+            var onPointerEventCollider = meshFilter.transform.Find(OnPointerEventColliders.COLLIDER_NAME).GetComponent<MeshCollider>();
+
+            Assert.IsTrue(onPointerEventCollider != null, "OnPointerEventCollider should exist");
+
+            // Check onpointer event collider is disabled with the entity outside scene boundaries
+            AssertMeshesAndCollidersValidState(entity.meshesInfo, false);
+            Assert.IsFalse(onPointerEventCollider.enabled);
+
+            // Move object to re-enter the scene boundaries
+            var transformModel = new DCLTransform.Model { position = new Vector3(8, 1, 8) };
+            TestUtils.SetEntityTransform(scene, entity, transformModel);
+
+            await WaitForFixedUpdates();
+
+            // Check onpointer event collider got enabled
+            AssertMeshesAndCollidersValidState(entity.meshesInfo, true);
+            Assert.IsTrue(onPointerEventCollider.enabled);
+        }
+
+        public static async Task GLTFShapeIsResetWhenReenteringBounds(ParcelScene scene)
         {
             var entity = TestUtils.CreateSceneEntity(scene);
 
@@ -271,22 +436,22 @@ namespace SceneBoundariesCheckerTests
                 {
                     src = TestAssetsUtils.GetPath() + "/GLB/PalmTree_01.glb"
                 }));
-            LoadWrapper gltfShape = Environment.i.world.state.GetLoaderForEntity(entity);
-            yield return new UnityEngine.WaitUntil(() => gltfShape.alreadyLoaded);
-            yield return null;
 
-            AssertMeshIsInvalid(entity.meshesInfo);
+            LoadWrapper gltfShape = Environment.i.world.state.GetLoaderForEntity(entity);
+            await UniTask.WaitUntil(() => gltfShape.alreadyLoaded);
+            await UniTask.WaitForFixedUpdate();
+
+            AssertMeshesAndCollidersValidState(entity.meshesInfo, false);
 
             // Move object to surpass the scene boundaries
             TestUtils.SetEntityTransform(scene, entity, new DCLTransform.Model { position = new Vector3(8, 1, 8) });
 
-            yield return null;
-            yield return null;
+            await WaitForFixedUpdates();
 
-            AssertMeshIsValid(entity.meshesInfo);
+            AssertMeshesAndCollidersValidState(entity.meshesInfo, true);
         }
 
-        public static IEnumerator NFTShapeIsResetWhenReenteringBounds(ParcelScene scene)
+        public static async Task NFTShapeIsResetWhenReenteringBounds(ParcelScene scene)
         {
             var entity = TestUtils.CreateSceneEntity(scene);
 
@@ -298,82 +463,59 @@ namespace SceneBoundariesCheckerTests
             };
 
             NFTShape component = TestUtils.SharedComponentCreate<NFTShape, NFTShape.Model>(scene, CLASS_ID.NFT_SHAPE, componentModel);
-            yield return component.routine;
+            await UniTask.WaitUntil(() => !component.isRoutineRunning);
 
             TestUtils.SharedComponentAttach(component, entity);
 
             LoadWrapper shapeLoader = Environment.i.world.state.GetLoaderForEntity(entity);
-            yield return new UnityEngine.WaitUntil(() => shapeLoader.alreadyLoaded);
+            await UniTask.WaitUntil(() => shapeLoader.alreadyLoaded);
 
-            AssertMeshIsInvalid(entity.meshesInfo);
+            AssertMeshesAndCollidersValidState(entity.meshesInfo, false);
 
             // Move object to surpass the scene boundaries
             TestUtils.SetEntityTransform(scene, entity, new DCLTransform.Model { position = new Vector3(8, 1, 8) });
 
-            yield return null;
+            await WaitForFixedUpdates();
 
-            AssertMeshIsValid(entity.meshesInfo);
+            AssertMeshesAndCollidersValidState(entity.meshesInfo, true);
         }
 
-        public static void AssertMeshIsInvalid(MeshesInfo meshesInfo)
+        public static void AssertMeshesAndCollidersValidState(MeshesInfo meshesInfo, bool expectedValidState)
         {
-            Assert.IsTrue(meshesInfo.meshRootGameObject != null, "MeshRootGameObject is null. The object is valid when it shouldn't.");
+            if (expectedValidState)
+            {
+                if (meshesInfo.meshRootGameObject == null)
+                    return; // It's valid if there's no mesh
+            }
+            else { Assert.IsTrue(meshesInfo.meshRootGameObject != null, "MeshRootGameObject is null. The object is valid when it shouldn't."); }
 
             if (Environment.i.world.sceneBoundsChecker.GetFeedbackStyle() is SceneBoundsFeedbackStyle_RedBox)
             {
-                bool hasWireframe = false;
-
-                foreach (Transform t in meshesInfo.innerGameObject.transform)
+                if ((meshesInfo.renderers != null && meshesInfo.renderers.Length > 0) || meshesInfo.colliders.Count > 0)
                 {
-                    if (t.name.Contains("Wireframe"))
-                        hasWireframe = true;
-                }
+                    bool hasWireframe = false;
 
-                Assert.That(hasWireframe, Is.True); 
+                    foreach (Transform t in meshesInfo.innerGameObject.transform)
+                    {
+                        if (t.name.Contains("Wireframe"))
+                            hasWireframe = true;
+                    }
+
+                    Assert.That(hasWireframe != expectedValidState);
+                }
             }
             else
             {
-                for (int i = 0; i < meshesInfo.renderers.Length; i++)
-                {
-                    Assert.IsFalse(meshesInfo.renderers[i].enabled, $"Renderer {meshesInfo.renderers[i].gameObject.name} is enabled when it shouldn't!");
-                }
+                for (int i = 0; i < meshesInfo.renderers.Length; i++) { Assert.That(meshesInfo.renderers[i].enabled == expectedValidState); }
 
-                for (int i = 0; i < meshesInfo.colliders.Count; i++)
-                {
-                    Assert.IsFalse(meshesInfo.colliders[i].enabled, $"Collider {meshesInfo.renderers[i].gameObject.name} is enabled when it shouldn't!");
-                }
+                foreach (Collider collider in meshesInfo.colliders) { Assert.That(collider.enabled == expectedValidState); }
             }
         }
 
-        public static void AssertMeshIsValid(MeshesInfo meshesInfo)
+        private static async Task WaitForFixedUpdates()
         {
-            if (meshesInfo.meshRootGameObject == null)
-                return; // It's valid if there's no mesh
-
-            if (Environment.i.world.sceneBoundsChecker.GetFeedbackStyle() is SceneBoundsFeedbackStyle_RedBox)
-            {
-                bool hasWireframe = false;
-
-                foreach (Transform t in meshesInfo.innerGameObject.transform)
-                {
-                    if (t.name.Contains("Wireframe"))
-                        hasWireframe = true;
-                }
-
-                Assert.That(hasWireframe, Is.False); 
-            }
-            else
-            {
-                for (int i = 0; i < meshesInfo.renderers.Length; i++)
-                {
-                    Assert.IsTrue(meshesInfo.renderers[i].enabled, $"Renderer {meshesInfo.renderers[i].gameObject.name} is disabled when it should!");
-                }
-
-                for (int i = 0; i < meshesInfo.colliders.Count; i++)
-                {
-                    Assert.IsTrue(meshesInfo.colliders[i].enabled, $"Collider {meshesInfo.renderers[i].gameObject.name} is disabled when it should!");
-                }
-            }
+            await UniTask.WaitForFixedUpdate(); // preliminary check
+            await UniTask.WaitForFixedUpdate(); // immortal process catches up
         }
     }
 }

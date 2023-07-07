@@ -9,9 +9,9 @@ namespace DCL.ECSComponents
         private readonly IECSComponentWriter componentWriter;
         private readonly int componentId;
 
-        public TransformRegister(int componentId, ECSComponentsFactory factory, IECSComponentWriter componentWriter)
+        public TransformRegister(int componentId, ECSComponentsFactory factory, IECSComponentWriter componentWriter, IInternalECSComponents internalComponents)
         {
-            ECSTransformHandler handler = new ECSTransformHandler();
+            ECSTransformHandler handler = new ECSTransformHandler(internalComponents.sceneBoundsCheckComponent);
             factory.AddOrReplaceComponent(componentId, ECSTransformSerialization.Deserialize, () => handler);
             componentWriter.AddOrReplaceComponentSerializer<ECSTransform>(componentId, ECSTransformSerialization.Serialize);
 

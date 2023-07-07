@@ -1,3 +1,4 @@
+using System.Collections;
 using DCL.VR;
 using UnityEngine;
 
@@ -11,10 +12,11 @@ namespace DCL
         private Transform cam;
         private Transform myTrans;
         
-        private void Start()
+        private IEnumerator Start()
         {
             myTrans = transform;
-            controller.ApplyHideModifier();
+            yield return null;
+            controller.ApplyHideAvatarModifier();
             //DCLCharacterController.i.OnUpdateFinish += OnUpdateFinish;
         }
         

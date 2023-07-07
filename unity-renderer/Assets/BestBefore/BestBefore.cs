@@ -24,23 +24,24 @@ namespace BestBefore
         public enum ExpirationModes
         {
             FixedDate,
+            FixedDateFromBuild,
             FromFirstStart
         }
 
         public enum MonthsOfYear
         {
             January = 1,
-            February,
-            March,
-            April,
-            May,
-            June,
-            July,
-            August,
-            September,
-            October,
-            November,
-            December
+            Februar=2,
+            March=3,
+            April=4,
+            May=5,
+            June=6,
+            July=7,
+            August=8,
+            September=9,
+            October=10,
+            November=11,
+            December=12
         }
 
         public enum CheckModes
@@ -55,7 +56,7 @@ namespace BestBefore
 
         #region SETTINGS
         [Header( "Settings" )]
-        public ExpirationModes ExpirationMode = ExpirationModes.FixedDate;
+        public ExpirationModes ExpirationMode = ExpirationModes.FixedDateFromBuild;
         /// <summary>
         /// [REQUIRES INTERNET CONNECTION] If checked, the current date and time will be fetched from a remote web server, else local system time will be used
         /// </summary>
@@ -116,8 +117,9 @@ namespace BestBefore
 
         #region FIXED DATE
         [Header( "Expiration Date" )]
-        [Range( 1, 9999 )]
-        public int Year = 2018;
+        public int DaysOut = 40;
+        [Range( 2022, 9999 )]
+        public int Year = 2022;
         public MonthsOfYear Month = MonthsOfYear.January;
         [Range( 1, 31 )]
         public int Day = 1;
@@ -128,7 +130,10 @@ namespace BestBefore
         [Range( 0, 59 )]
         public int Second = 0;
         #endregion
-
+ 
+        // #region FIXED DATE FROM BUILD
+        //
+        // #endregion
 
         private bool checkingRemoteTime
         {

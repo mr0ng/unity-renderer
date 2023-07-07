@@ -11,7 +11,10 @@ namespace DCL.Models
     {
         public IParcelScene scene { get; set; }
         public bool markedForCleanup { get; set; } = false;
-        public bool isInsideBoundaries { get; set; } = false;
+
+        // We let the SceneBoundsChecker update these values later
+        public bool isInsideSceneOuterBoundaries { get; private set; } = true;
+        public bool isInsideSceneBoundaries { get; private set; } = true;
 
         public Dictionary<long, IDCLEntity> children { get; private set; } = new Dictionary<long, IDCLEntity>();
         public IDCLEntity parent { get; private set; }
@@ -21,6 +24,7 @@ namespace DCL.Models
         public GameObject meshRootGameObject => meshesInfo.meshRootGameObject;
         public Renderer[] renderers => meshesInfo.renderers;
 
+
         public Action<IDCLEntity> OnShapeUpdated { get; set; }
         public Action<IDCLEntity> OnShapeLoaded { get; set; }
         public Action<object> OnNameChange { get; set; }
@@ -28,8 +32,14 @@ namespace DCL.Models
         public Action<IDCLEntity> OnRemoved { get; set; }
         public Action<IDCLEntity> OnMeshesInfoUpdated { get; set; }
         public Action<IDCLEntity> OnMeshesInfoCleaned { get; set; }
+        public Action<CLASS_ID_COMPONENT, IDCLEntity> OnBaseComponentAdded { get; set; }
+        public Action<IDCLEntity, bool> OnInsideBoundariesChanged { get; set; }
+        public Action<IDCLEntity, bool> OnOuterBoundariesChanged { get; set; }
 
         public Action<ICleanableEventDispatcher> OnCleanupEvent { get; set; }
+
+        public long parentId { get; set; }
+        public IList<long> childrenId { get; } = new List<long>();
 
         const string MESH_GAMEOBJECT_NAME = "Mesh";
 
@@ -45,54 +55,44 @@ namespace DCL.Models
 
         public void AddChild(IDCLEntity entity)
         {
-            if (!children.ContainsKey(entity.entityId))
-            {
-                children.Add(entity.entityId, entity);
-            }
+            if (!children.ContainsKey(entity.entityId)) { children.Add(entity.entityId, entity); }
         }
 
         public void RemoveChild(IDCLEntity entity)
         {
-            if (children.ContainsKey(entity.entityId))
-            {
-                children.Remove(entity.entityId);
-            }
+            if (children.ContainsKey(entity.entityId)) { children.Remove(entity.entityId); }
         }
 
         public void SetParent(IDCLEntity entity)
         {
-            if (parent != null)
-            {
-                parent.RemoveChild(this);
-            }
+            if (parent != null) { parent.RemoveChild(this); }
 
             if (entity != null)
             {
+                parentId = entity.entityId;
                 entity.AddChild(this);
 
                 if (entity.gameObject && gameObject)
                     gameObject.transform.SetParent(entity.gameObject.transform, false);
             }
-            else if (gameObject)
-            {
-                gameObject.transform.SetParent(null, false);
-            }
+            else if (gameObject) { gameObject.transform.SetParent(null, false); }
 
             parent = entity;
         }
 
         public void EnsureMeshGameObject(string gameObjectName = null)
         {
-            if (meshesInfo.meshRootGameObject == null)
-            {
-                meshesInfo.meshRootGameObject = new GameObject();
-                meshesInfo.meshRootGameObject.name = gameObjectName == null ? MESH_GAMEOBJECT_NAME : gameObjectName;
-                meshesInfo.meshRootGameObject.transform.SetParent(gameObject.transform);
-                Utils.ResetLocalTRS(meshesInfo.meshRootGameObject.transform);
-            }
+            if (meshesInfo.meshRootGameObject != null) return;
+
+            meshesInfo.meshRootGameObject = new GameObject { name = gameObjectName ?? MESH_GAMEOBJECT_NAME };
+            meshesInfo.meshRootGameObject.transform.SetParent(gameObject.transform);
+            meshesInfo.meshRootGameObject.transform.ResetLocalTRS();
         }
 
-        public void ResetRelease() { isReleased = false; }
+        public void ResetRelease()
+        {
+            isReleased = false;
+        }
 
         public void Cleanup()
         {
@@ -107,7 +107,7 @@ namespace DCL.Models
 
             scene.componentsManagerLegacy.CleanComponents(this);
 
-            if (meshesInfo.meshRootGameObject)
+            if (meshesInfo.meshRootGameObject && !meshesInfo.RootIsPoolableObject)
             {
                 Utils.SafeDestroy(meshesInfo.meshRootGameObject);
                 meshesInfo.CleanReferences();
@@ -118,10 +118,8 @@ namespace DCL.Models
                 int childCount = gameObject.transform.childCount;
 
                 // Destroy any other children
-                for (int i = 0; i < childCount; i++)
-                {
+                for (var i = 0; i < childCount; i++)
                     Utils.SafeDestroy(gameObject.transform.GetChild(i).gameObject);
-                }
 
                 //NOTE(Brian): This will prevent any component from storing/querying invalid gameObject references.
                 gameObject = null;
@@ -129,6 +127,18 @@ namespace DCL.Models
 
             OnTransformChange = null;
             isReleased = true;
+        }
+
+        public void UpdateInsideBoundariesStatus(bool isInsideBoundaries)
+        {
+            isInsideSceneBoundaries = isInsideBoundaries;
+            OnInsideBoundariesChanged?.Invoke(this, isInsideSceneBoundaries);
+        }
+
+        public void UpdateOuterBoundariesStatus(bool isInsideOuterBoundaries)
+        {
+            isInsideSceneOuterBoundaries = isInsideOuterBoundaries;
+            OnOuterBoundariesChanged?.Invoke(this, isInsideSceneOuterBoundaries);
         }
     }
 }

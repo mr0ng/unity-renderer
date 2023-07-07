@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using DCL.Configuration;
 using DCL.Interface;
 using UnityEngine;
 using InputSettings = DCL.Configuration.InputSettings;
@@ -12,7 +13,9 @@ namespace DCL
             bool useRaycast, bool enablePointerEvent);
 
         private static bool renderingEnabled => CommonScriptableObjects.rendererState.Get();
+        #if DCL_VR
         private static DCLPlayerInput.PlayerActions actions;
+        #endif
 
         public enum EVENT
         {
@@ -33,16 +36,20 @@ namespace DCL
             public WebInterface.ACTION_BUTTON buttonId;
             public bool useRaycast;
             public bool enablePointerEvent;
+#if DCL_VR
+            public bool lastState;
+#endif
         }
 
-        private Dictionary<WebInterface.ACTION_BUTTON, List<ButtonListenerCallback>> listeners =
-            new Dictionary<WebInterface.ACTION_BUTTON, List<ButtonListenerCallback>>();
+        private readonly Dictionary<WebInterface.ACTION_BUTTON, List<ButtonListenerCallback>> listeners = new ();
+        private readonly List<BUTTON_MAP> buttonsMap = new ();
 
-        private List<BUTTON_MAP> buttonsMap = new List<BUTTON_MAP>();
 
         public InputController_Legacy()
         {
+            #if DCL_VR
             InputController.GetPlayerActions(ref actions);
+            #endif
             buttonsMap.Add(new BUTTON_MAP()
             {
                 type = BUTTON_TYPE.MOUSE, buttonNum = 0, buttonId = WebInterface.ACTION_BUTTON.POINTER,
@@ -175,67 +182,98 @@ namespace DCL
                 callbacks[i].Invoke(buttonId, evt, useRaycast, enablePointerEvent);
             }
         }
-
+        //private int updateSkip = 0;
         public void Update()
         {
+
             if (!renderingEnabled)
                 return;
-
+            // updateSkip = (updateSkip + 1 ) % 25;
+            // if (updateSkip != 0)
+            //     return;
             int count = buttonsMap.Count;
 
             for (int i = 0; i < count; i++)
             {
                 BUTTON_MAP btnMap = buttonsMap[i];
 
+                if (CommonScriptableObjects.allUIHidden.Get())
+                    continue;
+
                 switch (btnMap.type)
                 {
-                    case BUTTON_TYPE.MOUSE:
-                        if (CommonScriptableObjects.allUIHidden.Get())
-                            break;
-                        if (GetButtonDown(btnMap))
-                            RaiseEvent(btnMap.buttonId, EVENT.BUTTON_DOWN, btnMap.useRaycast,
-                                btnMap.enablePointerEvent);
-                        else if (GetButtonUp(btnMap))
-                            RaiseEvent(btnMap.buttonId, EVENT.BUTTON_UP, btnMap.useRaycast, btnMap.enablePointerEvent);
+#if DCL_VR
+                     case BUTTON_TYPE.MOUSE:
+                         // if (CommonScriptableObjects.allUIHidden.Get())
+                         //     break;
+
+                         if (GetButtonDown(btnMap) && !btnMap.lastState)
+                             RaiseEvent(btnMap.buttonId, EVENT.BUTTON_DOWN, btnMap.useRaycast,
+                                 btnMap.enablePointerEvent);
+                         else if (GetButtonUp(btnMap) && btnMap.lastState)
+                             RaiseEvent(btnMap.buttonId, EVENT.BUTTON_UP, btnMap.useRaycast, btnMap.enablePointerEvent);
+                         break;
+                     case BUTTON_TYPE.KEYBOARD:
+                         if (CommonScriptableObjects.allUIHidden.Get())
+                             break;
+                         if (GetKeyDown((KeyCode) btnMap.buttonNum) && !btnMap.lastState)
+                             RaiseEvent(btnMap.buttonId, EVENT.BUTTON_DOWN, btnMap.useRaycast,
+                                 btnMap.enablePointerEvent);
+                         else if (!GetKeyDown((KeyCode) btnMap.buttonNum)&& btnMap.lastState)
+                             RaiseEvent(btnMap.buttonId, EVENT.BUTTON_UP, btnMap.useRaycast, btnMap.enablePointerEvent);
+#else
+                    case BUTTON_TYPE.MOUSE when Input.GetMouseButtonDown(btnMap.buttonNum):
+                    case BUTTON_TYPE.KEYBOARD when Input.GetKeyDown((KeyCode)btnMap.buttonNum):
+                        RaiseEvent(btnMap.buttonId, EVENT.BUTTON_DOWN, btnMap.useRaycast, btnMap.enablePointerEvent);
                         break;
-                    case BUTTON_TYPE.KEYBOARD:
-                        if (CommonScriptableObjects.allUIHidden.Get())
-                            break;
-                        if (GetKeyDown((KeyCode) btnMap.buttonNum))
-                            RaiseEvent(btnMap.buttonId, EVENT.BUTTON_DOWN, btnMap.useRaycast,
-                                btnMap.enablePointerEvent);
-                        else if (!GetKeyDown((KeyCode) btnMap.buttonNum))
-                            RaiseEvent(btnMap.buttonId, EVENT.BUTTON_UP, btnMap.useRaycast, btnMap.enablePointerEvent);
-                        break;
+                    case BUTTON_TYPE.MOUSE when Input.GetMouseButtonUp(btnMap.buttonNum):
+                    case BUTTON_TYPE.KEYBOARD when Input.GetKeyUp((KeyCode)btnMap.buttonNum):
+                        RaiseEvent(btnMap.buttonId, EVENT.BUTTON_UP, btnMap.useRaycast, btnMap.enablePointerEvent);
+#endif
+                         break;
                 }
             }
         }
         private static bool GetButtonUp(BUTTON_MAP btnMap)
         {
+            #if DCL_VR
             return !actions.Select.triggered;
+            #else
+            return false;
+            #endif
         }
         private static bool GetButtonDown(BUTTON_MAP btnMap)
         {
+            #if DCL_VR
             return actions.Select.triggered;
+            #else
+            return false;
+            #endif
         }
 
         private static bool GetKeyDown(KeyCode code)
         {
+            #if DCL_VR
             switch (code)
             {
                 case KeyCode.E:
                     return actions.PrimaryInteraction.triggered;
                 case KeyCode.F:
                     return actions.SecondaryInteraction.triggered;
-                default: 
+                default:
                     return default;
             }
+            #else
+                return false;
+            #endif
         }
 
         public bool IsPressed(WebInterface.ACTION_BUTTON button)
         {
+//<<<<<<< HEAD
             switch (button)
             {
+                #if DCL_VR
                 case WebInterface.ACTION_BUTTON.POINTER:
                     return actions.Select.triggered;
                 case WebInterface.ACTION_BUTTON.PRIMARY:
@@ -246,7 +284,28 @@ namespace DCL
                     return actions.Select.triggered ||
                            actions.PrimaryInteraction.triggered ||
                            actions.SecondaryInteraction.triggered;
+                #else
+                case WebInterface.ACTION_BUTTON.POINTER:
+                    return Input.GetMouseButton(0);
+                case WebInterface.ACTION_BUTTON.PRIMARY:
+                    return Input.GetKey(InputSettings.PrimaryButtonKeyCode);
+                case WebInterface.ACTION_BUTTON.SECONDARY:
+                    return Input.GetKey(InputSettings.SecondaryButtonKeyCode);
+                default: // ANY
+                    return Input.GetMouseButton(0) ||
+                           Input.GetKey(InputSettings.PrimaryButtonKeyCode) ||
+                           Input.GetKey(InputSettings.SecondaryButtonKeyCode);
+                #endif
             }
+//=======
+            return button switch
+                   {
+                       WebInterface.ACTION_BUTTON.POINTER => Input.GetMouseButton(0),
+                       WebInterface.ACTION_BUTTON.PRIMARY => Input.GetKey(InputSettings.PrimaryButtonKeyCode),
+                       WebInterface.ACTION_BUTTON.SECONDARY => Input.GetKey(InputSettings.SecondaryButtonKeyCode),
+                       _ => Input.GetMouseButton(0) || Input.GetKey(InputSettings.PrimaryButtonKeyCode) || Input.GetKey(InputSettings.SecondaryButtonKeyCode)
+                   };
+//>>>>>>> dev
         }
 
         public void Dispose()

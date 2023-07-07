@@ -3,7 +3,6 @@ using DCL;
 using DCL.Helpers;
 using DCL.Components;
 using DCL.Models;
-using NUnit.Framework;
 using System.Collections;
 using DCL.Components.Video.Plugin;
 using UnityEngine;
@@ -11,8 +10,7 @@ using UnityEngine.TestTools;
 using DCL.Controllers;
 using DCL.Interface;
 using DCL.SettingsCommon;
-using NSubstitute;
-using UnityEngine.Assertions;
+using DCL.Shaders;
 using Assert = UnityEngine.Assertions.Assert;
 using AudioSettings = DCL.SettingsCommon.AudioSettings;
 
@@ -31,9 +29,10 @@ namespace Tests
 
             coreComponentsPlugin = new CoreComponentsPlugin();
             scene = TestUtils.CreateTestScene() as ParcelScene;
-            IVideoPluginWrapper pluginWrapper = new VideoPluginWrapper_Mock();
+            CommonScriptableObjects.sceneNumber.Set(scene.sceneData.sceneNumber);
+
             originalVideoPluginBuilder = DCLVideoTexture.videoPluginWrapperBuilder;
-            DCLVideoTexture.videoPluginWrapperBuilder = () => pluginWrapper;
+            DCLVideoTexture.videoPluginWrapperBuilder = () => new VideoPluginWrapper_Mock();
         }
 
         protected override IEnumerator TearDown()
@@ -67,7 +66,7 @@ namespace Tests
 
             var expectedEvent = new WebInterface.SendVideoProgressEvent()
             {
-                sceneId = scene.sceneData.id,
+                sceneNumber = scene.sceneData.sceneNumber,
                 componentId = component.id,
                 videoLength = 0,
                 videoTextureId = id,
@@ -97,7 +96,7 @@ namespace Tests
 
             var expectedEvent = new WebInterface.SendVideoProgressEvent()
             {
-                sceneId = scene.sceneData.id,
+                sceneNumber = scene.sceneData.sceneNumber,
                 componentId = component.id,
                 videoLength = 0,
                 videoTextureId = id,
@@ -129,7 +128,7 @@ namespace Tests
 
             var expectedEvent = new WebInterface.SendVideoProgressEvent()
             {
-                sceneId = scene.sceneData.id,
+                sceneNumber = scene.sceneData.sceneNumber,
                 componentId = component.id,
                 videoLength = 0,
                 videoTextureId = id,
@@ -298,7 +297,7 @@ namespace Tests
             scene.isPersistent = false;
 
             // Set current scene as a different one
-            CommonScriptableObjects.sceneID.Set("non-existent-scene");
+            CommonScriptableObjects.sceneNumber.Set(666666);
 
             DCLVideoTexture videoTexture = CreateDCLVideoTexture(scene, "it-wont-load-during-test");
             yield return videoTexture.routine;
@@ -350,7 +349,6 @@ namespace Tests
             DCLVideoTexture.videoPluginWrapperBuilder = originalVideoPluginBuilder;
         }
 
-
         [UnityTest]
         public IEnumerator UnmuteWhenVideoIsCreatedWithUserInScene()
         {
@@ -358,7 +356,7 @@ namespace Tests
             sceneController.enabled = false;
 
             // Set current scene with this scene's id
-            CommonScriptableObjects.sceneID.Set(scene.sceneData.id);
+            CommonScriptableObjects.sceneNumber.Set(scene.sceneData.sceneNumber);
 
             DCLVideoTexture videoTexture = CreateDCLVideoTexture(scene, "it-wont-load-during-test");
             yield return videoTexture.routine;
@@ -386,7 +384,7 @@ namespace Tests
             scene.isPersistent = false;
 
             // Set current scene with this scene's id
-            CommonScriptableObjects.sceneID.Set(scene.sceneData.id);
+            CommonScriptableObjects.sceneNumber.Set(scene.sceneData.sceneNumber);
             yield return null;
 
             DCLVideoTexture videoTexture = CreateDCLVideoTexture(scene, "it-wont-load-during-test");
@@ -404,7 +402,7 @@ namespace Tests
             yield return new WaitForAllMessagesProcessed();
 
             // Set current scene as a different one
-            CommonScriptableObjects.sceneID.Set("unexistent-scene");
+            CommonScriptableObjects.sceneNumber.Set(666666);
 
             // to force the video player to update its volume
             CommonScriptableObjects.playerCoords.Set(new Vector2Int(666, 666));
@@ -422,7 +420,7 @@ namespace Tests
             sceneController.enabled = false;
 
             // Set current scene as a different one
-            CommonScriptableObjects.sceneID.Set("unexistent-scene");
+            CommonScriptableObjects.sceneNumber.Set(666666);
 
             DCLVideoTexture videoTexture = CreateDCLVideoTexture(scene, "it-wont-load-during-test");
             yield return videoTexture.routine;
@@ -439,7 +437,7 @@ namespace Tests
             yield return new WaitForAllMessagesProcessed();
 
             // Set current scene with this scene's id
-            CommonScriptableObjects.sceneID.Set(scene.sceneData.id);
+            CommonScriptableObjects.sceneNumber.Set(scene.sceneData.sceneNumber);
 
             // to force the video player to update its volume
             CommonScriptableObjects.playerCoords.Set(new Vector2Int(666, 666));
@@ -448,6 +446,51 @@ namespace Tests
 
             // Check the volume
             Assert.AreEqual(videoTexture.GetVolume(), videoTexture.texturePlayer.volume);
+        }
+
+        [UnityTest]
+        public IEnumerator VideoTextureIsDisposedAndReloadedCorrectly()
+        {
+            IDCLEntity entity = TestUtils.CreateSceneEntity(scene);
+            DCLVideoTexture texture = CreateDCLVideoTexture(scene, "it-wont-load-during-test");
+
+            BasicMaterial basicMaterial = TestUtils.SharedComponentCreate<BasicMaterial, BasicMaterial.Model>(
+                scene,
+                DCL.Models.CLASS_ID.BASIC_MATERIAL,
+                new BasicMaterial.Model()
+                {
+                    texture = texture.id
+                });
+
+            TestUtils.SharedComponentAttach(basicMaterial, entity);
+            TestUtils.SharedComponentAttach(texture, entity);
+
+            yield return basicMaterial.routine;
+
+            Texture mainTex = basicMaterial.material.GetTexture(ShaderUtils.BaseMap);
+
+            // texture should be created
+            Assert.IsTrue(mainTex);
+
+            TestUtils.SharedComponentUpdate(basicMaterial, new BasicMaterial.Model()
+            {
+                texture =  CreateDCLVideoTexture(scene, "it-wont-load-during-test2").id
+            });
+
+            yield return basicMaterial.routine;
+
+            // texture should have being disposed
+            Assert.IsFalse(mainTex);
+
+            TestUtils.SharedComponentUpdate(basicMaterial, new BasicMaterial.Model()
+            {
+                texture = texture.id
+            });
+
+            yield return basicMaterial.routine;
+
+            // texture should have being reloaded
+            Assert.IsTrue(basicMaterial.material.GetTexture(ShaderUtils.BaseMap));
         }
 
         static DCLVideoClip CreateDCLVideoClip(ParcelScene scn, string url)

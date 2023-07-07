@@ -2,6 +2,7 @@ using DCL;
 using DCL.Interface;
 using System.Collections.Generic;
 using System.Linq;
+using DCL.Social.Friends;
 using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -34,7 +35,7 @@ public interface IRealmSelectorComponentView
     void SetAvailableRealms(List<RealmRowComponentModel> realms);
 }
 
-public class RealmSelectorComponentView : BaseComponentView, IRealmSelectorComponentView, IComponentModelConfig
+public class RealmSelectorComponentView : BaseComponentView, IRealmSelectorComponentView, IComponentModelConfig<RealmSelectorComponentModel>
 {
     internal const string REALMS_POOL_NAME = "RealmSelector_RealmRowsPool";
     internal const int REALMS_POOL_PREWARM = 20;
@@ -73,7 +74,7 @@ public class RealmSelectorComponentView : BaseComponentView, IRealmSelectorCompo
     {
         base.Awake();
 
-        friendsTrackerController = new RealmTrackerController(FriendsController.i, friendColors);
+        friendsTrackerController = new RealmTrackerController(Environment.i.serviceLocator.Get<IFriendsController>(), friendColors);
 
         if (sortByNameButton != null)
             sortByNameButton.onClick.AddListener(() =>
@@ -108,9 +109,9 @@ public class RealmSelectorComponentView : BaseComponentView, IRealmSelectorCompo
         RefreshSortingArrows();
     }
 
-    public void Configure(BaseComponentModel newModel)
+    public void Configure(RealmSelectorComponentModel newModel)
     {
-        model = (RealmSelectorComponentModel)newModel;
+        model = newModel;
         RefreshControl();
     }
 

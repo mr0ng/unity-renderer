@@ -7,14 +7,11 @@ using Newtonsoft.Json;
 using NUnit.Framework;
 using System.Collections;
 using System.Collections.Generic;
-using System.Runtime.CompilerServices;
-using DCL.Camera;
 using DCL.Controllers;
 using NSubstitute;
 using NSubstitute.Extensions;
 using UnityEngine;
 using UnityEngine.TestTools;
-using UnityEngine.UI;
 
 namespace Tests
 {
@@ -59,7 +56,6 @@ namespace Tests
             mainCamera.transform.forward = Vector3.forward;
 
             EntityIdHelper idHelper = new EntityIdHelper();
-            DCL.Environment.i.world.state.currentSceneId = scene.sceneData.id;
             DCL.Environment.i.world.sceneController.Configure().entityIdHelper.Returns(idHelper);
 
             uuidEventsPlugin = new UUIDEventsPlugin();
@@ -70,7 +66,7 @@ namespace Tests
         {
             uuidEventsPlugin.Dispose();
             coreComponentsPlugin.Dispose();
-                
+
             Object.Destroy(mainCamera.gameObject);
             Utils.UnlockCursor();
             yield return base.TearDown();
@@ -234,7 +230,7 @@ namespace Tests
             TestUtils.CreateSceneEntity(scene, entityId);
 
             Assert.IsTrue(
-                scene.entities[entityId].gameObject.GetComponentInChildren<UnityGLTF.InstantiatedGLTFObject>() == null,
+                scene.entities[entityId].gameObject.GetComponentInChildren<MeshRenderer>() == null,
                 "Since the shape hasn't been updated yet, the 'GLTFScene' child object shouldn't exist");
 
             string shapeId = TestUtils.CreateAndSetShape(scene, entityId, DCL.Models.CLASS_ID.GLTF_SHAPE,
@@ -247,7 +243,7 @@ namespace Tests
             yield return new DCL.WaitUntil(() => gltfShape.alreadyLoaded, 7f);
 
             Assert.IsTrue(
-                scene.entities[entityId].gameObject.GetComponentInChildren<UnityGLTF.InstantiatedGLTFObject>() != null,
+                scene.entities[entityId].gameObject.GetComponentInChildren<MeshRenderer>() != null,
                 "'GLTFScene' child object with 'InstantiatedGLTF' component should exist if the GLTF was loaded correctly");
 
             string clickUuid = "pointerevent-1";
@@ -281,7 +277,7 @@ namespace Tests
             TestUtils.CreateSceneEntity(scene, entityId);
 
             Assert.IsTrue(
-                scene.entities[entityId].gameObject.GetComponentInChildren<UnityGLTF.InstantiatedGLTFObject>() == null,
+                scene.entities[entityId].gameObject.GetComponentInChildren<MeshRenderer>() == null,
                 "Since the shape hasn't been updated yet, the 'GLTFScene' child object shouldn't exist");
 
             string shapeId = TestUtils.CreateAndSetShape(scene, entityId, DCL.Models.CLASS_ID.GLTF_SHAPE,
@@ -294,7 +290,7 @@ namespace Tests
             yield return new DCL.WaitUntil(() => gltfShape.alreadyLoaded, 7f);
 
             Assert.IsTrue(
-                scene.entities[entityId].gameObject.GetComponentInChildren<UnityGLTF.InstantiatedGLTFObject>() != null,
+                scene.entities[entityId].gameObject.GetComponentInChildren<MeshRenderer>() != null,
                 "'GLTFScene' child object with 'InstantiatedGLTF' component should exist if the GLTF was loaded correctly");
 
             string clickUuid = "pointerevent-1";
@@ -327,7 +323,7 @@ namespace Tests
             TestUtils.CreateSceneEntity(scene, entityId);
 
             Assert.IsTrue(
-                scene.entities[entityId].gameObject.GetComponentInChildren<UnityGLTF.InstantiatedGLTFObject>() == null,
+                scene.entities[entityId].gameObject.GetComponentInChildren<MeshRenderer>() == null,
                 "Since the shape hasn't been updated yet, the 'GLTFScene' child object shouldn't exist");
 
             string shapeId = TestUtils.CreateAndSetShape(scene, entityId, DCL.Models.CLASS_ID.GLTF_SHAPE,
@@ -340,7 +336,7 @@ namespace Tests
             yield return new DCL.WaitUntil(() => gltfShape.alreadyLoaded, 7f);
 
             Assert.IsTrue(
-                scene.entities[entityId].gameObject.GetComponentInChildren<UnityGLTF.InstantiatedGLTFObject>() != null,
+                scene.entities[entityId].gameObject.GetComponentInChildren<MeshRenderer>() != null,
                 "'GLTFScene' child object with 'InstantiatedGLTF' component should exist if the GLTF was loaded correctly");
 
             string clickUuid = "pointerevent-1";
@@ -373,7 +369,7 @@ namespace Tests
             TestUtils.CreateSceneEntity(scene, entityId);
 
             Assert.IsTrue(
-                scene.entities[entityId].gameObject.GetComponentInChildren<UnityGLTF.InstantiatedGLTFObject>() == null,
+                scene.entities[entityId].gameObject.GetComponentInChildren<MeshRenderer>() == null,
                 "Since the shape hasn't been updated yet, the 'GLTFScene' child object shouldn't exist");
 
             string shapeId = TestUtils.CreateAndSetShape(scene, entityId, DCL.Models.CLASS_ID.GLTF_SHAPE,
@@ -386,7 +382,7 @@ namespace Tests
             yield return new DCL.WaitUntil(() => gltfShape.alreadyLoaded, 7f);
 
             Assert.IsTrue(
-                scene.entities[entityId].gameObject.GetComponentInChildren<UnityGLTF.InstantiatedGLTFObject>() != null,
+                scene.entities[entityId].gameObject.GetComponentInChildren<MeshRenderer>() != null,
                 "'GLTFScene' child object with 'InstantiatedGLTF' component should exist if the GLTF was loaded correctly");
 
             string clickUuid = "pointerevent-1";
@@ -418,7 +414,7 @@ namespace Tests
             TestUtils.CreateSceneEntity(scene, entityId);
 
             Assert.IsTrue(
-                scene.entities[entityId].gameObject.GetComponentInChildren<UnityGLTF.InstantiatedGLTFObject>() == null,
+                scene.entities[entityId].gameObject.GetComponentInChildren<MeshRenderer>() == null,
                 "Since the shape hasn't been updated yet, the 'GLTFScene' child object shouldn't exist");
 
             string shapeId = TestUtils.CreateAndSetShape(scene, entityId, DCL.Models.CLASS_ID.GLTF_SHAPE,
@@ -431,7 +427,7 @@ namespace Tests
             yield return new DCL.WaitUntil(() => gltfShape.alreadyLoaded, 7f);
 
             Assert.IsTrue(
-                scene.entities[entityId].gameObject.GetComponentInChildren<UnityGLTF.InstantiatedGLTFObject>() != null,
+                scene.entities[entityId].gameObject.GetComponentInChildren<MeshRenderer>() != null,
                 "'GLTFScene' child object with 'InstantiatedGLTF' component should exist if the GLTF was loaded correctly");
 
             string clickUuid = "pointerevent-1";
@@ -462,7 +458,7 @@ namespace Tests
             TestUtils.CreateSceneEntity(scene, entityId);
 
             Assert.IsTrue(
-                scene.entities[entityId].gameObject.GetComponentInChildren<UnityGLTF.InstantiatedGLTFObject>() == null,
+                scene.entities[entityId].gameObject.GetComponentInChildren<MeshRenderer>() == null,
                 "Since the shape hasn't been updated yet, the 'GLTFScene' child object shouldn't exist");
 
             TestUtils.CreateAndSetShape(scene, entityId, DCL.Models.CLASS_ID.GLTF_SHAPE, JsonConvert.SerializeObject(
@@ -485,7 +481,7 @@ namespace Tests
             yield return new DCL.WaitUntil(() => gltfShape.alreadyLoaded, 7f);
 
             Assert.IsTrue(
-                scene.entities[entityId].gameObject.GetComponentInChildren<UnityGLTF.InstantiatedGLTFObject>() != null,
+                scene.entities[entityId].gameObject.GetComponentInChildren<MeshRenderer>() != null,
                 "'GLTFScene' child object with 'InstantiatedGLTF' component should exist if the GLTF was loaded correctly");
 
             foreach (var meshFilter in scene.entities[entityId].gameObject.GetComponentsInChildren<MeshFilter>())
@@ -506,7 +502,7 @@ namespace Tests
             TestUtils.CreateSceneEntity(scene, entityId);
 
             Assert.IsTrue(
-                scene.entities[entityId].gameObject.GetComponentInChildren<UnityGLTF.InstantiatedGLTFObject>() == null,
+                scene.entities[entityId].gameObject.GetComponentInChildren<MeshRenderer>() == null,
                 "Since the shape hasn't been updated yet, the 'GLTFScene' child object shouldn't exist");
 
             TestUtils.CreateAndSetShape(scene, entityId, DCL.Models.CLASS_ID.GLTF_SHAPE, JsonConvert.SerializeObject(
@@ -528,7 +524,7 @@ namespace Tests
             yield return new DCL.WaitUntil(() => gltfShape.alreadyLoaded, 7f);
 
             Assert.IsTrue(
-                scene.entities[entityId].gameObject.GetComponentInChildren<UnityGLTF.InstantiatedGLTFObject>() != null,
+                scene.entities[entityId].gameObject.GetComponentInChildren<MeshRenderer>() != null,
                 "'GLTFScene' child object with 'InstantiatedGLTF' component should exist if the GLTF was loaded correctly");
 
             foreach (var meshFilter in scene.entities[entityId].gameObject.GetComponentsInChildren<MeshFilter>())
@@ -549,7 +545,7 @@ namespace Tests
             TestUtils.CreateSceneEntity(scene, entityId);
 
             Assert.IsTrue(
-                scene.entities[entityId].gameObject.GetComponentInChildren<UnityGLTF.InstantiatedGLTFObject>() == null,
+                scene.entities[entityId].gameObject.GetComponentInChildren<MeshRenderer>() == null,
                 "Since the shape hasn't been updated yet, the 'GLTFScene' child object shouldn't exist");
 
             TestUtils.CreateAndSetShape(scene, entityId, DCL.Models.CLASS_ID.GLTF_SHAPE, JsonConvert.SerializeObject(
@@ -573,7 +569,7 @@ namespace Tests
             yield return new DCL.WaitUntil(() => gltfShape.alreadyLoaded, 7f);
 
             Assert.IsTrue(
-                scene.entities[entityId].gameObject.GetComponentInChildren<UnityGLTF.InstantiatedGLTFObject>() != null,
+                scene.entities[entityId].gameObject.GetComponentInChildren<MeshRenderer>() != null,
                 "'GLTFScene' child object with 'InstantiatedGLTF' component should exist if the GLTF was loaded correctly");
 
             foreach (var meshFilter in scene.entities[entityId].gameObject.GetComponentsInChildren<MeshFilter>())
@@ -594,7 +590,7 @@ namespace Tests
             TestUtils.CreateSceneEntity(scene, entityId);
 
             Assert.IsTrue(
-                scene.entities[entityId].gameObject.GetComponentInChildren<UnityGLTF.InstantiatedGLTFObject>() == null,
+                scene.entities[entityId].gameObject.GetComponentInChildren<MeshRenderer>() == null,
                 "Since the shape hasn't been updated yet, the 'GLTFScene' child object shouldn't exist");
 
             TestUtils.CreateAndSetShape(scene, entityId, DCL.Models.CLASS_ID.GLTF_SHAPE, JsonConvert.SerializeObject(
@@ -617,7 +613,7 @@ namespace Tests
             yield return new DCL.WaitUntil(() => gltfShape.alreadyLoaded, 7f);
 
             Assert.IsTrue(
-                scene.entities[entityId].gameObject.GetComponentInChildren<UnityGLTF.InstantiatedGLTFObject>() != null,
+                scene.entities[entityId].gameObject.GetComponentInChildren<MeshRenderer>() != null,
                 "'GLTFScene' child object with 'InstantiatedGLTF' component should exist if the GLTF was loaded correctly");
 
             foreach (var meshFilter in scene.entities[entityId].gameObject.GetComponentsInChildren<MeshFilter>())
@@ -638,7 +634,7 @@ namespace Tests
             TestUtils.CreateSceneEntity(scene, entityId);
 
             Assert.IsTrue(
-                scene.entities[entityId].gameObject.GetComponentInChildren<UnityGLTF.InstantiatedGLTFObject>() == null,
+                scene.entities[entityId].gameObject.GetComponentInChildren<MeshRenderer>() == null,
                 "Since the shape hasn't been updated yet, the 'GLTFScene' child object shouldn't exist");
 
             TestUtils.CreateAndSetShape(scene, entityId, DCL.Models.CLASS_ID.GLTF_SHAPE, JsonConvert.SerializeObject(
@@ -661,7 +657,7 @@ namespace Tests
             yield return new DCL.WaitUntil(() => gltfShape.alreadyLoaded, 7f);
 
             Assert.IsTrue(
-                scene.entities[entityId].gameObject.GetComponentInChildren<UnityGLTF.InstantiatedGLTFObject>() != null,
+                scene.entities[entityId].gameObject.GetComponentInChildren<MeshRenderer>() != null,
                 "'GLTFScene' child object with 'InstantiatedGLTF' component should exist if the GLTF was loaded correctly");
 
             foreach (var meshFilter in scene.entities[entityId].gameObject.GetComponentsInChildren<MeshFilter>())
@@ -705,6 +701,8 @@ namespace Tests
                 JsonConvert.SerializeObject(new BoxShape.Model { })
             );
 
+            yield return null;
+
             var meshFilter = component.entity.gameObject.GetComponentInChildren<MeshFilter>();
             var onPointerEventCollider = meshFilter.transform.Find(OnPointerEventColliders.COLLIDER_NAME);
 
@@ -742,6 +740,8 @@ namespace Tests
                 JsonConvert.SerializeObject(new BoxShape.Model { })
             );
 
+            yield return null;
+
             var meshFilter = scene.entities[entityId].gameObject.GetComponentInChildren<MeshFilter>();
             var onPointerEventCollider = meshFilter.transform.Find(OnPointerEventColliders.COLLIDER_NAME);
 
@@ -749,8 +749,6 @@ namespace Tests
 
             Assert.AreSame(meshFilter.sharedMesh, onPointerEventCollider.GetComponent<MeshCollider>().sharedMesh,
                 "OnPointerEventCollider should have the same mesh info as the mesh renderer");
-
-            yield break;
         }
 
         [UnityTest]
@@ -781,6 +779,8 @@ namespace Tests
                 JsonConvert.SerializeObject(new BoxShape.Model { })
             );
 
+            yield return null;
+
             var meshFilter = scene.entities[entityId].gameObject.GetComponentInChildren<MeshFilter>();
             var onPointerEventCollider = meshFilter.transform.Find(OnPointerEventColliders.COLLIDER_NAME);
 
@@ -788,8 +788,6 @@ namespace Tests
 
             Assert.AreSame(meshFilter.sharedMesh, onPointerEventCollider.GetComponent<MeshCollider>().sharedMesh,
                 "OnPointerEventCollider should have the same mesh info as the mesh renderer");
-
-            yield break;
         }
 
         [UnityTest]
@@ -820,6 +818,8 @@ namespace Tests
                 JsonConvert.SerializeObject(new BoxShape.Model { })
             );
 
+            yield return null;
+
             var meshFilter = scene.entities[entityId].gameObject.GetComponentInChildren<MeshFilter>();
             var onPointerEventCollider = meshFilter.transform.Find(OnPointerEventColliders.COLLIDER_NAME);
 
@@ -827,8 +827,6 @@ namespace Tests
 
             Assert.AreSame(meshFilter.sharedMesh, onPointerEventCollider.GetComponent<MeshCollider>().sharedMesh,
                 "OnPointerEventCollider should have the same mesh info as the mesh renderer");
-
-            yield break;
         }
 
         [UnityTest]
@@ -859,6 +857,8 @@ namespace Tests
                 JsonConvert.SerializeObject(new BoxShape.Model { })
             );
 
+            yield return null;
+
             var meshFilter = scene.entities[entityId].gameObject.GetComponentInChildren<MeshFilter>();
             var onPointerEventCollider = meshFilter.transform.Find(OnPointerEventColliders.COLLIDER_NAME);
 
@@ -866,8 +866,6 @@ namespace Tests
 
             Assert.AreSame(meshFilter.sharedMesh, onPointerEventCollider.GetComponent<MeshCollider>().sharedMesh,
                 "OnPointerEventCollider should have the same mesh info as the mesh renderer");
-
-            yield break;
         }
 
         [UnityTest]
@@ -906,7 +904,7 @@ namespace Tests
             onPointerEvent.uuid = onPointerId;
 
             var sceneEvent = new WebInterface.SceneEvent<WebInterface.OnClickEvent>();
-            sceneEvent.sceneId = scene.sceneData.id;
+            sceneEvent.sceneNumber = scene.sceneData.sceneNumber;
             sceneEvent.payload = onPointerEvent;
             sceneEvent.eventType = "uuidEvent";
             bool eventTriggered = false;
@@ -970,7 +968,7 @@ namespace Tests
             onPointerDownEvent.payload.hit.meshName = component.name;
 
             var sceneEvent = new WebInterface.SceneEvent<WebInterface.OnPointerDownEvent>();
-            sceneEvent.sceneId = scene.sceneData.id;
+            sceneEvent.sceneNumber = scene.sceneData.sceneNumber;
             sceneEvent.payload = onPointerDownEvent;
             sceneEvent.eventType = "uuidEvent";
             bool eventTriggered = false;
@@ -985,7 +983,7 @@ namespace Tests
                 {
                     if (eventTriggered)
                         return true;
-                    
+
                     if (pointerEvent.eventType == sceneEvent.eventType &&
                         pointerEvent.payload.uuid == sceneEvent.payload.uuid &&
                         pointerEvent.payload.payload.hit.entityId == sceneEvent.payload.payload.hit.entityId)
@@ -1035,7 +1033,7 @@ namespace Tests
             onPointerUpEvent.payload.hit.meshName = component.name;
 
             var sceneEvent = new WebInterface.SceneEvent<WebInterface.OnPointerUpEvent>();
-            sceneEvent.sceneId = scene.sceneData.id;
+            sceneEvent.sceneNumber = scene.sceneData.sceneNumber;
             sceneEvent.payload = onPointerUpEvent;
             sceneEvent.eventType = "uuidEvent";
             bool eventTriggered = false;
@@ -1115,14 +1113,14 @@ namespace Tests
 
             var sceneEventHoverEnter = new WebInterface.SceneEvent<WebInterface.UUIDEvent<WebInterface.EmptyPayload>>
             {
-                sceneId = scene.sceneData.id,
+                sceneNumber = scene.sceneData.sceneNumber,
                 payload = onPointerHoverEnterEvent,
                 eventType = "uuidEvent"
             };
 
             var sceneEventHoverExit = new WebInterface.SceneEvent<WebInterface.UUIDEvent<WebInterface.EmptyPayload>>
             {
-                sceneId = scene.sceneData.id,
+                sceneNumber = scene.sceneData.sceneNumber,
                 payload = onPointerHoverExitEvent,
                 eventType = "uuidEvent"
             };
@@ -1208,7 +1206,7 @@ namespace Tests
             onPointerUpEvent.payload.hit.meshName = component.name;
 
             var sceneEvent = new WebInterface.SceneEvent<WebInterface.OnPointerUpEvent>();
-            sceneEvent.sceneId = scene.sceneData.id;
+            sceneEvent.sceneNumber = scene.sceneData.sceneNumber;
             sceneEvent.payload = onPointerUpEvent;
             sceneEvent.eventType = "uuidEvent";
 
@@ -1303,7 +1301,7 @@ namespace Tests
 
             var sceneEvent = new WebInterface.SceneEvent<WebInterface.UUIDEvent<WebInterface.EmptyPayload>>
             {
-                sceneId = scene.sceneData.id,
+                sceneNumber = scene.sceneData.sceneNumber,
                 payload = onPointerHoverEnterEvent,
                 eventType = "uuidEvent"
             };
@@ -1377,7 +1375,7 @@ namespace Tests
                 new Vector3(1, 1, 1));
             yield return clickTargetShape.routine;
 
-            
+
             // Set character position and camera rotation
             mainCamera.transform.position = new Vector3(3, 3, 1);
 
@@ -1391,7 +1389,7 @@ namespace Tests
             var component = TestUtils.EntityComponentCreate<OnPointerDown, OnPointerDown.Model>(scene,
                 clickTargetEntity,
                 OnPointerDownModel, CLASS_ID_COMPONENT.UUID_CALLBACK);
-            
+
             // We simulate that entityId has come from kernel
             DCL.Environment.i.world.sceneController.entityIdHelper.entityIdToLegacyId.Add(component.entity.entityId,component.entity.entityId.ToString());
 
@@ -1407,11 +1405,11 @@ namespace Tests
             onPointerDownEvent.payload.hit.meshName = component.name;
 
             var sceneEvent = new WebInterface.SceneEvent<WebInterface.OnPointerDownEvent>();
-            sceneEvent.sceneId = scene.sceneData.id;
+            sceneEvent.sceneNumber = scene.sceneData.sceneNumber;
             sceneEvent.payload = onPointerDownEvent;
             sceneEvent.eventType = "uuidEvent";
             EntityIdHelper idHelper = new EntityIdHelper();
-            
+
 
             // Check if target entity is hit behind other entity
             bool targetEntityHit = false;
@@ -1507,7 +1505,7 @@ namespace Tests
 
             var sceneEvent = new WebInterface.SceneEvent<WebInterface.UUIDEvent<WebInterface.EmptyPayload>>
             {
-                sceneId = scene.sceneData.id,
+                sceneNumber = scene.sceneData.sceneNumber,
                 payload = onPointerHoverEnterEvent,
                 eventType = "uuidEvent"
             };
@@ -1602,7 +1600,7 @@ namespace Tests
             string targetEventType = "SceneEvent";
             // We simulate that entityId has come from kernel
             DCL.Environment.i.world.sceneController.entityIdHelper.entityIdToLegacyId.Add(component.entity.entityId,component.entity.entityId.ToString());
-            
+
             var onPointerDownEvent = new WebInterface.OnPointerDownEvent();
             onPointerDownEvent.uuid = onPointerId;
             onPointerDownEvent.payload = new WebInterface.OnPointerEventPayload();
@@ -1611,7 +1609,7 @@ namespace Tests
             onPointerDownEvent.payload.hit.meshName = component.name;
 
             var sceneEvent = new WebInterface.SceneEvent<WebInterface.OnPointerDownEvent>();
-            sceneEvent.sceneId = scene.sceneData.id;
+            sceneEvent.sceneNumber = scene.sceneData.sceneNumber;
             sceneEvent.payload = onPointerDownEvent;
             sceneEvent.eventType = "uuidEvent";
             EntityIdHelper idHelper = new EntityIdHelper();
@@ -1718,7 +1716,7 @@ namespace Tests
             var onPointerHoverEnterEvent = new WebInterface.UUIDEvent<WebInterface.EmptyPayload> {uuid = onPointerId};
 
             var sceneEvent = new WebInterface.SceneEvent<WebInterface.UUIDEvent<WebInterface.EmptyPayload>>
-                {sceneId = scene.sceneData.id, payload = onPointerHoverEnterEvent, eventType = "uuidEvent"};
+                {sceneNumber = scene.sceneData.sceneNumber, payload = onPointerHoverEnterEvent, eventType = "uuidEvent"};
 
             // Check the target entity is not hit behind the 'isPointerBlocker' shape
             bool targetEntityHit = false;
@@ -1769,9 +1767,8 @@ namespace Tests
         public IEnumerator PointerEventNotTriggeredByParent()
         {
             EntityIdHelper idHelper = new EntityIdHelper();
-            DCL.Environment.i.world.state.currentSceneId = scene.sceneData.id;
             DCL.Environment.i.world.sceneController.Configure().entityIdHelper.Returns(idHelper);
-            
+
             // Create parent entity
             InstantiateEntityWithShape(out IDCLEntity blockingEntity, out BoxShape blockingShape);
             TestUtils.SetEntityTransform(scene, blockingEntity, new Vector3(3, 3, 3), Quaternion.identity,
@@ -1821,10 +1818,10 @@ namespace Tests
             onPointerDownEvent.payload.hit.meshName = component.name;
 
             var sceneEvent = new WebInterface.SceneEvent<WebInterface.OnPointerDownEvent>();
-            sceneEvent.sceneId = scene.sceneData.id;
+            sceneEvent.sceneNumber = scene.sceneData.sceneNumber;
             sceneEvent.payload = onPointerDownEvent;
             sceneEvent.eventType = "uuidEvent";
-            
+
             // Check if target entity is triggered by hitting the parent entity
             bool targetEntityHit = false;
             yield return TestUtils.ExpectMessageToKernel(targetEventType, sceneEvent,
@@ -1878,7 +1875,7 @@ namespace Tests
         }
 
         [UnityTest]
-        public IEnumerator OnPointerHoverFeedbackPropertiesAreAppliedCorrectly()
+        public IEnumerator OnPointerEventsPropertiesAreAppliedCorrectly()
         {
             IDCLEntity entity;
             BoxShape shape;
@@ -1953,7 +1950,7 @@ namespace Tests
 
             yield return null;
 
-            // Canvas now should be true because the camera was repositioned 
+            // Canvas now should be true because the camera was repositioned
             Assert.IsTrue(uuidEventsPlugin.hoverCanvas.canvas.enabled);
 
             onPointerDownModel.distance = 1f;
@@ -1963,7 +1960,7 @@ namespace Tests
 
             yield return null;
 
-            // Canvas should be false again because the distance value was set to 1 
+            // Canvas should be false again because the distance value was set to 1
             Assert.IsFalse(uuidEventsPlugin.hoverCanvas.canvas.enabled);
             Object.Destroy(component);
         }

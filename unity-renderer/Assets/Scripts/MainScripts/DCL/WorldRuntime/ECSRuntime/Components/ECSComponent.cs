@@ -8,16 +8,14 @@ namespace DCL.ECSRuntime
 {
     public class ECSComponent<ModelType> : IECSComponent
     {
-        internal Dictionary<long, ECSComponentData<ModelType>> entities = new Dictionary<long, ECSComponentData<ModelType>>();
-        internal Dictionary<long, IECSComponentHandler<ModelType>> handlers = new Dictionary<long, IECSComponentHandler<ModelType>>();
+        internal readonly DualKeyValueSet<IParcelScene, long, ECSComponentData<ModelType>> componentData =
+            new DualKeyValueSet<IParcelScene, long, ECSComponentData<ModelType>>(50);
 
         private readonly Func<IECSComponentHandler<ModelType>> handlerBuilder;
         private readonly Func<object, ModelType> deserializer;
-        private readonly IParcelScene scene;
 
-        public ECSComponent(IParcelScene scene, Func<object, ModelType> deserializer, Func<IECSComponentHandler<ModelType>> handlerBuilder)
+        public ECSComponent(Func<object, ModelType> deserializer, Func<IECSComponentHandler<ModelType>> handlerBuilder)
         {
-            this.scene = scene;
             this.deserializer = deserializer;
             this.handlerBuilder = handlerBuilder;
         }
@@ -25,101 +23,98 @@ namespace DCL.ECSRuntime
         /// <summary>
         /// creates and add component to an entity
         /// </summary>
+        /// <param name="scene">target scene</param>
         /// <param name="entity">target entity</param>
-        public void Create(IDCLEntity entity)
+        public void Create(IParcelScene scene, IDCLEntity entity)
         {
             var entityId = entity.entityId;
 
-            if (entities.ContainsKey(entityId))
+            if (componentData.ContainsKey(scene, entityId))
             {
                 Debug.LogError($"entity {entityId} already contains component {typeof(ModelType)}", entity.gameObject);
                 return;
             }
 
-            entities[entityId] = new ECSComponentData<ModelType>()
+            var handler = handlerBuilder?.Invoke();
+
+            componentData.Add(scene, entityId, new ECSComponentData<ModelType>()
             {
                 entity = entity,
                 model = default,
-                scene = scene
-            };
+                scene = scene,
+                handler = handler
+            });
 
-            var handler = handlerBuilder?.Invoke();
-
-            if (handler != null)
-            {
-                handlers[entityId] = handler;
-                handler.OnComponentCreated(scene, entity);
-            }
+            handler?.OnComponentCreated(scene, entity);
         }
 
         /// <summary>
         /// remove component from entity
         /// </summary>
+        /// <param name="scene">target scene</param>
         /// <param name="entity">target entity</param>
         /// <returns>true if component removed successfully, false if entity didn't contain component</returns>
-        public bool Remove(IDCLEntity entity)
+        public bool Remove(IParcelScene scene, IDCLEntity entity)
         {
-            var entityId = entity.entityId;
-            if (handlers.TryGetValue(entityId, out IECSComponentHandler<ModelType> handler))
-            {
-                handler.OnComponentRemoved(scene, entity);
-            }
-            handlers.Remove(entityId);
-            return entities.Remove(entityId);
+            if (!componentData.TryGetValue(scene, entity.entityId, out ECSComponentData<ModelType> data))
+                return false;
+
+            data.handler?.OnComponentRemoved(scene, entity);
+            componentData.Remove(scene, entity.entityId);
+            return true;
         }
 
         /// <summary>
         /// set component model for entity
         /// </summary>
+        /// <param name="scene">target scene</param>
         /// <param name="entity">target entity</param>
         /// <param name="model">new model</param>
-        public void SetModel(IDCLEntity entity, ModelType model)
+        public void SetModel(IParcelScene scene, IDCLEntity entity, ModelType model)
         {
-            var entityId = entity.entityId;
-            if (entities.TryGetValue(entity.entityId, out ECSComponentData<ModelType> data))
+            if (componentData.TryGetValue(scene, entity.entityId, out ECSComponentData<ModelType> data))
             {
                 data.model = model;
+                data.handler?.OnComponentModelUpdated(scene, entity, model);
             }
             else
             {
-                Debug.LogError($"trying to update model but entity {entityId} does not contains component {typeof(ModelType)}",
+                Debug.LogError($"trying to update model but entity {entity.entityId} does not contains component {typeof(ModelType)}",
                     entity.gameObject);
-            }
-
-            if (handlers.TryGetValue(entityId, out IECSComponentHandler<ModelType> handler))
-            {
-                handler.OnComponentModelUpdated(scene, entity, model);
             }
         }
 
         /// <summary>
         /// deserialize message and apply a new model for an entity
         /// </summary>
+        /// <param name="scene">target scene</param>
         /// <param name="entity">target entity</param>
         /// <param name="message">message</param>
-        public void Deserialize(IDCLEntity entity, object message)
+        public void Deserialize(IParcelScene scene, IDCLEntity entity, object message)
         {
-            SetModel(entity, deserializer.Invoke(message));
+            SetModel(scene, entity, deserializer.Invoke(message));
         }
 
         /// <summary>
         /// check if entity contains component
         /// </summary>
+        /// <param name="scene">target scene</param>
         /// <param name="entity">target entity</param>
         /// <returns>true if entity contains this component</returns>
-        public bool HasComponent(IDCLEntity entity)
+        public bool HasComponent(IParcelScene scene, IDCLEntity entity)
         {
-            return entities.ContainsKey(entity.entityId);
+            return componentData.ContainsKey(scene, entity.entityId);
         }
 
         /// <summary>
         /// get component data for an entity
         /// </summary>
+        /// <param name="scene">target scene</param>
         /// <param name="entity">target entity</param>
         /// <returns>component data, including model</returns>
-        public ECSComponentData<ModelType> Get(IDCLEntity entity)
+        public IECSReadOnlyComponentData<ModelType> Get(IParcelScene scene, IDCLEntity entity)
         {
-            if (entities.TryGetValue(entity.entityId, out ECSComponentData<ModelType> data))
+            if (componentData.TryGetValue(scene, entity.entityId, out ECSComponentData<ModelType> data))
             {
                 return data;
             }
@@ -127,18 +122,27 @@ namespace DCL.ECSRuntime
         }
 
         /// <summary>
-        /// get every component data for every entity containing this component
+        /// get component data for an entity
         /// </summary>
-        /// <returns>enumerator to iterate through the component data</returns>
-        public IEnumerator<ECSComponentData<ModelType>> Get()
+        /// <param name="scene">target scene</param>
+        /// <param name="entityId">target entity id</param>
+        /// <returns>component data, including model</returns>
+        public IECSReadOnlyComponentData<ModelType> Get(IParcelScene scene, long entityId)
         {
-            using (var iterator = entities.GetEnumerator())
+            if (componentData.TryGetValue(scene, entityId, out ECSComponentData<ModelType> data))
             {
-                while (iterator.MoveNext())
-                {
-                    yield return iterator.Current.Value;
-                }
+                return data;
             }
+            return null;
+        }
+
+        /// <summary>
+        /// get component data for all entities
+        /// </summary>
+        /// <returns>list of component's data</returns>
+        public IReadOnlyList<KeyValueSetTriplet<IParcelScene, long, ECSComponentData<ModelType>>> Get()
+        {
+            return componentData.Pairs;
         }
     }
 }

@@ -17,7 +17,7 @@ public interface IFriendHeadForPlaceCardComponentView
     void SetUserProfile(UserProfile profile);
 }
 
-public class FriendHeadForPlaceCardComponentView : BaseComponentView, IFriendHeadForPlaceCardComponentView, IComponentModelConfig
+public class FriendHeadForPlaceCardComponentView : BaseComponentView, IFriendHeadForPlaceCardComponentView, IComponentModelConfig<FriendHeadForPlaceCardComponentModel>
 {
     [Header("Prefab References")]
     [SerializeField] internal ImageComponentView friendPortrait;
@@ -28,11 +28,14 @@ public class FriendHeadForPlaceCardComponentView : BaseComponentView, IFriendHea
     [Header("Configuration")]
     [SerializeField] internal FriendHeadForPlaceCardComponentModel model;
 
-    public override void Start() { friendNameShowHideAnimator.gameObject.SetActive(false); }
-
-    public void Configure(BaseComponentModel newModel)
+    public void Start()
     {
-        model = (FriendHeadForPlaceCardComponentModel)newModel;
+        friendNameShowHideAnimator.gameObject.SetActive(false);
+    }
+
+    public void Configure(FriendHeadForPlaceCardComponentModel newModel)
+    {
+        model = newModel;
         RefreshControl();
     }
 

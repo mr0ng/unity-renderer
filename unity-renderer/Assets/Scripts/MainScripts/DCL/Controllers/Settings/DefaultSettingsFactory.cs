@@ -5,33 +5,35 @@ namespace DCL.SettingsCommon
 {
     public class DefaultSettingsFactory : ISettingsFactory
     {
-        const string QUALITY_SETTINGS_KEY = "Settings.Quality";
-        const string GENERAL_SETTINGS_KEY = "Settings.General";
-        const string AUDIO_SETTINGS_KEY = "Settings.Audio";
+        private const string QUALITY_SETTINGS_KEY = "Settings.Quality";
+        private const string GENERAL_SETTINGS_KEY = "Settings.General";
+        private const string AUDIO_SETTINGS_KEY = "Settings.Audio";
 
         private string graphicsQualitySettingsPresetPath = "ScriptableObjects/QualitySettingsData";
         private string audioMixerPath = "AudioMixer";
 
         private GeneralSettings defaultGeneralSettings = new GeneralSettings
         {
+            leftMouseButtonCursorLock = true,
             mouseSensitivity = 0.6f,
-            scenesLoadRadius = 4,
+            invertYAxis = false,
+            scenesLoadRadius = 3,
             avatarsLODDistance = 16,
             maxNonLODAvatars = DataStore_AvatarsLOD.DEFAULT_MAX_AVATAR,
             voiceChatVolume = 1,
             voiceChatAllow = GeneralSettings.VoiceChatAllow.ALL_USERS,
-            namesOpacity = 0.5f,
+            namesOpacity = 1f,
             profanityChatFiltering = true,
             nightMode = false,
             hideUI = false,
             showAvatarNames = true,
-            dynamicProceduralSkybox = true,
-            invertYAxis = false,
+            dynamicProceduralSkybox = false, //VR for Quest 2 native
             skyboxTime = 0.0f,
-            firstPersonCameraFOV = 60
+            firstPersonCameraFOV = 60,
+            useInternalBrowser = true
         };
 
-        private AudioSettings defaultAudioSettings = new AudioSettings
+        private readonly AudioSettings defaultAudioSettings = new ()
         {
             masterVolume = 1f,
             voiceChatVolume = 1f,
@@ -39,7 +41,7 @@ namespace DCL.SettingsCommon
             uiSFXVolume = 1f,
             sceneSFXVolume = 1f,
             musicVolume = 1f,
-            chatSFXEnabled = true
+            chatNotificationType = AudioSettings.ChatNotificationType.All,
         };
 
         public DefaultSettingsFactory WithDefaultGeneralSettings(GeneralSettings settings)

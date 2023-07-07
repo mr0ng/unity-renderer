@@ -1,3 +1,4 @@
+using DCL.CameraTool;
 using UnityEngine;
 
 public static class NotificationScriptableObjects
@@ -10,18 +11,17 @@ public static class NotificationScriptableObjects
 
     private static FloatVariable pendingFriendRequestsValue;
     public static FloatVariable pendingFriendRequests => CommonScriptableObjects.GetOrLoad(ref pendingFriendRequestsValue, "ScriptableObjects/NotificationBadge_PendingFriendRequests");
+
+    public static void UnloadAll()
+    {
+        Resources.UnloadAsset(newApprovedFriendsValue);
+        Resources.UnloadAsset(pendingChatMessagesValue);
+        Resources.UnloadAsset(pendingFriendRequestsValue);
+    }
 }
 
 public static class AudioScriptableObjects
 {
-    // Builder
-
-    private static AudioEvent builderEnterEvent;
-    public static AudioEvent builderEnter => CommonScriptableObjects.GetOrLoad(ref builderEnterEvent, "ScriptableObjects/AudioEvents/Builder/BuilderEnter");
-
-    private static AudioEvent builderReadyEvent;
-    public static AudioEvent builderReady => CommonScriptableObjects.GetOrLoad(ref builderReadyEvent, "ScriptableObjects/AudioEvents/Builder/BuilderReady");
-
     // Common UI
 
     private static AudioEvent cameraFadeInEvent;
@@ -35,6 +35,21 @@ public static class AudioScriptableObjects
 
     private static AudioEvent buttonClickEvent;
     public static AudioEvent buttonClick => CommonScriptableObjects.GetOrLoad(ref buttonClickEvent, "ScriptableObjects/AudioEvents/HUDCommon/ButtonClick");
+
+    private static AudioEvent equipEvent;
+    public static AudioEvent equip => CommonScriptableObjects.GetOrLoad(ref equipEvent, "ScriptableObjects/AudioEvents/HUDCommon/Equip");
+
+    private static AudioEvent unequipEvent;
+    public static AudioEvent unequip => CommonScriptableObjects.GetOrLoad(ref unequipEvent, "ScriptableObjects/AudioEvents/HUDCommon/Unequip");
+
+    private static AudioEvent hideEvent;
+    public static AudioEvent hide => CommonScriptableObjects.GetOrLoad(ref hideEvent, "ScriptableObjects/AudioEvents/HUDCommon/Hide");
+
+    private static AudioEvent showEvent;
+    public static AudioEvent show => CommonScriptableObjects.GetOrLoad(ref showEvent, "ScriptableObjects/AudioEvents/HUDCommon/Show");
+
+    private static AudioEvent_WithRandomPitch inputEvent;
+    public static AudioEvent_WithRandomPitch input => CommonScriptableObjects.GetOrLoad(ref inputEvent, "ScriptableObjects/AudioEvents/HUDCommon/InputField");
 
     private static AudioEvent buttonReleaseEvent;
     public static AudioEvent buttonRelease => CommonScriptableObjects.GetOrLoad(ref buttonReleaseEvent, "ScriptableObjects/AudioEvents/HUDCommon/ButtonRelease");
@@ -75,8 +90,17 @@ public static class AudioScriptableObjects
     private static AudioEvent chatReceivePrivateEvent;
     public static AudioEvent chatReceivePrivate => CommonScriptableObjects.GetOrLoad(ref chatReceivePrivateEvent, "ScriptableObjects/AudioEvents/HUDCommon/ChatReceivePrivate");
 
+    private static AudioEvent chatReceiveMentionEvent;
+    public static AudioEvent ChatReceiveMentionEvent => CommonScriptableObjects.GetOrLoad(ref chatReceiveMentionEvent, "ScriptableObjects/AudioEvents/HUDCommon/ChatReceiveMention");
+
     private static AudioEvent chatSendEvent;
     public static AudioEvent chatSend => CommonScriptableObjects.GetOrLoad(ref chatSendEvent, "ScriptableObjects/AudioEvents/HUDCommon/ChatSend");
+
+    private static AudioEvent joinChannelEvent;
+    public static AudioEvent joinChannel => CommonScriptableObjects.GetOrLoad(ref joinChannelEvent, "ScriptableObjects/AudioEvents/HUDCommon/JoinChannel");
+
+    private static AudioEvent leaveChannelEvent;
+    public static AudioEvent leaveChannel => CommonScriptableObjects.GetOrLoad(ref leaveChannelEvent, "ScriptableObjects/AudioEvents/HUDCommon/LeaveChannel");
 
     private static AudioEvent notificationEvent;
     public static AudioEvent notification => CommonScriptableObjects.GetOrLoad(ref notificationEvent, "ScriptableObjects/AudioEvents/HUDCommon/Notification");
@@ -98,15 +122,50 @@ public static class AudioScriptableObjects
 
     private static AudioEvent tooltipPopupEvent;
     public static AudioEvent tooltipPopup => CommonScriptableObjects.GetOrLoad(ref tooltipPopupEvent, "ScriptableObjects/AudioEvents/HUDCommon/TooltipPopup");
+
+    private static AudioEvent friendRequestEvent;
+    public static AudioEvent FriendRequestEvent => CommonScriptableObjects.GetOrLoad(ref friendRequestEvent, "ScriptableObjects/AudioEvents/HUDCommon/FriendRequest");
+
+    public static void UnloadAll()
+    {
+        Resources.UnloadAsset(cameraFadeInEvent);
+        Resources.UnloadAsset(cameraFadeOutEvent);
+        Resources.UnloadAsset(buttonHoverEvent);
+        Resources.UnloadAsset(buttonClickEvent);
+        Resources.UnloadAsset(equipEvent);
+        Resources.UnloadAsset(unequipEvent);
+        Resources.UnloadAsset(buttonReleaseEvent);
+        Resources.UnloadAsset(cancelEvent);
+        Resources.UnloadAsset(confirmEvent);
+        Resources.UnloadAsset(dialogOpenEvent);
+        Resources.UnloadAsset(dialogCloseEvent);
+        Resources.UnloadAsset(enableEvent);
+        Resources.UnloadAsset(errorEvent);
+        Resources.UnloadAsset(disableEvent);
+        Resources.UnloadAsset(fadeInEvent);
+        Resources.UnloadAsset(fadeOutEvent);
+        Resources.UnloadAsset(listItemAppearEvent);
+        Resources.UnloadAsset(chatReceiveGlobalEvent);
+        Resources.UnloadAsset(chatReceivePrivateEvent);
+        Resources.UnloadAsset(chatReceiveMentionEvent);
+        Resources.UnloadAsset(chatSendEvent);
+        Resources.UnloadAsset(joinChannelEvent);
+        Resources.UnloadAsset(leaveChannelEvent);
+        Resources.UnloadAsset(notificationEvent);
+        Resources.UnloadAsset(sliderValueChangeEvent);
+        Resources.UnloadAsset(inputFieldFocusEvent);
+        Resources.UnloadAsset(inputFieldUnfocusEvent);
+        Resources.UnloadAsset(UIHideEvent);
+        Resources.UnloadAsset(UIShowEvent);
+        Resources.UnloadAsset(tooltipPopupEvent);
+        Resources.UnloadAsset(friendRequestEvent);
+    }
 }
 
 public static class CommonScriptableObjects
 {
     private static Vector3Variable playerUnityPositionValue;
     public static Vector3Variable playerUnityPosition => GetOrLoad(ref playerUnityPositionValue, "ScriptableObjects/PlayerUnityPosition");
-
-    private static Vector3Variable playerWorldPositionValue;
-    public static Vector3Variable playerWorldPosition => GetOrLoad(ref playerWorldPositionValue, "ScriptableObjects/PlayerWorldPosition");
 
     private static Vector3Variable playerUnityEulerAnglesValue;
     public static Vector3Variable playerUnityEulerAngles => GetOrLoad(ref playerUnityEulerAnglesValue, "ScriptableObjects/PlayerUnityEulerAngles");
@@ -123,8 +182,10 @@ public static class CommonScriptableObjects
     private static QuaternionVariable movingPlatformRotationDeltaValue;
     public static QuaternionVariable movingPlatformRotationDelta => GetOrLoad(ref movingPlatformRotationDeltaValue, "ScriptableObjects/MovingPlatformRotationDelta");
 
-    private static StringVariable sceneIDValue;
-    public static StringVariable sceneID => GetOrLoad(ref sceneIDValue, "ScriptableObjects/SceneID");
+    // private static StringVariable sceneIDValue;
+    // public static StringVariable sceneID => GetOrLoad(ref sceneIDValue, "ScriptableObjects/SceneID");
+    private static IntVariable sceneNumbervalue;
+    public static IntVariable sceneNumber => GetOrLoad(ref sceneNumbervalue, "ScriptableObjects/SceneNumber");
 
     private static FloatVariable minimapZoomValue;
     public static FloatVariable minimapZoom => GetOrLoad(ref minimapZoomValue, "ScriptableObjects/MinimapZoom");
@@ -150,6 +211,9 @@ public static class CommonScriptableObjects
     private static BooleanVariable playerInfoCardVisibleStateValue;
     public static BooleanVariable playerInfoCardVisibleState => GetOrLoad(ref playerInfoCardVisibleStateValue, "ScriptableObjects/PlayerInfoCardVisibleState");
 
+    private static BooleanVariable forcePerformanceMeterValue;
+    public static BooleanVariable forcePerformanceMeter => GetOrLoad(ref forcePerformanceMeterValue, "ScriptableObjects/ForcePerformanceMeter");
+
     public static RendererState rendererState => GetOrLoad(ref rendererStateValue, "ScriptableObjects/RendererState");
     private static RendererState rendererStateValue;
 
@@ -164,16 +228,15 @@ public static class CommonScriptableObjects
 
     private static BooleanVariable allUIHiddenValue;
     public static BooleanVariable allUIHidden => GetOrLoad(ref allUIHiddenValue, "ScriptableObjects/AllUIHidden");
-
-    private static BooleanVariable builderInWorldNotNecessaryUIVisibilityStatusValue;
-    public static BooleanVariable builderInWorldNotNecessaryUIVisibilityStatus => GetOrLoad(ref builderInWorldNotNecessaryUIVisibilityStatusValue, "ScriptableObjects/BuilderInWorldUIHidden");
+    private static BooleanVariable useInternalBrowserValue;
+    public static BooleanVariable useInternalBrowser => GetOrLoad(ref useInternalBrowserValue, "ScriptableObjects/UseInternalBrowser");
 
     private static LatestOpenChatsList latestOpenChatsValue;
     public static LatestOpenChatsList latestOpenChats => GetOrLoad(ref latestOpenChatsValue, "ScriptableObjects/LatestOpenChats");
 
     private static CameraMode cameraModeValue;
     public static CameraMode cameraMode => GetOrLoad(ref cameraModeValue, "ScriptableObjects/CameraMode");
-    
+
     private static BooleanVariable cameraModeInputLockedValue;
     public static BooleanVariable cameraModeInputLocked => GetOrLoad(ref cameraModeInputLockedValue, "ScriptableObjects/CameraModeInputLocked");
 
@@ -183,6 +246,9 @@ public static class CommonScriptableObjects
     private static BooleanVariable isFullscreenHUDOpenValue;
     public static BooleanVariable isFullscreenHUDOpen => GetOrLoad(ref isFullscreenHUDOpenValue, "ScriptableObjects/IsAvatarHUDOpen");
 
+    private static BooleanVariable isLoadingHUDOpenValue;
+    public static BooleanVariable isLoadingHUDOpen => GetOrLoad(ref isLoadingHUDOpenValue, "ScriptableObjects/IsLoadingHUDOpen");
+
     private static BooleanVariable isTaskbarHUDInitializedValue;
     public static BooleanVariable isTaskbarHUDInitialized => GetOrLoad(ref isTaskbarHUDInitializedValue, "ScriptableObjects/IsTaskbarHUDInitialized");
 
@@ -191,6 +257,9 @@ public static class CommonScriptableObjects
 
     private static BooleanVariable featureKeyTriggersBlockedValue;
     public static BooleanVariable featureKeyTriggersBlocked => GetOrLoad(ref featureKeyTriggersBlockedValue, "ScriptableObjects/FeatureKeyTriggersBlocked");
+
+    private static BooleanVariable userMovementKeysBlockedValue;
+    public static BooleanVariable userMovementKeysBlocked => GetOrLoad(ref userMovementKeysBlockedValue, "ScriptableObjects/UserMovementKeysBlocked");
 
     private static BooleanVariable emailPromptActiveValue;
     public static BooleanVariable emailPromptActive => GetOrLoad(ref emailPromptActiveValue, "ScriptableObjects/EmailPromptActive");
@@ -206,5 +275,41 @@ public static class CommonScriptableObjects
         }
 
         return variable;
+    }
+
+    public static void UnloadAll()
+    {
+        Resources.UnloadAsset(playerUnityPositionValue);
+        Resources.UnloadAsset(playerUnityEulerAnglesValue);
+        Resources.UnloadAsset(worldOffsetValue);
+        Resources.UnloadAsset(playerCoordsValue);
+        Resources.UnloadAsset(playerIsOnMovingPlatformValue);
+        Resources.UnloadAsset(movingPlatformRotationDeltaValue);
+        Resources.UnloadAsset(sceneNumbervalue);
+        Resources.UnloadAsset(minimapZoomValue);
+        Resources.UnloadAsset(characterForwardValue);
+        Resources.UnloadAsset(cameraForwardValue);
+        Resources.UnloadAsset(cameraPositionValue);
+        Resources.UnloadAsset(cameraRightValue);
+        Resources.UnloadAsset(cameraIsBlendingValue);
+        Resources.UnloadAsset(cameraBlockedValue);
+        Resources.UnloadAsset(playerInfoCardVisibleStateValue);
+        Resources.UnloadAsset(forcePerformanceMeterValue);
+        Resources.UnloadAsset(rendererStateValue);
+        Resources.UnloadAsset(focusStateValue);
+        Resources.UnloadAsset(lastReadChatMessagesDictionary);
+        Resources.UnloadAsset(lastReadChatMessagesValue);
+        Resources.UnloadAsset(allUIHiddenValue);
+        Resources.UnloadAsset(latestOpenChatsValue);
+        Resources.UnloadAsset(cameraModeValue);
+        Resources.UnloadAsset(cameraModeInputLockedValue);
+        Resources.UnloadAsset(isProfileHUDOpenValue);
+        Resources.UnloadAsset(isFullscreenHUDOpenValue);
+        Resources.UnloadAsset(isTaskbarHUDInitializedValue);
+        Resources.UnloadAsset(tutorialActiveValue);
+        Resources.UnloadAsset(featureKeyTriggersBlockedValue);
+        Resources.UnloadAsset(userMovementKeysBlockedValue);
+        Resources.UnloadAsset(emailPromptActiveValue);
+        Resources.UnloadAsset(voiceChatDisabledValue);
     }
 }

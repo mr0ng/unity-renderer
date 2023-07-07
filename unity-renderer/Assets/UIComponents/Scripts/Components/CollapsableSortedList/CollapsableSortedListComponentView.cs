@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,9 +13,9 @@ namespace UIComponents.CollapsableSortedList
         private readonly Dictionary<K, V> entries = new Dictionary<K, V>();
         private readonly List<K> sortedEntries = new List<K>();
 
-        [SerializeField] private Transform container;
-        [SerializeField] private CollapsableListToggleButton toggleButton;
-        [SerializeField] private GameObject emptyStateContainer;
+        [SerializeField] internal Transform container;
+        [SerializeField] internal CollapsableListToggleButton toggleButton;
+        [SerializeField] internal GameObject emptyStateContainer;
         [SerializeField] private CollapsableSortedListModel model;
 
         private int filteredCount;
@@ -34,10 +34,8 @@ namespace UIComponents.CollapsableSortedList
             UpdateLayout();
         }
 
-        public override void Update()
+        public void Update()
         {
-            base.Update();
-            
             if (isLayoutDirty)
                 Utils.ForceRebuildLayoutImmediate((RectTransform) container);
             isLayoutDirty = false;
@@ -46,7 +44,7 @@ namespace UIComponents.CollapsableSortedList
         public override void RefreshControl()
         {
             Clear();
-            
+
             if (model.isExpanded)
                 Expand();
             else
@@ -140,7 +138,7 @@ namespace UIComponents.CollapsableSortedList
             UpdateLayout();
             UpdateEmptyState();
         }
-        
+
         public IEnumerator FilterAsync(Func<V, bool> comparision, int throttlingBudget = 10)
         {
             filteredCount = 0;
@@ -151,7 +149,7 @@ namespace UIComponents.CollapsableSortedList
                 iterations++;
                 if (iterations % throttlingBudget == 0)
                     yield return null;
-                
+
                 var isMatch = comparision.Invoke(entry.Value);
                 entry.Value.gameObject.SetActive(isMatch);
 
@@ -173,7 +171,7 @@ namespace UIComponents.CollapsableSortedList
             }
         }
 
-        private void UpdateEmptyState()
+        protected virtual void UpdateEmptyState()
         {
             if (emptyStateContainer == null) return;
             emptyStateContainer.SetActive(Count() == 0);

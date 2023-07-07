@@ -9,9 +9,12 @@ namespace DCL.Emotes
     public class EmoteAnimationLoader : IEmoteAnimationLoader
     {
         private readonly IWearableRetriever retriever;
-        public AnimationClip animation { get; internal set; }
+        public AnimationClip loadedAnimationClip { get; internal set; }
 
-        public EmoteAnimationLoader(IWearableRetriever retriever) { this.retriever = retriever; }
+        public EmoteAnimationLoader(IWearableRetriever retriever)
+        {
+            this.retriever = retriever;
+        }
 
         public async UniTask LoadEmote(GameObject container, WearableItem emote, string bodyShapeId, CancellationToken ct = default)
         {
@@ -26,20 +29,33 @@ namespace DCL.Emotes
 
             ct.ThrowIfCancellationRequested();
 
-            WearableItem.Representation representation = emote.GetRepresentation(bodyShapeId);
-            if (representation == null)
+            Rendereable rendereable = await retriever.Retrieve(container, emote, bodyShapeId, ct);
+
+            var animation = rendereable.container.GetComponentInChildren<Animation>();
+
+            if (animation == null)
             {
-                throw new Exception($"No representation for {bodyShapeId} of emote: {emote.id}");
+                Debug.LogError("Animation component not found in the container for emote " + emote.id);
+                return;
             }
 
-            Rendereable rendereable = await retriever.Retrieve(container, emote.GetContentProvider(bodyShapeId), emote.baseUrlBundles, representation.mainFile, ct);
+            animation.enabled = false;
+            var animationClip = animation.clip;
 
-            animation = rendereable.container.GetComponentInChildren<Animation>()?.clip;
+            if (animationClip == null)
+            {
+                Debug.LogError("AnimationClip not found in the container for emote " + emote.id);
+                return;
+            }
 
             //Setting animation name equal to emote id to avoid unity animation clip duplication on Animation.AddClip()
-            animation.name = emote.id;
+            this.loadedAnimationClip = animationClip;
+            animationClip.name = emote.id;
         }
 
-        public void Dispose() { retriever?.Dispose(); }
+        public void Dispose()
+        {
+            retriever?.Dispose();
+        }
     }
 }

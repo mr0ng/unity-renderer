@@ -1,9 +1,12 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using DCL;
 using DCL.Helpers;
 using UnityEngine;
+using DCL.Shaders;
 using Object = UnityEngine.Object;
 
 namespace AvatarSystem
@@ -28,6 +31,8 @@ namespace AvatarSystem
         internal readonly IFacialFeatureRetriever eyesRetriever;
         internal readonly IFacialFeatureRetriever eyebrowsRetriever;
         internal readonly IFacialFeatureRetriever mouthRetriever;
+
+        private readonly Dictionary<SkinnedMeshRenderer, (Transform rootBone, Transform[] bones)> originalBones = new Dictionary<SkinnedMeshRenderer, (Transform rootBone, Transform[] bones)>();
 
         public BodyShapeLoader(IRetrieverFactory retrieverFactory, WearableItem bodyshape, WearableItem eyes, WearableItem eyebrows, WearableItem mouth)
         {
@@ -57,10 +62,15 @@ namespace AvatarSystem
                 status = IWearableLoader.Status.Idle;
                 await LoadWearable(container, ct);
 
+                // Store the original bones.
+                originalBones.Clear();
+
+                foreach (SkinnedMeshRenderer skm in bodyshapeRetriever.rendereable.renderers.OfType<SkinnedMeshRenderer>()) { originalBones[skm] = (skm.rootBone, skm.bones); }
+
                 (headRenderer, upperBodyRenderer, lowerBodyRenderer, feetRenderer, eyesRenderer, eyebrowsRenderer, mouthRenderer) = AvatarSystemUtils.ExtractBodyshapeParts(bodyshapeRetriever.rendereable);
 
                 await (LoadEyes(ct), LoadEyebrows(ct), LoadMouth(ct));
-               
+
                 UpdateColors(avatarSettings);
                 status = IWearableLoader.Status.Succeeded;
             }
@@ -72,14 +82,22 @@ namespace AvatarSystem
             }
         }
 
+        public void SetBones(Transform rootBone, Transform[] bones)
+        {
+            AvatarSystemUtils.CopyBones(rootBone, bones, rendereable.renderers.OfType<SkinnedMeshRenderer>());
+        }
+
         private async UniTask LoadMouth(CancellationToken ct)
         {
             if (mouth == null) return;
             (Texture main, Texture mask) = await mouthRetriever.Retrieve(mouth, wearable.id, ct);
             mouthRenderer.material = new Material(Resources.Load<Material>("Mouth Material"));
+
             if (main == null)
                 throw new Exception($"Couldn't fetch main texture for {mouth.id}");
+
             mouthRenderer.material.SetTexture(ShaderUtils.BaseMap, main);
+
             if (mask != null)
                 mouthRenderer.material.SetTexture(ShaderUtils.TintMask, mask);
         }
@@ -89,9 +107,12 @@ namespace AvatarSystem
             if (eyebrows == null) return;
             (Texture main, Texture mask) = await eyebrowsRetriever.Retrieve(eyebrows, wearable.id, ct);
             eyebrowsRenderer.material = new Material(Resources.Load<Material>("Eyebrow Material"));
+
             if (main == null)
                 throw new Exception($"Couldn't fetch main texture for {eyebrows.id}");
+
             eyebrowsRenderer.material.SetTexture(ShaderUtils.BaseMap, main);
+
             if (mask != null)
                 eyebrowsRenderer.material.SetTexture(ShaderUtils.BaseMap, mask);
         }
@@ -101,9 +122,12 @@ namespace AvatarSystem
             if (eyes == null) return;
             (Texture main, Texture mask) = await eyesRetriever.Retrieve(eyes, wearable.id, ct);
             eyesRenderer.material = new Material(Resources.Load<Material>("Eye Material"));
+
             if (main == null)
                 throw new Exception($"Couldn't fetch main texture for {eyes.id}");
+
             eyesRenderer.material.SetTexture(ShaderUtils.EyesTexture, main);
+
             if (mask != null)
                 eyesRenderer.material.SetTexture(ShaderUtils.IrisMask, mask);
         }
@@ -122,18 +146,14 @@ namespace AvatarSystem
 
             bodyshapeRetriever.Dispose();
 
-            WearableItem.Representation representation = wearable.GetRepresentation(wearable.id);
-            if (representation == null)
-                throw new Exception("Couldn't find a representation for this bodyshape");
-
-            Rendereable bodyshapeRenderable = await bodyshapeRetriever.Retrieve(container, wearable.GetContentProvider(wearable.id), wearable.baseUrlBundles, representation.mainFile, ct);
+            Rendereable bodyshapeRenderable = await bodyshapeRetriever.Retrieve(container, wearable, wearable.id, ct);
 
             if (bodyshapeRenderable == null) // fail safe, we shouldnt reach this since .Retrieve should throw if anything goes wrong
                 throw new Exception("Couldn't load bodyshape");
 
             return bodyshapeRenderable;
         }
-        
+
         public bool IsValid(WearableItem bodyshape, WearableItem eyebrows, WearableItem eyes, WearableItem mouth)
         {
             if (wearable.id != bodyshape?.id) return false;
@@ -147,8 +167,10 @@ namespace AvatarSystem
         {
             if (eyesRenderer != null)
                 eyesRenderer.enabled = false;
+
             if (eyebrowsRenderer != null)
                 eyebrowsRenderer.enabled = false;
+
             if (mouthRenderer != null)
                 mouthRenderer.enabled = false;
         }
@@ -156,6 +178,16 @@ namespace AvatarSystem
         public void Dispose()
         {
             status = IWearableLoader.Status.Idle;
+
+            //Restore bones
+            foreach ((SkinnedMeshRenderer skm, (Transform rootBone, Transform[] bones)) in originalBones)
+            {
+                skm.rootBone = rootBone;
+                skm.bones = bones;
+            }
+
+            originalBones.Clear();
+
             bodyshapeRetriever?.Dispose();
             eyesRetriever?.Dispose();
             eyebrowsRetriever?.Dispose();
@@ -163,8 +195,10 @@ namespace AvatarSystem
 
             if (eyesRenderer != null)
                 Object.Destroy(eyesRenderer.material);
+
             if (eyebrowsRenderer != null)
                 Object.Destroy(eyebrowsRenderer.material);
+
             if (mouthRenderer != null)
                 Object.Destroy(mouthRenderer.material);
 

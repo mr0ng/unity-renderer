@@ -1,0 +1,301 @@
+<linker>
+  <assembly fullname="Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
+    <type fullname="DCL.Interface.KeyboardCreator" preserve="all" />
+  </assembly>
+  <assembly fullname="Audio, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
+    <type fullname="AudioEvent" preserve="all" />
+    <type fullname="AudioEvent/AudioClipList" preserve="nothing" serialized="true" />
+  </assembly>
+  <assembly fullname="AvatarAssets, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
+    <type fullname="DCL.Emotes.EmbeddedEmotesSO" preserve="all" />
+    <type fullname="DCL.Emotes.EmbeddedEmote" preserve="nothing" serialized="true" />
+    <type fullname="DCL.Emotes.EmoteDataV0" preserve="nothing" serialized="true" />
+    <type fullname="WearableItem/Data" preserve="nothing" serialized="true" />
+    <type fullname="i18n" preserve="nothing" serialized="true" />
+  </assembly>
+  <assembly fullname="AvatarEditorHUD, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
+    <type fullname="SizeOnHover" preserve="all" />
+  </assembly>
+  <assembly fullname="BaseVariable, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
+    <type fullname="BooleanVariable" preserve="all" />
+  </assembly>
+  <assembly fullname="ChatHUD, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
+    <type fullname="DateSeparatorEntry" preserve="all" />
+    <type fullname="DCL.Chat.HUD.ChatMentionSuggestionComponentView" preserve="all" />
+    <type fullname="DCL.Chat.HUD.ChatMentionSuggestionEntryComponentView" preserve="all" />
+    <type fullname="DCL.Chat.HUD.DefaultChatEntry" preserve="all" />
+    <type fullname="DCL.Chat.HUD.DefaultChatEntryFactory" preserve="all" />
+    <type fullname="DCL.Chat.HUD.PoolChatEntryFactory" preserve="all" />
+    <type fullname="DCL.Social.Chat.ChatHUDView" preserve="all" />
+    <type fullname="DCL.Social.Chat.ChatHUDView/Model" preserve="nothing" serialized="true" />
+  </assembly>
+  <assembly fullname="FriendsHUD, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
+    <type fullname="CollapsableSortedFriendEntryList" preserve="all" />
+    <type fullname="FriendEntry" preserve="all" />
+    <type fullname="FriendRequestEntry" preserve="all" />
+    <type fullname="FriendRequestsTabComponentView" preserve="all" />
+    <type fullname="FriendsHUDComponentView" preserve="all" />
+    <type fullname="FriendsTabComponentView" preserve="all" />
+    <type fullname="JumpInButton" preserve="all" />
+    <type fullname="FriendRequestsTabComponentView/Model" preserve="nothing" serialized="true" />
+    <type fullname="FriendsHUDComponentView/Model" preserve="nothing" serialized="true" />
+    <type fullname="FriendsTabComponentView/FriendListComponents" preserve="nothing" serialized="true" />
+    <type fullname="FriendsTabComponentView/Model" preserve="nothing" serialized="true" />
+  </assembly>
+  <assembly fullname="GraphicCardWarningHUD, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
+    <type fullname="GraphicCardNotification" preserve="all" />
+  </assembly>
+  <assembly fullname="HelpAndSupportHUD, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
+    <type fullname="DCL.HelpAndSupportHUD.HelpAndSupportHUDView" preserve="all" />
+  </assembly>
+  <assembly fullname="HUD, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
+    <type fullname="HelpAndSupportHudHelper" preserve="all" />
+    <type fullname="SignupHudHelper" preserve="all" />
+    <type fullname="UIHoverObjectToggler" preserve="all" />
+  </assembly>
+  <assembly fullname="HUDCommon, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
+    <type fullname="Button_OnPointerDown" preserve="all" />
+    <type fullname="ButtonAudioHandler" preserve="all" />
+    <type fullname="DCL.HUD.Common.ContentSizeFitterMaxWidth" preserve="all" />
+    <type fullname="DCL.HUD.Common.ScrollRectSensitivityHandler" preserve="all" />
+    <type fullname="GeneralHUDElementAudioHandler" preserve="all" />
+    <type fullname="ScrollbarHandleAudioHandler" preserve="all" />
+    <type fullname="ShowHideAnimator" preserve="all" />
+    <type fullname="ShowHideUIByTrigger" preserve="all" />
+  </assembly>
+  <assembly fullname="InputController, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
+    <type fullname="InputAction_Trigger" preserve="all" />
+  </assembly>
+  <assembly fullname="Launcher, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
+    <type fullname="Login.LoginHUDView" preserve="all" />
+  </assembly>
+  <assembly fullname="MapRendererV2, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
+    <type fullname="DCLServices.MapRendererV2.ComponentsFactory.MapRendererConfiguration" preserve="all" />
+    <type fullname="DCLServices.MapRendererV2.MapCameraController.MapCameraObject" preserve="all" />
+    <type fullname="DCLServices.MapRendererV2.MapLayers.HomePoint.HomePointMarkerObject" preserve="all" />
+    <type fullname="DCLServices.MapRendererV2.MapLayers.ParcelHighlight.ParcelHighlightMarkerObject" preserve="all" />
+    <type fullname="DCLServices.MapRendererV2.MapLayers.PlayerMarker.PlayerMarkerObject" preserve="all" />
+    <type fullname="DCLServices.MapRendererV2.MapLayers.PointsOfInterest.SceneOfInterestMarkerObject" preserve="all" />
+    <type fullname="DCLServices.MapRendererV2.MapLayers.UsersMarkers.ColdArea.ColdUserMarkerObject" preserve="all" />
+    <type fullname="DCLServices.MapRendererV2.MapLayers.UsersMarkers.HotArea.HotUserMarkerObject" preserve="all" />
+  </assembly>
+  <assembly fullname="Mentions, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
+    <type fullname="DCL.Social.Chat.Mentions.MentionLinkDetector" preserve="all" />
+  </assembly>
+  <assembly fullname="NotificationBadge, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
+    <type fullname="ReceivedFriendRequestsNotificationBadge" preserve="all" />
+    <type fullname="UnreadNotificationBadge" preserve="all" />
+  </assembly>
+  <assembly fullname="NotificationHUD, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
+    <type fullname="Notification" preserve="all" />
+    <type fullname="NotificationFactory" preserve="all" />
+    <type fullname="NotificationHUDView" preserve="all" />
+    <type fullname="NotificationFactory/Item" preserve="nothing" serialized="true" />
+  </assembly>
+  <assembly fullname="NotificationMessagesHUD, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
+    <type fullname="DCL.Chat.Notifications.ChatNotificationMessageComponentView" preserve="all" />
+    <type fullname="DCL.Chat.Notifications.FriendRequestNotificationComponentView" preserve="all" />
+    <type fullname="DCL.Chat.Notifications.MainChatNotificationsComponentView" preserve="all" />
+    <type fullname="DCL.Chat.Notifications.TopNotificationComponentView" preserve="all" />
+    <type fullname="DCL.Chat.Notifications.ChatNotificationMessageComponentModel" preserve="nothing" serialized="true" />
+    <type fullname="DCL.Chat.Notifications.FriendRequestNotificationComponentModel" preserve="nothing" serialized="true" />
+  </assembly>
+  <assembly fullname="PrivateChatWindowHUD, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
+    <type fullname="DCL.Chat.HUD.PoolPrivateChatEntryFactory" preserve="all" />
+    <type fullname="DCL.Social.Chat.PrivateChatHUDView" preserve="all" />
+    <type fullname="PrivateChatWindowComponentView" preserve="all" />
+    <type fullname="PrivateChatWindowComponentView/Model" preserve="nothing" serialized="true" />
+  </assembly>
+  <assembly fullname="ProceduralSkybox, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
+    <type fullname="DCL.Skybox.MaterialReferenceContainer" preserve="all" />
+    <type fullname="DCL.Skybox.ReflectionProbeRuntime" preserve="all" />
+    <type fullname="DCL.Skybox.SkyboxConfiguration" preserve="all" />
+    <type fullname="DCL.Skybox.SkyboxElementsReferences" preserve="all" />
+    <type fullname="FollowBehaviour" preserve="all" />
+    <type fullname="DCL.Skybox.DirectionalLightAttributes" preserve="nothing" serialized="true" />
+    <type fullname="DCL.Skybox.TextureLayer" preserve="nothing" serialized="true" />
+    <type fullname="DCL.Skybox.TimelineTagsDuration" preserve="nothing" serialized="true" />
+    <type fullname="DCL.Skybox.TransitioningFloat" preserve="nothing" serialized="true" />
+    <type fullname="DCL.Skybox.TransitioningQuaternion" preserve="nothing" serialized="true" />
+    <type fullname="DCL.Skybox.TransitioningVector2" preserve="nothing" serialized="true" />
+    <type fullname="DCL.Skybox.TransitioningVector3" preserve="nothing" serialized="true" />
+  </assembly>
+  <assembly fullname="RenderingUIScripts, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
+    <type fullname="UILoadingSpinner" preserve="all" />
+    <type fullname="UIRainbowController" preserve="all" />
+  </assembly>
+  <assembly fullname="ShaderPrewarm, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
+    <type fullname="MainScripts.DCL.Controllers.ShaderPrewarm.ShaderVariantsData" preserve="all" />
+  </assembly>
+  <assembly fullname="SignupHUD, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
+    <type fullname="SignupHUD.SignupHUDView" preserve="all" />
+  </assembly>
+  <assembly fullname="SocialBarHUD, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
+    <type fullname="SocialBar.UserThumbnail.UserThumbnailComponentView" preserve="all" />
+    <type fullname="SocialBar.UserThumbnail.UserThumbnailComponentModel" preserve="nothing" serialized="true" />
+  </assembly>
+  <assembly fullname="ToSPopupHUD, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
+    <type fullname="MainScripts.DCL.Controllers.HUD.ToSPopupHUD.ToSPopupView" preserve="all" />
+  </assembly>
+  <assembly fullname="UIComponents, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
+    <type fullname="ButtonComponentView" preserve="all" />
+    <type fullname="ImageComponentView" preserve="all" />
+    <type fullname="SearchBarComponentView" preserve="all" />
+    <type fullname="ToggleComponentView" preserve="all" />
+    <type fullname="UIComponents.CollapsableSortedList.CollapsableListToggleButton" preserve="all" />
+    <type fullname="UIHelper_ChangeTextAndIconColorOnFocus" preserve="all" />
+    <type fullname="ButtonComponentModel" preserve="nothing" serialized="true" />
+    <type fullname="ImageComponentModel" preserve="nothing" serialized="true" />
+    <type fullname="SearchBarComponentModel" preserve="nothing" serialized="true" />
+    <type fullname="ToggleComponentModel" preserve="nothing" serialized="true" />
+    <type fullname="UIComponents.CollapsableSortedList.CollapsableListToggleButtonModel" preserve="nothing" serialized="true" />
+    <type fullname="UIComponents.CollapsableSortedList.CollapsableSortedListModel" preserve="nothing" serialized="true" />
+  </assembly>
+  <assembly fullname="Unity.Addressables, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null" preserve="all">
+    <type fullname="UnityEngine.AddressableAssets.Addressables" preserve="all" />
+  </assembly>
+  <assembly fullname="Unity.RenderPipelines.Universal.Runtime, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
+    <type fullname="UnityEngine.Rendering.Universal.UniversalAdditionalCameraData" preserve="all" />
+  </assembly>
+  <assembly fullname="Unity.ResourceManager, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null" preserve="all">
+    <type fullname="UnityEngine.ResourceManagement.ResourceProviders.AssetBundleProvider" preserve="all" />
+    <type fullname="UnityEngine.ResourceManagement.ResourceProviders.AtlasSpriteProvider" preserve="all" />
+    <type fullname="UnityEngine.ResourceManagement.ResourceProviders.BundledAssetProvider" preserve="all" />
+    <type fullname="UnityEngine.ResourceManagement.ResourceProviders.InstanceProvider" preserve="all" />
+    <type fullname="UnityEngine.ResourceManagement.ResourceProviders.LegacyResourcesProvider" preserve="all" />
+    <type fullname="UnityEngine.ResourceManagement.ResourceProviders.SceneProvider" preserve="all" />
+  </assembly>
+  <assembly fullname="Unity.TextMeshPro, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
+    <type fullname="TMPro.TextMeshPro" preserve="all" />
+    <type fullname="TMPro.TextMeshProUGUI" preserve="all" />
+    <type fullname="TMPro.TMP_FontAsset" preserve="all" />
+    <type fullname="TMPro.TMP_InputField" preserve="all" />
+    <type fullname="TMPro.FaceInfo_Legacy" preserve="nothing" serialized="true" />
+    <type fullname="TMPro.FontAssetCreationSettings" preserve="nothing" serialized="true" />
+    <type fullname="TMPro.KerningTable" preserve="nothing" serialized="true" />
+    <type fullname="TMPro.TMP_Character" preserve="nothing" serialized="true" />
+    <type fullname="TMPro.TMP_FontFeatureTable" preserve="nothing" serialized="true" />
+    <type fullname="TMPro.TMP_FontWeightPair" preserve="nothing" serialized="true" />
+    <type fullname="TMPro.VertexGradient" preserve="nothing" serialized="true" />
+    <type fullname="TMPro.TMP_InputField/OnChangeEvent" preserve="nothing" serialized="true" />
+    <type fullname="TMPro.TMP_InputField/SelectionEvent" preserve="nothing" serialized="true" />
+    <type fullname="TMPro.TMP_InputField/SubmitEvent" preserve="nothing" serialized="true" />
+    <type fullname="TMPro.TMP_InputField/TextSelectionEvent" preserve="nothing" serialized="true" />
+    <type fullname="TMPro.TMP_InputField/TouchScreenKeyboardEvent" preserve="nothing" serialized="true" />
+  </assembly>
+  <assembly fullname="UnityEngine.AnimationModule, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
+    <type fullname="UnityEngine.Animation" preserve="all" />
+    <type fullname="UnityEngine.AnimationClip" preserve="all" />
+    <type fullname="UnityEngine.Animator" preserve="all" />
+    <type fullname="UnityEngine.RuntimeAnimatorController" preserve="all" />
+  </assembly>
+  <assembly fullname="UnityEngine.AudioModule, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
+    <type fullname="UnityEngine.AudioClip" preserve="all" />
+  </assembly>
+  <assembly fullname="UnityEngine.CoreModule, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
+    <type fullname="UnityEngine.Camera" preserve="all" />
+    <type fullname="UnityEngine.Cubemap" preserve="all" />
+    <type fullname="UnityEngine.GameObject" preserve="all" />
+    <type fullname="UnityEngine.Material" preserve="all" />
+    <type fullname="UnityEngine.MeshRenderer" preserve="all" />
+    <type fullname="UnityEngine.Object" preserve="all" />
+    <type fullname="UnityEngine.RectTransform" preserve="all" />
+    <type fullname="UnityEngine.ReflectionProbe" preserve="all" />
+    <type fullname="UnityEngine.Shader" preserve="all" />
+    <type fullname="UnityEngine.ShaderVariantCollection" preserve="all" />
+    <type fullname="UnityEngine.Sprite" preserve="all" />
+    <type fullname="UnityEngine.SpriteRenderer" preserve="all" />
+    <type fullname="UnityEngine.TextAsset" preserve="all" />
+    <type fullname="UnityEngine.Texture2D" preserve="all" />
+    <type fullname="UnityEngine.Transform" preserve="all" />
+    <type fullname="UnityEngine.U2D.SpriteAtlas" preserve="all" />
+    <type fullname="UnityEngine.Events.PersistentCallGroup" preserve="nothing" serialized="true" />
+    <type fullname="UnityEngine.RectOffset" preserve="nothing" serialized="true" />
+  </assembly>
+  <assembly fullname="UnityEngine.TextRenderingModule, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
+    <type fullname="UnityEngine.Font" preserve="all" />
+  </assembly>
+  <assembly fullname="UnityEngine.UI, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
+    <type fullname="UnityEngine.UI.AspectRatioFitter" preserve="all" />
+    <type fullname="UnityEngine.UI.Button" preserve="all" />
+    <type fullname="UnityEngine.UI.CanvasScaler" preserve="all" />
+    <type fullname="UnityEngine.UI.ContentSizeFitter" preserve="all" />
+    <type fullname="UnityEngine.UI.GraphicRaycaster" preserve="all" />
+    <type fullname="UnityEngine.UI.GridLayoutGroup" preserve="all" />
+    <type fullname="UnityEngine.UI.HorizontalLayoutGroup" preserve="all" />
+    <type fullname="UnityEngine.UI.Image" preserve="all" />
+    <type fullname="UnityEngine.UI.LayoutElement" preserve="all" />
+    <type fullname="UnityEngine.UI.Mask" preserve="all" />
+    <type fullname="UnityEngine.UI.RawImage" preserve="all" />
+    <type fullname="UnityEngine.UI.RectMask2D" preserve="all" />
+    <type fullname="UnityEngine.UI.Scrollbar" preserve="all" />
+    <type fullname="UnityEngine.UI.ScrollRect" preserve="all" />
+    <type fullname="UnityEngine.UI.Text" preserve="all" />
+    <type fullname="UnityEngine.UI.Toggle" preserve="all" />
+    <type fullname="UnityEngine.UI.VerticalLayoutGroup" preserve="all" />
+    <type fullname="UnityEngine.UI.AnimationTriggers" preserve="nothing" serialized="true" />
+    <type fullname="UnityEngine.UI.Button/ButtonClickedEvent" preserve="nothing" serialized="true" />
+    <type fullname="UnityEngine.UI.ColorBlock" preserve="nothing" serialized="true" />
+    <type fullname="UnityEngine.UI.MaskableGraphic/CullStateChangedEvent" preserve="nothing" serialized="true" />
+    <type fullname="UnityEngine.UI.Navigation" preserve="nothing" serialized="true" />
+    <type fullname="UnityEngine.UI.SpriteState" preserve="nothing" serialized="true" />
+    <type fullname="UnityEngine.UI.FontData" preserve="nothing" serialized="true" />
+    <type fullname="UnityEngine.UI.ScrollRect/ScrollRectEvent" preserve="nothing" serialized="true" />
+    <type fullname="UnityEngine.UI.Scrollbar/ScrollEvent" preserve="nothing" serialized="true" />
+    <type fullname="UnityEngine.UI.Toggle/ToggleEvent" preserve="nothing" serialized="true" />
+  </assembly>
+  <assembly fullname="UnityEngine.UIModule, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
+    <type fullname="UnityEngine.Canvas" preserve="all" />
+    <type fullname="UnityEngine.CanvasGroup" preserve="all" />
+    <type fullname="UnityEngine.CanvasRenderer" preserve="all" />
+  </assembly>
+  <assembly fullname="UserContextMenu, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
+    <type fullname="UserContextConfirmationDialog" preserve="all" />
+    <type fullname="UserContextMenu" preserve="all" />
+  </assembly>
+  <assembly fullname="UserProfile, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
+    <type fullname="UserProfile" preserve="all" />
+  </assembly>
+  <assembly fullname="WebGLIMEInput, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
+    <type fullname="WebGLSupport.WebGLInput" preserve="all" />
+  </assembly>
+  <assembly fullname="WorldChatWindowHUD, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
+    <type fullname="CollapsableChannelMemberListComponentView" preserve="all" />
+    <type fullname="CollapsableDirectChatListComponentView" preserve="all" />
+    <type fullname="CollapsablePublicChannelListComponentView" preserve="all" />
+    <type fullname="DCL.Chat.HUD.ChannelContextualMenu" preserve="all" />
+    <type fullname="DCL.Chat.HUD.ChannelEntryFactory" preserve="all" />
+    <type fullname="DCL.Chat.HUD.ChannelJoinErrorWindowComponentView" preserve="all" />
+    <type fullname="DCL.Chat.HUD.ChannelLeaveErrorWindowComponentView" preserve="all" />
+    <type fullname="DCL.Chat.HUD.ChannelLimitReachedWindowComponentView" preserve="all" />
+    <type fullname="DCL.Chat.HUD.ChannelLinkDetector" preserve="all" />
+    <type fullname="DCL.Chat.HUD.ChannelMemberEntry" preserve="all" />
+    <type fullname="DCL.Chat.HUD.ChannelMembersComponentView" preserve="all" />
+    <type fullname="DCL.Chat.HUD.ChatChannelComponentView" preserve="all" />
+    <type fullname="DCL.Chat.HUD.CollapsableChatSearchListComponentView" preserve="all" />
+    <type fullname="DCL.Chat.HUD.CreateChannelWindowComponentView" preserve="all" />
+    <type fullname="DCL.Chat.HUD.LeaveChannelConfirmationWindowComponentView" preserve="all" />
+    <type fullname="DCL.Chat.HUD.PrivateChatEntry" preserve="all" />
+    <type fullname="DCL.Chat.HUD.PromoteChannelsToastComponentView" preserve="all" />
+    <type fullname="DCL.Chat.HUD.PublicChatEntry" preserve="all" />
+    <type fullname="DCL.Chat.HUD.SearchChannelsWindowComponentView" preserve="all" />
+    <type fullname="DCL.Chat.HUD.WorldChatWindowComponentView" preserve="all" />
+    <type fullname="PublicChatWindowComponentView" preserve="all" />
+    <type fullname="DCL.Chat.HUD.ChannelEntryFactory/SpecialEntry" preserve="nothing" serialized="true" />
+    <type fullname="DCL.Chat.HUD.ChannelMemberEntryModel" preserve="nothing" serialized="true" />
+    <type fullname="DCL.Chat.HUD.LeaveChannelConfirmationWindowComponentModel" preserve="nothing" serialized="true" />
+    <type fullname="DCL.Chat.HUD.PrivateChatEntryModel" preserve="nothing" serialized="true" />
+    <type fullname="DCL.Chat.HUD.PublicChatEntryModel" preserve="nothing" serialized="true" />
+    <type fullname="DCL.Chat.HUD.WorldChatWindowModel" preserve="nothing" serialized="true" />
+    <type fullname="PublicChatModel" preserve="nothing" serialized="true" />
+  </assembly>
+  <assembly fullname="UnityEngine.TextCoreFontEngineModule">
+    <type fullname="UnityEngine.TextCore.FaceInfo" preserve="nothing" serialized="true" />
+    <type fullname="UnityEngine.TextCore.Glyph" preserve="nothing" serialized="true" />
+    <type fullname="UnityEngine.TextCore.GlyphMetrics" preserve="nothing" serialized="true" />
+    <type fullname="UnityEngine.TextCore.GlyphRect" preserve="nothing" serialized="true" />
+    <type fullname="UnityEngine.TextCore.LowLevel.GlyphAdjustmentRecord" preserve="nothing" serialized="true" />
+    <type fullname="UnityEngine.TextCore.LowLevel.GlyphPairAdjustmentRecord" preserve="nothing" serialized="true" />
+    <type fullname="UnityEngine.TextCore.LowLevel.GlyphValueRecord" preserve="nothing" serialized="true" />
+  </assembly>
+</linker>

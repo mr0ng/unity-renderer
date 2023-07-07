@@ -1,31 +1,39 @@
-﻿using System;
+﻿using DCL.Chat.HUD;
 using DCL.Interface;
+using System;
+using System.Collections.Generic;
 
-public interface IChatHUDComponentView
+namespace DCL.Social.Chat
 {
-    event Action<ChatMessage> OnSendMessage;
-    event Action<string> OnMessageUpdated;
-    event Action OnShowMenu;
-    event Action OnInputFieldSelected;
-    event Action OnInputFieldDeselected;
-    event Action OnPreviousChatInHistory;
-    event Action OnNextChatInHistory;
-    
-    int EntryCount { get; }
+    public interface IChatHUDComponentView
+    {
+        event Action<ChatMessage> OnSendMessage;
+        event Action<string, int> OnMessageUpdated;
+        event Action OnOpenedContextMenu;
+        event Action OnShowMenu;
+        event Action OnInputFieldSelected;
+        event Action OnInputFieldDeselected;
+        event Action OnPreviousChatInHistory;
+        event Action OnNextChatInHistory;
+        event Action<string> OnMentionSuggestionSelected;
 
-    IChatEntryFactory ChatEntryFactory { get; set; }
-    bool IsInputFieldSelected { get; }
+        int EntryCount { get; }
+    IComparer<ChatEntryModel> SortingStrategy { set; }
+    bool UseLegacySorting { set; }
 
-    void OnMessageCancelHover();
-    void AddEntry(ChatEntryModel model, bool setScrollPositionToBottom = false);
-    void Dispose();
-    void RemoveFirstEntry();
-    void ClearAllEntries();
-    void ResetInputField(bool loseFocus = false);
-    void FocusInputField();
-    void UnfocusInputField();
-    void SetInputFieldText(string text);
-    void ActivatePreview();
-    void DeactivatePreview();
-    void FadeOutMessages();
+        void OnMessageCancelHover();
+        void SetEntry(ChatEntryModel model, bool setScrollPositionToBottom = false);
+        void Dispose();
+        void RemoveOldestEntry();
+        void ClearAllEntries();
+        void ResetInputField(bool loseFocus = false);
+        void FocusInputField();
+        void UnfocusInputField();
+        void SetInputFieldText(string text);
+        void ShowMentionSuggestions();
+        void SetMentionSuggestions(List<ChatMentionSuggestionModel> suggestions);
+        void HideMentionSuggestions();
+        void AddMentionToInputField(int fromIndex, int length, string userId, string userName);
+        void AddTextIntoInputField(string text);
+    }
 }

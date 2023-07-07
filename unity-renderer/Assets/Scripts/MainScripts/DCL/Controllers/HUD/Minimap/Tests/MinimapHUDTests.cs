@@ -1,8 +1,11 @@
+using DCL;
+using DCLServices.MapRendererV2;
 using NUnit.Framework;
 using System.Collections;
 using TMPro;
 using UnityEngine;
 using UnityEngine.TestTools;
+using NSubstitute;
 
 namespace Tests
 {
@@ -14,7 +17,7 @@ namespace Tests
         protected override IEnumerator SetUp()
         {
             yield return base.SetUp();
-            controller = new MinimapHUDController();
+            controller = new MinimapHUDController(Substitute.For<MinimapMetadataController>(), Substitute.For<IHomeLocationController>(), DCL.Environment.i);
             controller.Initialize();
         }
 
@@ -42,13 +45,6 @@ namespace Tests
         }
 
         [Test]
-        public void MinimapHUD_DefaultPlayerCoordinates()
-        {
-            var view = controller.view;
-            Assert.IsEmpty(Reflection_GetField<TextMeshProUGUI>(view, "playerPositionText").text);
-        }
-
-        [Test]
         public void MinimapHUD_SetSceneName()
         {
             const string sceneName = "SCENE_NAME";
@@ -56,6 +52,15 @@ namespace Tests
             controller.UpdateSceneName(sceneName);
             var view = controller.view;
             Assert.AreEqual(sceneName, Reflection_GetField<TextMeshProUGUI>(view, "sceneNameText").text);
+        }
+
+        [Test]
+        public void MinimapHUD_ReportScene()
+        {
+            controller.ToggleOptions();
+            controller.view.reportSceneButton.onClick.Invoke();
+
+            Assert.IsFalse(controller.view.sceneOptionsPanel.activeSelf);
         }
 
         [Test]

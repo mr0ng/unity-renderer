@@ -3,33 +3,30 @@ using UnityEngine;
 
 namespace DCL.SettingsCommon.SettingsControllers.SpecificControllers
 {
-    [CreateAssetMenu(menuName = "Settings/Controllers/Controls/Hide UI", fileName = "HideUIControlController")]
+    [CreateAssetMenu(menuName = "Settings/Controllers/Controls/Hide UI", fileName = "ControlController")]
     public class HideUIControlController : ToggleSettingsControlController
     {
         public override void Initialize()
         {
             base.Initialize();
-
             CommonScriptableObjects.allUIHidden.OnChange += AllUIHiddenChanged;
-            AllUIHiddenChanged(CommonScriptableObjects.allUIHidden.Get(), false);
-        }
 
-        public override object GetStoredValue() { return currentGeneralSettings.hideUI; }
-
-        public override void UpdateSetting(object newValue)
-        {
-            currentGeneralSettings.hideUI = (bool)newValue;
-            CommonScriptableObjects.allUIHidden.Set(currentGeneralSettings.hideUI);
+            AllUIHiddenChanged(currentGeneralSettings.hideUI);
         }
 
         public override void OnDestroy()
         {
             base.OnDestroy();
-
             CommonScriptableObjects.allUIHidden.OnChange -= AllUIHiddenChanged;
         }
 
-        private void AllUIHiddenChanged(bool current, bool previous)
+        public override object GetStoredValue() =>
+            currentGeneralSettings.hideUI;
+
+        public override void UpdateSetting(object newValue) =>
+            CommonScriptableObjects.allUIHidden.Set((bool)newValue);
+
+        private void AllUIHiddenChanged(bool current, bool _ = false)
         {
             currentGeneralSettings.hideUI = current;
             ApplySettings();

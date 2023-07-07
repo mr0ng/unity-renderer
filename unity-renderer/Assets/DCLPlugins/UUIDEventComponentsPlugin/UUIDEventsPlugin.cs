@@ -5,6 +5,7 @@ using DCL.Components;
 using DCL.Helpers;
 using DCL.Models;
 using UnityEngine;
+using Decentraland.Sdk.Ecs6;
 
 public class UUIDEventsPlugin : IPlugin
 {
@@ -17,7 +18,7 @@ public class UUIDEventsPlugin : IPlugin
         inputControllerLegacy = new InputController_Legacy();
         hoverCanvas = LoadAndInstantiate<InteractionHoverCanvasController>("InteractionHoverCanvas");
 
-        pointerEventsController = new PointerEventsController(inputControllerLegacy, hoverCanvas);
+        pointerEventsController = new PointerEventsController(inputControllerLegacy, hoverCanvas, SceneReferences.i?.mouseCatcher, DataStore.i.Get<DataStore_World>().currentRaycaster);
 
         IRuntimeComponentFactory factory = Environment.i.world.componentFactory;
 
@@ -35,9 +36,14 @@ public class UUIDEventsPlugin : IPlugin
         factory.createOverrides.Add((int) CLASS_ID_COMPONENT.UUID_CALLBACK, OnUUIDCallbackIsAdded);
     }
 
-    private void OnUUIDCallbackIsAdded(string sceneid, long entityid, ref int classId, object data)
+    private void OnUUIDCallbackIsAdded(int sceneNumber, long entityid, ref int classId, object data)
     {
-        OnPointerEvent.Model model = JsonUtility.FromJson<OnPointerEvent.Model>(data as string);
+        OnPointerEvent.Model model = new OnPointerEvent.Model();
+        if (data is string json)
+            model = (OnPointerEvent.Model)model.GetDataFromJSON(json);
+        else if (data is Decentraland.Sdk.Ecs6.ComponentBodyPayload payload)
+            model = (OnPointerEvent.Model)model.GetDataFromPb(payload);
+            
         classId = (int) model.GetClassIdFromType();
     }
 

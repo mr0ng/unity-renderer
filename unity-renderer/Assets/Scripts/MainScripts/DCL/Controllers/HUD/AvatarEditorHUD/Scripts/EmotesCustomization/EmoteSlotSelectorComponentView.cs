@@ -5,7 +5,7 @@ using System.Linq;
 
 namespace DCL.EmotesCustomization
 {
-    public class EmoteSlotSelectorComponentView : BaseComponentView, IEmoteSlotSelectorComponentView, IComponentModelConfig
+    public class EmoteSlotSelectorComponentView : BaseComponentView, IEmoteSlotSelectorComponentView, IComponentModelConfig<EmoteSlotSelectorComponentModel>
     {
         [Header("Prefab References")]
         [SerializeField] internal GridContainerComponentView emotesSlots;
@@ -17,19 +17,17 @@ namespace DCL.EmotesCustomization
 
         public event Action<int, string> onSlotSelected;
 
-        public override void Start()
+        public void Start()
         {
-            base.Start();
-
             ConfigureSlotButtons();
         }
 
-        public void Configure(BaseComponentModel newModel)
+        public void Configure(EmoteSlotSelectorComponentModel newModel)
         {
             if (model == newModel)
                 return;
 
-            model = (EmoteSlotSelectorComponentModel)newModel;
+            model = newModel;
             RefreshControl();
         }
 
@@ -121,6 +119,12 @@ namespace DCL.EmotesCustomization
 
         internal List<EmoteSlotCardComponentView> GetAllSlots()
         {
+            if (emotesSlots == null)
+            {
+                Debug.LogError("EmotesSlotSelectorComponentView: emotesSlots are accessed before serialized reference was initialized");
+                return new List<EmoteSlotCardComponentView>();
+            }
+
             return emotesSlots
                 .GetItems()
                 .Select(x => x as EmoteSlotCardComponentView)

@@ -1,8 +1,29 @@
 using DCL;
+using DCL.Helpers;
 using System;
 using System.Collections;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.EventSystems;
+
+namespace UIComponents.Scripts.Components
+{
+    public abstract class BaseComponentView<TModel> : BaseComponentView, IBaseComponentView<TModel>
+        where TModel: IEquatable<TModel>, new()
+    {
+        [field: SerializeField]
+        protected TModel model { get; private set; } = new ();
+
+        public void SetModel(TModel newModel)
+        {
+            if (!Equals(model, newModel))
+            {
+                model = newModel;
+                RefreshControl();
+            }
+        }
+    }
+}
 
 public interface IBaseComponentView : IPointerEnterHandler, IPointerExitHandler, IDisposable
 {
@@ -20,31 +41,6 @@ public interface IBaseComponentView : IPointerEnterHandler, IPointerExitHandler,
     /// It will inform if the UI Component is focused or not.
     /// </summary>
     bool isFocused { get; }
-
-    /// <summary>
-    /// It is called at the beginning of the UI component lifecycle.
-    /// </summary>
-    void Awake();
-
-    /// <summary>
-    /// It is called each time the component is enabled.
-    /// </summary>
-    void OnEnable();
-
-    /// <summary>
-    /// It is called each time the component is disabled.
-    /// </summary>
-    void OnDisable();
-
-    /// <summary>
-    /// It is called just after the UI component has been initialized.
-    /// </summary>
-    void Start();
-
-    /// <summary>
-    /// It is called once per frame.
-    /// </summary>
-    void Update();
 
     /// <summary>
     /// Updates the UI component with the current model configuration.
@@ -72,32 +68,37 @@ public interface IBaseComponentView : IPointerEnterHandler, IPointerExitHandler,
     /// It is called when the focus is lost from the component.
     /// </summary>
     void OnLoseFocus();
-
-    /// <summary>
-    /// It is called just after the screen size has changed.
-    /// </summary>
-    void OnScreenSizeChanged();
 }
 
-public interface IComponentModelConfig
+public interface IComponentModelConfig<T> where T: BaseComponentModel
 {
     /// <summary>
     /// Fill the model and updates the component with this data.
     /// </summary>
     /// <param name="newModel">Data to configure the component.</param>
-    void Configure(BaseComponentModel newModel);
+    void Configure(T newModel);
 }
 
 public abstract class BaseComponentView : MonoBehaviour, IBaseComponentView
 {
+    public ShowHideAnimator showHideAnimator;
+
     internal BaseComponentModel baseModel;
-    internal ShowHideAnimator showHideAnimator;
+    private bool isDestroyed;
 
     public virtual bool isVisible { get; private set; }
-    private bool isDestroyed = false;
+
+    public bool isFocused { get; private set; }
 
     public event Action<bool> onFocused;
-    public bool isFocused { get; private set; }
+
+    public virtual void Dispose()
+    {
+        DataStore.i.screen.size.OnChange -= OnScreenSizeModified;
+
+        if (!isDestroyed && gameObject)
+            Utils.SafeDestroy(gameObject);
+    }
 
     private Transform myTrans;
 
@@ -113,11 +114,16 @@ public abstract class BaseComponentView : MonoBehaviour, IBaseComponentView
         StartCoroutine(RaiseOnScreenSizeChangedAfterDelay());
     }
 
-    public virtual void OnDisable() { OnLoseFocus(); }
+    public virtual void OnDisable()
+    {
+        OnLoseFocus();
+    }
 
-    public virtual void Start() { }
-
-    public virtual void Update() { }
+    private void OnDestroy()
+    {
+        isDestroyed = true;
+        Dispose();
+    }
 
     public abstract void RefreshControl();
 
@@ -151,29 +157,24 @@ public abstract class BaseComponentView : MonoBehaviour, IBaseComponentView
         onFocused?.Invoke(false);
     }
 
-    public virtual void OnScreenSizeChanged() 
+    public virtual void OnScreenSizeChanged()
     {
-        myTrans.localRotation = Quaternion.identity; 
+        if (myTrans == null)
+            myTrans = transform;
+        myTrans.localRotation = Quaternion.identity;
     }
 
-    public virtual void Dispose()
+    public virtual void OnPointerEnter(PointerEventData eventData)
     {
-        DataStore.i.screen.size.OnChange -= OnScreenSizeModified;
-        if (!isDestroyed)
-            Destroy(gameObject);
+        OnFocus();
     }
 
-    public virtual void OnPointerEnter(PointerEventData eventData) { OnFocus(); }
-
-    public virtual void OnPointerExit(PointerEventData eventData) { OnLoseFocus(); }
-
-    private void OnDestroy()
+    public virtual void OnPointerExit(PointerEventData eventData)
     {
-        isDestroyed = true;
-        Dispose();
+        OnLoseFocus();
     }
 
-    internal void OnScreenSizeModified(Vector2Int current, Vector2Int previous)
+    private void OnScreenSizeModified(Vector2Int current, Vector2Int previous)
     {
         if (!gameObject.activeInHierarchy)
             return;
@@ -181,15 +182,20 @@ public abstract class BaseComponentView : MonoBehaviour, IBaseComponentView
         StartCoroutine(RaiseOnScreenSizeChangedAfterDelay());
     }
 
-    internal IEnumerator RaiseOnScreenSizeChangedAfterDelay()
+    private IEnumerator RaiseOnScreenSizeChangedAfterDelay()
     {
         yield return null;
         OnScreenSizeChanged();
     }
 
-    public static T Create<T>(string resourceName) where T : BaseComponentView
+    public static T Create<T>(string resourceName) where T: BaseComponentView
     {
         T buttonComponentView = Instantiate(Resources.Load<GameObject>(resourceName)).GetComponent<T>();
         return buttonComponentView;
     }
+
+#if UNITY_EDITOR
+    public static T CreateUIComponentFromAssetDatabase<T>(string assetName) where T: BaseComponentView =>
+        Instantiate(AssetDatabase.LoadAssetAtPath<T>($"Assets/UIComponents/Prefabs/{assetName}.prefab"));
+#endif
 }

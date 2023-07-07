@@ -7,58 +7,69 @@ using DCL;
 
 public class TeleportPromptHUDView : MonoBehaviour
 {
-    [SerializeField] internal GameObject content;
     [SerializeField] internal ShowHideAnimator contentAnimator;
+    [SerializeField] public GameObject content;
+    [SerializeField] internal Animator teleportHUDAnimator;
+    [SerializeField] internal GraphicRaycaster teleportRaycaster;
 
     [Header("Images")]
-    [SerializeField] RawImage imageSceneThumbnail;
+    [SerializeField] private RawImage imageSceneThumbnail;
 
-    [SerializeField] Image imageGotoCrowd;
-    [SerializeField] Image imageGotoMagic;
+    [SerializeField] private Image imageGotoCrowd;
+    [SerializeField] internal Image imageGotoMagic;
+    [SerializeField] private Texture2D nullImage;
 
     [Header("Containers")]
-    [SerializeField] GameObject containerCoords;
+    [SerializeField] private GameObject containerCoords;
 
-    [SerializeField] GameObject containerMagic;
-    [SerializeField] GameObject containerCrowd;
-    [SerializeField] GameObject containerScene;
-    [SerializeField] GameObject containerEvent;
+    [SerializeField] private GameObject containerMagic;
+    [SerializeField] private GameObject containerCrowd;
+    [SerializeField] private GameObject containerScene;
+    [SerializeField] private GameObject containerEvent;
+    [SerializeField] private GameObject creatorContainer;
 
     [Header("Scene info")]
-    [SerializeField] TextMeshProUGUI textCoords;
+    [SerializeField] private TextMeshProUGUI textCoords;
 
-    [SerializeField] TextMeshProUGUI textSceneName;
-    [SerializeField] TextMeshProUGUI textSceneOwner;
+    [SerializeField] private TextMeshProUGUI textSceneName;
+    [SerializeField] private TextMeshProUGUI textSceneOwner;
 
     [Header("Event info")]
-    [SerializeField] TextMeshProUGUI textEventInfo;
+    [SerializeField] private TextMeshProUGUI textEventInfo;
 
-    [SerializeField] TextMeshProUGUI textEventName;
-    [SerializeField] TextMeshProUGUI textEventAttendees;
+    [SerializeField] private TextMeshProUGUI textEventName;
+    [SerializeField] private TextMeshProUGUI textEventAttendees;
 
-    [Header("Buttons")]
-    [SerializeField] Button closeButton;
-
-    [SerializeField] Button continueButton;
-    [SerializeField] Button cancelButton;
-
-    [Header("Spinners")]
-    [SerializeField] GameObject spinnerGeneral;
-
-    [SerializeField] GameObject spinnerImage;
+    [SerializeField] private Button continueButton;
+    [SerializeField] private Button cancelButton;
+    [SerializeField] private Button backgroundCatcher;
 
     public event Action OnCloseEvent;
     public event Action OnTeleportEvent;
+    public event Action<bool> OnSetVisibility;
 
-    WebRequestAsyncOperation fetchParcelImageOp;
+    IWebRequestAsyncOperation fetchParcelImageOp;
     Texture2D downloadedBanner;
+    private HUDCanvasCameraModeController hudCanvasCameraModeController;
+    private static readonly int IDLE = Animator.StringToHash("Idle");
+    private static readonly int OUT = Animator.StringToHash("Out");
+    private static readonly int IN = Animator.StringToHash("In");
 
     private void Awake()
     {
-        closeButton.onClick.AddListener(OnClosePressed);
+        hudCanvasCameraModeController = new HUDCanvasCameraModeController(content.GetComponent<Canvas>(), DataStore.i.camera.hudsCamera);
         cancelButton.onClick.AddListener(OnClosePressed);
-        continueButton.onClick.AddListener(OnTeleportPressed);
-        contentAnimator.OnWillFinishHide += (animator) => Hide();
+        backgroundCatcher.onClick.AddListener(OnClosePressed);
+
+         continueButton.onClick.AddListener(OnTeleportPressed);
+         teleportRaycaster.enabled = false;
+         #if DCL_VR
+         // contentAnimator.OnWillFinishHide += (animator) => Hide();
+         //
+         // contentAnimator.Hide();
+         OnSetVisibility?.Invoke(false);
+         //content.GetComponent<Canvas>().enabled = false;
+         #endif
     }
 
     public void Reset()
@@ -72,33 +83,59 @@ public class TeleportPromptHUDView : MonoBehaviour
         imageSceneThumbnail.gameObject.SetActive(false);
         imageGotoCrowd.gameObject.SetActive(false);
         imageGotoMagic.gameObject.SetActive(false);
+    }
 
-        spinnerImage.SetActive(false);
-        spinnerGeneral.SetActive(false);
+    public void SetLoadingCompleted()
+    {
+        teleportHUDAnimator.SetTrigger(IDLE);
+    }
+
+    public void SetInAnimation()
+    {
+        #if DCL_VR
+        SetVisibility(true);
+        #endif
+        teleportRaycaster.enabled = true;
+        teleportHUDAnimator.SetTrigger(IN);
+    }
+
+    public void SetOutAnimation()
+    {
+        teleportRaycaster.enabled = false;
+        teleportHUDAnimator.SetTrigger(OUT);
     }
 
     public void ShowTeleportToMagic()
     {
+#if DCL_VR
+        OnSetVisibility?.Invoke(true);
+#endif
         containerMagic.SetActive(true);
         imageGotoMagic.gameObject.SetActive(true);
     }
 
     public void ShowTeleportToCrowd()
     {
+        #if DCL_VR
+        OnSetVisibility?.Invoke(true);
+        #endif
         containerCrowd.SetActive(true);
         imageGotoCrowd.gameObject.SetActive(true);
     }
 
     public void ShowTeleportToCoords(string coords, string sceneName, string sceneCreator, string previewImageUrl)
     {
+        #if DCL_VR
+        OnSetVisibility?.Invoke(true);
+        #endif
         containerCoords.SetActive(true);
         containerScene.SetActive(true);
 
         textCoords.text = coords;
-        textSceneName.text = sceneName;
+        textSceneName.text = !string.IsNullOrEmpty(sceneName) ? sceneName : "Untitled Scene";
+        creatorContainer.SetActive(!string.IsNullOrEmpty(sceneCreator));
         textSceneOwner.text = sceneCreator;
-
-        FetchScenePreviewImage(previewImageUrl);
+        SetParcelImage(previewImageUrl);
     }
 
     public void SetEventInfo(string eventName, string eventStatus, int attendeesCount)
@@ -106,13 +143,18 @@ public class TeleportPromptHUDView : MonoBehaviour
         containerEvent.SetActive(true);
         textEventInfo.text = eventStatus;
         textEventName.text = eventName;
-        textEventAttendees.text = string.Format("+{0}", attendeesCount);
+        textEventAttendees.text = $"+{attendeesCount}";
     }
-
+    //VR helper
+    public void SetVisibility(bool visible)
+    {
+        OnSetVisibility?.Invoke(visible);
+    }
+    //VR helper
     private void Hide()
     {
-        content.SetActive(false);
-
+        content.GetComponent<Canvas>().enabled = false;
+        SetVisibility((false));
         if (fetchParcelImageOp != null)
             fetchParcelImageOp.Dispose();
 
@@ -121,45 +163,60 @@ public class TeleportPromptHUDView : MonoBehaviour
             UnityEngine.Object.Destroy(downloadedBanner);
             downloadedBanner = null;
         }
+	}
+
+
+    private AssetPromise_Texture texturePromise;
+
+    public void SetParcelImage(string imageUrl)
+    {
+        containerMagic.SetActive(false);
+        imageSceneThumbnail.gameObject.SetActive(true);
+
+        if (string.IsNullOrEmpty(imageUrl))
+        {
+            DisplayThumbnail(nullImage);
+            return;
+        }
+
+        if (texturePromise != null)
+            AssetPromiseKeeper_Texture.i.Forget(texturePromise);
+
+        texturePromise = new AssetPromise_Texture(imageUrl, storeTexAsNonReadable: false);
+        texturePromise.OnSuccessEvent += (textureAsset) => { DisplayThumbnail(textureAsset.texture); };
+        texturePromise.OnFailEvent += (x, e) => DisplayThumbnail(nullImage);
+        AssetPromiseKeeper_Texture.i.Keep(texturePromise);
     }
 
-    private void FetchScenePreviewImage(string previewImageUrl)
+    private void DisplayThumbnail(Texture2D texture)
     {
-        if (string.IsNullOrEmpty(previewImageUrl))
-            return;
-
-        spinnerImage.SetActive(true);
-        fetchParcelImageOp = Utils.FetchTexture(previewImageUrl, false, (texture) =>
-        {
-            downloadedBanner = texture;
-            imageSceneThumbnail.texture = texture;
-
-            RectTransform rt = (RectTransform)imageSceneThumbnail.transform.parent;
-            float h = rt.rect.height;
-            float w = h * (texture.width / (float)texture.height);
-            imageSceneThumbnail.rectTransform.sizeDelta = new Vector2(w, h);
-
-            spinnerImage.SetActive(false);
-            imageSceneThumbnail.gameObject.SetActive(true);
-        });
+        imageSceneThumbnail.texture = texture;
     }
 
     private void OnClosePressed()
     {
         OnCloseEvent?.Invoke();
-        contentAnimator.Hide(true);
-
-        AudioScriptableObjects.dialogClose.Play(true);
+#if DCL_VR //TODO: test that this is still needed for VR or if new updates make this obsolete.
+        //contentAnimator.Hide(true);
+        //OnSetVisibility?.Invoke(false);
+        //AudioScriptableObjects.dialogClose.Play(true);
+        //transform.position += 20*Vector3.down;
+#endif
     }
 
     private void OnTeleportPressed()
     {
         OnTeleportEvent?.Invoke();
-        contentAnimator.Hide(true);
+ #if DCL_VR
+         OnSetVisibility?.Invoke(false);
+         contentAnimator?.Hide(true);
+         //transform.position += 20*Vector3.down;
+ #endif
     }
 
     private void OnDestroy()
     {
+        hudCanvasCameraModeController?.Dispose();
         if (downloadedBanner != null)
         {
             UnityEngine.Object.Destroy(downloadedBanner);

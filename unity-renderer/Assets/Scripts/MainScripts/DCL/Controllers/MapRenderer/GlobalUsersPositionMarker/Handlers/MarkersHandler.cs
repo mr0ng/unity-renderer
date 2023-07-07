@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MainScripts.DCL.Controllers.HotScenes;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using Random = UnityEngine.Random;
@@ -12,7 +13,7 @@ namespace DCL
     {
         internal readonly List<UserPositionMarker> availableMarkers;
         internal readonly List<UserPositionMarker> usedMarkers;
-        readonly Func<float, float, Vector3> coordToMapPosition;
+        readonly Func<Vector2Int, Vector2> coordToMapPosition;
 
         readonly ExclusionArea exclusionArea;
         readonly ScenesFilter scenesFilter;
@@ -26,7 +27,7 @@ namespace DCL
         /// <param name="overlayContainer">parent for markers</param>
         /// <param name="maxMarkers">max amount of markers (pool)</param>
         /// <param name="coordToMapPosFunc">function to transform coords to map position</param>
-        public MarkersHandler(UserMarkerObject markerPrefab, Transform overlayContainer, int maxMarkers, Func<float, float, Vector3> coordToMapPosFunc)
+        public MarkersHandler(UserMarkerObject markerPrefab, Transform overlayContainer, int maxMarkers, Func<Vector2Int, Vector2> coordToMapPosFunc)
         {
             this.maxMarkers = maxMarkers;
             this.coordToMapPosition = coordToMapPosFunc;
@@ -37,11 +38,23 @@ namespace DCL
             availableMarkers = new List<UserPositionMarker>(maxMarkers);
             usedMarkers = new List<UserPositionMarker>(maxMarkers);
 
+            InstantiateUserPositionMarkers(markerPrefab, overlayContainer);
+
+        }
+
+        public void InstantiateUserPositionMarkers(UserMarkerObject markerPrefab, Transform overlayContainer)
+        {
             for (int i = 0; i < maxMarkers; i++)
             {
-                var marker = new UserPositionMarker(GameObject.Instantiate(markerPrefab, overlayContainer));
-                availableMarkers.Add(marker);
-                marker.SetActive(false);
+                UnityThread.ExecuteInTimeBudgetCoroutine(() =>
+                {
+                    var marker = new UserPositionMarker(GameObject.Instantiate(markerPrefab, overlayContainer));
+                    availableMarkers.Add(marker);
+                    marker.SetActive(false);
+                });
+
+
+
             }
         }
 
@@ -63,7 +76,7 @@ namespace DCL
         /// Then markers will be set and will be shown or hidden according to the current exclusion area.
         /// </summary>
         /// <param name="hotScenes">list of populated scenes</param>
-        public void SetMarkers(List<HotScenesController.HotSceneInfo> hotScenes)
+        public void SetMarkers(List<IHotScenesController.HotSceneInfo> hotScenes)
         {
             var parcelList = scenesFilter.Filter(hotScenes, maxMarkers);
             ResfreshMarkersPoolLists(parcelList.Count);
@@ -94,9 +107,8 @@ namespace DCL
         {
             marker.name = $"UsersPositionMarker({parcelData.coords.x},{parcelData.coords.y})";
 
-            marker.localPosition = coordToMapPosition(
-                parcelData.coords.x + Random.Range(-0.5f, 0.5f),
-                parcelData.coords.y + Random.Range(-0.5f, 0.5f));
+            var coords = new Vector2(parcelData.coords.x + Random.Range(-0.5f, 0.5f), parcelData.coords.y + Random.Range(-0.5f, 0.5f));
+            marker.localPosition = coordToMapPosition(Vector2Int.RoundToInt(coords));
 
             marker.coords = parcelData.coords;
             marker.realmServer = parcelData.realmServer;

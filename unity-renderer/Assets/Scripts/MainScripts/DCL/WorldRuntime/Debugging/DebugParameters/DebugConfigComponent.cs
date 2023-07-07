@@ -1,14 +1,46 @@
-using System;
-using System.Collections.Generic;
 using DCL.Components;
-using UnityEditor;
-using UnityEngine;
 
+using UnityEngine;
+using System.Diagnostics;
+using Debug = UnityEngine.Debug;
+using Utils = DCL.Helpers.Utils;
+
+//VR additions
+using TMPro;
+using DCL.Interface;
+using DCL.SettingsCommon;
+using System.Collections.Generic;
+using UnityEngine.UI;
+using Vuplex.WebView;
+
+using QualitySettings = UnityEngine.QualitySettings;
+//end VR additions
 namespace DCL
 {
     public class DebugConfigComponent : MonoBehaviour
     {
+        private Stopwatch loadingStopwatch;
         private static DebugConfigComponent sharedInstance;
+//VR
+ 		[SerializeField] private GameObject startMenu;
+        [SerializeField] private GameObject browserOptionsButton;
+        [SerializeField] private TMP_Text browserMessage;
+        [SerializeField] private TMP_Text popupMessage;
+        [SerializeField] private GameObject popupMessageObj;
+        [SerializeField] private CanvasWebViewPrefab DCLWebview;
+        // [SerializeField] private CanvasKeyboard keyboardDCL;
+        //[SerializeField] private CanvasWebViewPrefab optionsWeview;
+        //[SerializeField] public CanvasKeyboard keyboardOptions;
+        [SerializeField] private TMP_InputField urlInput;
+        [SerializeField] private Button reload;
+        [SerializeField] private Button swapTabs;
+        [SerializeField] private Toggle useInternalBrowser;
+        private string webViewURL = "";
+        private bool isMainTab = true;
+		public bool openInternalBrowser;
+        private GeneralSettings currentSettings;
+        //end VR
+        private readonly DataStoreRef<DataStore_LoadingScreen> dataStoreLoadingScreen;
 
         public static DebugConfigComponent i
         {
@@ -16,8 +48,10 @@ namespace DCL
             {
                 if (sharedInstance == null)
                     sharedInstance = FindObjectOfType<DebugConfigComponent>();
+
                 return sharedInstance;
             }
+
             private set => sharedInstance = value;
         }
 
@@ -32,23 +66,19 @@ namespace DCL
 
         public enum BaseUrl
         {
+            ZONE,
+            ORG,
             LOCAL_HOST,
             CUSTOM,
         }
 
-        public enum Environment
+        public enum Network
         {
-            USE_DEFAULT_FROM_URL,
-            LOCAL,
-            ZONE,
-            TODAY,
-            ORG
+            MAINNET,
+            GOERLI,
         }
 
-        private const string ENGINE_DEBUG_PANEL = "ENGINE_DEBUG_PANEL";
-        private const string SCENE_DEBUG_PANEL = "SCENE_DEBUG_PANEL";
-
-        [Header("General Settings")] public bool openBrowserWhenStart;
+        [Header("General Settings")] public bool OpenBrowserOnStart = true;
         public bool webSocketSSL = false;
 
         [Header("Kernel General Settings")] public string kernelVersion;
@@ -56,11 +86,11 @@ namespace DCL
 
         public string customContentServerUrl = "http://localhost:1338/";
 
-        [Space(10)] public BaseUrl baseUrlMode;
+        [Space(10)] public BaseUrl baseUrlMode = BaseUrl.ZONE;
+        [DrawIf("baseUrlMode", BaseUrl.CUSTOM)]
+        public string customURL = "https://play.decentraland.zone/?";
 
-        public string baseUrlCustom;
-
-        [Space(10)] public Environment environment;
+        [Space(10)] public Network network;
 
         [Tooltip(
             "Set this field to force the realm (server). On the latin-american zone, recommended realms are fenrir-amber, baldr-amber and thor. Other realms can give problems to debug from Unity editor due to request certificate issues.\n\nFor auto selection leave this field blank.\n\nCheck out all the realms at https://catalyst-monitor.vercel.app/?includeDevServers")]
@@ -68,18 +98,33 @@ namespace DCL
 
         public Vector2 startInCoords = new Vector2(-99, 109);
 
+        [Tooltip("Set this value to load the catalog from another wallet for debug purposes")]
+        public string overrideUserID = "";
+
         [Header("Kernel Misc Settings")] public bool forceLocalComms = true;
 
-        public bool allWearables = false;
-        public bool testWearables = false;
         public bool enableTutorial = false;
         public bool builderInWorld = false;
         public bool soloScene = true;
-        public bool multithreaded = false;
+        public bool disableAssetBundles = false;
+        public bool enableDebugMode = false;
         public DebugPanel debugPanelMode = DebugPanel.Off;
+
+        [Header("Performance")]
+        public bool disableGLTFDownloadThrottle = false;
+        public bool multithreaded = false;
+        public bool runPerformanceMeterToolDuringLoading = false;
+        private PerformanceMeterController performanceMeterController;
 
         private void Awake()
         {
+		#if DCL_VR
+#if UNITY_ANDROID && !UNITY_EDITOR
+            useInternalBrowser.transform.parent.gameObject.SetActive((false));
+#else
+            browserOptionsButton.SetActive(false);
+#endif
+#endif
             if (sharedInstance == null)
                 sharedInstance = this;
 
@@ -87,70 +132,238 @@ namespace DCL
             DataStore.i.debugConfig.soloSceneCoords = debugConfig.soloSceneCoords;
             DataStore.i.debugConfig.ignoreGlobalScenes = debugConfig.ignoreGlobalScenes;
             DataStore.i.debugConfig.msgStepByStep = debugConfig.msgStepByStep;
+            DataStore.i.debugConfig.overrideUserID = overrideUserID;
             DataStore.i.performance.multithreading.Set(multithreaded);
+            if (disableGLTFDownloadThrottle) DataStore.i.performance.maxDownloads.Set(999);
             Texture.allowThreadedTextureCreation = multithreaded;
+#if DCL_VR
+            useInternalBrowser.isOn = currentSettings.useInternalBrowser;
+            useInternalBrowser.onValueChanged.AddListener(UpdateBrowserType);
+	// options.Initialized += (sender, eventArgs) =>
+            // {
+            //     Debug.Log($"Secondary Webview loading {htmlServerTest}");
+            //     options.WebView.LoadHtml(htmlServerTest);
+            // };
+#if (UNITY_EDITOR  || UNITY_STANDALONE)
+            StandaloneWebView.GloballySetUserAgent("Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2228.0 Safari/537.36");
+            StandaloneWebView.SetIgnoreCertificateErrors(true);
+            StandaloneWebView.GloballySetUserAgent(false);
+            StandaloneWebView.SetCameraAndMicrophoneEnabled(true);
+            StandaloneWebView.SetAutoplayEnabled(true);
+            StandaloneWebView.SetTargetFrameRate(72);
+            StandaloneWebView.SetCommandLineArguments("--disable-web-security");
+            //optionsWeview.gameObject.SetActive(false);
+            //keyboardOptions.gameObject.SetActive(false);
+#elif UNITY_ANDROID
+            AndroidGeckoWebView.GloballySetUserAgent("Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2228.0 Safari/537.36");
+            Web.SetUserAgent("Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2228.0 Safari/537.36");
+            Web.SetStorageEnabled(true);
+            Web.SetIgnoreCertificateErrors(true);
+            // Web.EnableRemoteDebugging();
+            Web.SetAutoplayEnabled(true);
+            AndroidGeckoWebView.SetIgnoreCertificateErrors(true);
+            // AndroidGeckoWebView.GloballySetUserAgent(false);
+            AndroidGeckoWebView.SetCameraAndMicrophoneEnabled(true);
+
+            AndroidGeckoWebView.SetAutoplayEnabled(true);
+            AndroidGeckoWebView.SetStorageEnabled(true);
+            AndroidGeckoWebView.SetEnterpriseRootsEnabled(true);
+            AndroidGeckoWebView.SetDrmEnabled(true);
+            AndroidGeckoWebView.SetPreferences(new Dictionary<string, string> {
+                ["network.websocket.allowInsecureFromHTTPS"] = "true",
+                ["dom.security.https_only_check_path_upgrade_downgrade_endless_loop"] = "false",
+                ["dom.security.https_only_mode_break_upgrade_downgrade_endless_loop"] = "false",
+                ["security.csp.enable"] = "false",
+                ["dom.webnotifications.allowcrossoriginiframe"] = "true",
+                ["dom.webnotifications.allowinsecure"] = "true",
+                ["network.auth.subresource-img-cross-origin-http-auth-allow"] = "true",
+                ["network.http.referer.XOriginPolicy"] = "1"
+                // ["dom.security.https_only_mode_send_http_background_request"] = "false",
+                // ["security.allow_unsafe_parent_loads"] = "true",
+                //
+                // //["network.dns.echconfig.fallback_to_origin_when_all_failed"] = "false",
+                //
+                // ["security.fileuri.strict_origin_policy"] = "false",
+                // ["dom.cross_origin_iframes_loaded_in_background"] = "true",
+                // ["security.csp.enableNavigateTo"] = "true",
+                // ["security.mixed_content.block_active_content"] = "	false",
+                // ["security.insecure_field_warning.ignore_local_ip_address"] = "false",
+                // ["security.mixed_content.upgrade_display_content"] = "false",
+                // ["network.websocket.auto-follow-http-redirects"] = "true",
+                //
+
+            });
+
+#endif
+#endif
         }
 
         private void Start()
         {
+#if DCL_VR
+			if (!Debug.isDebugBuild)
+            {
+                startMenu.gameObject.SetActive(true);
+                //openInternalBrowser = CommonScriptableObjects.useInternalBrowser;
+                useInternalBrowser.isOn = openInternalBrowser;
+#if UNITY_ANDROID && !UNITY_EDITOR
+//don't have a method of using external browser on quest2.
+                openInternalBrowser = true;
+                CommonScriptableObjects.useInternalBrowser.Set(true);
+
+                webSocketSSL = false;
+                baseUrlMode = BaseUrl.CUSTOM;
+
+                // parcelRadiusToLoad = 3;
+
+
+#else
+                // openInternalBrowser = false;
+                //openInternalBrowser = true;
+                webSocketSSL = true;
+                baseUrlMode = BaseUrl.ORG;
+
+#endif
+
+                //startInCoords = Vector2.zero;
+                //disableAssetBundles = true;
+            }
+
+
+            // WebInterface.openURLInternal = openInternalBrowser;
+            if (openInternalBrowser)
+            {
+                browserMessage.transform.parent.gameObject.SetActive(true);
+                DCLWebview.gameObject.SetActive((true));
+                //keyboardDCL.gameObject.SetActive((true));
+            }
+            else
+            {
+
+                DCLWebview.gameObject.SetActive((false));
+                //keyboardDCL.gameObject.SetActive((false));
+
+            }
+            // keyboardOptions.InputReceived += (sender, key) =>
+            // {
+            //     optionsWeview.WebView.HandleKeyboardInput(key.Value);
+            // };
+            // keyboardDCL.InputReceived += (sender, key) =>
+            // {
+            //     DCLWebview.WebView.HandleKeyboardInput(key.Value);
+            //
+            // };
+#endif
             lock (DataStore.i.wsCommunication.communicationReady)
             {
-                if (DataStore.i.wsCommunication.communicationReady.Get())
-                {
-                    InitConfig();
-                }
-                else
-                {
-                    DataStore.i.wsCommunication.communicationReady.OnChange += OnCommunicationReadyChangedValue;
-                }
+                if (DataStore.i.wsCommunication.communicationReady.Get()) { InitConfig(); }
+                else { DataStore.i.wsCommunication.communicationReady.OnChange += OnCommunicationReadyChangedValue; }
             }
         }
 
+        private void UpdateBrowserType(bool current)
+        {
+            openInternalBrowser = current;
+            currentSettings.useInternalBrowser = current;
+        }
         private void OnCommunicationReadyChangedValue(bool newState, bool prevState)
         {
+            Debug.Log("Clint: before Init after OnCommunicationReadyChangedValue.");
+
             if (newState && !prevState)
+            {
                 InitConfig();
+                Debug.Log("Clint: before Init after OnCommunicationReadyChangedValue.");
+            }
 
             DataStore.i.wsCommunication.communicationReady.OnChange -= OnCommunicationReadyChangedValue;
         }
 
         private void InitConfig()
         {
+            Debug.Log($"Clint: InitConfig started");
             if (useCustomContentServer)
             {
                 RendereableAssetLoadHelper.useCustomContentServerUrl = true;
                 RendereableAssetLoadHelper.customContentServerUrl = customContentServerUrl;
             }
 
-            if (openBrowserWhenStart)
+            if (OpenBrowserOnStart)
+            {
                 OpenWebBrowser();
+                Debug.Log($"Clint: InitConfig started. Open Browser");
+            }
+
+            if (runPerformanceMeterToolDuringLoading)
+            {
+                CommonScriptableObjects.forcePerformanceMeter.Set(true);
+                performanceMeterController = new PerformanceMeterController();
+
+                StartSampling();
+                CommonScriptableObjects.rendererState.OnChange += EndSampling;
+            }
+        }
+
+        private void StartSampling()
+        {
+            loadingStopwatch = new Stopwatch();
+            loadingStopwatch.Start();
+            performanceMeterController.StartSampling(999);
+        }
+
+        private void EndSampling(bool current, bool previous)
+        {
+            if (current)
+            {
+                loadingStopwatch.Stop();
+                CommonScriptableObjects.rendererState.OnChange -= EndSampling;
+                performanceMeterController.StopSampling();
+                Debug.Log($"Loading time: {loadingStopwatch.Elapsed.Seconds} seconds");
+            }
         }
 
         private void OpenWebBrowser()
         {
-#if (UNITY_EDITOR || UNITY_STANDALONE)
+            Debug.Log($"Clint: OpenBrowser started");
             string baseUrl = "";
             string debugString = "";
 
-            if (baseUrlMode == BaseUrl.CUSTOM)
-                baseUrl = baseUrlCustom;
-            else
-                baseUrl = "http://localhost:3000/?";
-
-            switch (environment)
+            if (baseUrlMode.Equals(BaseUrl.CUSTOM))
             {
-                case Environment.USE_DEFAULT_FROM_URL:
+                baseUrl = this.customURL;
+                if (string.IsNullOrEmpty(this.customURL))
+                {
+                    Debug.LogError("Custom url cannot be empty");
+                    QuitGame();
+                    return;
+                }
+            }
+            else if (baseUrlMode.Equals(BaseUrl.LOCAL_HOST))
+            {
+                baseUrl = "http://localhost:8080/?";
+            }
+            else if (baseUrlMode.Equals(BaseUrl.ORG))
+            {
+                baseUrl = "http://play.decentraland.org/?";
+                if (!webSocketSSL)
+                {
+                    Debug.LogError(
+                        "play.decentraland.org only works with WebSocket SSL, please change the base URL to play.decentraland.zone");
+                    QuitGame();
+                    return;
+                }
+            }
+            else
+            {
+                baseUrl = "http://play.decentraland.zone/?";
+            }
+
+            switch (network)
+            {
+                case Network.GOERLI:
+                    debugString = "NETWORK=goerli&";
                     break;
-                case Environment.LOCAL:
-                    debugString = "DEBUG_MODE&";
-                    break;
-                case Environment.ZONE:
-                    debugString = "NETWORK=ropsten&";
-                    break;
-                case Environment.TODAY:
-                    debugString = "NETWORK=mainnet&";
-                    break;
-                case Environment.ORG:
+                case Network.MAINNET:
                     debugString = "NETWORK=mainnet&";
                     break;
             }
@@ -163,16 +376,6 @@ namespace DCL
             if (forceLocalComms)
             {
                 debugString += "LOCAL_COMMS&";
-            }
-
-            if (allWearables)
-            {
-                debugString += "ALL_WEARABLES&";
-            }
-
-            if (testWearables)
-            {
-                debugString += "TEST_WEARABLES&";
             }
 
             if (enableTutorial)
@@ -190,6 +393,16 @@ namespace DCL
                 debugString += "ENABLE_BUILDER_IN_WORLD&";
             }
 
+            if (disableAssetBundles)
+            {
+                debugString += "DISABLE_ASSET_BUNDLES&DISABLE_WEARABLE_ASSET_BUNDLES&";
+            }
+
+            if (enableDebugMode)
+            {
+                debugString += "DEBUG_MODE&";
+            }
+
             if (!string.IsNullOrEmpty(realm))
             {
                 debugString += $"realm={realm}&";
@@ -199,33 +412,234 @@ namespace DCL
 
             if (debugPanelMode == DebugPanel.Engine)
             {
-                debugPanelString = ENGINE_DEBUG_PANEL + "&";
+                debugPanelString = "ENGINE_DEBUG_PANEL&";
             }
             else if (debugPanelMode == DebugPanel.Scene)
             {
-                debugPanelString = SCENE_DEBUG_PANEL + "&";
+                debugPanelString = "SCENE_DEBUG_PANEL&";
             }
 
-            if (!webSocketSSL)
-            {
-                if (baseUrl.Contains("play.decentraland.org"))
-                {
-                    Debug.LogError(
-                        "play.decentraland.org only works with WebSocket SSL, please change the base URL to play.decentraland.zone");
-                    QuitGame();
-                    return;
-                }
-            }
-            else
+            if (webSocketSSL)
             {
                 Debug.Log(
                     "[REMINDER] To be able to connect with SSL you should start Chrome with the --ignore-certificate-errors argument specified (or enabling the following option: chrome://flags/#allow-insecure-localhost). In Firefox set the configuration option `network.websocket.allowInsecureFromHTTPS` to true, then use the ws:// rather than the wss:// address.");
             }
 
-            Application.OpenURL(
+            Debug.Log($"URL: {baseUrl}{debugString}{debugPanelString}position={startInCoords.x}%2C{startInCoords.y}&ws={DataStore.i.wsCommunication.url}");
+            #if DCL_VR
+			 webViewURL =  $"{baseUrl}{debugString}{debugPanelString}position={startInCoords.x}%2C{startInCoords.y}&ws={DataStore.i.wsCommunication.url}";
+            urlInput.text = webViewURL;
+
+            var canvas = GameObject.Find("Canvas");
+#if UNITY_ANDROID && !UNITY_EDITOR
+            //don't have a method of using external browser on quest2.
+            openInternalBrowser = true;
+#endif
+            Debug.Log($"Clint: OpenBrowser Middle: internal - {openInternalBrowser}");
+            if (openInternalBrowser)
+            {
+                browserMessage.text = "Browser Loading";
+                //DontDestroyOnLoad(canvas);
+                WebViewOptions opt = new WebViewOptions();
+#if ( UNITY_EDITOR || UNITY_STANDALONE)
+                opt.preferredPlugins  = new WebPluginType[] { WebPluginType.AndroidGecko, WebPluginType.iOS, WebPluginType.Windows, WebPluginType.UniversalWindowsPlatform };
+#elif UNITY_ANDROID
+            opt.preferredPlugins  = new WebPluginType[] { WebPluginType.AndroidGecko};
+#endif
+
+
+                DCLWebview.InitialUrl = webViewURL;
+
+                //DCLWebview.WebView.Reload();
+                if (DCLWebview.WebView!= null && DCLWebview.WebView.IsInitialized) {
+
+
+                    DCLWebview.gameObject.SetActive((true));
+                    //keyboardDCL.gameObject.SetActive((true));
+                    Debug.Log($"main webview loading {webViewURL}");
+                    DCLWebview.WebView.LoadUrl(webViewURL);
+                    DCLWebview.WebView.LoadProgressChanged += ( sender,  args) => {
+                        browserMessage.transform.parent.gameObject.SetActive((false));
+                        Debug.Log($"WebView Status LoadProgressChanged {args.Type.ToString()}, {sender.ToString()}");
+                    };
+                    DCLWebview.WebView.PageLoadFailed += ( sender,  args) => { Debug.Log($"WebView Status PageLoadFailed {args.ToString()}, {sender.ToString()}"); };
+                    DCLWebview.WebView.CloseRequested += ( sender,  args) => { Debug.Log($"WebView Status CloseRequested {args.ToString()}, {sender.ToString()}"); };}
+                else
+                {
+                    DCLWebview.Initialized += (sender, eventArgs) =>
+                    {
+
+
+                        DCLWebview.gameObject.SetActive((true));
+                        //keyboardDCL.gameObject.SetActive((true));
+                        Debug.Log($"main webview loading {webViewURL}");
+                        DCLWebview.WebView.LoadUrl(webViewURL);
+                        DCLWebview.WebView.LoadProgressChanged += ( sender,  args) => {
+                            browserMessage.transform.parent.gameObject.SetActive((false));
+                            Debug.Log($"WebView Status LoadProgressChanged {args.Type.ToString()}, {sender.ToString()}");
+                        };
+                        DCLWebview.WebView.PageLoadFailed += ( sender,  args) => { Debug.Log($"WebView Status PageLoadFailed {args.ToString()}, {sender.ToString()}"); };
+                        DCLWebview.WebView.CloseRequested += ( sender,  args) => { Debug.Log($"WebView Status CloseRequested {args.ToString()}, {sender.ToString()}"); };
+                    };
+                }
+
+
+                DCLWebview.transform.SetParent(canvas.transform, false);
+                DCLWebview.Resolution = 450;
+
+
+                // DCLWebview.RemoteDebuggingEnabled = false;
+                // DCLWebview.LogConsoleMessages = false;
+                //DCLWebview.NativeOnScreenKeyboardEnabled = false;
+                //DCLWebview.Native2DModeEnabled = false;
+
+                //urlInput.keyboardType = TouchScreenKeyboardType.URL;
+                //urlInput.contentType = TMP_InputField.ContentType.Alphanumeric;
+
+
+                Debug.Log("Created WebView objects");
+                //_positionPrefabs();
+                Debug.Log("finished positioning webview objects");
+            }
+            else
+            {
+                browserMessage.text = "Use External Browser";
+                Application.OpenURL(webViewURL);
+            }
+            //#endif
+			#else
+
+
+
+			Application.OpenURL(
                 $"{baseUrl}{debugString}{debugPanelString}position={startInCoords.x}%2C{startInCoords.y}&ws={DataStore.i.wsCommunication.url}");
 #endif
+
         }
+#if DCL_VR
+        private void _positionPrefabs() {
+#if (UNITY_ANDROID || UNITY_STANDALONE || UNITY_EDITOR)
+            var rectTransform = DCLWebview.transform as RectTransform;
+
+
+            //rectTransform.anchoredPosition3D = Vector3.zero;
+            rectTransform.offsetMin = new Vector2(-0.191f, -0.25f);
+            rectTransform.offsetMax = new Vector2(-0.809f, -0.75f);
+            rectTransform.pivot = new Vector2(0.5f, 1);
+            //rectTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, 520/150);
+            //rectTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, 520/150);
+
+            rectTransform.localScale = new Vector3(0.5f, 0.5f, 0.5f);
+
+            // var keyboardTransform = _keyboard.transform as RectTransform;
+            // keyboardTransform.anchoredPosition3D = Vector3.zero;
+            // keyboardTransform.offsetMin = new Vector2(0.5f, -1.8f);
+            // keyboardTransform.offsetMax = new Vector2(0.5f, -0.3f);
+            // keyboardTransform.pivot = new Vector2(0.5f, 0);
+            // keyboardTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, 690/150);
+            // keyboardTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, 162/150);
+#endif
+        }
+        public  void HideWebViewScreens()
+        {
+            Debug.Log("WebView Connected, hiding web browsers.");
+            // _canvasWebViewPrefab.Visible = false;
+            //DCLWebview.transform.localPosition += new Vector3(0, 1, 0);
+            //_keyboard.WebViewPrefab.transform.localPosition -= new Vector3(0, 10, 0);
+            startMenu.SetActive((false));
+            //keyboardOptions.gameObject.SetActive(false);
+            //keyboardDCL.gameObject.SetActive((false));
+            //optionsWeview.gameObject.SetActive(false);
+            urlInput.gameObject.SetActive(false);
+            reload.gameObject.SetActive((false));
+            swapTabs.gameObject.SetActive((false));
+            DCLWebview.gameObject.SetActive(false);
+
+
+        }
+        public void ShowWebviewScreen()
+        {
+            popupMessageObj.SetActive(true);
+            popupMessage.text = "Network Communication Lost.\r\nRestart Application.\r\n Reduced Loading Radius Recommended In This Area";
+            ReloadPage();
+
+            //DCLWebview.gameObject.SetActive(true);
+            //keyboardDCL.gameObject.SetActive((true));
+            //urlInput.gameObject.SetActive(false);
+            //reload.gameObject.SetActive((true));
+
+
+        }
+        public void SwapBrowserTabs()
+        {
+            if (isMainTab)
+            {
+                DCLWebview.gameObject.SetActive((false));
+                //keyboardDCL.gameObject.SetActive(false);
+                //optionsWeview.gameObject.SetActive((true));
+                //keyboardOptions.gameObject.SetActive(true);
+                isMainTab = false;
+            }
+            else
+            {
+                DCLWebview.gameObject.SetActive((true));
+                //keyboardDCL.gameObject.SetActive(true);
+                //optionsWeview.gameObject.SetActive((false));
+                //keyboardOptions.gameObject.SetActive(false);
+                isMainTab = true;
+            }
+
+        }
+        public void ReloadPage()
+        {
+            //TODO: ensure websocket is restarted and listening, set start location to current parcel, ensure startMenu is open, reload url. Use to correct dropped connections in future.
+            //Set
+
+            //if(_canvasWebViewPrefab!=null) _canvasWebViewPrefab.Destroy();
+            //if(_keyboard!= null)  Destroy(_keyboard.gameObject);
+            if(openInternalBrowser)
+                DCLWebview.WebView.Reload();
+            else
+                OpenWebBrowser();
+
+        }
+        public void PauseWebview()
+        {
+            //DCLWebview.WebView.Dispose();
+        }
+
+
+        public void ToggleUseInternalBrowser()
+        {
+
+            openInternalBrowser = useInternalBrowser.isOn;
+            // WebInterface.openURLInternal = openInternalBrowser;
+            // if (useInternalBrowser.isOn)
+            // {
+            //     DCLWebview.gameObject.SetActive(true);
+            //     keyboardDCL.gameObject.SetActive(true);
+            //     optionsWeview.gameObject.SetActive(false);
+            //     keyboardOptions.gameObject.SetActive(false);
+            //     OpenWebBrowser();
+            // }
+            // else
+            // {
+            //     if (DCLWebview != null && DCLWebview.WebView != null)
+            //     {
+            //         DCLWebview.WebView.LoadUrl("https://www.google.com/");
+            //         //DCLWebview.WebView.StopLoad();
+            //         //DCLWebview.WebView.Dispose();
+            //         DCLWebview.gameObject.SetActive((false));
+            //     }
+            //     DCLWebview.gameObject.SetActive(false);
+            //     keyboardDCL.gameObject.SetActive(false);
+            //     optionsWeview.gameObject.SetActive(false);
+            //     keyboardOptions.gameObject.SetActive(false);
+            //     OpenWebBrowser();
+            // }
+
+        }
+#endif
 
         private void OnDestroy()
         {
@@ -234,13 +648,7 @@ namespace DCL
 
         private void QuitGame()
         {
-#if UNITY_EDITOR
-            // Application.Quit() does not work in the editor so
-            // UnityEditor.EditorApplication.isPlaying need to be set to false to end the game
-            UnityEditor.EditorApplication.isPlaying = false;
-#else
-            Application.Quit();
-#endif
+            Utils.QuitApplication();
         }
     }
 }

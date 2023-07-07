@@ -4,14 +4,19 @@
     "references": [
         "GUID:43315b150e1df4592868fc0fe58b3429",
         "GUID:6afcac5154f98e846bbd9f27e454b57a",
-        "GUID:ba9b721ce33233c4da7ff4ef30d25b59",
         "GUID:a881b57670b1d2747a6d7f9e32b63230",
         "GUID:b1087c5731ff68448a0a9c625bb7e52d",
         "GUID:4720e174f2805c74bb7aa94cc8bb5bf8",
         "GUID:97d8897529779cb49bebd400c7f402a6",
-        "GUID:b8662e798190944f4b638fbeb48e84f0",
-        "GUID:2140808fc43616745a6de0d53e9cda30",
-        "GUID:6e6a87f97192ec947993f360104e75b7"
+        "GUID:6e6a87f97192ec947993f360104e75b7",
+        "GUID:f51ebe6a0ceec4240a699833d6309b23",
+        "GUID:fbcc413e192ef9048811d47ab0aca0c0",
+        "GUID:3b80b0b562b1cbc489513f09fc1b8f69",
+	    "GUID:d393f5965bc9eef4b84a1d59aaf14dbd",
+	    "GUID:46a5a1d17ad3be1428011cf7ce016255",
+	    "GUID:b4eaab489cf406a4ab5c6ff712227bee",
+	    "GUID:6b6448a85958378489e24e29aaed0d9d",
+        "GUID:a78c5d8dad39efe45ab1b21901f8db0f"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

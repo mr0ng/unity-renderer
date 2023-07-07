@@ -6,8 +6,10 @@ using AvatarSystem;
 using Cysharp.Threading.Tasks;
 using DCL;
 using DCL.Helpers;
+using DCL.Shaders;
+using DCLServices.WearablesCatalogService;
+using MainScripts.DCL.Models.AvatarAssets.Tests.Helpers;
 using NSubstitute;
-using NSubstitute.Core.Arguments;
 using NSubstitute.Extensions;
 using NUnit.Framework;
 using UnityEngine;
@@ -28,6 +30,7 @@ namespace Test.AvatarSystem
         private IRetrieverFactory retrieverFactory;
         private GameObject container = null;
         private readonly List<Material> materialsToBeDisposed = new List<Material>();
+        private IWearablesCatalogService wearablesCatalogService;
 
         private class BodyParts
         {
@@ -44,7 +47,7 @@ namespace Test.AvatarSystem
         public void SetUp()
         {
             container = new GameObject("Container");
-            PrepareCatalog();
+            wearablesCatalogService = AvatarAssetsTestHelpers.CreateTestCatalogLocal();
 
             retrieverFactory = Substitute.For<IRetrieverFactory>();
             retrieverFactory.Configure().GetWearableRetriever().Returns(Substitute.For<IWearableRetriever>());
@@ -52,210 +55,228 @@ namespace Test.AvatarSystem
 
             bodyshapeLoader = new BodyShapeLoader(
                 retrieverFactory,
-                CatalogController.wearableCatalog[FEMALE_ID],
-                CatalogController.wearableCatalog[EYES_ID],
-                CatalogController.wearableCatalog[EYEBROWS_ID],
-                CatalogController.wearableCatalog[MOUTH_ID]);
-        }
-
-        private void PrepareCatalog()
-        {
-            //This is really, really ugly. There's no other way to solve it until the catalog is in our service locator
-            container.AddComponent<CatalogController>();
-            AvatarAssetsTestHelpers.CreateTestCatalogLocal();
+                wearablesCatalogService.WearablesCatalog[FEMALE_ID],
+                wearablesCatalogService.WearablesCatalog[EYES_ID],
+                wearablesCatalogService.WearablesCatalog[EYEBROWS_ID],
+                wearablesCatalogService.WearablesCatalog[MOUTH_ID]);
         }
 
         [UnityTest]
-        public IEnumerator LoadBodyshape() => UniTask.ToCoroutine(async () =>
-        {
-            //Arrange
-            BodyParts bodyParts = GetBodyshapeMock(container.transform);
-            SetMaterial(bodyParts.lbody, WEARABLE_SHADER_PATH, "skin"); //lbody will be tinted as skin
-            SetMaterial(bodyParts.ubody, WEARABLE_SHADER_PATH, "hair"); //ubody will be tinted as hair
-
-            Rendereable rendereable = PrepareRendereable(bodyParts);
-            bodyshapeLoader.bodyshapeRetriever.rendereable.Returns(rendereable);
-            bodyshapeLoader.bodyshapeRetriever.Configure()
-                .Retrieve(Arg.Any<GameObject>(), Arg.Any<ContentProvider>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<CancellationToken>())
-                .Returns(x => new UniTask<Rendereable>(rendereable));
-
-            bodyshapeLoader.eyesRetriever.Configure()
-                .Retrieve(Arg.Any<WearableItem>(), Arg.Any<string>())
-                .Returns(x => new UniTask<(Texture main, Texture mask)>((Texture2D.whiteTexture, null)));
-
-            bodyshapeLoader.eyebrowsRetriever.Configure()
-                .Retrieve(Arg.Any<WearableItem>(), Arg.Any<string>())
-                .Returns(x => new UniTask<(Texture main, Texture mask)>((Texture2D.whiteTexture, null)));
-
-            bodyshapeLoader.mouthRetriever.Configure()
-                .Retrieve(Arg.Any<WearableItem>(), Arg.Any<string>())
-                .Returns(x => new UniTask<(Texture main, Texture mask)>((Texture2D.whiteTexture, null)));
-
-            //Act
-            Color hairColor = Color.red;
-            Color skinColor = Color.blue;
-            Color eyesColor = Color.yellow;
-            await bodyshapeLoader.Load(container, new AvatarSettings
+        public IEnumerator LoadBodyshape() =>
+            UniTask.ToCoroutine(async () =>
             {
-                bodyshapeId = WearableLiterals.BodyShapes.MALE,
-                hairColor = Color.red,
-                skinColor = Color.blue,
-                eyesColor = Color.yellow
+                //Arrange
+                BodyParts bodyParts = GetBodyshapeMock(container.transform);
+                SetMaterial(bodyParts.lbody, WEARABLE_SHADER_PATH, "skin"); //lbody will be tinted as skin
+                SetMaterial(bodyParts.ubody, WEARABLE_SHADER_PATH, "hair"); //ubody will be tinted as hair
+
+                Rendereable rendereable = PrepareRendereable(bodyParts);
+                bodyshapeLoader.bodyshapeRetriever.rendereable.Returns(rendereable);
+
+                bodyshapeLoader.bodyshapeRetriever.Configure()
+                               .Retrieve(
+                                    Arg.Any<GameObject>(),
+                                    Arg.Any<WearableItem>(),
+                                    Arg.Any<string>(),
+                                    Arg.Any<CancellationToken>())
+                               .Returns(x => new UniTask<Rendereable>(rendereable));
+
+                bodyshapeLoader.eyesRetriever.Configure()
+                               .Retrieve(Arg.Any<WearableItem>(), Arg.Any<string>())
+                               .Returns(x => new UniTask<(Texture main, Texture mask)>((Texture2D.whiteTexture, null)));
+
+                bodyshapeLoader.eyebrowsRetriever.Configure()
+                               .Retrieve(Arg.Any<WearableItem>(), Arg.Any<string>())
+                               .Returns(x => new UniTask<(Texture main, Texture mask)>((Texture2D.whiteTexture, null)));
+
+                bodyshapeLoader.mouthRetriever.Configure()
+                               .Retrieve(Arg.Any<WearableItem>(), Arg.Any<string>())
+                               .Returns(x => new UniTask<(Texture main, Texture mask)>((Texture2D.whiteTexture, null)));
+
+                //Act
+                Color hairColor = Color.red;
+                Color skinColor = Color.blue;
+                Color eyesColor = Color.yellow;
+
+                await bodyshapeLoader.Load(container, new AvatarSettings
+                {
+                    bodyshapeId = WearableLiterals.BodyShapes.MALE,
+                    hairColor = Color.red,
+                    skinColor = Color.blue,
+                    eyesColor = Color.yellow
+                });
+
+                //Assert
+                Assert.AreEqual(IWearableLoader.Status.Succeeded, bodyshapeLoader.status);
+                Assert.AreEqual(Color.gray, bodyParts.head.material.color);
+                Assert.AreEqual(hairColor, bodyParts.ubody.material.color);
+                Assert.AreEqual(skinColor, bodyParts.lbody.material.color);
+                Assert.AreEqual(Color.gray, bodyParts.feet.material.color);
+                Assert.AreEqual(eyesColor, bodyParts.eyes.material.GetColor(ShaderUtils.EyeTint));
+                Assert.AreEqual(Texture2D.whiteTexture, bodyParts.eyes.material.GetTexture(ShaderUtils.EyesTexture));
+                Assert.AreEqual(hairColor, bodyParts.eyebrows.material.GetColor(ShaderUtils.BaseColor));
+                Assert.AreEqual(Texture2D.whiteTexture, bodyParts.eyebrows.material.GetTexture(ShaderUtils.BaseMap));
+                Assert.AreEqual(skinColor, bodyParts.mouth.material.GetColor(ShaderUtils.BaseColor));
+                Assert.AreEqual(Texture2D.whiteTexture, bodyParts.mouth.material.GetTexture(ShaderUtils.BaseMap));
             });
 
-            //Assert
-            Assert.AreEqual(IWearableLoader.Status.Succeeded, bodyshapeLoader.status);
-            Assert.AreEqual(Color.gray, bodyParts.head.material.color);
-            Assert.AreEqual(hairColor, bodyParts.ubody.material.color);
-            Assert.AreEqual(skinColor, bodyParts.lbody.material.color);
-            Assert.AreEqual(Color.gray, bodyParts.feet.material.color);
-            Assert.AreEqual(eyesColor, bodyParts.eyes.material.GetColor(ShaderUtils.EyeTint));
-            Assert.AreEqual(Texture2D.whiteTexture, bodyParts.eyes.material.GetTexture(ShaderUtils.EyesTexture));
-            Assert.AreEqual(hairColor, bodyParts.eyebrows.material.GetColor(ShaderUtils.BaseColor));
-            Assert.AreEqual(Texture2D.whiteTexture, bodyParts.eyebrows.material.GetTexture(ShaderUtils.BaseMap));
-            Assert.AreEqual(skinColor, bodyParts.mouth.material.GetColor(ShaderUtils.BaseColor));
-            Assert.AreEqual(Texture2D.whiteTexture, bodyParts.mouth.material.GetTexture(ShaderUtils.BaseMap));
-        });
+        [UnityTest]
+        public IEnumerator ThrowsIfCanceledTokenIsPassed() =>
+            UniTask.ToCoroutine(async () =>
+            {
+                //Arrange
+                var cts = new CancellationTokenSource();
+                cts.Cancel();
+
+                // Act & Assert
+                await TestUtils.ThrowsAsync<OperationCanceledException>(bodyshapeLoader.Load(container, new AvatarSettings(), cts.Token));
+            });
 
         [UnityTest]
-        public IEnumerator ThrowsIfCanceledTokenIsPassed() => UniTask.ToCoroutine(async () =>
-        {
-            //Arrange
-            var cts = new CancellationTokenSource();
-            cts.Cancel();
+        public IEnumerator ThrowWhenBodyshapeRetrieverFails() =>
+            UniTask.ToCoroutine(async () =>
+            {
+                //Arrange
+                bodyshapeLoader.bodyshapeRetriever.Configure()
+                               .Retrieve(
+                                    Arg.Any<GameObject>(),
+                                    Arg.Any<WearableItem>(),
+                                    Arg.Any<string>(),
+                                    Arg.Any<CancellationToken>())
+                               .Returns(x => throw new Exception("ThrowingOnPurpose"));
 
-            // Act & Assert
-            await TestUtils.ThrowsAsync<OperationCanceledException>(bodyshapeLoader.Load(container, new AvatarSettings(), cts.Token));
-        });
-
-        [UnityTest]
-        public IEnumerator ThrowWhenBodyshapeRetrieverFails() => UniTask.ToCoroutine(async () =>
-        {
-            //Arrange
-            bodyshapeLoader.bodyshapeRetriever.Configure()
-                .Retrieve(Arg.Any<GameObject>(), Arg.Any<ContentProvider>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<CancellationToken>())
-                .Returns(x => throw new Exception("ThrowingOnPurpose"));
-
-            //Assert
-            await TestUtils.ThrowsAsync<Exception>(bodyshapeLoader.Load(container, new AvatarSettings()));
-            bodyshapeLoader.bodyshapeRetriever.Received().Dispose();
-            bodyshapeLoader.eyesRetriever.Received().Dispose();
-            bodyshapeLoader.eyebrowsRetriever.Received().Dispose();
-            bodyshapeLoader.mouthRetriever.Received().Dispose();
-        });
+                //Assert
+                await TestUtils.ThrowsAsync<Exception>(bodyshapeLoader.Load(container, new AvatarSettings()));
+                bodyshapeLoader.bodyshapeRetriever.Received().Dispose();
+                bodyshapeLoader.eyesRetriever.Received().Dispose();
+                bodyshapeLoader.eyebrowsRetriever.Received().Dispose();
+                bodyshapeLoader.mouthRetriever.Received().Dispose();
+            });
 
         [UnityTest]
-        public IEnumerator ThrowWhenBodyshapeRetrieverReturnsNull() => UniTask.ToCoroutine(async () =>
-        {
-            //Arrange
-            bodyshapeLoader.bodyshapeRetriever.rendereable.Returns(x => null);
-            bodyshapeLoader.bodyshapeRetriever.Configure()
-                .Retrieve(Arg.Any<GameObject>(), Arg.Any<ContentProvider>(), Arg.Any<string>(), Arg.Any<string>())
-                .Returns(x => new UniTask<Rendereable>(null));
+        public IEnumerator ThrowWhenBodyshapeRetrieverReturnsNull() =>
+            UniTask.ToCoroutine(async () =>
+            {
+                //Arrange
+                bodyshapeLoader.bodyshapeRetriever.rendereable.Returns(x => null);
 
-            //Assert
-            await TestUtils.ThrowsAsync<Exception>(bodyshapeLoader.Load(container, new AvatarSettings()));
-            bodyshapeLoader.bodyshapeRetriever.Received().Dispose();
-            bodyshapeLoader.eyesRetriever.Received().Dispose();
-            bodyshapeLoader.eyebrowsRetriever.Received().Dispose();
-            bodyshapeLoader.mouthRetriever.Received().Dispose();
-        });
+                bodyshapeLoader.bodyshapeRetriever.Configure()
+                               .Retrieve(
+                                    Arg.Any<GameObject>(),
+                                    Arg.Any<WearableItem>(),
+                                    Arg.Any<string>(),
+                                    Arg.Any<CancellationToken>())
+                               .Returns(x => new UniTask<Rendereable>(null));
 
-        [UnityTest]
-        public IEnumerator ThrowWhenEyesRetrieverFails() => UniTask.ToCoroutine(async () =>
-        {
-            //Arrange
-            bodyshapeLoader.eyesRetriever.Configure()
-                .Retrieve(Arg.Any<WearableItem>(), Arg.Any<string>())
-                .Returns(x => throw new Exception("ThrowingOnPurpose"));
-
-            //Assert
-            await TestUtils.ThrowsAsync<Exception>(bodyshapeLoader.Load(container, new AvatarSettings()));
-            bodyshapeLoader.bodyshapeRetriever.Received().Dispose();
-            bodyshapeLoader.eyesRetriever.Received().Dispose();
-            bodyshapeLoader.eyebrowsRetriever.Received().Dispose();
-            bodyshapeLoader.mouthRetriever.Received().Dispose();
-        });
+                //Assert
+                await TestUtils.ThrowsAsync<Exception>(bodyshapeLoader.Load(container, new AvatarSettings()));
+                bodyshapeLoader.bodyshapeRetriever.Received().Dispose();
+                bodyshapeLoader.eyesRetriever.Received().Dispose();
+                bodyshapeLoader.eyebrowsRetriever.Received().Dispose();
+                bodyshapeLoader.mouthRetriever.Received().Dispose();
+            });
 
         [UnityTest]
-        public IEnumerator ThrowWhenEyebrowsRetrieverFails() => UniTask.ToCoroutine(async () =>
-        {
-            //Arrange
-            bodyshapeLoader.eyebrowsRetriever.Configure()
-                .Retrieve(Arg.Any<WearableItem>(), Arg.Any<string>())
-                .Returns(x => throw new Exception("ThrowingOnPurpose"));
+        public IEnumerator ThrowWhenEyesRetrieverFails() =>
+            UniTask.ToCoroutine(async () =>
+            {
+                //Arrange
+                bodyshapeLoader.eyesRetriever.Configure()
+                               .Retrieve(Arg.Any<WearableItem>(), Arg.Any<string>())
+                               .Returns(x => throw new Exception("ThrowingOnPurpose"));
 
-            //Assert
-            await TestUtils.ThrowsAsync<Exception>(bodyshapeLoader.Load(container, new AvatarSettings()));
-            bodyshapeLoader.bodyshapeRetriever.Received().Dispose();
-            bodyshapeLoader.eyesRetriever.Received().Dispose();
-            bodyshapeLoader.eyebrowsRetriever.Received().Dispose();
-            bodyshapeLoader.mouthRetriever.Received().Dispose();
-        });
-
-        [UnityTest]
-        public IEnumerator ThrowWhenMouthRetrieverFails() => UniTask.ToCoroutine(async () =>
-        {
-            //Arrange
-            bodyshapeLoader.mouthRetriever.Configure()
-                .Retrieve(Arg.Any<WearableItem>(), Arg.Any<string>())
-                .Returns(x => throw new Exception("ThrowingOnPurpose"));
-
-            //Assert
-            await TestUtils.ThrowsAsync<Exception>(bodyshapeLoader.Load(container, new AvatarSettings()));
-            bodyshapeLoader.bodyshapeRetriever.Received().Dispose();
-            bodyshapeLoader.eyesRetriever.Received().Dispose();
-            bodyshapeLoader.eyebrowsRetriever.Received().Dispose();
-            bodyshapeLoader.mouthRetriever.Received().Dispose();
-        });
+                //Assert
+                await TestUtils.ThrowsAsync<Exception>(bodyshapeLoader.Load(container, new AvatarSettings()));
+                bodyshapeLoader.bodyshapeRetriever.Received().Dispose();
+                bodyshapeLoader.eyesRetriever.Received().Dispose();
+                bodyshapeLoader.eyebrowsRetriever.Received().Dispose();
+                bodyshapeLoader.mouthRetriever.Received().Dispose();
+            });
 
         [UnityTest]
-        public IEnumerator ThrowWhenEyesRetrieverReturnsNull() => UniTask.ToCoroutine(async () =>
-        {
-            //Arrange
-            bodyshapeLoader.eyesRetriever.Configure()
-                .Retrieve(Arg.Any<WearableItem>(), Arg.Any<string>())
-                .Returns(x => new UniTask<(Texture main, Texture mask)>((null, null)));
+        public IEnumerator ThrowWhenEyebrowsRetrieverFails() =>
+            UniTask.ToCoroutine(async () =>
+            {
+                //Arrange
+                bodyshapeLoader.eyebrowsRetriever.Configure()
+                               .Retrieve(Arg.Any<WearableItem>(), Arg.Any<string>())
+                               .Returns(x => throw new Exception("ThrowingOnPurpose"));
 
-            //Assert
-            await TestUtils.ThrowsAsync<Exception>(bodyshapeLoader.Load(container, new AvatarSettings()));
-            bodyshapeLoader.bodyshapeRetriever.Received().Dispose();
-            bodyshapeLoader.eyesRetriever.Received().Dispose();
-            bodyshapeLoader.eyebrowsRetriever.Received().Dispose();
-            bodyshapeLoader.mouthRetriever.Received().Dispose();
-        });
-
-        [UnityTest]
-        public IEnumerator ThrowWhenEyebrowsRetrieverReturnsNull() => UniTask.ToCoroutine(async () =>
-        {
-            //Arrange
-            bodyshapeLoader.eyebrowsRetriever.Configure()
-                .Retrieve(Arg.Any<WearableItem>(), Arg.Any<string>())
-                .Returns(x => new UniTask<(Texture main, Texture mask)>((null, null)));
-
-            //Assert
-            await TestUtils.ThrowsAsync<Exception>(bodyshapeLoader.Load(container, new AvatarSettings()));
-            bodyshapeLoader.bodyshapeRetriever.Received().Dispose();
-            bodyshapeLoader.eyesRetriever.Received().Dispose();
-            bodyshapeLoader.eyebrowsRetriever.Received().Dispose();
-            bodyshapeLoader.mouthRetriever.Received().Dispose();
-        });
+                //Assert
+                await TestUtils.ThrowsAsync<Exception>(bodyshapeLoader.Load(container, new AvatarSettings()));
+                bodyshapeLoader.bodyshapeRetriever.Received().Dispose();
+                bodyshapeLoader.eyesRetriever.Received().Dispose();
+                bodyshapeLoader.eyebrowsRetriever.Received().Dispose();
+                bodyshapeLoader.mouthRetriever.Received().Dispose();
+            });
 
         [UnityTest]
-        public IEnumerator ThrowWhenMouthRetrieverReturnsNull() => UniTask.ToCoroutine(async () =>
-        {
-            //Arrange
-            bodyshapeLoader.mouthRetriever.Configure()
-                .Retrieve(Arg.Any<WearableItem>(), Arg.Any<string>())
-                .Returns(x => new UniTask<(Texture main, Texture mask)>((null, null)));
+        public IEnumerator ThrowWhenMouthRetrieverFails() =>
+            UniTask.ToCoroutine(async () =>
+            {
+                //Arrange
+                bodyshapeLoader.mouthRetriever.Configure()
+                               .Retrieve(Arg.Any<WearableItem>(), Arg.Any<string>())
+                               .Returns(x => throw new Exception("ThrowingOnPurpose"));
 
-            //Assert
-            await TestUtils.ThrowsAsync<Exception>(bodyshapeLoader.Load(container, new AvatarSettings()));
-            bodyshapeLoader.bodyshapeRetriever.Received().Dispose();
-            bodyshapeLoader.eyesRetriever.Received().Dispose();
-            bodyshapeLoader.eyebrowsRetriever.Received().Dispose();
-            bodyshapeLoader.mouthRetriever.Received().Dispose();
-        });
+                //Assert
+                await TestUtils.ThrowsAsync<Exception>(bodyshapeLoader.Load(container, new AvatarSettings()));
+                bodyshapeLoader.bodyshapeRetriever.Received().Dispose();
+                bodyshapeLoader.eyesRetriever.Received().Dispose();
+                bodyshapeLoader.eyebrowsRetriever.Received().Dispose();
+                bodyshapeLoader.mouthRetriever.Received().Dispose();
+            });
+
+        [UnityTest]
+        public IEnumerator ThrowWhenEyesRetrieverReturnsNull() =>
+            UniTask.ToCoroutine(async () =>
+            {
+                //Arrange
+                bodyshapeLoader.eyesRetriever.Configure()
+                               .Retrieve(Arg.Any<WearableItem>(), Arg.Any<string>())
+                               .Returns(x => new UniTask<(Texture main, Texture mask)>((null, null)));
+
+                //Assert
+                await TestUtils.ThrowsAsync<Exception>(bodyshapeLoader.Load(container, new AvatarSettings()));
+                bodyshapeLoader.bodyshapeRetriever.Received().Dispose();
+                bodyshapeLoader.eyesRetriever.Received().Dispose();
+                bodyshapeLoader.eyebrowsRetriever.Received().Dispose();
+                bodyshapeLoader.mouthRetriever.Received().Dispose();
+            });
+
+        [UnityTest]
+        public IEnumerator ThrowWhenEyebrowsRetrieverReturnsNull() =>
+            UniTask.ToCoroutine(async () =>
+            {
+                //Arrange
+                bodyshapeLoader.eyebrowsRetriever.Configure()
+                               .Retrieve(Arg.Any<WearableItem>(), Arg.Any<string>())
+                               .Returns(x => new UniTask<(Texture main, Texture mask)>((null, null)));
+
+                //Assert
+                await TestUtils.ThrowsAsync<Exception>(bodyshapeLoader.Load(container, new AvatarSettings()));
+                bodyshapeLoader.bodyshapeRetriever.Received().Dispose();
+                bodyshapeLoader.eyesRetriever.Received().Dispose();
+                bodyshapeLoader.eyebrowsRetriever.Received().Dispose();
+                bodyshapeLoader.mouthRetriever.Received().Dispose();
+            });
+
+        [UnityTest]
+        public IEnumerator ThrowWhenMouthRetrieverReturnsNull() =>
+            UniTask.ToCoroutine(async () =>
+            {
+                //Arrange
+                bodyshapeLoader.mouthRetriever.Configure()
+                               .Retrieve(Arg.Any<WearableItem>(), Arg.Any<string>())
+                               .Returns(x => new UniTask<(Texture main, Texture mask)>((null, null)));
+
+                //Assert
+                await TestUtils.ThrowsAsync<Exception>(bodyshapeLoader.Load(container, new AvatarSettings()));
+                bodyshapeLoader.bodyshapeRetriever.Received().Dispose();
+                bodyshapeLoader.eyesRetriever.Received().Dispose();
+                bodyshapeLoader.eyebrowsRetriever.Received().Dispose();
+                bodyshapeLoader.mouthRetriever.Received().Dispose();
+            });
 
         [Test]
         public void DisablesFacialRenderersOnHideFace()
@@ -300,7 +321,8 @@ namespace Test.AvatarSystem
             SetMaterial(bodyParts.head, WEARABLE_SHADER_PATH, "NormalMaterial");
             SetMaterial(bodyParts.ubody, WEARABLE_SHADER_PATH, "NormalMaterial");
             SetMaterial(bodyParts.lbody, WEARABLE_SHADER_PATH, "NormalMaterial");
-            SetMaterial(bodyParts.feet , WEARABLE_SHADER_PATH, "NormalMaterial");
+            SetMaterial(bodyParts.feet, WEARABLE_SHADER_PATH, "NormalMaterial");
+
             //Facial features materials are set by the loader itself, no need to mock it here
 
             return bodyParts;
@@ -312,8 +334,10 @@ namespace Test.AvatarSystem
             holder.transform.parent = parent;
             GameObject primitive = GameObject.CreatePrimitive(PrimitiveType.Cube);
             primitive.name = holderName;
+
             if (primitive.TryGetComponent(out Collider collider))
                 Object.Destroy(collider);
+
             primitive.transform.parent = holder.transform;
 
             Renderer renderer = primitive.GetComponent<Renderer>();
@@ -335,16 +359,16 @@ namespace Test.AvatarSystem
         public void TearDown()
         {
             bodyshapeLoader?.Dispose();
-            CatalogController.Clear();
+
             if (container != null)
                 Object.Destroy(container);
 
-            if (CatalogController.i != null)
-                Object.Destroy(CatalogController.i);
+            wearablesCatalogService.Dispose();
 
             for (int i = 0; i < materialsToBeDisposed.Count; i++)
             {
                 Material material = materialsToBeDisposed[i];
+
                 if (material != null)
                     Object.Destroy(material);
             }

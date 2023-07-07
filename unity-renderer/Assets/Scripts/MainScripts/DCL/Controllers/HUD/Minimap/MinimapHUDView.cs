@@ -1,11 +1,17 @@
+using System;
 using DCL;
+using DCLServices.MapRendererV2.ConsumerUtils;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class MinimapHUDView : MonoBehaviour
 {
+#if DCL_VR
+    public const string VIEW_PATH = "MinimapHUDVR";
+#else
     public const string VIEW_PATH = "MinimapHUD";
+#endif
     public const string VIEW_OBJECT_NAME = "_MinimapHUD";
 
     private int START_MENU_HOVER_BOOL = Animator.StringToHash("hover");
@@ -19,47 +25,75 @@ public class MinimapHUDView : MonoBehaviour
     [SerializeField] private Button openNavmapButton;
 
     [Header("Options")] [SerializeField] private Button optionsButton;
-    [SerializeField] private GameObject sceneOptionsPanel;
+    [SerializeField] internal GameObject sceneOptionsPanel;
     [SerializeField] private ToggleComponentView toggleSceneUI;
-    [SerializeField] private Button addBookmarkButton;
-    [SerializeField] private Button reportSceneButton;
+    [SerializeField] internal Button reportSceneButton;
     [SerializeField] internal UsersAroundListHUDButtonView usersAroundListHudButton;
+    [SerializeField] internal ToggleComponentView setHomeScene;
 
-    [Header("Map Renderer")] public RectTransform mapRenderContainer;
+    [Header("Map Renderer")]
+    public RectTransform mapRenderContainer;
+
+    [field: SerializeField]
+    internal RawImage mapRendererTargetImage { get; private set; }
+
+    [field: SerializeField]
+    internal PixelPerfectMapRendererTextureProvider pixelPerfectMapRendererTextureProvider { get; private set; }
+
+    [field: SerializeField]
+    internal int mapRendererVisibleParcels { get; private set; }
+
     public RectTransform mapViewport;
 
     public static System.Action<MinimapHUDModel> OnUpdateData;
     public static System.Action OnOpenNavmapClicked;
     public InputAction_Trigger toggleNavMapAction;
     private IMouseCatcher mouseCatcher;
+    private HUDCanvasCameraModeController hudCanvasCameraModeController;
+    private MinimapHUDController controller;
+
+    private void Awake() { hudCanvasCameraModeController = new HUDCanvasCameraModeController(GetComponent<Canvas>(), DataStore.i.camera.hudsCamera); }
 
     public void Initialize(MinimapHUDController controller)
     {
+        this.controller = controller;
         mouseCatcher = SceneReferences.i?.mouseCatcher;
         gameObject.name = VIEW_OBJECT_NAME;
         sceneOptionsPanel.SetActive(false);
 
         optionsButton.onClick.AddListener(controller.ToggleOptions);
         toggleSceneUI.OnSelectedChanged += (isOn, id, name) => controller.ToggleSceneUI(isOn);
-        addBookmarkButton.onClick.AddListener(controller.AddBookmark);
-        reportSceneButton.onClick.AddListener(controller.ReportScene);
+        reportSceneButton.onClick.AddListener(ReportScene);
+        setHomeScene.OnSelectedChanged += (isOn, id, name) => SetHomeScene(isOn);
         openNavmapButton.onClick.AddListener(toggleNavMapAction.RaiseOnTriggered);
 
         if (mouseCatcher != null)
             mouseCatcher.OnMouseLock += OnMouseLocked;
 
-        var renderer = MapRenderer.i;
+        /*var renderer = MapRenderer.i;
 
         if (renderer != null)
         {
             renderer.atlas.viewport = mapViewport;
             renderer.transform.SetParent(mapRenderContainer);
             renderer.transform.SetAsFirstSibling();
-        }
+        }*/
+
         usersAroundListHudButton.gameObject.SetActive(false);
     }
 
-    internal void OnMouseLocked() 
+    private void ReportScene()
+    {
+        controller.ReportScene();
+        controller.ToggleOptions();
+    }
+
+    private void SetHomeScene(bool isOn)
+    {
+        controller.SetHomeScene(isOn);
+    }
+
+    internal void OnMouseLocked()
     {
         sceneOptionsPanel.SetActive(false);
     }
@@ -69,6 +103,11 @@ public class MinimapHUDView : MonoBehaviour
         var view = Instantiate(Resources.Load<GameObject>(VIEW_PATH)).GetComponent<MinimapHUDView>();
         view.Initialize(controller);
         return view;
+    }
+
+    internal void UpdateSetHomePanel(bool isHome)
+    {
+        setHomeScene.SetIsOnWithoutNotify(isHome);
     }
 
     internal void UpdateData(MinimapHUDModel model)
@@ -91,5 +130,6 @@ public class MinimapHUDView : MonoBehaviour
     {
         if(mouseCatcher != null)
             mouseCatcher.OnMouseLock -= OnMouseLocked;
+        hudCanvasCameraModeController?.Dispose();
     }
 }

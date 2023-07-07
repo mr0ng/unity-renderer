@@ -1,11 +1,11 @@
 using System;
 using System.Collections;
-using DCL.Controllers;
 using DCL.Helpers;
 using DCL.Models;
 using TMPro;
 using UnityEngine;
-using Object = UnityEngine.Object;
+using Decentraland.Sdk.Ecs6;
+using MainScripts.DCL.Components;
 
 namespace DCL.Components
 {
@@ -29,7 +29,6 @@ namespace DCL.Components
 
             [Header("Text box properties")]
             public string hTextAlign = "bottom";
-
             public string vTextAlign = "left";
             public float width = 1f;
             public float height = 0.2f;
@@ -43,7 +42,6 @@ namespace DCL.Components
 
             [Header("Text shadow properties")]
             public float shadowBlur = 0f;
-
             public float shadowOffsetX = 0f;
             public float shadowOffsetY = 0f;
             public Color shadowColor = new Color(1, 1, 1);
@@ -54,63 +52,137 @@ namespace DCL.Components
             public Color outlineColor = Color.white;
 
             public override BaseModel GetDataFromJSON(string json) { return Utils.SafeFromJson<Model>(json); }
+
+            public override BaseModel GetDataFromPb(ComponentBodyPayload pbModel)
+            {
+                if (pbModel.PayloadCase != ComponentBodyPayload.PayloadOneofCase.TextShape)
+                    return Utils.SafeUnimplemented<TextShape, Model>(expected: ComponentBodyPayload.PayloadOneofCase.TextShape, actual: pbModel.PayloadCase);
+
+                var model = new Model();
+
+                try {
+                    if (pbModel.TextShape.HasBillboard) model.billboard = pbModel.TextShape.Billboard;
+                    if (pbModel.TextShape.Color != null) model.color = pbModel.TextShape.Color.AsUnityColor();
+                    if (pbModel.TextShape.HasFont) model.font = pbModel.TextShape.Font;
+                    if (pbModel.TextShape.HasHeight) model.height = pbModel.TextShape.Height;
+                    if (pbModel.TextShape.HasOpacity) model.opacity = pbModel.TextShape.Opacity;
+                    if (pbModel.TextShape.HasValue) model.value = pbModel.TextShape.Value;
+                    if (pbModel.TextShape.HasVisible) model.visible = pbModel.TextShape.Visible;
+                    if (pbModel.TextShape.HasWidth) model.width = pbModel.TextShape.Width;
+                    if (pbModel.TextShape.HasLineCount) model.lineCount = pbModel.TextShape.LineCount;
+                    if (pbModel.TextShape.OutlineColor != null) model.outlineColor = pbModel.TextShape.OutlineColor.AsUnityColor();
+                    if (pbModel.TextShape.HasOutlineWidth) model.outlineWidth = pbModel.TextShape.OutlineWidth;
+                    if (pbModel.TextShape.HasPaddingBottom ) model.paddingBottom = pbModel.TextShape.PaddingBottom;
+                    if (pbModel.TextShape.HasPaddingLeft) model.paddingLeft = pbModel.TextShape.PaddingLeft;
+                    if (pbModel.TextShape.HasPaddingRight) model.paddingRight = pbModel.TextShape.PaddingRight;
+                    if (pbModel.TextShape.HasPaddingTop) model.paddingTop = pbModel.TextShape.PaddingTop;
+                    if (pbModel.TextShape.HasShadowBlur) model.shadowBlur = pbModel.TextShape.ShadowBlur;
+                    if (pbModel.TextShape.ShadowColor != null) model.shadowColor = pbModel.TextShape.ShadowColor.AsUnityColor();
+                    if (pbModel.TextShape.HasShadowOffsetX) model.shadowOffsetX = pbModel.TextShape.ShadowOffsetX;
+                    if (pbModel.TextShape.HasShadowOffsetY) model.shadowOffsetY = pbModel.TextShape.ShadowOffsetY;
+                    if (pbModel.TextShape.HasTextWrapping) model.textWrapping = pbModel.TextShape.TextWrapping;
+                    if (pbModel.TextShape.HasVTextAlign) model.vTextAlign = pbModel.TextShape.VTextAlign;
+                    if (pbModel.TextShape.HasHTextAlign) model.hTextAlign = pbModel.TextShape.HTextAlign;
+                    if (pbModel.TextShape.HasFontSize) model.fontAutoSize = pbModel.TextShape.FontSize == 0;
+                    if (pbModel.TextShape.HasFontSize) model.fontSize = pbModel.TextShape.FontSize;
+                    // if (pbModel.TextShape.HasLineSpacing) model.lineSpacing = float.Parse(pbModel.TextShape.LineSpacing[..^2]); // TODO [SDK6_REFACTOR] revise this, is failing
+                }
+                catch (Exception e)
+                {
+                    Debug.LogException(e);
+                }
+
+                return model;
+            }
+
         }
 
+        public MeshRenderer meshRenderer;
         public TextMeshPro text;
         public RectTransform rectTransform;
         private Model cachedModel;
         private Material cachedFontMaterial;
+        private Camera mainCamera;
+        private bool cameraFound;
 
         public override string componentName => "text";
+
+        private bool CameraFound
+        {
+            get
+            {
+                if (!cameraFound)
+                {
+                    mainCamera = Camera.main;
+                    if (mainCamera != null)
+                        cameraFound = true;
+                }
+
+                return cameraFound;
+            }
+        }
 
         private void Awake()
         {
             model = new Model();
+
             cachedFontMaterial = new Material(text.fontSharedMaterial);
+
             text.fontSharedMaterial = cachedFontMaterial;
             text.text = string.Empty;
-        }
 
-        public void Update()
+            Environment.i.platform.updateEventHandler.AddListener(IUpdateEventHandler.EventType.Update, LookToCamera);
+        }
+        //private int updateSkip = 0;
+        //private void OnUpdate()
+
+        private void LookToCamera()
         {
-            if (cachedModel.billboard && Camera.main != null)
-            {
-                transform.forward = Camera.main.transform.forward;
-            }
+            //updateSkip = (updateSkip + 1 ) % 5;
+            //if (updateSkip != 0)
+                //return;
+            // Cameras are not detected while loading, so we can not load the camera on Awake or Start
+            if (cachedModel is { billboard: true } && CameraFound)
+                transform.forward = mainCamera.transform.forward;
         }
 
-        new public Model GetModel() { return cachedModel; }
+        public new Model GetModel() =>
+            cachedModel;
 
         public override IEnumerator ApplyChanges(BaseModel newModel)
         {
             if (rectTransform == null)
                 yield break;
 
-            Model model = (Model) newModel;
+            Model model = (Model)newModel;
             cachedModel = model;
             PrepareRectTransform();
 
             // We avoid using even yield break; as this instruction skips a frame and we don't want that.
-            if ( !DCLFont.IsFontLoaded(scene, model.font) )
+            if (!DCLFont.IsFontLoaded(scene, model.font))
             {
                 yield return DCLFont.WaitUntilFontIsReady(scene, model.font);
             }
 
             DCLFont.SetFontFromComponent(scene, model.font, text);
+
             ApplyModelChanges(text, model);
 
             if (entity.meshRootGameObject == null)
+            {
                 entity.meshesInfo.meshRootGameObject = gameObject;
+                entity.meshesInfo.RootIsPoolableObject = true;
+            }
 
             entity.OnShapeUpdated?.Invoke(entity);
         }
 
-        public static void ApplyModelChanges(TMP_Text text, Model model)
+        private static void ApplyModelChanges(TMP_Text text, Model model)
         {
             text.text = model.value;
 
             text.color = new Color(model.color.r, model.color.g, model.color.b, model.visible ? model.opacity : 0);
-            text.fontSize = (int) model.fontSize;
+            text.fontSize = (int)model.fontSize;
             text.richText = true;
             text.overflowMode = TextOverflowModes.Overflow;
             text.enableAutoSizing = model.fontAutoSize;
@@ -118,10 +190,10 @@ namespace DCL.Components
             text.margin =
                 new Vector4
                 (
-                    (int) model.paddingLeft,
-                    (int) model.paddingTop,
-                    (int) model.paddingRight,
-                    (int) model.paddingBottom
+                    (int)model.paddingLeft,
+                    (int)model.paddingTop,
+                    (int)model.paddingRight,
+                    (int)model.paddingBottom
                 );
 
             text.alignment = GetAlignment(model.vTextAlign, model.hTextAlign);
@@ -166,41 +238,27 @@ namespace DCL.Components
             vTextAlign = vTextAlign.ToLower();
             hTextAlign = hTextAlign.ToLower();
 
-            switch (vTextAlign)
-            {
-                case "top":
-                    switch (hTextAlign)
-                    {
-                        case "left":
-                            return TextAlignmentOptions.TopLeft;
-                        case "right":
-                            return TextAlignmentOptions.TopRight;
-                        default:
-                            return TextAlignmentOptions.Top;
-                    }
-
-                case "bottom":
-                    switch (hTextAlign)
-                    {
-                        case "left":
-                            return TextAlignmentOptions.BottomLeft;
-                        case "right":
-                            return TextAlignmentOptions.BottomRight;
-                        default:
-                            return TextAlignmentOptions.Bottom;
-                    }
-
-                default: // center
-                    switch (hTextAlign)
-                    {
-                        case "left":
-                            return TextAlignmentOptions.Left;
-                        case "right":
-                            return TextAlignmentOptions.Right;
-                        default:
-                            return TextAlignmentOptions.Center;
-                    }
-            }
+            return vTextAlign switch
+                   {
+                       "top" => hTextAlign switch
+                                {
+                                    "left" => TextAlignmentOptions.TopLeft,
+                                    "right" => TextAlignmentOptions.TopRight,
+                                    _ => TextAlignmentOptions.Top
+                                },
+                       "bottom" => hTextAlign switch
+                                   {
+                                       "left" => TextAlignmentOptions.BottomLeft,
+                                       "right" => TextAlignmentOptions.BottomRight,
+                                       _ => TextAlignmentOptions.Bottom
+                                   },
+                       _ => hTextAlign switch
+                            {
+                                "left" => TextAlignmentOptions.Left,
+                                "right" => TextAlignmentOptions.Right,
+                                _ => TextAlignmentOptions.Center
+                            }
+                   };
         }
 
         private void PrepareRectTransform()
@@ -224,7 +282,8 @@ namespace DCL.Components
             }
         }
 
-        public override int GetClassId() { return (int) CLASS_ID_COMPONENT.TEXT_SHAPE; }
+        public override int GetClassId() =>
+            (int)CLASS_ID_COMPONENT.TEXT_SHAPE;
 
         public override void Cleanup()
         {
@@ -234,6 +293,8 @@ namespace DCL.Components
 
         private void OnDestroy()
         {
+            Environment.i.platform.updateEventHandler?.RemoveListener(IUpdateEventHandler.EventType.Update, LookToCamera);
+
             base.Cleanup();
             Destroy(cachedFontMaterial);
         }

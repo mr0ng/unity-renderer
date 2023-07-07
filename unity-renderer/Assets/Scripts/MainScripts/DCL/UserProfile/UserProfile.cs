@@ -1,10 +1,12 @@
+using DCL;
+using DCL.Helpers;
+using Decentraland.Renderer.KernelServices;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using DCL;
-using DCL.Helpers;
-using DCL.Interface;
+using UnityEditor;
 using UnityEngine;
+using Environment = DCL.Environment;
 
 [CreateAssetMenu(fileName = "UserProfile", menuName = "UserProfile")]
 public class UserProfile : ScriptableObject //TODO Move to base variable
@@ -13,23 +15,25 @@ public class UserProfile : ScriptableObject //TODO Move to base variable
     {
         EmotesWheel,
         Shortcut,
-        Command
+        Command,
+        Backpack
     }
 
-    static DateTime epochStart = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+    private const string FALLBACK_NAME = "fallback";
+
     public event Action<UserProfile> OnUpdate;
     public event Action<string, long, EmoteSource> OnAvatarEmoteSet;
-    public event Action<Dictionary<string, int>> OnInventorySet;
 
     public string userId => model.userId;
     public string ethAddress => model.ethAddress;
     public string userName => model.name;
     public string description => model.description;
     public string email => model.email;
-    public string bodySnapshotURL => model.snapshots.body;
-    public string face256SnapshotURL => model.snapshots.face256;
+    public string bodySnapshotURL => model.ComposeCorrectUrl(model.snapshots.body);
+    public string face256SnapshotURL => model.ComposeCorrectUrl(model.snapshots.face256);
+    public string baseUrl => model.baseUrl;
     public UserProfileModel.ParcelsWithAccess[] parcelsWithAccess => model.parcelsWithAccess;
-    public List<string> blocked => model.blocked != null ? model.blocked : new List<string>();
+    public List<string> blocked => model.blocked ?? new List<string>();
     public List<string> muted => model.muted ?? new List<string>();
     public bool hasConnectedWeb3 => model.hasConnectedWeb3;
     public bool hasClaimedName => model.hasClaimedName;
@@ -37,23 +41,46 @@ public class UserProfile : ScriptableObject //TODO Move to base variable
     public AvatarModel avatar => model.avatar;
     public int tutorialStep => model.tutorialStep;
 
-    internal Dictionary<string, int> inventory = new Dictionary<string, int>();
+    internal Dictionary<string, int> inventory = new ();
 
     public ILazyTextureObserver snapshotObserver = new LazyTextureObserver();
     public ILazyTextureObserver bodySnapshotObserver = new LazyTextureObserver();
 
-    internal UserProfileModel model = new UserProfileModel() //Empty initialization to avoid nullchecks
-    {
-        avatar = new AvatarModel()
-    };
+    internal static UserProfile ownUserProfile;
+
+    // Empty initialization to avoid null-checks
+    internal UserProfileModel model = new () { avatar = new AvatarModel() };
+
+    private UserProfileModel ModelFallback() =>
+        UserProfileModel.FallbackModel(FALLBACK_NAME, this.GetInstanceID());
+
+    private AvatarModel AvatarFallback() =>
+        AvatarModel.FallbackModel(FALLBACK_NAME, this.GetInstanceID());
+
+    private int emoteLamportTimestamp = 1;
 
     public void UpdateData(UserProfileModel newModel)
     {
         if (newModel == null)
         {
-            model = null;
-            return;
+            if (DataStore.i.featureFlags.flags.Get().IsFeatureEnabled("user_profile_null_model_exception"))
+                Debug.LogError("Model is null when updating UserProfile! Using fallback or previous model instead.");
+
+            // Check if there is a previous model to fallback to. Because default model has everything empty or null.
+            newModel = string.IsNullOrEmpty(model.userId) ? ModelFallback() : model;
         }
+
+        if (newModel.avatar == null)
+        {
+            model.avatar = new AvatarModel();
+
+            if (DataStore.i.featureFlags.flags.Get().IsFeatureEnabled("user_profile_null_model_exception"))
+                Debug.LogError("Avatar is null when updating UserProfile! Using fallback or previous avatar instead.");
+
+            // Check if there is a previous avatar to fallback to.
+            newModel.avatar = string.IsNullOrEmpty(model.userId) ? AvatarFallback() : model.avatar;
+        }
+
         bool faceSnapshotDirty = model.snapshots.face256 != newModel.snapshots.face256;
         bool bodySnapshotDirty = model.snapshots.body != newModel.snapshots.body;
 
@@ -65,27 +92,19 @@ public class UserProfile : ScriptableObject //TODO Move to base variable
         model.name = newModel.name;
         model.email = newModel.email;
         model.description = newModel.description;
+        model.baseUrl = newModel.baseUrl;
         model.avatar.CopyFrom(newModel.avatar);
         model.snapshots = newModel.snapshots;
         model.hasConnectedWeb3 = newModel.hasConnectedWeb3;
-        model.inventory = newModel.inventory;
         model.blocked = newModel.blocked;
         model.muted = newModel.muted;
+        model.version = newModel.version;
 
-        if (model.inventory != null)
-        {
-            SetInventory(model.inventory);
-        }
+        if (faceSnapshotDirty)
+            snapshotObserver.RefreshWithUri(face256SnapshotURL);
 
-        if (model.snapshots != null && faceSnapshotDirty)
-        {
-            this.snapshotObserver.RefreshWithUri(model.snapshots.face256);
-        }
-
-        if (model.snapshots != null && bodySnapshotDirty)
-        {
-            bodySnapshotObserver.RefreshWithUri(model.snapshots.body);
-        }
+        if (bodySnapshotDirty)
+            bodySnapshotObserver.RefreshWithUri(bodySnapshotURL);
 
         OnUpdate?.Invoke(this);
     }
@@ -108,19 +127,26 @@ public class UserProfile : ScriptableObject //TODO Move to base variable
 
     public void SetAvatarExpression(string id, EmoteSource source)
     {
-        var timestamp = (long) (DateTime.UtcNow - epochStart).TotalMilliseconds;
+        int timestamp = emoteLamportTimestamp++;
         avatar.expressionTriggerId = id;
         avatar.expressionTriggerTimestamp = timestamp;
-        WebInterface.SendExpression(id, timestamp);
+
+        ClientEmotesKernelService emotes = Environment.i.serviceLocator.Get<IRPC>().Emotes();
+        // TODO: fix message `Timestamp` should NOT be `float`, we should use `int lamportTimestamp` or `long timeStamp`
+        emotes?.TriggerExpression(new TriggerExpressionRequest()
+        {
+            Id = id,
+            Timestamp = timestamp
+        });
+
         OnUpdate?.Invoke(this);
         OnAvatarEmoteSet?.Invoke(id, timestamp, source);
     }
 
-    public void SetInventory(string[] inventoryIds)
+    public void SetInventory(IEnumerable<string> inventoryIds)
     {
         inventory.Clear();
         inventory = inventoryIds.GroupBy(x => x).ToDictionary(x => x.Key, x => x.Count());
-        OnInventorySet?.Invoke(inventory);
     }
 
     public void AddToInventory(string wearableId)
@@ -132,12 +158,11 @@ public class UserProfile : ScriptableObject //TODO Move to base variable
     }
 
     public void RemoveFromInventory(string wearableId) { inventory.Remove(wearableId); }
-    
+
     public bool ContainsInInventory(string wearableId) => inventory.ContainsKey(wearableId);
 
-    public string[] GetInventoryItemsIds() { return inventory.Keys.ToArray(); }
-
-    internal static UserProfile ownUserProfile;
+    public string[] GetInventoryItemsIds() =>
+        inventory.Keys.ToArray();
 
     public static UserProfile GetOwnUserProfile()
     {
@@ -159,9 +184,9 @@ public class UserProfile : ScriptableObject //TODO Move to base variable
             return;
         blocked.Add(userId);
     }
-    
+
     public void Unblock(string userId) { blocked.Remove(userId); }
-    
+
     public bool HasEquipped(string wearableId) => avatar.wearables.Contains(wearableId);
 
 #if UNITY_EDITOR
@@ -174,7 +199,7 @@ public class UserProfile : ScriptableObject //TODO Move to base variable
     private void CleanUp()
     {
         Application.quitting -= CleanUp;
-        if (UnityEditor.AssetDatabase.Contains(this))
+        if (AssetDatabase.Contains(this))
             Resources.UnloadAsset(this);
     }
 #endif

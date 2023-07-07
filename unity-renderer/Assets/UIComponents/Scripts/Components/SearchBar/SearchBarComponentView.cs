@@ -6,6 +6,8 @@ using UnityEngine.UI;
 
 public interface ISearchBarComponentView
 {
+    string Text { get; }
+
     /// <summary>
     /// Event that will be triggered when a search is ordered in the search component.
     /// </summary>
@@ -21,21 +23,26 @@ public interface ISearchBarComponentView
     /// Order a specific search.
     /// </summary>
     /// <param name="value">Text to search.</param>
-    void SubmitSearch(string value);
+    void SubmitSearch(string value, bool notify = true);
 
     /// <summary>
     /// Clear the search component.
     /// </summary>
-    void ClearSearch();
+    void ClearSearch(bool notify = true);
 
     /// <summary>
     /// Set the idle time to search.
     /// </summary>
     /// <param name="idleSearchTime">Time in seconds.</param>
     void SetIdleSearchTime(float idleSearchTime);
+
+    /// <summary>
+    /// Set the focus on the text input.
+    /// </summary>
+    void SetFocus();
 }
 
-public class SearchBarComponentView : BaseComponentView, ISearchBarComponentView, IComponentModelConfig
+public class SearchBarComponentView : BaseComponentView, ISearchBarComponentView, IComponentModelConfig<SearchBarComponentModel>
 {
     [Header("Prefab References")]
     [SerializeField] internal TMP_InputField inputField;
@@ -52,22 +59,22 @@ public class SearchBarComponentView : BaseComponentView, ISearchBarComponentView
     internal Coroutine searchWhileTypingRoutine;
     internal float lastValueChangeTime = 0;
 
+    public string Text => inputField.text;
+
     public override void Awake()
     {
         base.Awake();
-        
+
         inputField.onValueChanged.AddListener(OnValueChanged);
-        inputField.onSubmit.AddListener(SubmitSearch);
-        inputField.onSelect.AddListener(SelectInput);
-        inputField.onDeselect.AddListener(DeselectInput);
-        clearSearchButton.onClick.AddListener(ClearSearch);
+        inputField.onSubmit.AddListener(s => SubmitSearch(s));
+        clearSearchButton.onClick.AddListener(() => ClearSearch());
 
         SetClearMode();
     }
 
-    public void Configure(BaseComponentModel newModel)
+    public void Configure(SearchBarComponentModel newModel)
     {
-        model = (SearchBarComponentModel)newModel;
+        model = newModel;
         RefreshControl();
     }
 
@@ -89,26 +96,41 @@ public class SearchBarComponentView : BaseComponentView, ISearchBarComponentView
         placeHolderText.text = value;
     }
 
-    public void SubmitSearch(string value)
+    public void SubmitSearch(string value, bool notify = true)
     {
         StopSearchCoroutine();
 
-        inputField.text = value;
+        if (notify)
+            inputField.text = value;
+        else
+            inputField.SetTextWithoutNotify(value);
+
         SetSearchMode();
-        OnSearchText?.Invoke(value);
-        OnSubmit?.Invoke(value);
+
+        if (notify)
+        {
+            OnSearchText?.Invoke(value);
+            OnSubmit?.Invoke(value);
+        }
     }
 
-    public void ClearSearch()
+    public void ClearSearch(bool notify = true)
     {
         StopSearchCoroutine();
 
         inputField.SetTextWithoutNotify(string.Empty);
         SetClearMode();
-        OnSearchText?.Invoke(string.Empty);
+
+        if (notify)
+            OnSearchText?.Invoke(string.Empty);
     }
 
     public void SetIdleSearchTime(float idleSearchTime) { model.idleTimeToTriggerSearch = idleSearchTime; }
+
+    public void SetFocus()
+    {
+        inputField.Select();
+    }
 
     public override void Dispose()
     {
@@ -125,6 +147,7 @@ public class SearchBarComponentView : BaseComponentView, ISearchBarComponentView
 
     internal void OnValueChanged(string value)
     {
+        AudioScriptableObjects.input.Play(true);
         if (model.idleTimeToTriggerSearch < 0)
             return;
 
@@ -174,7 +197,7 @@ public class SearchBarComponentView : BaseComponentView, ISearchBarComponentView
 
     internal void SetSearchMode()
     {
-        clearSearchButton.gameObject.SetActive(true);
+        clearSearchButton.gameObject.SetActive(!string.IsNullOrEmpty(inputField.text));
         searchSpinner.SetActive(false);
     }
 
@@ -182,15 +205,5 @@ public class SearchBarComponentView : BaseComponentView, ISearchBarComponentView
     {
         clearSearchButton.gameObject.SetActive(false);
         searchSpinner.SetActive(false);
-    }
-
-    internal void SelectInput(string value)
-    {
-        placeHolderText.gameObject.SetActive(false);
-    }
-
-    internal void DeselectInput(string value)
-    {
-        placeHolderText.gameObject.SetActive(true);
     }
 }

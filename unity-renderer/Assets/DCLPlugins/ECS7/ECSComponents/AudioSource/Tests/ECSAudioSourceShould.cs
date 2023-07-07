@@ -1,8 +1,6 @@
 ﻿using System.Collections;
-using System.Collections.Generic;
 using DCL.Controllers;
-using DCL.ECSComponents;
-using DCL.ECSRuntime;
+using DCL.ECS7.InternalComponents;
 using DCL.Helpers;
 using DCL.Models;
 using DCL.SettingsCommon;
@@ -12,7 +10,6 @@ using NUnit.Framework;
 using Tests;
 using UnityEngine;
 using UnityEngine.TestTools;
-using AudioSettings = DCL.SettingsCommon.AudioSettings;
 
 namespace DCL.ECSComponents.Test
 {
@@ -36,12 +33,19 @@ namespace DCL.ECSComponents.Test
             gameObject = new GameObject();
             entity = Substitute.For<IDCLEntity>();
             scene = Substitute.For<IParcelScene>();
-            audioSourceComponentHandler = new ECSAudioSourceComponentHandler(DataStore.i,Settings.i, AssetPromiseKeeper_AudioClip.i, CommonScriptableObjects.sceneID);
+            Settings.CreateSharedInstance(new DefaultSettingsFactory());
+            audioSourceComponentHandler = new ECSAudioSourceComponentHandler(
+                DataStore.i,
+                Settings.i,
+                AssetPromiseKeeper_AudioClip.i,
+                CommonScriptableObjects.sceneNumber,
+                Substitute.For<IInternalECSComponent<InternalAudioSource>>(),
+                Substitute.For<IInternalECSComponent<InternalSceneBoundsCheck>>());
 
             entity.entityId.Returns(1);
             entity.gameObject.Returns(gameObject);
             LoadParcelScenesMessage.UnityParcelScene sceneData = new LoadParcelScenesMessage.UnityParcelScene();
-            sceneData.id = "1";
+            sceneData.sceneNumber = 1;
 
             ContentProvider_Dummy providerDummy = new ContentProvider_Dummy();
 
@@ -58,7 +62,7 @@ namespace DCL.ECSComponents.Test
             audioSourceComponentHandler.OnComponentRemoved(scene, entity);
             GameObject.Destroy(gameObject);
         }
-        
+
         [UnityTest]
         public IEnumerator UpdatePlayingModelComponentCorrectly()
         {
@@ -82,12 +86,12 @@ namespace DCL.ECSComponents.Test
             // Arrange
             PBAudioSource model = CreateAudioSourceModel();
             model.Loop = false;
-            
+
             PBAudioSource model2 = CreateAudioSourceModel();
             model2.Loop = true;
-            
+
             audioSourceComponentHandler.OnComponentModelUpdated(scene, entity, model);
-            
+
             // Act
             audioSourceComponentHandler.OnComponentModelUpdated(scene, entity, model2);
 
@@ -101,39 +105,40 @@ namespace DCL.ECSComponents.Test
             // Arrange
             PBAudioSource model = CreateAudioSourceModel();
             model.Pitch = 0f;
-            
+
             PBAudioSource model2 = CreateAudioSourceModel();
             model2.Pitch = 1f;
-            
+
             audioSourceComponentHandler.OnComponentModelUpdated(scene, entity, model);
-            
+
             // Act
             audioSourceComponentHandler.OnComponentModelUpdated(scene, entity, model2);
 
             // Assert
             Assert.AreEqual(audioSourceComponentHandler.audioSource.pitch, model2.Pitch);
         }
-        
+
         [Test]
         public void UpdateVolumeModelComponentCorrectly()
         {
             // Arrange
             Settings.CreateSharedInstance(new DefaultSettingsFactory());
-            CommonScriptableObjects.sceneID.Set("1");
-            
+            CommonScriptableObjects.sceneNumber.Set(1);
+
             PBAudioSource model = CreateAudioSourceModel();
             model.Volume = 0f;
-            
+
             PBAudioSource model2 = CreateAudioSourceModel();
             model2.Volume = 1f;
-            
+
             audioSourceComponentHandler.OnComponentModelUpdated(scene, entity, model);
-            
+            Assert.AreEqual(model.Volume, audioSourceComponentHandler.audioSource.volume);
+
             // Act
             audioSourceComponentHandler.OnComponentModelUpdated(scene, entity, model2);
 
             // Assert
-            Assert.AreEqual(audioSourceComponentHandler.audioSource.volume, model2.Volume);
+            Assert.AreEqual(model2.Volume, audioSourceComponentHandler.audioSource.volume);
         }
 
         [UnityTest]
@@ -158,6 +163,6 @@ namespace DCL.ECSComponents.Test
             model.AudioClipUrl = TestAssetsUtils.GetPath() + "/Audio/short_effect.ogg";
             return model;
         }
-        
+
     }
 }

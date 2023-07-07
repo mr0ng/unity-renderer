@@ -36,7 +36,7 @@ namespace DCL
         public CustomYieldInstruction msgYieldInstruction;
 
         public MessagingBusType type;
-        public string debugTag;
+        public int debugSceneNumber;
 
         public MessagingController owner;
         private IMessagingControllersManager manager;
@@ -50,7 +50,12 @@ namespace DCL
 
         public float timeBudget
         {
-            get => renderingIsDisabled ? float.MaxValue : timeBudgetValue;
+
+#if DCL_VR
+            get => renderingIsDisabled ? 3*timeBudgetValue: timeBudgetValue;
+#else
+			get => renderingIsDisabled ? float.MaxValue : timeBudgetValue;
+#endif
             set => timeBudgetValue = value;
         }
 
@@ -85,22 +90,28 @@ namespace DCL
             Stop();
         }
 
+        Dictionary<string, LinkedListNode<QueuedSceneMessage>> tempDictionary = new Dictionary<string, LinkedListNode<QueuedSceneMessage>>();
+
         public void Enqueue(QueuedSceneMessage message, QueueMode queueMode = QueueMode.Reliable)
         {
             lock (unreliableMessages)
             {
+                // TODO: If we check here for 'if (message == null || string.IsNullOrEmpty(message.message))' loading the scene breaks, as we get empty messages every frame...
                 if (message == null)
                     throw new Exception("A null message?");
 
                 bool enqueued = true;
 
                 // When removing an entity we have to ensure that the enqueued lossy messages after it are processed and not replaced
-                if (message is QueuedSceneMessage_Scene queuedSceneMessage &&
-                    queuedSceneMessage.payload is Protocol.RemoveEntity removeEntityPayload)
+                if (message is QueuedSceneMessage_Scene { payload: Protocol.RemoveEntity removeEntityPayload })
                 {
-                    unreliableMessages = unreliableMessages
-                        .Where(kvp => !kvp.Key.Contains(removeEntityPayload.entityId))
-                        .ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
+                    tempDictionary.Clear();
+
+                    foreach (var unreliableMessage in unreliableMessages)
+                        if (!unreliableMessage.Key.Contains(removeEntityPayload.entityId))
+                            tempDictionary.Add(unreliableMessage.Key, unreliableMessage.Value);
+
+                    unreliableMessages = tempDictionary;
                 }
 
                 if (queueMode == QueueMode.Reliable)
@@ -165,8 +176,9 @@ namespace DCL
 
             float startTime = Time.realtimeSinceStartup;
 
-            while (enabled && pendingMessagesCount > 0 && Time.realtimeSinceStartup - startTime < timeBudget)
+            while (enabled && pendingMessagesCount > 0 )//&& Time.realtimeSinceStartup - startTime < timeBudget)
             {
+
                 LinkedListNode<QueuedSceneMessage> pendingMessagesFirst;
 
                 lock (pendingMessages)
@@ -185,7 +197,7 @@ namespace DCL
                 QueuedSceneMessage m = pendingMessagesFirst.Value;
 
                 PerformanceAnalytics.MessagesProcessedTracker.Track();
-                
+
                 RemoveFirstReliableMessage();
 
                 if (m.isUnreliable)
@@ -234,24 +246,56 @@ namespace DCL
 
                         break;
                     case QueuedSceneMessage.Type.LOAD_PARCEL:
+                        #if DCL_VR
+                        UnityThread.ExecuteInTimeBudgetCoroutine(() =>
+                        {
+                            handler.LoadParcelScenesExecute(m.message);
+                            ProfilingEvents.OnMessageWillDequeue?.Invoke("LoadScene");
+                        });
+                        #else
                         handler.LoadParcelScenesExecute(m.message);
                         ProfilingEvents.OnMessageWillDequeue?.Invoke("LoadScene");
-
+                        #endif
                         break;
                     case QueuedSceneMessage.Type.UNLOAD_PARCEL:
-                        handler.UnloadParcelSceneExecute(m.message);
+                        #if DCL_VR
+                        UnityThread.ExecuteInTimeBudgetCoroutine(() =>
+                        {
+
+                            handler.UnloadParcelSceneExecute(m.sceneNumber);
+                            ProfilingEvents.OnMessageWillDequeue?.Invoke("UnloadScene");
+
+                        });
+                        #else
+                        handler.UnloadParcelSceneExecute(m.sceneNumber);
                         ProfilingEvents.OnMessageWillDequeue?.Invoke("UnloadScene");
+                        #endif
 
                         break;
                     case QueuedSceneMessage.Type.UPDATE_PARCEL:
+                    #if DCL_VR
+                        UnityThread.ExecuteInTimeBudgetCoroutine(() =>
+                        {
+                            handler.UpdateParcelScenesExecute(m.message);
+                            ProfilingEvents.OnMessageWillDequeue?.Invoke("UpdateScene");
+                        });
+                        #else
                         handler.UpdateParcelScenesExecute(m.message);
                         ProfilingEvents.OnMessageWillDequeue?.Invoke("UpdateScene");
-
+                        #endif
                         break;
                     case QueuedSceneMessage.Type.UNLOAD_SCENES:
+                        #if DCL_VR
+                        UnityThread.ExecuteInTimeBudgetCoroutine(() =>
+                        {
+                            handler.UnloadAllScenes();
+                            ProfilingEvents.OnMessageWillDequeue?.Invoke("UnloadAllScenes");
+                        });
+                        #else
                         handler.UnloadAllScenes();
                         ProfilingEvents.OnMessageWillDequeue?.Invoke("UnloadAllScenes");
 
+                        #endif
                         break;
                 }
 
@@ -316,7 +360,7 @@ namespace DCL
 
         private void LogMessage(QueuedSceneMessage m, MessagingBus bus, bool logType = true)
         {
-            string finalTag = WorldStateUtils.TryToGetSceneCoordsID(bus.debugTag);
+            string finalTag = WorldStateUtils.TryToGetSceneCoordsFromSceneNumber(bus.debugSceneNumber);
 
             if (logType)
             {

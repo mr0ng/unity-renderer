@@ -10,14 +10,17 @@ namespace DCL
         [Header("Debug Panel")] [SerializeField]
         private GameObject engineDebugPanel;
 
-        [SerializeField] private GameObject sceneDebugPanel;
-
         [SerializeField] private InfoPanel infoPanel;
+
+        private HUDCanvasCameraModeController hudCanvasCameraModeController;
 
         private void Awake()
         {
             infoPanel.SetVisible(false);
+            hudCanvasCameraModeController = new HUDCanvasCameraModeController(GetComponent<Canvas>(), DataStore.i.camera.hudsCamera);
         }
+
+        private void OnDestroy() { hudCanvasCameraModeController?.Dispose(); }
 
         public void ShowFPSPanel()
         {
@@ -32,12 +35,10 @@ namespace DCL
         public void SetSceneDebugPanel()
         {
             engineDebugPanel.SetActive(false);
-            sceneDebugPanel.SetActive(true);
         }
 
         public void SetEngineDebugPanel()
         {
-            sceneDebugPanel.SetActive(false);
             engineDebugPanel.SetActive(true);
         }
 

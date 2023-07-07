@@ -26,8 +26,11 @@ namespace DCL
             positionTracker = new CrashPayloadPositionTracker();
             isFPSPanelVisible = DataStore.i.debugConfig.isFPSPanelVisible;
             isFPSPanelVisible.OnChange += OnFPSPanelToggle;
+            //TODO: handle HUDS that need to be converted to VR
+            #if !DCL_VR
             GameObject view = Object.Instantiate(Resources.Load("DebugView")) as GameObject;
             debugView = view.GetComponent<DebugView>();
+            #endif
             this.botsController = botsController;
 
             OnKernelConfigChanged(KernelConfig.i.Get(), null);
@@ -59,13 +62,11 @@ namespace DCL
             {
                 Debug.unityLogger.logEnabled = true;
                 Debug.Log("Client logging ENABLED");
-                ShowFPSPanel();
             }
             else
             {
                 Debug.Log("Client logging DISABLED");
                 Debug.unityLogger.logEnabled = false;
-                HideFPSPanel();
             }
 
             OnDebugModeSet?.Invoke();
@@ -84,6 +85,11 @@ namespace DCL
         public void ShowFPSPanel()
         {
             isFPSPanelVisible.Set(true);
+        }
+
+        public void ToggleFPSPanel()
+        {
+            isFPSPanelVisible.Set(!isFPSPanelVisible.Get());
         }
 
         public void ShowInfoPanel(string network, string realm)
@@ -175,6 +181,12 @@ namespace DCL
             return positionTracker.movePositions;
         }
 
+        public void SetAnimationCulling(bool enabled)
+        {
+            Environment.i.platform.cullingController.SetAnimationCulling(enabled);
+        }
+
+
         public void Dispose()
         {
             positionTracker.Dispose();
@@ -197,7 +209,7 @@ namespace DCL
                 debugView.SetSceneDebugPanel();
             }
 
-            bool enablePrevewSceneLimitWarning = !string.IsNullOrEmpty(current.debugConfig.sceneLimitsWarningSceneId);
+            bool enablePrevewSceneLimitWarning = current.debugConfig.sceneLimitsWarningSceneNumber > 0;
             if (enablePrevewSceneLimitWarning && previewSceneLimitsWarning == null)
             {
                 previewSceneLimitsWarning = new PreviewSceneLimitsWarning(Environment.i.world.state);

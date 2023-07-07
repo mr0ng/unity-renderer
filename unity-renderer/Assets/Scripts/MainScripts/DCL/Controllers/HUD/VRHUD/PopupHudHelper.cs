@@ -13,17 +13,18 @@ public class PopupHudHelper : VRHUDHelper
         myTrans.localScale = 0.0025f * Vector3.one;
         objectToHide.SetActive(false);
         if (showHideAnimator)
-            showHideAnimator.OnStartShow += PositionHud;
+            showHideAnimator.OnSetVisibility += PositionHud;
         else
             DataStore.i.common.onOpenNFTPrompt.OnChange += OnNFTPromptOpened;
     }
     private void OnNFTPromptOpened(NFTPromptModel current, NFTPromptModel previous)
     {
-        PositionHud();
+        PositionHud(true);
     }
 
-    private void PositionHud()
+    private void PositionHud(bool isVisible)
     {
+        if(!isVisible) return;
         CrossPlatformManager.GetSurfacePoint(out var point, out var normal);
         myTrans.position = point + normal * .25f;
         myTrans.forward = -normal;

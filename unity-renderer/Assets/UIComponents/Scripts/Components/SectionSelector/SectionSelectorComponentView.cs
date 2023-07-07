@@ -24,7 +24,7 @@ public interface ISectionSelectorComponentView
     List<ISectionToggle> GetAllSections();
 }
 
-public class SectionSelectorComponentView : BaseComponentView, ISectionSelectorComponentView, IComponentModelConfig
+public class SectionSelectorComponentView : BaseComponentView, ISectionSelectorComponentView, IComponentModelConfig<SectionSelectorComponentModel>
 {
     [Header("Prefab References")]
     [SerializeField] internal SectionToggle sectionToggleTemplate;
@@ -41,9 +41,9 @@ public class SectionSelectorComponentView : BaseComponentView, ISectionSelectorC
         RegisterCurrentInstantiatedSections();
     }
 
-    public void Configure(BaseComponentModel newModel)
+    public void Configure(SectionSelectorComponentModel newModel)
     {
-        model = (SectionSelectorComponentModel)newModel;
+        model = newModel;
         RefreshControl();
     }
 
@@ -76,6 +76,18 @@ public class SectionSelectorComponentView : BaseComponentView, ISectionSelectorC
             return null;
 
         return instantiatedSections[index];
+    }
+
+    public void DisableSection(int index)
+    {
+        if (index < instantiatedSections.Count)
+            instantiatedSections[index].GameObject.SetActive(false);
+    }
+
+    public void EnableSection(int index)
+    {
+        if (index < instantiatedSections.Count)
+            instantiatedSections[index].GameObject.SetActive(true);
     }
 
     public List<ISectionToggle> GetAllSections() { return instantiatedSections; }

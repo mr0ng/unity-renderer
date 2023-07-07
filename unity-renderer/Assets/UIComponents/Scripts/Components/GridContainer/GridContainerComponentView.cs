@@ -37,6 +37,11 @@ public interface IGridContainerComponentView
     void SetItemSize(Vector2 newItemSize);
 
     /// <summary>
+    /// Set item size and resize grid container with respect to the current model.
+    /// </summary>
+    void SetItemSizeForModel();
+
+    /// <summary>
     /// Set the space between child items.
     /// </summary>
     /// <param name="newSpace">Space between children.</param>
@@ -68,6 +73,12 @@ public interface IGridContainerComponentView
     void AddItem(BaseComponentView item);
 
     /// <summary>
+    /// Adds a new item in the grid and resize the grid.
+    /// </summary>
+    /// <param name="item">An UI component.</param>
+    void AddItemWithResize(BaseComponentView item);
+
+    /// <summary>
     /// Remove an item from the grid.
     /// </summary>
     /// <param name="item">An UI component</param>
@@ -91,7 +102,7 @@ public interface IGridContainerComponentView
     void RemoveItems();
 }
 
-public class GridContainerComponentView : BaseComponentView, IGridContainerComponentView, IComponentModelConfig
+public class GridContainerComponentView : BaseComponentView, IGridContainerComponentView, IComponentModelConfig<GridContainerComponentModel>
 {
     [Header("Prefab References")]
     [SerializeField] internal GridLayoutGroup gridLayoutGroup;
@@ -111,9 +122,25 @@ public class GridContainerComponentView : BaseComponentView, IGridContainerCompo
         RegisterCurrentInstantiatedItems();
     }
 
-    public void Configure(BaseComponentModel newModel)
+    public override void Show(bool instant = false)
     {
-        model = (GridContainerComponentModel)newModel;
+        base.Show(instant);
+
+        if (instant)
+            gameObject.SetActive(true);
+    }
+
+    public override void Hide(bool instant = false)
+    {
+        base.Hide(instant);
+
+        if (instant)
+            gameObject.SetActive(false);
+    }
+
+    public void Configure(GridContainerComponentModel newModel)
+    {
+        model = newModel;
         RefreshControl();
     }
 
@@ -229,7 +256,7 @@ public class GridContainerComponentView : BaseComponentView, IGridContainerCompo
         ResizeGridContainer();
     }
 
-    internal void CalculateAutoSize(out Vector2 newSizeToApply)
+    private void CalculateAutoSize(out Vector2 newSizeToApply)
     {
         float height = externalParentToAdaptSize != null ? externalParentToAdaptSize.rect.height : ((RectTransform)transform).rect.height;
         float width = externalParentToAdaptSize != null ? externalParentToAdaptSize.rect.width : ((RectTransform)transform).rect.width;
@@ -269,7 +296,7 @@ public class GridContainerComponentView : BaseComponentView, IGridContainerCompo
         currentItemsPerRow = model.constraintCount;
     }
 
-    internal void CalculateHorizontalSizeForFixedColumnConstraint(out Vector2 newSizeToApply)
+    private void CalculateHorizontalSizeForFixedColumnConstraint(out Vector2 newSizeToApply)
     {
         float width = externalParentToAdaptSize != null ? externalParentToAdaptSize.rect.width : ((RectTransform)transform).rect.width;
         float extraSpaceToRemove = (model.spaceBetweenItems.x * (model.constraintCount - 1)) / model.constraintCount;
@@ -281,7 +308,7 @@ public class GridContainerComponentView : BaseComponentView, IGridContainerCompo
         currentItemsPerRow = model.constraintCount;
     }
 
-    internal void CalculateHorizontalSizeForFixedRowConstraint(out Vector2 newSizeToApply)
+    private void CalculateHorizontalSizeForFixedRowConstraint(out Vector2 newSizeToApply)
     {
         float height = ((RectTransform)transform).rect.height;
         float extraSpaceToRemove = (model.spaceBetweenItems.y / (model.constraintCount / 2f));
@@ -293,7 +320,7 @@ public class GridContainerComponentView : BaseComponentView, IGridContainerCompo
         currentItemsPerRow = (int)Mathf.Ceil((float)instantiatedItems.Count / model.constraintCount);
     }
 
-    internal void CalculateHorizontalSizeForFlexibleConstraint(out Vector2 newSizeToApply, Vector2 newItemSize)
+    private void CalculateHorizontalSizeForFlexibleConstraint(out Vector2 newSizeToApply, Vector2 newItemSize)
     {
         newSizeToApply = newItemSize;
 
@@ -370,11 +397,17 @@ public class GridContainerComponentView : BaseComponentView, IGridContainerCompo
         SetItemSize(model.itemSize);
     }
 
-    public void AddItem(BaseComponentView item)
+    public void AddItemWithResize(BaseComponentView item)
     {
         CreateItem(item, $"Item{instantiatedItems.Count}");
         SetItemSize(model.itemSize);
     }
+
+    public void SetItemSizeForModel() =>
+        SetItemSize(model.itemSize);
+
+    public void AddItem(BaseComponentView item) =>
+        CreateItem(item, $"Item{instantiatedItems.Count}");
 
     public void RemoveItem(BaseComponentView item)
     {
@@ -436,7 +469,7 @@ public class GridContainerComponentView : BaseComponentView, IGridContainerCompo
         instantiatedItems.Add(newItem);
     }
 
-    internal void ResizeGridContainer()
+    private void ResizeGridContainer()
     {
         int currentNumberOfItems = transform.childCount;
 
@@ -464,7 +497,7 @@ public class GridContainerComponentView : BaseComponentView, IGridContainerCompo
         SetSpaceBetweenItems(model.spaceBetweenItems);
     }
 
-    internal void RegisterCurrentInstantiatedItems()
+    private void RegisterCurrentInstantiatedItems()
     {
         instantiatedItems.Clear();
 

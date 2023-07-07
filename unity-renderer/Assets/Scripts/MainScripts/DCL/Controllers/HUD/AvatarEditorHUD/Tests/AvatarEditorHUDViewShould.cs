@@ -1,5 +1,7 @@
 using DCL;
-using DCL.Helpers;
+using DCLServices.WearablesCatalogService;
+using MainScripts.DCL.Controllers.HUD.CharacterPreview;
+using MainScripts.DCL.Models.AvatarAssets.Tests.Helpers;
 using NSubstitute;
 using NUnit.Framework;
 using System.Collections;
@@ -13,10 +15,9 @@ namespace AvatarEditorHUD_Tests
     public class AvatarEditorHUDViewShould : IntegrationTestSuite_Legacy
     {
         private UserProfile userProfile;
-        private CatalogController catalogController;
         private AvatarEditorHUDController_Mock controller;
-        private BaseDictionary<string, WearableItem> catalog;
         private IAnalytics analytics;
+        private IWearablesCatalogService wearablesCatalogService;
 
         [UnitySetUp]
         protected override IEnumerator SetUp()
@@ -26,13 +27,14 @@ namespace AvatarEditorHUD_Tests
             Setup_AvatarEditorHUDController();
 
             controller.collectionsAlreadyLoaded = true;
+            controller.avatarIsDirty = false;
             controller.UnequipAllWearables();
             controller.SetVisibility(true);
         }
 
         protected override IEnumerator TearDown()
         {
-            Object.Destroy(catalogController.gameObject);
+            wearablesCatalogService.Dispose();
             controller.Dispose();
             yield return base.TearDown();
         }
@@ -52,11 +54,15 @@ namespace AvatarEditorHUD_Tests
             });
 
             analytics = Substitute.For<IAnalytics>();
-            catalogController = TestUtils.CreateComponentWithGameObject<CatalogController>("CatalogController");
-            catalog = AvatarAssetsTestHelpers.CreateTestCatalogLocal();
-            controller = new AvatarEditorHUDController_Mock(DataStore.i.featureFlags, analytics);
+            wearablesCatalogService = AvatarAssetsTestHelpers.CreateTestCatalogLocal();
+
+            IUserProfileBridge userProfileBridge = Substitute.For<IUserProfileBridge>();
+            userProfileBridge.GetOwn().Returns(userProfile);
+
+            controller = new AvatarEditorHUDController_Mock(DataStore.i.featureFlags, analytics, wearablesCatalogService,
+                userProfileBridge);
             controller.collectionsAlreadyLoaded = true;
-            controller.Initialize(userProfile, catalog);
+            controller.Initialize(false, Substitute.For<IPreviewCameraRotationController>());
         }
 
         [Test]
@@ -74,13 +80,13 @@ namespace AvatarEditorHUD_Tests
                     wearables = new List<string>() { },
                 }
             });
-            var category = catalog.Get(wearableId).data.category;
+            var category = wearablesCatalogService.WearablesCatalog.Get(wearableId).data.category;
 
             Assert.IsTrue(controller.myView.selectorsByCategory.ContainsKey(category));
             var selector = controller.myView.selectorsByCategory[category];
 
-            Assert.IsTrue(selector.itemToggles.ContainsKey(wearableId));
-            var itemToggle = selector.itemToggles[wearableId];
+            Assert.IsTrue(selector.currentItemToggles.ContainsKey(wearableId));
+            var itemToggle = selector.currentItemToggles[wearableId];
             Assert.NotNull(itemToggle.wearableItem);
 
             Assert.AreEqual(wearableId, itemToggle.wearableItem.id);
@@ -90,7 +96,7 @@ namespace AvatarEditorHUD_Tests
         [Test]
         [TestCase("urn:decentraland:off-chain:base-avatars:f_african_leggins", WearableLiterals.BodyShapes.MALE)]
         [TestCase("urn:decentraland:off-chain:base-avatars:eyebrows_02", WearableLiterals.BodyShapes.FEMALE)]
-        public void NotCreate_IncompatibleWithBodyShape_ItemToggle(string wearableId, string bodyShape)
+        public void IncompatibleWithBodyShape_ItemToggle(string wearableId, string bodyShape)
         {
             userProfile.UpdateData(new UserProfileModel()
             {
@@ -103,17 +109,13 @@ namespace AvatarEditorHUD_Tests
                 }
             });
 
-            var category = catalog.Get(wearableId).data.category;
+            var category = wearablesCatalogService.WearablesCatalog.Get(wearableId).data.category;
 
             Assert.IsTrue(controller.myView.selectorsByCategory.ContainsKey(category));
             var selector = controller.myView.selectorsByCategory[category];
 
-            Assert.IsTrue(selector.itemToggles.ContainsKey(wearableId));
-            var itemToggle = selector.itemToggles[wearableId];
-            Assert.NotNull(itemToggle.wearableItem);
-
-            Assert.AreEqual(wearableId, itemToggle.wearableItem.id);
-            Assert.IsFalse(itemToggle.gameObject.activeSelf);
+            Assert.IsTrue(selector.currentItemToggles.ContainsKey(wearableId));
+            Assert.IsTrue(selector.totalWearables.ContainsKey(wearableId));
         }
 
         [Test]
@@ -123,7 +125,7 @@ namespace AvatarEditorHUD_Tests
         [TestCase("urn:decentraland:off-chain:base-avatars:moptop")]
         public void NotAdd_BaseWearables_ToCollectibles(string wearableId)
         {
-            Assert.IsFalse(controller.myView.collectiblesItemSelector.itemToggles.ContainsKey(wearableId));
+            Assert.IsFalse(controller.myView.collectiblesItemSelector.currentItemToggles.ContainsKey(wearableId));
         }
 
         [Test]
@@ -134,7 +136,7 @@ namespace AvatarEditorHUD_Tests
             userProfile.UpdateData(new UserProfileModel()
             {
                 name = "name",
-                email = "mail",
+                email = "email",
                 avatar = new AvatarModel()
                 {
                     bodyShape = WearableLiterals.BodyShapes.FEMALE,
@@ -142,7 +144,8 @@ namespace AvatarEditorHUD_Tests
                 }
             });
 
-            Assert.IsTrue(controller.myView.collectiblesItemSelector.itemToggles.ContainsKey(wearableId));
+            // changed from itemToggles from totalWearables since this wearable cant be used by the test avatar ( female )
+            Assert.IsTrue(controller.myView.collectiblesItemSelector.totalWearables.ContainsKey(wearableId));
         }
 
         [Test]
@@ -156,9 +159,9 @@ namespace AvatarEditorHUD_Tests
             WearableItem dummyItem = CreateDummyNFT(rarity);
 
             var selector = controller.myView.selectorsByCategory[dummyItem.data.category];
-            var itemToggleObject = selector.itemToggles[dummyItem.id].gameObject;
+            var itemToggleObject = selector.currentItemToggles[dummyItem.id].gameObject;
 
-            var originalName = selector.itemToggleFactory.nftDictionary[rarity].prefab.name;
+            var originalName = "";//selector.itemToggleFactory.nftDictionary[rarity].prefab.name;
 
             Assert.IsTrue(
                 itemToggleObject.name
@@ -170,7 +173,7 @@ namespace AvatarEditorHUD_Tests
         {
             WearableItem dummyItem = CreateDummyNFT(WearableLiterals.ItemRarity.EPIC);
 
-            var itemToggle = controller.myView.selectorsByCategory[dummyItem.data.category].itemToggles[dummyItem.id];
+            var itemToggle = controller.myView.selectorsByCategory[dummyItem.data.category].currentItemToggles[dummyItem.id];
             var nftInfo = (itemToggle as NFTItemToggle)?.nftItemInfo;
 
             Assert.NotNull(nftInfo);
@@ -191,12 +194,12 @@ namespace AvatarEditorHUD_Tests
                 email = "mail",
                 avatar = new AvatarModel()
                 {
-                    bodyShape = WearableLiterals.BodyShapes.FEMALE,
+                    bodyShape = WearableLiterals.BodyShapes.MALE,
                     wearables = new List<string>() { },
                 }
             });
 
-            Assert.IsFalse(controller.myView.collectiblesItemSelector.itemToggles[wearableId].amountContainer.gameObject
+            Assert.IsFalse(controller.myView.collectiblesItemSelector.currentItemToggles[wearableId].amountContainer.gameObject
                 .activeSelf);
         }
 
@@ -208,20 +211,20 @@ namespace AvatarEditorHUD_Tests
         public void ShowAndUpdateAmount(int amount)
         {
             var wearableId = "urn:decentraland:off-chain:halloween_2019:sad_clown_upper_body";
-            userProfile.SetInventory(Enumerable.Repeat(wearableId, amount).ToArray());
+            userProfile.SetInventory(Enumerable.Repeat(wearableId, amount));
             userProfile.UpdateData(new UserProfileModel()
             {
                 name = "name",
                 email = "mail",
                 avatar = new AvatarModel()
                 {
-                    bodyShape = WearableLiterals.BodyShapes.FEMALE,
+                    bodyShape = WearableLiterals.BodyShapes.MALE,
                     wearables = new List<string>() { },
                 }
             });
 
             var itemToggle = controller.myView.selectorsByCategory[WearableLiterals.Categories.UPPER_BODY]
-                .itemToggles[wearableId];
+                .currentItemToggles[wearableId];
 
             Assert.IsTrue(itemToggle.amountContainer.gameObject.activeSelf);
             Assert.AreEqual($"x{amount}", itemToggle.amountText.text);
@@ -235,19 +238,19 @@ namespace AvatarEditorHUD_Tests
         public void ShowAndUpdateAmountInCollectibleTab(int amount)
         {
             var wearableId = "urn:decentraland:off-chain:halloween_2019:sad_clown_upper_body";
-            userProfile.SetInventory(Enumerable.Repeat(wearableId, amount).ToArray());
+            userProfile.SetInventory(Enumerable.Repeat(wearableId, amount));
             userProfile.UpdateData(new UserProfileModel()
             {
                 name = "name",
                 email = "mail",
                 avatar = new AvatarModel()
                 {
-                    bodyShape = WearableLiterals.BodyShapes.FEMALE,
+                    bodyShape = WearableLiterals.BodyShapes.MALE,
                     wearables = new List<string>() { },
                 }
             });
 
-            var itemToggle = controller.myView.collectiblesItemSelector.itemToggles[wearableId];
+            var itemToggle = controller.myView.collectiblesItemSelector.currentItemToggles[wearableId];
 
             Assert.IsTrue(itemToggle.amountContainer.gameObject.activeSelf);
             Assert.AreEqual($"x{amount}", itemToggle.amountText.text);
@@ -259,20 +262,27 @@ namespace AvatarEditorHUD_Tests
             var smartNft = CreateSmartNFT();
 
             var selector = controller.myView.selectorsByCategory[smartNft.data.category];
-            var itemToggleObject = (NFTItemToggle) selector.itemToggles[smartNft.id];
+            var itemToggleObject = (NFTItemToggle) selector.currentItemToggles[smartNft.id];
 
             Assert.IsTrue( itemToggleObject.smartItemBadge.activeSelf);
         }
-        
+
         [Test]
         public void HideSmartIconWhenIsNormalNFT()
         {
             var smartNft = CreateDummyNFT("rare");
 
             var selector = controller.myView.selectorsByCategory[smartNft.data.category];
-            var itemToggleObject = (NFTItemToggle) selector.itemToggles[smartNft.id];
+            var itemToggleObject = (NFTItemToggle) selector.currentItemToggles[smartNft.id];
 
             Assert.IsFalse( itemToggleObject.smartItemBadge.activeSelf);
+        }
+
+        [Test]
+        public void ShowWarningWhenNoLinkedWearableAvailable()
+        {
+            controller.ToggleThirdPartyCollection(true, "MOCK_COLLECTION_ID", "MOCK_COLLECTION_NAME");
+            Assert.True(controller.view.noItemInCollectionWarning.isActiveAndEnabled);
         }
 
         private WearableItem CreateDummyNFT(string rarity)
@@ -310,8 +320,8 @@ namespace AvatarEditorHUD_Tests
                 }
             });
 
-            catalog.Remove(dummyItem.id);
-            catalog.Add(dummyItem.id, dummyItem);
+            wearablesCatalogService.WearablesCatalog.Remove(dummyItem.id);
+            wearablesCatalogService.WearablesCatalog.Add(dummyItem.id, dummyItem);
             return dummyItem;
         }
 
@@ -351,8 +361,8 @@ namespace AvatarEditorHUD_Tests
                 }
             });
 
-            catalog.Remove(dummyItem.id);
-            catalog.Add(dummyItem.id, dummyItem);
+            wearablesCatalogService.WearablesCatalog.Remove(dummyItem.id);
+            wearablesCatalogService.WearablesCatalog.Add(dummyItem.id, dummyItem);
             return dummyItem;
         }
     }

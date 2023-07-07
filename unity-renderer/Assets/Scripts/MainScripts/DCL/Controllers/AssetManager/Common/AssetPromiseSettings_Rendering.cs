@@ -14,7 +14,6 @@ namespace DCL
         }
 
         public VisibleFlags visibleFlags = VisibleFlags.VISIBLE_WITH_TRANSITION;
-        public MaterialCachingHelper.Mode cachingFlags = MaterialCachingHelper.Mode.CACHE_EVERYTHING;
         public Shader shaderOverride;
 
         public Transform parent;
@@ -25,6 +24,7 @@ namespace DCL
 
         public bool forceNewInstance;
         public bool forceGPUOnlyMesh = false;
+        public bool smrUpdateWhenOffScreen = true;
 
         public void ApplyBeforeLoad(Transform t)
         {
@@ -63,6 +63,9 @@ namespace DCL
             {
                 Renderer renderer = renderers[i];
                 renderer.enabled = visibleFlags != VisibleFlags.INVISIBLE;
+
+                if (renderer is SkinnedMeshRenderer smr)
+                    smr.updateWhenOffscreen = smrUpdateWhenOffScreen;
             }
         }
     }

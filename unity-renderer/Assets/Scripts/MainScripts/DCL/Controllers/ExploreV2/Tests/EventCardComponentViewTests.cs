@@ -16,7 +16,11 @@ public class EventCardComponentViewTests
     public void SetUp()
     {
         eventCardComponent = BaseComponentView.Create<EventCardComponentView>("Sections/PlacesAndEventsSection/EventsSubSection/EventCard");
+        #if DCL_VR
+        eventCardModalComponent = BaseComponentView.Create<EventCardComponentView>("Sections/PlacesAndEventsSection/EventsSubSection/EventCard_ModalVR");
+        #else
         eventCardModalComponent = BaseComponentView.Create<EventCardComponentView>("Sections/PlacesAndEventsSection/EventsSubSection/EventCard_Modal");
+        #endif
         eventCardComponent.eventImage.imageObserver = Substitute.For<ILazyTextureObserver>();
         eventCardModalComponent.eventImage.imageObserver = Substitute.For<ILazyTextureObserver>();
         testTexture = new Texture2D(20, 20);
@@ -149,12 +153,9 @@ public class EventCardComponentViewTests
         Assert.AreEqual(isLive, eventCardComponent.liveTag.gameObject.activeSelf);
         Assert.AreEqual(!isLive, eventCardComponent.eventDateText.gameObject.activeSelf);
         Assert.AreEqual(isEventCardModal || isLive, eventCardComponent.jumpinButton.gameObject.activeSelf);
-        Assert.AreEqual(!isEventCardModal && !isLive, eventCardComponent.jumpinButtonForNotLive.gameObject.activeSelf);
-        Assert.AreEqual(!isLive && !isSubscribed, eventCardComponent.subscribeEventButton.gameObject.activeSelf);
-        Assert.AreEqual(!isLive && isSubscribed, eventCardComponent.unsubscribeEventButton.gameObject.activeSelf);
+        Assert.AreEqual(!isLive && !eventCardComponent.model.eventFromAPIInfo.attending, eventCardComponent.subscribeEventButton.gameObject.activeSelf);
+        Assert.AreEqual(!isLive && eventCardComponent.model.eventFromAPIInfo.attending, eventCardComponent.unsubscribeEventButton.gameObject.activeSelf);
         Assert.AreEqual(isLive, eventCardComponent.eventStartedInTitleForLive.gameObject.activeSelf);
-        Assert.AreEqual(!isLive, eventCardComponent.eventStartedInTitleForNotLive.gameObject.activeSelf);
-        Assert.AreEqual(isLive, eventCardComponent.subscribedUsersTitleForLive.gameObject.activeSelf);
         Assert.AreEqual(!isLive, eventCardComponent.subscribedUsersTitleForNotLive.gameObject.activeSelf);
     }
 
@@ -287,7 +288,7 @@ public class EventCardComponentViewTests
         Assert.AreEqual(newNumberOfUsers, eventCardComponent.model.subscribedUsers, "The event card subscribedUsers does not match in the model.");
         if (!isEventCardModal)
         {
-            Assert.AreEqual(newNumberOfUsers.ToString(), eventCardComponent.subscribedUsersText.text);
+            Assert.AreEqual(newNumberOfUsers.ToString() + " going", eventCardComponent.subscribedUsersText.text);
         }
         else
         {
@@ -352,7 +353,7 @@ public class EventCardComponentViewTests
 
         // Act
         eventCardModalComponent.OnCloseActionTriggered(new DCLAction_Trigger());
-        
+
         // Assert
         Assert.IsFalse(eventCardModalComponent.isVisible);
     }

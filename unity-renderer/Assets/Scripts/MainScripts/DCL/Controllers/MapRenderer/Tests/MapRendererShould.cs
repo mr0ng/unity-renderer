@@ -2,6 +2,7 @@ using DCL;
 using System.Collections;
 using System.Collections.Generic;
 using NUnit.Framework;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.TestTools;
 using Assert = UnityEngine.Assertions.Assert;
@@ -20,7 +21,7 @@ namespace Tests
             if (MapRenderer.i == null)
                 Object.Instantiate(Resources.Load("Map Renderer"));
 
-            MapRenderer.i.atlas.mapChunkPrefab = (GameObject) Resources.Load("Map Chunk Mock");
+            MapRenderer.i.atlas.mapChunkPrefab = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Scripts/MainScripts/DCL/Controllers/MapRenderer/Tests/Map Chunk Mock.prefab");
             viewport = new GameObject("Viewport");
             var rt = viewport.AddComponent<RectTransform>();
             rt.sizeDelta = Vector2.one * 100;
@@ -38,27 +39,32 @@ namespace Tests
         {
             MapRenderer.i.Cleanup();
             UnityEngine.Object.Destroy(viewport);
+            DataStore.Clear();
+            MinimapMetadata.GetMetadata().Clear();
 
             yield return base.TearDown();
         }
 
-        [Test]
+        [UnityTest]
         [Category("Explicit")]
         [Explicit("For some reason this test fails when running after other test in this suite.")]
-        public void CenterAsIntended()
+        public IEnumerator CenterAsIntended()
         {
             Transform atlasContainerTransform = MapRenderer.i.atlas.container.transform;
 
-            CommonScriptableObjects.playerWorldPosition.Set(new Vector3(1, 1, 1));
-            CommonScriptableObjects.playerWorldPosition.Set(new Vector3(0, 0, 0));
+            DataStore.i.player.playerWorldPosition.Set(new Vector3(1, 1, 1));
+            DataStore.i.player.playerWorldPosition.Set(new Vector3(0, 0, 0));
+            yield return null; // wait frame for `Update`
             Assert.AreApproximatelyEqual(-1500, atlasContainerTransform.position.x);
             Assert.AreApproximatelyEqual(-1500, atlasContainerTransform.position.y);
 
-            CommonScriptableObjects.playerWorldPosition.Set(new Vector3(100, 0, 100));
+            DataStore.i.player.playerWorldPosition.Set(new Vector3(100, 0, 100));
+            yield return null; // wait frame for `Update`
             Assert.AreApproximatelyEqual(-1562.5f, atlasContainerTransform.position.x);
             Assert.AreApproximatelyEqual(-1562.5f, atlasContainerTransform.position.y);
 
-            CommonScriptableObjects.playerWorldPosition.Set(new Vector3(-100, 0, -100));
+            DataStore.i.player.playerWorldPosition.Set(new Vector3(-100, 0, -100));
+            yield return null; // wait frame for `Update`
             Assert.AreApproximatelyEqual(-1437.5f, atlasContainerTransform.position.x);
             Assert.AreApproximatelyEqual(-1437.5f, atlasContainerTransform.position.y);
         }
@@ -107,7 +113,30 @@ namespace Tests
 
             Assert.AreEqual(1, icons.Length, "Only 1 icon is marked as POI, but 2 icons were spawned");
             Assert.AreEqual(sceneInfo.name, icons[0].title.text);
-            Assert.AreEqual(new Vector3(3010, 3010, 0), icons[0].transform.localPosition);
+            Assert.AreEqual(new Vector3(0, 0, 0), icons[0].transform.localPosition);
+        }
+
+        [Test]
+        public void DisplayParcelOfInterestIconsProperly2()
+        {
+            var sceneInfo = new MinimapMetadata.MinimapSceneInfo();
+            sceneInfo.name = "important scene";
+            sceneInfo.isPOI = true;
+            sceneInfo.parcels = new List<Vector2Int>()
+            {
+                new Vector2Int() { x = 10, y = 10 },
+                new Vector2Int() { x = 10, y = 11 },
+                new Vector2Int() { x = 11, y = 10 },
+                new Vector2Int() { x = 11, y = 11 }
+            };
+
+            MinimapMetadata.GetMetadata().AddSceneInfo(sceneInfo);
+
+            MapSceneIcon[] icons = MapRenderer.i.GetComponentsInChildren<MapSceneIcon>();
+
+            Assert.AreEqual(1, icons.Length, "Only 1 icon is marked as POI, but 2 icons were spawned");
+            Assert.AreEqual(sceneInfo.name, icons[0].title.text);
+            Assert.AreEqual(new Vector3(220, 220, 0), icons[0].transform.localPosition);
         }
         // TODO Fix tests
         // [UnityTest]

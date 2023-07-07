@@ -33,7 +33,7 @@ public interface IButtonComponentView
     bool IsInteractable();
 }
 
-public class ButtonComponentView : BaseComponentView, IButtonComponentView, IComponentModelConfig
+public class ButtonComponentView : BaseComponentView, IButtonComponentView, IComponentModelConfig<ButtonComponentModel>
 {
     [Header("Prefab References")]
     [SerializeField] internal Button button;
@@ -45,9 +45,9 @@ public class ButtonComponentView : BaseComponentView, IButtonComponentView, ICom
 
     public Button.ButtonClickedEvent onClick => button?.onClick;
 
-    public void Configure(BaseComponentModel newModel)
+    public void Configure(ButtonComponentModel newModel)
     {
-        model = (ButtonComponentModel)newModel;
+        model = newModel;
         RefreshControl();
     }
 
@@ -60,9 +60,11 @@ public class ButtonComponentView : BaseComponentView, IButtonComponentView, ICom
         SetIcon(model.icon);
     }
 
-    public bool IsInteractable() { return button.interactable; }
+    public bool IsInteractable() =>
+        button.interactable;
 
-    public void SetInteractable(bool isActive) { button.interactable = isActive;}
+    public void SetInteractable(bool isActive) =>
+        button.interactable = isActive;
 
     public void SetText(string newText)
     {

@@ -1,11 +1,14 @@
 using DCL;
+using DCL.Helpers;
+using DCL.Social.Friends;
 using ExploreV2Analytics;
 using NSubstitute;
 using NUnit.Framework;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
-using static HotScenesController;
+using MainScripts.DCL.Controllers.HotScenes;
+using System.Threading;
 
 public class PlacesSubSectionComponentControllerTests
 {
@@ -22,7 +25,7 @@ public class PlacesSubSectionComponentControllerTests
         placesAPIController = Substitute.For<IPlacesAPIController>();
         friendsController = Substitute.For<IFriendsController>();
         exploreV2Analytics = Substitute.For<IExploreV2Analytics>();
-        placesSubSectionComponentController = new PlacesSubSectionComponentController(placesSubSectionComponentView, placesAPIController, friendsController, exploreV2Analytics);
+        placesSubSectionComponentController = new PlacesSubSectionComponentController(placesSubSectionComponentView, placesAPIController, friendsController, exploreV2Analytics, DataStore.i);
     }
 
     [TearDown]
@@ -41,81 +44,61 @@ public class PlacesSubSectionComponentControllerTests
     public void DoFirstLoadingCorrectly()
     {
         // Arrange
-        placesSubSectionComponentController.reloadPlaces = true;
+        placesSubSectionComponentController.cardsReloader.firstLoading = true;
 
         // Act
-        placesSubSectionComponentController.FirstLoading();
+        placesSubSectionComponentController.RequestAllPlaces();
 
         // Assert
         placesSubSectionComponentView.Received().RestartScrollViewPosition();
-        placesSubSectionComponentView.Received().SetPlacesAsLoading(true);
-        placesSubSectionComponentView.Received().SetShowMorePlacesButtonActive(false);
-        Assert.IsFalse(placesSubSectionComponentController.reloadPlaces);
+        placesSubSectionComponentView.Received().SetAllAsLoading();
+        Assert.IsFalse(placesSubSectionComponentController.cardsReloader.reloadSubSection);
+        placesSubSectionComponentView.Received().SetShowMoreButtonActive(false);
     }
 
-    [Test]
     [TestCase(true)]
     [TestCase(false)]
     public void RaiseOnExploreV2OpenCorrectly(bool isOpen)
     {
         // Arrange
-        placesSubSectionComponentController.reloadPlaces = false;
+        placesSubSectionComponentController.cardsReloader.reloadSubSection = false;
 
         // Act
-        placesSubSectionComponentController.OnExploreV2Open(isOpen, false);
+        placesSubSectionComponentController.cardsReloader.OnExploreV2Open(isOpen, false);
 
         // Assert
-        if (isOpen)
-            Assert.IsFalse(placesSubSectionComponentController.reloadPlaces);
-        else
-            Assert.IsTrue(placesSubSectionComponentController.reloadPlaces);
+        Assert.That(placesSubSectionComponentController.cardsReloader.reloadSubSection, Is.EqualTo(!isOpen));
     }
 
     [Test]
     public void RequestAllPlacesCorrectly()
     {
         // Arrange
-        placesSubSectionComponentController.currentPlacesShowed = -1;
-        placesSubSectionComponentController.reloadPlaces = true;
-        placesSubSectionComponentController.lastTimeAPIChecked = Time.realtimeSinceStartup - PlacesAndEventsSectionComponentController.MIN_TIME_TO_CHECK_API;
+        placesSubSectionComponentController.availableUISlots = -1;
+        placesSubSectionComponentController.cardsReloader.reloadSubSection = true;
+        placesSubSectionComponentController.cardsReloader.lastTimeAPIChecked = Time.realtimeSinceStartup - PlacesAndEventsSectionComponentController.MIN_TIME_TO_CHECK_API;
         DataStore.i.exploreV2.isInShowAnimationTransiton.Set(false);
 
         // Act
         placesSubSectionComponentController.RequestAllPlaces();
 
         // Assert
-        Assert.AreEqual(placesSubSectionComponentView.currentPlacesPerRow * PlacesSubSectionComponentController.INITIAL_NUMBER_OF_ROWS, placesSubSectionComponentController.currentPlacesShowed);
+        Assert.AreEqual(placesSubSectionComponentView.currentPlacesPerRow * PlacesSubSectionComponentController.INITIAL_NUMBER_OF_ROWS, placesSubSectionComponentController.availableUISlots);
         placesSubSectionComponentView.Received().RestartScrollViewPosition();
-        placesSubSectionComponentView.Received().SetPlacesAsLoading(true);
-        placesSubSectionComponentView.Received().SetShowMorePlacesButtonActive(false);
-        placesAPIController.Received().GetAllPlaces(Arg.Any<Action<List<HotSceneInfo>>>());
-        Assert.IsFalse(placesSubSectionComponentController.reloadPlaces);
+        placesSubSectionComponentView.Received().SetAllAsLoading();
+        placesSubSectionComponentView.Received().SetShowMoreButtonActive(false);
+        placesAPIController.Received().GetAllPlacesFromPlacesAPI(Arg.Any<Action<List<IHotScenesController.PlaceInfo>, int>>(), Arg.Any<int>(), Arg.Any<int>(), Arg.Any<CancellationToken>());
+        Assert.IsFalse(placesSubSectionComponentController.cardsReloader.reloadSubSection);
     }
 
     [Test]
     public void RequestAllPlacesFromAPICorrectly()
     {
         // Act
-        placesSubSectionComponentController.RequestAllPlacesFromAPI();
+        placesSubSectionComponentController.RequestAllFromAPI();
 
         // Assert
-        placesAPIController.Received().GetAllPlaces(Arg.Any<Action<List<HotSceneInfo>>>());
-    }
-
-    [Test]
-    public void RaiseOnRequestedPlacesUpdatedCorrectly()
-    {
-        // Arrange
-        int numberOfPlaces = 2;
-        placesSubSectionComponentController.placesFromAPI = ExplorePlacesTestHelpers.CreateTestPlacesFromApi(numberOfPlaces);
-
-        // Act
-        placesSubSectionComponentController.OnRequestedPlacesUpdated();
-
-        // Assert
-        placesSubSectionComponentView.Received().SetPlaces(Arg.Any<List<PlaceCardComponentModel>>());
-        placesSubSectionComponentView.Received().SetShowMorePlacesButtonActive(placesSubSectionComponentController.currentPlacesShowed < numberOfPlaces);
-        placesSubSectionComponentView.Received().SetPlacesAsLoading(false);
+        placesAPIController.Received().GetAllPlacesFromPlacesAPI(Arg.Any<Action<List<IHotScenesController.PlaceInfo>, int>>(), Arg.Any<int>(), Arg.Any<int>(), Arg.Any<CancellationToken>());
     }
 
     [Test]
@@ -126,39 +109,43 @@ public class PlacesSubSectionComponentControllerTests
         placesSubSectionComponentController.placesFromAPI = ExplorePlacesTestHelpers.CreateTestPlacesFromApi(numberOfPlaces);
 
         // Act
-        placesSubSectionComponentController.LoadPlaces();
+        placesSubSectionComponentController.view.SetPlaces(PlacesAndEventsCardsFactory.ConvertPlaceResponseToModel(
+            placesSubSectionComponentController.TakeAllForAvailableSlots(placesSubSectionComponentController.placesFromAPI)));
 
         // Assert
         placesSubSectionComponentView.Received().SetPlaces(Arg.Any<List<PlaceCardComponentModel>>());
-        placesSubSectionComponentView.Received().SetShowMorePlacesButtonActive(placesSubSectionComponentController.currentPlacesShowed < numberOfPlaces);
-        placesSubSectionComponentView.Received().SetPlacesAsLoading(false);
     }
 
     [Test]
     [TestCase(2)]
     [TestCase(10)]
-    public void LoaShowMorePlacesCorrectly(int numberOfPlaces)
+    public void LoadShowMorePlacesCorrectly(int numberOfPlaces)
     {
         // Act
         placesSubSectionComponentController.ShowMorePlaces();
-
         // Assert
-        placesSubSectionComponentView.Received().SetShowMorePlacesButtonActive(Arg.Any<bool>());
+        placesAPIController.Received().GetAllPlacesFromPlacesAPI(Arg.Any<Action<List<IHotScenesController.PlaceInfo>, int>>(), Arg.Any<int>(), Arg.Any<int>(), Arg.Any<CancellationToken>());
     }
 
     [Test]
     public void ShowPlaceDetailedInfoCorrectly()
     {
         // Arrange
-        PlaceCardComponentModel testPlaceCardModel = new PlaceCardComponentModel();
-        testPlaceCardModel.hotSceneInfo = new HotSceneInfo();
+        PlaceCardComponentModel testPlaceCardModel = new PlaceCardComponentModel
+            {
+                placeInfo = new IHotScenesController.PlaceInfo()
+                {
+                    base_position = "10,10",
+                    title = "Test place"
+                },
+            };
 
         // Act
         placesSubSectionComponentController.ShowPlaceDetailedInfo(testPlaceCardModel);
 
         // Assert
         placesSubSectionComponentView.Received().ShowPlaceModal(testPlaceCardModel);
-        exploreV2Analytics.Received().SendClickOnPlaceInfo(testPlaceCardModel.hotSceneInfo.id, testPlaceCardModel.placeName);
+        exploreV2Analytics.Received().SendClickOnPlaceInfo(testPlaceCardModel.placeInfo.id, testPlaceCardModel.placeName);
     }
 
     [Test]
@@ -167,14 +154,14 @@ public class PlacesSubSectionComponentControllerTests
         // Arrange
         bool exploreClosed = false;
         placesSubSectionComponentController.OnCloseExploreV2 += () => exploreClosed = true;
-        HotSceneInfo testPlaceFromAPI = ExplorePlacesTestHelpers.CreateTestHotSceneInfo("1");
+        IHotScenesController.PlaceInfo testPlaceFromAPI = ExplorePlacesTestHelpers.CreateTestHotSceneInfo("1");
 
         // Act
-        placesSubSectionComponentController.JumpInToPlace(testPlaceFromAPI);
+        placesSubSectionComponentController.OnJumpInToPlace(testPlaceFromAPI);
 
         // Assert
         placesSubSectionComponentView.Received().HidePlaceModal();
         Assert.IsTrue(exploreClosed);
-        exploreV2Analytics.Received().SendPlaceTeleport(testPlaceFromAPI.id, testPlaceFromAPI.name, testPlaceFromAPI.baseCoords);
+        exploreV2Analytics.Received().SendPlaceTeleport(testPlaceFromAPI.id, testPlaceFromAPI.title, Utils.ConvertStringToVector(testPlaceFromAPI.base_position));
     }
 }

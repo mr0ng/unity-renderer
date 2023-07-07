@@ -1,7 +1,9 @@
 using System;
+using System.Linq;
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using DCL;
+using DCLServices.WearablesCatalogService;
 using UnityEngine;
 
 namespace AvatarSystem
@@ -9,7 +11,7 @@ namespace AvatarSystem
     public class WearableLoader : IWearableLoader
     {
         // TODO: This should be a service
-        internal static IWearableItemResolver defaultWearablesResolver = new WearableItemResolver();
+        internal static IWearableItemResolver defaultWearablesResolver = new WearableItemResolver(DCL.Environment.i.serviceLocator.Get<IWearablesCatalogService>());
         static WearableLoader()
         {
             // Prewarm default wearables
@@ -85,6 +87,8 @@ namespace AvatarSystem
             }
         }
 
+        public void SetBones(Transform rootBone, Transform[] bones) { AvatarSystemUtils.CopyBones(rootBone, bones, rendereable.renderers.OfType<SkinnedMeshRenderer>()); }
+
         private async UniTask FallbackToDefault(GameObject container, CancellationToken ct)
         {
             ct.ThrowIfCancellationRequested();
@@ -109,15 +113,7 @@ namespace AvatarSystem
         private async UniTask LoadWearable(GameObject container, WearableItem wearableToLoad, string bodyshapeId, CancellationToken ct)
         {
             ct.ThrowIfCancellationRequested();
-
-            WearableItem.Representation representation = wearableToLoad.GetRepresentation(bodyshapeId);
-            if (representation == null)
-            {
-                Debug.Log($"No representation for {bodyshapeId} of {wearableToLoad.id}");
-                return;
-            }
-
-            await retriever.Retrieve(container, wearableToLoad.GetContentProvider(bodyshapeId), wearableToLoad.baseUrlBundles, representation.mainFile, ct);
+            await retriever.Retrieve(container, wearableToLoad, bodyshapeId, ct);
         }
 
         public void Dispose() { retriever?.Dispose(); }

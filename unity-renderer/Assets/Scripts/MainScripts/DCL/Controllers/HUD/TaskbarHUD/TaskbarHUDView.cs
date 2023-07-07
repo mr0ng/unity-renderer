@@ -1,10 +1,18 @@
 using System.Collections.Generic;
+using DCL;
+using DCL.Interface;
+using System;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class TaskbarHUDView : MonoBehaviour
 {
+    #if DCL_VR
+    private const string VIEW_PATH = "TaskbarVR";
+#else
     private const string VIEW_PATH = "Taskbar";
+#endif
+    [SerializeField] internal RectTransform fullScreenWindowContainer;
 
     [Header("Taskbar Animation")] [SerializeField]
     internal ShowHideAnimator taskbarAnimator;
@@ -12,7 +20,6 @@ public class TaskbarHUDView : MonoBehaviour
     [Header("Left Side Config")]
     [SerializeField] internal RectTransform leftWindowContainer;
     [SerializeField] internal RectTransform altSectionContainer;
-
     [SerializeField] internal ShowHideAnimator leftWindowContainerAnimator;
     [SerializeField] internal LayoutGroup leftWindowContainerLayout;
     [SerializeField] internal TaskbarButton chatButton;
@@ -22,6 +29,7 @@ public class TaskbarHUDView : MonoBehaviour
     [SerializeField] internal GameObject experiencesContainer;
     [SerializeField] internal TaskbarButton experiencesButton;
     [SerializeField] internal RectTransform socialTooltipReference;
+    [SerializeField] internal Button intercomButton;
 
     private readonly Dictionary<TaskbarButtonType, TaskbarButton> buttonsByType =
         new Dictionary<TaskbarButtonType, TaskbarButton>();
@@ -33,12 +41,22 @@ public class TaskbarHUDView : MonoBehaviour
     public event System.Action<bool> OnEmotesToggle;
     public event System.Action<bool> OnVoiceChatToggle;
     public event System.Action<bool> OnExperiencesToggle;
+    public event Action OnIntercomPressed;
+
+    private HUDCanvasCameraModeController hudCanvasCameraModeController;
 
     internal static TaskbarHUDView Create()
     {
         var view = Instantiate(Resources.Load<GameObject>(VIEW_PATH)).GetComponent<TaskbarHUDView>();
         view.Initialize();
         return view;
+    }
+
+    private void Awake()
+    {
+        hudCanvasCameraModeController = new HUDCanvasCameraModeController(GetComponent<Canvas>(), DataStore.i.camera.hudsCamera);
+        intercomButton.onClick.RemoveAllListeners();
+        intercomButton.onClick.AddListener(()=>OnIntercomPressed?.Invoke());
     }
 
     private void Initialize()
@@ -77,6 +95,8 @@ public class TaskbarHUDView : MonoBehaviour
 
     private void OnDestroy()
     {
+        hudCanvasCameraModeController?.Dispose();
+
         if (chatButton != null)
         {
             chatButton.OnToggleOn -= ToggleOn;
@@ -124,20 +144,20 @@ public class TaskbarHUDView : MonoBehaviour
     public void ToggleOn(TaskbarButtonType buttonType) => ToggleOn(buttonsByType[buttonType], false);
 
     public void ToggleOff(TaskbarButtonType buttonType) => ToggleOff(buttonsByType[buttonType], false);
-    
+
     private void ToggleOn(TaskbarButton obj) => ToggleOn(obj, true);
 
     private void ToggleOn(TaskbarButton obj, bool useCallback)
     {
         var wasToggled = lastToggledOnButton == obj;
         lastToggledOnButton = obj;
-        
+
         foreach (var btn in buttonsByType.Values)
             btn.SetToggleState(btn == obj, useCallback);
 
         if (!useCallback) return;
         if (wasToggled) return;
-        
+
         if (obj == friendsButton)
             OnFriendsToggle?.Invoke(true);
         if (obj == emotesButton)
@@ -155,15 +175,15 @@ public class TaskbarHUDView : MonoBehaviour
     private void ToggleOff(TaskbarButton obj, bool useCallback)
     {
         var wasToggled = lastToggledOnButton == obj;
-        
+
         if (wasToggled)
             lastToggledOnButton = null;
-        
+
         obj.SetToggleState(false, useCallback);
 
         if (!useCallback) return;
         if (!wasToggled) return;
-        
+
         if (obj == friendsButton)
             OnFriendsToggle?.Invoke(false);
         if (obj == emotesButton)
@@ -186,6 +206,11 @@ public class TaskbarHUDView : MonoBehaviour
     internal void ShowFriendsButton()
     {
         friendsButton.transform.parent.gameObject.SetActive(true);
+    }
+
+    internal void HideFriendsButton()
+    {
+        friendsButton.transform.parent.gameObject.SetActive(false);
     }
 
     internal void ShowEmotesButton()

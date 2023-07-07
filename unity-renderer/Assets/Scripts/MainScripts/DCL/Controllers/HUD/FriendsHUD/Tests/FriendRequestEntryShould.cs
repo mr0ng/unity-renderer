@@ -1,27 +1,24 @@
-using NUnit.Framework;
-using System.Collections;
 using DCL.Helpers;
+using NUnit.Framework;
+using UnityEditor;
 using UnityEngine;
-using UnityEngine.TestTools;
 
-public class FriendRequestEntryShould : IntegrationTestSuite_Legacy
+public class FriendRequestEntryShould
 {
-    static string FRIEND_REQUEST_ENTRY_RESOURCE_NAME = "FriendRequestEntry";
-
     FriendRequestEntry entry;
 
-    [UnitySetUp]
-    protected override IEnumerator SetUp()
+    [SetUp]
+    public void SetUp()
     {
-        GameObject go = Object.Instantiate((GameObject) Resources.Load(FRIEND_REQUEST_ENTRY_RESOURCE_NAME));
-        entry = go.GetComponent<FriendRequestEntry>();
-        yield break;
+        entry = Object.Instantiate(
+            AssetDatabase.LoadAssetAtPath<FriendRequestEntry>(
+                "Assets/Scripts/MainScripts/DCL/Controllers/HUD/SocialBarPrefabs/SocialBarV1/Prefabs/FriendRequestEntry.prefab"));
     }
 
-    protected override IEnumerator TearDown()
+    [TearDown]
+    public void TearDown()
     {
         Object.Destroy(entry.gameObject);
-        yield break;
     }
 
     [Test]

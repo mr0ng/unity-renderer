@@ -1,4 +1,5 @@
 using System;
+using UnityEngine;
 
 namespace DCL.EmotesCustomization
 {
@@ -7,39 +8,34 @@ namespace DCL.EmotesCustomization
         /// <summary>
         /// It will be triggered when an emote should be previewed.
         /// </summary>
-        public event Action<string> onEmotePreviewed;
+        event Action<string> onEmotePreviewed;
 
         /// <summary>
         /// It will be triggered when an emote is equipped.
         /// </summary>
-        public event Action<string> onEmoteEquipped;
+        event Action<string> onEmoteEquipped;
 
         /// <summary>
         /// It will be triggered when an emote is unequipped.
         /// </summary>
-        public event Action<string> onEmoteUnequipped;
+        event Action<string> onEmoteUnequipped;
 
         /// <summary>
         /// It will be triggered when the sell button is clicked for an emote.
         /// </summary>
-        public event Action<string> onEmoteSell;
+        event Action<string> onEmoteSell;
 
         /// <summary>
-        /// Initializes the emotes customization controller.
+        /// Set the owned emotes
         /// </summary>
-        /// <param name="emotesCustomizationDataStore">Emotes customization data store.</param>
-        /// <param name="emotesDataStore">Emotes data store.</param>
-        /// <param name="exploreV2DataStore">Explore V2 data store.</param>
-        /// <param name="hudsDataStore">HUDs data store.</param>
-        /// <param name="userProfile">User Profile data store.</param>
-        /// <param name="catalog">Catalog data store.</param>
-        /// <returns></returns>
-        IEmotesCustomizationComponentView Initialize(
-            DataStore_EmotesCustomization emotesCustomizationDataStore,
-            DataStore_Emotes emotesDataStore,
-            DataStore_ExploreV2 exploreV2DataStore,
-            DataStore_HUDs hudsDataStore,
-            UserProfile userProfile, BaseDictionary<string, WearableItem> catalog);
+        /// <param name="ownedEmotes"></param>
+        void SetEmotes(WearableItem[] ownedEmotes);
+
+        /// <summary>
+        /// Set the current equipped bodyshape
+        /// </summary>
+        /// <param name="bodyShapeId"></param>
+        void SetEquippedBodyShape(string bodyShapeId);
 
         /// <summary>
         /// Restore the emote slots with the stored data.

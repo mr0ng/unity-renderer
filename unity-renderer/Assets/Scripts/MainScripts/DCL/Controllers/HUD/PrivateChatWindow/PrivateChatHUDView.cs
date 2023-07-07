@@ -1,44 +1,44 @@
+using DCL.Chat.HUD;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class PrivateChatHUDView : ChatHUDView
+namespace DCL.Social.Chat
 {
-    [SerializeField] private DateSeparatorEntry separatorEntryPrefab;
-    
-    private readonly Dictionary<DateTime, DateSeparatorEntry> dateSeparators = new Dictionary<DateTime, DateSeparatorEntry>();
-
-    public override void AddEntry(ChatEntryModel model, bool setScrollPositionToBottom = false)
+    public class PrivateChatHUDView : ChatHUDView
     {
-        AddSeparatorEntryIfNeeded(model);
-        base.AddEntry(model, setScrollPositionToBottom);
-    }
+        [SerializeField] private PoolPrivateChatEntryFactory chatEntryFactory;
 
-    public override void ClearAllEntries()
-    {
-        base.ClearAllEntries();
-        
-        foreach (var separator in dateSeparators.Values)
-            if (separator)
-                Destroy(separator.gameObject);
+        private readonly Dictionary<string, DateSeparatorEntry> dateSeparators = new ();
 
-        dateSeparators.Clear();
-    }
+        public override void Awake()
+        {
+            base.Awake();
+            ChatEntryFactory = chatEntryFactory;
+        }
 
-    private void AddSeparatorEntryIfNeeded(ChatEntryModel chatEntryModel)
-    {
-        var entryDateTime = GetDateTimeFromUnixTimestampMilliseconds(chatEntryModel.timestamp).Date;
-        if (dateSeparators.ContainsKey(entryDateTime)) return;
-        var dateSeparatorEntry = Instantiate(separatorEntryPrefab, chatEntriesContainer);
-        dateSeparatorEntry.Populate(chatEntryModel);
-        dateSeparatorEntry.SetFadeout(IsFadeoutModeEnabled);
-        dateSeparators.Add(entryDateTime, dateSeparatorEntry);
-        entries.Add(dateSeparatorEntry);
-    }
+        public override void SetEntry(ChatEntryModel model, bool setScrollPositionToBottom = false)
+        {
+            AddSeparatorEntryIfNeeded(model);
+            base.SetEntry(model, setScrollPositionToBottom);
+        }
 
-    private DateTime GetDateTimeFromUnixTimestampMilliseconds(ulong milliseconds)
-    {
-        DateTime result = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
-        return result.AddMilliseconds(milliseconds);
+        public override void ClearAllEntries()
+        {
+            base.ClearAllEntries();
+            dateSeparators.Clear();
+        }
+
+        private void AddSeparatorEntryIfNeeded(ChatEntryModel chatEntryModel)
+        {
+            var entryDateTime = DateTimeOffset.FromUnixTimeMilliseconds((long) chatEntryModel.timestamp).Date;
+            var separatorId = entryDateTime.Ticks.ToString();
+            if (dateSeparators.ContainsKey(separatorId)) return;
+            var dateSeparatorEntry = chatEntryFactory.CreateDateSeparator();
+            Dock(dateSeparatorEntry);
+            Populate(dateSeparatorEntry, chatEntryModel);
+            dateSeparators[separatorId] = dateSeparatorEntry;
+            SetEntry(separatorId, dateSeparatorEntry);
+        }
     }
 }

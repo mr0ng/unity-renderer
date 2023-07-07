@@ -1,6 +1,7 @@
+using MainScripts.DCL.Controllers.HotScenes;
+using static MainScripts.DCL.Controllers.HotScenes.IHotScenesController;
 using NUnit.Framework;
 using UnityEngine;
-using static HotScenesController;
 
 public class ExplorePlacesCommonTests
 {
@@ -44,11 +45,11 @@ public class ExplorePlacesCommonTests
         placesSubSectionComponent.placeModal = null;
 
         // Act
-        placesSubSectionComponent.placeModal = ExplorePlacesUtils.ConfigurePlaceCardModal(placesSubSectionComponent.placeCardModalPrefab);
+        placesSubSectionComponent.placeModal = PlacesAndEventsCardsFactory.GetPlaceCardTemplateHiddenLazy(placesSubSectionComponent.placeCardModalPrefab);
 
         // Assert
         Assert.IsNotNull(placesSubSectionComponent.placeModal);
-        Assert.AreEqual(ExplorePlacesUtils.PLACE_CARD_MODAL_ID, placesSubSectionComponent.placeModal.gameObject.name);
+        Assert.AreEqual(PlacesAndEventsCardsFactory.PLACE_CARD_MODAL_ID, placesSubSectionComponent.placeModal.gameObject.name);
     }
 
     [Test]
@@ -58,11 +59,8 @@ public class ExplorePlacesCommonTests
         placesSubSectionComponent.placeCardsPool = null;
 
         // Act
-        ExplorePlacesUtils.ConfigurePlaceCardsPool(
-            out placesSubSectionComponent.placeCardsPool,
-            PlacesSubSectionComponentView.PLACE_CARDS_POOL_NAME,
-            placesSubSectionComponent.placeCardPrefab,
-            200);
+        placesSubSectionComponent.placeCardsPool =
+            PlacesAndEventsCardsFactory.GetCardsPoolLazy(PlacesSubSectionComponentView.PLACE_CARDS_POOL_NAME, placesSubSectionComponent.placeCardPrefab, 200);
 
         // Assert
         Assert.IsNotNull(placesSubSectionComponent.placeCardsPool);
@@ -76,7 +74,7 @@ public class ExplorePlacesCommonTests
         PlaceCardComponentModel testPlaceInfo = CreateTestPlace("Test Place");
 
         // Act
-        ExplorePlacesUtils.ConfigurePlaceCard(testPlaceCard, testPlaceInfo, null, null);
+        PlacesCardsConfigurator.Configure(testPlaceCard, testPlaceInfo, null, null, null);
 
         // Assert
         Assert.AreEqual(testPlaceInfo, testPlaceCard.model, "The place card model does not match.");
@@ -89,17 +87,17 @@ public class ExplorePlacesCommonTests
         HotSceneInfo testPlaceFromAPI = CreateTestHotSceneInfo("1");
 
         // Act
-        PlaceCardComponentModel placeCardModel = ExplorePlacesUtils.CreatePlaceCardModelFromAPIPlace(testPlaceFromAPI);
+        PlaceCardComponentModel placeCardModel = new PlaceCardComponentModel();
+        PlacesCardsConfigurator.ConfigureFromAPIData(placeCardModel, testPlaceFromAPI);
 
         // Assert
         Assert.AreEqual(testPlaceFromAPI.thumbnail, placeCardModel.placePictureUri);
         Assert.AreEqual(testPlaceFromAPI.name, placeCardModel.placeName);
-        Assert.AreEqual(ExplorePlacesUtils.FormatDescription(testPlaceFromAPI), placeCardModel.placeDescription);
-        Assert.AreEqual(ExplorePlacesUtils.FormatAuthorName(testPlaceFromAPI), placeCardModel.placeAuthor);
+        Assert.AreEqual(PlacesCardsConfigurator.FormatDescription(testPlaceFromAPI), placeCardModel.placeDescription);
+        Assert.AreEqual(PlacesCardsConfigurator.FormatAuthorName(testPlaceFromAPI), placeCardModel.placeAuthor);
         Assert.AreEqual(testPlaceFromAPI.usersTotalCount, placeCardModel.numberOfUsers);
         Assert.AreEqual(testPlaceFromAPI.parcels, placeCardModel.parcels);
         Assert.AreEqual(testPlaceFromAPI.baseCoords, placeCardModel.coords);
-        Assert.AreEqual(testPlaceFromAPI, placeCardModel.hotSceneInfo);
     }
 
     private PlaceCardComponentModel CreateTestPlace(string name)
@@ -107,7 +105,13 @@ public class ExplorePlacesCommonTests
         return new PlaceCardComponentModel
         {
             coords = new Vector2Int(10, 10),
-            hotSceneInfo = new HotScenesController.HotSceneInfo(),
+            placeInfo = new IHotScenesController.PlaceInfo()
+            {
+                base_position = "10,10",
+                title = name,
+                owner = "Test Author",
+                description = "Test Description"
+            },
             numberOfUsers = 10,
             parcels = new Vector2Int[] { new Vector2Int(10, 10), new Vector2Int(20, 20) },
             placeAuthor = "Test Author",

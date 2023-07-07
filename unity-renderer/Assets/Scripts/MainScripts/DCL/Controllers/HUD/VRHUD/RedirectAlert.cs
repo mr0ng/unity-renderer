@@ -18,6 +18,6 @@ public class RedirectAlert : MonoBehaviour
     
     public void ShowAlert()
     {
-        AlertObject.SetActive(true);
+        //AlertObject.SetActive(true);
     }
 }
