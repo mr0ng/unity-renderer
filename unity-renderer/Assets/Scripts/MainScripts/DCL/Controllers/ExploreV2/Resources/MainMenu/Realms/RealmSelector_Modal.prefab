@@ -2149,7 +2149,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 51528b6a262d20541861d146a0d6e6a7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  showHideAnimator: {fileID: 0}
+  showHideAnimator: {fileID: 74521880310195911}
   realmRowPrefab: {fileID: 1525378289959702777, guid: 5803485679c3a764683a9679a65be7e8,
     type: 3}
   currentRealmText: {fileID: 4858337157946075603}

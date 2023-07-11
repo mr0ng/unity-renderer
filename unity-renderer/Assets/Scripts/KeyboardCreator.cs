@@ -34,7 +34,7 @@ namespace DCL.Interface
             Canvas canvas = keyboard.transform.GetComponent<Canvas>();
             canvas.renderMode = RenderMode.WorldSpace;
             canvas.overrideSorting = true;
-            canvas.sortingOrder = 105;
+            canvas.sortingOrder = 1005;
             canvas.sortingLayerName = "menu";
             // Set the layer of the keyboard and all its children to UI.
             SetLayerRecursively(canvasKeyboard, LayerMask.NameToLayer("UI"));
@@ -90,7 +90,7 @@ namespace DCL.Interface
             CleanUpEvents();
             // Set this KeyboardCreator as the active one
             activeCreator = this;
-
+            keyboard.InputField.text = arg0;
             SetupEvents();
             keyboard.PresentKeyboard(NonNativeKeyboard.LayoutType.URL);
             var rawForward = CommonScriptableObjects.cameraForward.Get();

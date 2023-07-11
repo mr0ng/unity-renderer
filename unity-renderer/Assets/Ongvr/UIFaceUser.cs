@@ -6,8 +6,7 @@ public class UIFaceUser : MonoBehaviour
 {
     [SerializeField] private Camera mainCamera;
     [SerializeField] private float maxViewAngle = 90.0f;
-    [SerializeField] private float rotationSpeed = 1.0f;
-    [SerializeField] private float checkInterval = 0.2f;  // Check every 200 milliseconds
+    [SerializeField] private float checkInterval = 0.3f;  // Check every 300 milliseconds
     private WaitForSeconds checkIntervalWT;
     private void Start()
     {
@@ -30,11 +29,6 @@ public class UIFaceUser : MonoBehaviour
             if (viewAngle > maxViewAngle)
             {
                 Position();
-                // Vector3 toCamera = mainCamera.transform.position - transform.position;
-                // toCamera.y = 0; // Ignore vertical difference
-                //
-                // Quaternion targetRotation = Quaternion.LookRotation(-toCamera);
-                // transform.rotation = Quaternion.Lerp(transform.rotation, targetRotation, rotationSpeed * Time.deltaTime);
             }
 
 
@@ -48,7 +42,10 @@ public class UIFaceUser : MonoBehaviour
 
         var forward = VRHUDController.I.GetForward();
         if (Camera.main != null)
-            transform.position = Camera.main.transform.position+ 1.9f*forward + 1.4f * Vector3.down ;
+        {
+            transform.position = Camera.main.transform.position + 1.9f * forward ;
+            transform.position = new Vector3(transform.position.x, 0, transform.position.z);
+        }
 
         transform.forward = forward;
 

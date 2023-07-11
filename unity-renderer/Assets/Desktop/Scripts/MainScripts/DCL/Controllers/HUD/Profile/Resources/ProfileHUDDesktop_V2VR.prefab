@@ -179,7 +179,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2d411ff873492544e9c592396ba301f6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  sortingOrder: 0
+  sortingOrder: 5
   showHideAnimator: {fileID: 0}
   view: {fileID: 4307070326388267435}
 --- !u!114 &4307070326388267435 stripped

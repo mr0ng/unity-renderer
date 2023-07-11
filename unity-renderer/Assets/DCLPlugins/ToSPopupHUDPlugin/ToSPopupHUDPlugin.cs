@@ -19,8 +19,11 @@ namespace DCLPlugins.ToSPopupHUDPlugin
             await Environment.WaitUntilInitialized();
             var assetsProvider = Environment.i.platform.serviceLocator.Get<IAddressableResourceProvider>();
             var hudsDataStore = DataStore.i.HUDs;
-
+            #if DCL_VR
+            var view = await assetsProvider.Instantiate<IToSPopupView>("ToSPopupHUDVR", "_ToSPopupHUDVR");
+            #else
             var view = await assetsProvider.Instantiate<IToSPopupView>("ToSPopupHUD", "_ToSPopupHUD");
+            #endif
             controller = new ToSPopupController(view, hudsDataStore.tosPopupVisible, new ToSPopupHandler(hudsDataStore.tosPopupVisible));
         }
 

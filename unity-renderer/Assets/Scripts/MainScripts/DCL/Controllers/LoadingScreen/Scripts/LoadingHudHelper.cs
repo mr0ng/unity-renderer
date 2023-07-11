@@ -61,7 +61,7 @@ private IEnumerator FindSignupView()
         //signUpScreen = SignupHUDView.I;
         StartCoroutine(FindSignupView());
         myTrans.localScale = 0.00075f * Vector3.one;
-
+        DebugConfigComponent.i.ShowWebviewScreen();
         if (myTrans is RectTransform rect)
         {
             rect.sizeDelta = new Vector2(1920, 1080);

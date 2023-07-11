@@ -200,5 +200,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2d411ff873492544e9c592396ba301f6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  sortingOrder: 0
+  sortingOrder: 5
   showHideAnimator: {fileID: 957896115999153835}
+  view: {fileID: 0}

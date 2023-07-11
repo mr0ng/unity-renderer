@@ -21,8 +21,14 @@ namespace DCL.Wallet
 
         private async void Initialize(CancellationToken ct)
         {
+            #if DCL_VR
+            var walletSectionView = await Environment.i.serviceLocator.Get<IAddressableResourceProvider>()
+                                                     .Instantiate<WalletSectionHUDComponentView>("WalletSectionHUDVR", cancellationToken: ct);
+            #else
             var walletSectionView = await Environment.i.serviceLocator.Get<IAddressableResourceProvider>()
                                                      .Instantiate<WalletSectionHUDComponentView>("WalletSectionHUD", cancellationToken: ct);
+            #endif
+            walletSectionView.name = "WalletSectionHUD";
             var dataStore = DataStore.i;
             var userProfileWebInterfaceBridge = new UserProfileWebInterfaceBridge();
             var webInterfaceBrowserBridge = new WebInterfaceBrowserBridge();

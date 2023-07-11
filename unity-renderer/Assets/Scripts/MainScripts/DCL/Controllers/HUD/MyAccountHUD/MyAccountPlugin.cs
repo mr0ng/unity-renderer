@@ -20,8 +20,15 @@ namespace DCL.MyAccount
 
         private async void Initialize(CancellationToken ct)
         {
+            #if DCL_VR
+            var myAccountSectionView = await Environment.i.serviceLocator.Get<IAddressableResourceProvider>()
+                                                        .Instantiate<MyAccountSectionHUDComponentView>("MyAccountSectionHUDVR", "MyAccountSectionHUDVR", cancellationToken: ct);
+            #else
             var myAccountSectionView = await Environment.i.serviceLocator.Get<IAddressableResourceProvider>()
                                                         .Instantiate<MyAccountSectionHUDComponentView>("MyAccountSectionHUD", "MyAccountSectionHUD", cancellationToken: ct);
+            #endif
+
+
 
             ProfileAdditionalInfoValueListScriptableObject countryListProvider = await Environment.i.serviceLocator.Get<IAddressableResourceProvider>()
                                                                                                   .GetAddressable<ProfileAdditionalInfoValueListScriptableObject>("ProfileCountries", ct);

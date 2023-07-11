@@ -26,7 +26,11 @@ public class HUDDesktopFactory : HUDFactory
                 hudElement = new SettingsPanelHUDControllerDesktop();
                 break;
             case HUDElementID.PROFILE_HUD:
+                #if DCL_VR
+                ProfileHUDViewDesktop_V2 view = Object.Instantiate(Resources.Load<ProfileHUDViewDesktop_V2>("ProfileHUDDesktop_V2VR"));
+                #else
                 ProfileHUDViewDesktop_V2 view = Object.Instantiate(Resources.Load<ProfileHUDViewDesktop_V2>("ProfileHUDDesktop_V2"));
+                #endif
                 view.name = VIEW_NAME;
 
                 var userProfileWebInterfaceBridge = new UserProfileWebInterfaceBridge();

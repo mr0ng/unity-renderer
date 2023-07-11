@@ -3,6 +3,7 @@ using DCL.Browser;
 using DCL.Helpers;
 using DCL.MyAccount;
 using SocialFeaturesAnalytics;
+using UnityEngine;
 
 namespace MainScripts.DCL.Controllers.HUD.Profile
 {

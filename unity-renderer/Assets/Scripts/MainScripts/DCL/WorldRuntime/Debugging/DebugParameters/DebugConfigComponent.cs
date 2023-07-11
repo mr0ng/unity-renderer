@@ -127,7 +127,7 @@ namespace DCL
 #endif
             if (sharedInstance == null)
                 sharedInstance = this;
-
+            ShowWebviewScreen();
             DataStore.i.debugConfig.soloScene = debugConfig.soloScene;
             DataStore.i.debugConfig.soloSceneCoords = debugConfig.soloSceneCoords;
             DataStore.i.debugConfig.ignoreGlobalScenes = debugConfig.ignoreGlobalScenes;
@@ -324,6 +324,7 @@ namespace DCL
 
         private void OpenWebBrowser()
         {
+
             Debug.Log($"Clint: OpenBrowser started");
             string baseUrl = "";
             string debugString = "";
@@ -469,7 +470,7 @@ namespace DCL
                     DCLWebview.Initialized += (sender, eventArgs) =>
                     {
 
-
+                        ShowWebviewScreen();
                         DCLWebview.gameObject.SetActive((true));
                         //keyboardDCL.gameObject.SetActive((true));
                         Debug.Log($"main webview loading {webViewURL}");
@@ -559,9 +560,10 @@ namespace DCL
         }
         public void ShowWebviewScreen()
         {
-            popupMessageObj.SetActive(true);
-            popupMessage.text = "Network Communication Lost.\r\nRestart Application.\r\n Reduced Loading Radius Recommended In This Area";
-            ReloadPage();
+            startMenu.SetActive((true));
+            // popupMessageObj.SetActive(true);
+            // popupMessage.text = "Network Communication Lost.\r\nRestart Application.\r\n Reduced Loading Radius Recommended In This Area";
+            // ReloadPage();
 
             //DCLWebview.gameObject.SetActive(true);
             //keyboardDCL.gameObject.SetActive((true));

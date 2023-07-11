@@ -68,6 +68,38 @@ MonoBehaviour:
     m_Address: MockQuestService
     m_ReadOnly: 0
     m_SerializedLabels: []
+  - m_GUID: 28a5e483ac296394fa443a19ec0d9eae
+    m_Address: ChannelLeaveErrorModalVR
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+  - m_GUID: fa04c9ac7ecb48e4d9e177310e17e0c3
+    m_Address: ChannelLimitReachedModalVR
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+  - m_GUID: 8e5cae0ce170bc549b5eb19b476200ec
+    m_Address: ChannelJoinErrorModalVR
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+  - m_GUID: 48bd0f4ca4923534196926fd7c6402ce
+    m_Address: ChannelSearchHUDVR
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+  - m_GUID: d36a2083f5036fb41abddff834e3a148
+    m_Address: PromoteChannelsHUDVR
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+  - m_GUID: afbee8c423d0d02438b6c47b2b0b382c
+    m_Address: MyAccountSectionHUDVR
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+  - m_GUID: f445ddaf2119d7a458dfeaaf32972f59
+    m_Address: WalletSectionHUDVR
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+  - m_GUID: 3a0f5c3266011984f88148422ad1230b
+    m_Address: ToSPopupHUDVR
+    m_ReadOnly: 0
+    m_SerializedLabels: []
   m_ReadOnly: 0
   m_Settings: {fileID: 11400000, guid: 436e0d4fdc1cdfa4aaef13be2e8bcef8, type: 2}
   m_SchemaSet:

@@ -15,14 +15,6 @@ namespace DCL
         public Dictionary<int, IRuntimeComponentFactory.CreateCondition> createConditions { get; } = new ();
         public Dictionary<int, IRuntimeComponentFactory.CreateOverride> createOverrides { get; } = new ();
 
-//<<<<<<< HEAD
-//        public Dictionary<int, IRuntimeComponentFactory.CreateOverride> createOverrides { get; set; } =
-//            new Dictionary<int, IRuntimeComponentFactory.CreateOverride>();
-
-//        protected delegate IComponent ComponentBuilder(int classId);
-
-//        protected Dictionary<int, ComponentBuilder> builders = new Dictionary<int, ComponentBuilder>();
-//=======
         private readonly Dictionary<int, Func<IComponent>> builders = new ();
 
 
