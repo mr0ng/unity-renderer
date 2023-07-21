@@ -1,0 +1,20 @@
+{
+    "name": "VRLogin",
+    "rootNamespace": "",
+    "references": [
+        "GUID:d393f5965bc9eef4b84a1d59aaf14dbd",
+        "GUID:6055be8ebefd69e48b49212b09b47b2f",
+        "GUID:7f26ec964984ff04d851b2235a002970",
+        "GUID:c6e3ac0a2748a14e2b281e440c082eb6",
+        "GUID:1cd9f56ea305aae458297148eecef98c"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

@@ -10,7 +10,7 @@ PrefabInstance:
     - target: {fileID: 807659555680895483, guid: 3b2c31cfa7e4a4d619b7f715848fc3b1,
         type: 3}
       propertyPath: m_PresetInfoIsWorld
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 2198214082617645929, guid: 3b2c31cfa7e4a4d619b7f715848fc3b1,
         type: 3}
@@ -21,6 +21,16 @@ PrefabInstance:
         type: 3}
       propertyPath: m_SortingLayerID
       value: -175788821
+      objectReference: {fileID: 0}
+    - target: {fileID: 2198214082617645929, guid: 3b2c31cfa7e4a4d619b7f715848fc3b1,
+        type: 3}
+      propertyPath: m_OverrideSorting
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2198214082617645929, guid: 3b2c31cfa7e4a4d619b7f715848fc3b1,
+        type: 3}
+      propertyPath: m_OverridePixelPerfect
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 3109213463883497978, guid: 3b2c31cfa7e4a4d619b7f715848fc3b1,
         type: 3}

@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: de20c26162ae24092b9bf5d122b2d850, type: 3}
   m_Name: DesktopGraphicsQualityPresets
   m_EditorClassIdentifier: 
-  defaultPresetIndex: 3
+  defaultPresetIndex: 1
   settings:
   - displayName: Low
     baseResolution: 0

@@ -11,35 +11,33 @@ using Vuplex.WebView;
 public class WebViewLoginController : MonoBehaviour
 {
     public static WebViewLoginController I;
-    private IWebView webView;
+    protected IWebView webView;
 
 
-    [SerializeField] private BaseWebViewPrefab webViewPrefab;
+    [SerializeField] protected BaseWebViewPrefab webViewPrefab;
     [SerializeField]private RawImage webviewImage;
     // private string[] buttonClickCodes = new string[]
     // {
     //     "document.querySelector('.LoginWalletItem .ui.huge.primary.button').click();",
     //     "document.querySelector('.LoginGuestItem .ui.huge.primary.button').click();"
     // };
-    [SerializeField] private Button guestLoginButton;
-    [SerializeField] private Button walletLoginButton;
+    [SerializeField] protected Button guestLoginButton;
+    [SerializeField] protected Button walletLoginButton;
 
-    [SerializeField] private GameObject WalletLoginPanel;
-    [SerializeField] private Button FortmaticLoginButton;
-    [SerializeField] private Button WalletConnectLoginButton;
+    [SerializeField] private GameObject walletLoginPanel;
+    [SerializeField] protected Button fortmaticLoginButton;
+    [SerializeField] protected Button walletConnectLoginButton;
+    [SerializeField] protected Button coinbaseLoginButton;
+    [SerializeField] protected Button walletCloseButton;
 
-    [SerializeField] private GameObject FortmaticLoginPanel;
-
-    [SerializeField] private GameObject WalletConnectLoginPanel;
-    [SerializeField] private Image QRImage;
-
-    //[SerializeField] private Button togglePasswordButton;
-
-   // [SerializeField] private TMP_InputField userName;
-    //[SerializeField] private TMP_InputField password;
-
-
-
+    [SerializeField] private GameObject fortmaticLoginPanel;
+    [SerializeField] private Button fortmaticPanelClose;
+    [SerializeField] private GameObject walletConnectLoginPanel;
+    [SerializeField] private Image walletConnectQRImage;
+    [SerializeField] private Button walletConnectPanelClose;
+    [SerializeField] private GameObject coinbaseLoginPanel;
+    [SerializeField] private Image coinbaseQRImage;
+    [SerializeField] private Button coinbasePanelClose;
 
     //[SerializeField] private TMP_Text LoginWarningText;
 
@@ -49,24 +47,20 @@ public class WebViewLoginController : MonoBehaviour
     {
         if (I != null) return;
         I = this;
-
+        CrossPlatformManager.SetCameraForGame();
         webView = webViewPrefab.WebView;
         CloseWalletLoginPanel();
-        //LoginWarningText.gameObject.SetActive(false);
-
+        ShowMainLoginButtons();
         // Attach the functions to the buttons' onClick event
         guestLoginButton.onClick.AddListener(GuestClickButton);
         walletLoginButton.onClick.AddListener(WalletClickButton);
-        FortmaticLoginButton.onClick.AddListener(FortmaticLoginClickButton);
-        WalletConnectLoginButton.onClick.AddListener(WalletConnectLoginClickButton);
-
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        // Disable the button if either username or password is empty
-
+        walletCloseButton.onClick.AddListener(CloseWalletLoginPanel);
+        fortmaticLoginButton.onClick.AddListener(FortmaticLoginClickButton);
+        fortmaticPanelClose.onClick.AddListener(CloseFortmaticPanel);
+        walletConnectLoginButton.onClick.AddListener(WalletConnectLoginClickButton);
+        walletConnectPanelClose.onClick.AddListener(CloseWalletConnectPanel);
+        coinbaseLoginButton.onClick.AddListener(CoinBaseLoginClickButton);
+        coinbasePanelClose.onClick.AddListener(CloseCoinbaseLoginPanel);
     }
 
     public void GuestClickButton()
@@ -106,7 +100,7 @@ public class WebViewLoginController : MonoBehaviour
             // }
 
         });
-        WalletLoginPanel.SetActive(true);
+        walletLoginPanel.SetActive(true);
     }
     public void FortmaticLoginClickButton()
     {
@@ -125,8 +119,57 @@ public class WebViewLoginController : MonoBehaviour
             // }
 
         });
-        FortmaticLoginPanel.SetActive(true);
+        fortmaticLoginPanel.SetActive(true);
 
+    }
+
+    public void CloseFortmaticPanel()
+    {
+        webView.ExecuteJavaScript($"document.querySelector('#root > div > div > div > div > div > div.NavigationBar-component > div > div.right > div').click();", (result) =>
+        {
+            if (result == "Success")
+            {
+                Debug.Log($"Button  click executed successfully");
+
+            }
+            else
+            {
+                Debug.LogError($"Failed to execute button  click: {result}");
+            }
+        });
+        fortmaticLoginPanel.SetActive(false);
+    }
+    public void CloseWalletConnectPanel()
+    {
+        webView.ExecuteJavaScript($"document.querySelector('body > wcm-modal:nth-child(19)').shadowRoot.querySelector('#wcm-modal > div > wcm-modal-backcard').shadowRoot.querySelector('div.wcm-toolbar > button').click();", (result) =>
+        {
+            if (result == "Success")
+            {
+                Debug.Log($"Button  click executed successfully");
+
+            }
+            else
+            {
+                Debug.LogError($"Failed to execute button  click: {result}");
+            }
+        });
+        walletConnectLoginPanel.SetActive(false);
+    }
+    public void CloseCoinbaseLoginPanel()
+    {
+        webView.ExecuteJavaScript($"document.querySelector('html > div > div.-cbwsdk-link-flow-root > div > div.-cbwsdk-extension-dialog > div > button').click();", (result) =>
+        {
+            if (result == "Success")
+            {
+                Debug.Log($"Button  click executed successfully");
+
+            }
+            else
+            {
+                Debug.LogError($"Failed to execute button  click: {result}");
+            }
+        });
+        coinbaseLoginPanel.SetActive(false);
     }
     public void WalletConnectLoginClickButton()
     {
@@ -143,16 +186,61 @@ public class WebViewLoginController : MonoBehaviour
             {
                 Debug.LogError($"Failed to execute button  click: {result}");
             }
-            WalletConnectLoginPanel.SetActive(true);
-            QRImage.material = webviewImage.material;
+            walletConnectLoginPanel.SetActive(true);
+            walletConnectQRImage.material = webviewImage.material;
         });
+    }
+    public void CoinBaseLoginClickButton()
+    {
+        if (webView == null) webView = webViewPrefab.WebView;
+
+        webView.ExecuteJavaScript($"document.querySelector('.dcl.option.wallet-link').click();", (result) =>
+        {
+            if (result == "Success")
+            {
+                Debug.Log($"Button  click executed successfully");
+
+            }
+            else
+            {
+                Debug.LogError($"Failed to execute button  click: {result}");
+            }
+            walletConnectLoginPanel.SetActive(true);
+            coinbaseQRImage.material = webviewImage.material;
+        });
+    }
+
+    public void HideMainLoginButtons()
+    {
+        guestLoginButton.gameObject.SetActive(false);
+        walletLoginButton.gameObject.SetActive(false);
+    }
+    public void ShowMainLoginButtons()
+    {
+        guestLoginButton.gameObject.SetActive(true);
+        walletLoginButton.gameObject.SetActive(true);
     }
 
     public void CloseWalletLoginPanel()
     {
+        if (webView == null) webView = webViewPrefab.WebView;
+        if (webViewPrefab.WebView == null) return;
         // userName.text = "";
         // password.text = "";
-        WalletLoginPanel.SetActive(false);
+        webView.ExecuteJavaScript($"document.querySelector('dcl modal-navigation-button modal-navigation-close').click();", (result) =>
+        {
+            if (result == "Success")
+            {
+                Debug.Log($"Button  click executed successfully");
+
+            }
+            else
+            {
+                Debug.LogError($"Failed to execute button  click: {result}");
+            }
+        });
+
+        walletLoginPanel.SetActive(false);
     }
 
 

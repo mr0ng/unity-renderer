@@ -170,19 +170,20 @@ namespace DCL
         {
             if (current)
                 return;
-            //DebugConfigComponent.i.ReloadPage();
-            //  kernelCommunication.Dispose();
-            //SetupPlugins();
+            kernelCommunication.Dispose();
+            // SetupPlugins();
 
 
             InitializeCommunication();
-            //DebugConfigComponent.i.ShowWebviewScreen();
+            // DebugConfigComponent.i.ShowWebviewScreen();
             DCL.Interface.WebInterface.SendSystemInfoReport();
-            SetupServices();
-            InitializeSceneDependencies();
-            InitializeDataStore();
+            // SetupServices();
+            // InitializeSceneDependencies();
+            // InitializeDataStore();
+            // DebugConfigComponent.i.ReloadPage();
             // We trigger the Decentraland logic once everything is initialized.
             DCL.Interface.WebInterface.StartDecentraland();
+            DebugConfigComponent.i.ShowWebviewScreen();
         }
     }
 }
