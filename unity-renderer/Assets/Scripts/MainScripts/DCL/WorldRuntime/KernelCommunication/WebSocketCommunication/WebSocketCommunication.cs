@@ -6,6 +6,7 @@ using System.Net.Sockets;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using DCL;
+
 using UnityEngine;
 using WebSocketSharp;
 using WebSocketSharp.Server;
@@ -25,11 +26,12 @@ public class WebSocketCommunication : IKernelCommunication
     public Dictionary<string, string> messageTypeToBridgeName = new Dictionary<string, string>(); // Public to be able to modify it from `explorer-desktop`
     private bool requestStop = false;
     private Coroutine updateCoroutine;
-
+    private int currentPort = 0;
     WebSocketServer ws;
     public static event Action<string> OnProfileLoading;
     public WebSocketCommunication(bool withSSL = false, int startPort = 7666, int endPort = 7800)
     {
+        if (currentPort != 0) startPort = currentPort + 1;
         InitMessageTypeToBridgeName();
 
         DCL.DataStore.i.debugConfig.isWssDebugMode = true;
@@ -46,11 +48,16 @@ public class WebSocketCommunication : IKernelCommunication
     }
 
     public bool isServerReady => ws.IsListening;
-    public void Dispose() { ws.Stop(); }
+    public void Dispose()
+    {
+        if(ws!= null)
+            ws.Stop();
+    }
     public static event Action<DCLWebSocketService> OnWebSocketServiceAdded;
 
     private string StartServer(int port, int maxPort, bool withSSL, bool verbose = false)
     {
+        currentPort = port;
         Debug.Log($"WebSocketCommunication: StartServer 1");
         if (port > maxPort)
         {
@@ -93,6 +100,32 @@ public class WebSocketCommunication : IKernelCommunication
             ws.AddWebSocketService("/" + wssServiceId, () =>
             {
                 service = new DCLWebSocketService();
+
+                service.OnCloseEvent += () =>
+                {
+                    // DataStore.i.wsCommunication.communicationReady.Set(false);
+
+                    ws.Stop();
+                    ws.WebSocketServices.Clear();
+
+                    //ws.WebSocketServices.Clear();
+
+                    queuedMessages.Clear();
+                    //service.Context.WebSocket.Connect();
+
+
+                    service = null;
+                    ws = null;
+                    requestStop = false;
+                    queuedMessagesDirty = false;
+
+
+                    UnityThread.executeCoroutine(
+                        RestartCommunication(port, maxPort, withSSL)
+                    );
+
+
+                };
                 OnWebSocketServiceAdded?.Invoke(service);
                 return service;
             });
@@ -122,6 +155,29 @@ public class WebSocketCommunication : IKernelCommunication
         return wssUrl;
     }
 
+    private IEnumerator RestartCommunication(int port, int maxPort, bool withSSL)
+    {
+        yield return new WaitForSeconds(3);
+        DataStore.i.wsCommunication.communicationReady.Set(false);
+        DataStore.i.common.isApplicationQuitting.Set(false);
+        //
+        // yield return new WaitForSeconds(3);
+        // InitMessageTypeToBridgeName();
+        //
+        // DCL.DataStore.i.debugConfig.isWssDebugMode = true;
+        // string url = StartServer(port + 1, maxPort, withSSL);
+        // Debug.Log("WebSocket Server URL: " + url);
+        //
+        // DataStore.i.wsCommunication.url = url;
+        //
+        // DataStore.i.wsCommunication.communicationReady.Set(true);
+        // if(updateCoroutine == null);
+        // updateCoroutine = CoroutineStarter.Start(ProcessMessages());
+        //
+        yield return new WaitForSeconds(1);
+        DebugConfigComponent.i.ShowWebviewScreen();
+
+    }
     private X509Certificate2 loadSelfSignedServerCertificate() {
         byte[] rawData = Convert.FromBase64String(SelfCertificateData.data);
         return new X509Certificate2(rawData, "cert");

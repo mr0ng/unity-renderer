@@ -12,7 +12,7 @@ namespace DCL.Huds
         private bool isProfileLoaded = false;
         public static VRHUDController I { get; private set; }
         private HUDController controller => HUDController.i;
-        private readonly Vector3 hidenPos = new Vector3(0, -10, 0);
+        private readonly Vector3 hidenPos = new Vector3(0, -100, 1000);
         private readonly List<VRHUDHelper> huds = new List<VRHUDHelper>();
         private readonly List<VRHUDHelper> submenu = new List<VRHUDHelper>();
 
@@ -57,9 +57,10 @@ namespace DCL.Huds
         private void OpenHandMenu(InputAction.CallbackContext context)
         {
             if (loading) return;
-            visuals.SetActive(!visuals.activeSelf);
-            hudOpen.Set(visuals.activeSelf);
-            DeactivateHud();
+            // visuals.SetActive(!visuals.activeSelf);
+            hudOpen.Set(!hudOpen);
+            if(!hudOpen) MoveHud();
+            else DeactivateHud();
         }
 
         private void HideSubs(bool current, bool previous)

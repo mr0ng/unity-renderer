@@ -43,8 +43,8 @@ public class UIFaceUser : MonoBehaviour
         var forward = VRHUDController.I.GetForward();
         if (Camera.main != null)
         {
-            transform.position = Camera.main.transform.position + 1.9f * forward ;
-            transform.position = new Vector3(transform.position.x, 0, transform.position.z);
+            transform.position = Camera.main.transform.position + 1.9f * forward + 1.146f* Vector3.down;
+            transform.position = new Vector3(transform.position.x, Mathf.Max(transform.position.y,0), transform.position.z);
         }
 
         transform.forward = forward;

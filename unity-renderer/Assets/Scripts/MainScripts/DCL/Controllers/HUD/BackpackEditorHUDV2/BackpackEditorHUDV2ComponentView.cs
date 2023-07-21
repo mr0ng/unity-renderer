@@ -143,7 +143,8 @@ namespace DCL.Backpack
         #if DCL_VR
         public static BackpackEditorHUDV2ComponentView Create() =>
             Instantiate(Resources.Load<BackpackEditorHUDV2ComponentView>("BackpackEditorHUDV2VR"));
-        #else
+
+    #else
         public static BackpackEditorHUDV2ComponentView Create() =>
             Instantiate(Resources.Load<BackpackEditorHUDV2ComponentView>("BackpackEditorHUDV2"));
         #endif
@@ -321,7 +322,7 @@ namespace DCL.Backpack
             transform.localScale = 0.0024f*Vector3.one;
             var rawForward = CommonScriptableObjects.cameraForward.Get();
             var forward = new Vector3(rawForward.x, 0, rawForward.z).normalized;
-            transform.position = Camera.main.transform.position + 3 * forward;// + 1.0f * Vector3.up;
+            transform.position = Camera.main.transform.position + 3 * forward + 1000.0f * Vector3.down;
             transform.forward =  forward;
 
         }

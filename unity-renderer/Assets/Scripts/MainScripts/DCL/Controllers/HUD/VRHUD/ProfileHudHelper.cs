@@ -17,12 +17,12 @@ public class ProfileHudHelper : VRHUDHelper
     public override void Hide()
     {
         view.SetStartMenuButtonActive(false);
-        view.ShowExpanded(true);
+        // view.ShowExpanded(true);
     }
 
     public override void Show()
     {
         view.SetStartMenuButtonActive(true);
-        view.ShowExpanded(false);
+        // view.ShowExpanded(false);
     }
 }

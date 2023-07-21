@@ -339,17 +339,6 @@ namespace DCL
                 },
                 {
                     ""name"": """",
-                    ""id"": ""1d64adf0-fdda-479c-a0e2-cac73c20be0f"",
-                    ""path"": ""<XRController>{RightHand}/primaryButton"",
-                    ""interactions"": """",
-                    ""processors"": """",
-                    ""groups"": ""XR"",
-                    ""action"": ""OpenMenu"",
-                    ""isComposite"": false,
-                    ""isPartOfComposite"": false
-                },
-                {
-                    ""name"": """",
                     ""id"": ""7b0f9a1a-e815-45bb-a8ef-bb603119982d"",
                     ""path"": ""<WMRSpatialController>/menu"",
                     ""interactions"": """",
@@ -488,6 +477,17 @@ namespace DCL
                     ""processors"": """",
                     ""groups"": """",
                     ""action"": ""RotateHMD"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""1d64adf0-fdda-479c-a0e2-cac73c20be0f"",
+                    ""path"": ""<XRController>{RightHand}/primaryButton"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""XR"",
+                    ""action"": ""OpenMenu"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 }

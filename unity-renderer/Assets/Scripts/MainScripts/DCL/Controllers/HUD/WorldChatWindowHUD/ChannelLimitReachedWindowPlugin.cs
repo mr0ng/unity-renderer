@@ -23,6 +23,7 @@ namespace DCL.Chat.HUD
             var view = await Environment.i.serviceLocator.Get<IAddressableResourceProvider>()
                                                     .Instantiate<ChannelLimitReachedWindowComponentView>("ChannelLimitReachedModal", cancellationToken: ct);
 #endif
+            view.name = "ChannelLimitReachedModal";
             channelLimitReachedWindow = new ChannelLimitReachedWindowController(view, DataStore.i);
         }
 

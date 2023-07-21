@@ -19,6 +19,7 @@ public class LoadingHudHelper : VRHUDHelper
     private ShowHideAnimator animator;
     private SignupHUDView signUpScreen;
     private bool signedUp = false;
+    private bool isFirstLoad = true;
     // protected void Start()
     // {
     //     CrossPlatformManager.SetCameraForLoading(signupMask);
@@ -56,8 +57,8 @@ private IEnumerator FindSignupView()
         #endif
         view.showHideAnimator.OnStartHide+= ()=>{CrossPlatformManager.SetCameraForGame();};
         view.showHideAnimator.OnStartShow+= ()=>{CrossPlatformManager.SetCameraForLoading(loadingMask);};
-
-        CrossPlatformManager.SetCameraForLoading(signupMask);
+        CrossPlatformManager.SetCameraForGame();
+        // CrossPlatformManager.SetCameraForLoading(signupMask);
         //signUpScreen = SignupHUDView.I;
         StartCoroutine(FindSignupView());
         myTrans.localScale = 0.00075f * Vector3.one;
@@ -70,7 +71,12 @@ private IEnumerator FindSignupView()
         VRHUDController.I.SetupLoading(animator);
         VRHUDController.LoadingStart += () =>
         {
-
+            if (isFirstLoad)
+            {
+                CrossPlatformManager.SetCameraForGame();
+                isFirstLoad = false;
+                return;
+            }
 
             if (DataStore.i.common.isSignUpFlow.Get())
             {
