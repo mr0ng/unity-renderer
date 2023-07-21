@@ -171,7 +171,7 @@ namespace DCLServices.MapRendererV2.ConsumerUtils
 
             eventData.position = pointerHelper.cursorMapCoords;
 
-            if (!pointerHelper.isCursorOverMap)
+            if (!pointerHelper.isCursorOverMap.ContainsValue(true))
             {
                 parcel = Vector2Int.zero;
                 localPosition = Vector2.zero;

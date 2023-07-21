@@ -14,11 +14,12 @@ public class PointerHelper : MonoBehaviour, IMixedRealityPointerHandler
     [SerializeField] private Vector3 offset = new Vector3(3332, 1356, 0);
     [SerializeField] private float scaleFactor = 0.15f;
     private GameObject dockParent;
+    private MixedRealityPointerEventData lastEventData = null;
 
     private RectTransform referenceTrans;
     public Vector3 localPointerPos;
     private Vector3 origin;
-    public bool isCursorOverMap;
+    public Dictionary<uint, bool> isCursorOverMap = new Dictionary<uint, bool>();
     private Dictionary<uint, bool> isDragging = new Dictionary<uint, bool>();
     private Dictionary<uint, bool> isTriggerDown = new Dictionary<uint, bool>();
     private Dictionary<uint,bool> triggerLastState = new Dictionary<uint, bool>();
@@ -72,6 +73,7 @@ public class PointerHelper : MonoBehaviour, IMixedRealityPointerHandler
             yield return waitTime;
             if (!navmapIsRendered.Get())
             {
+                yield return null;
                 continue;
             }
 
@@ -82,31 +84,46 @@ public class PointerHelper : MonoBehaviour, IMixedRealityPointerHandler
                 {
                     if (isTriggerDown[pointerId] && !triggerLastState[pointerId] && !isDragging[pointerId])
                     {
-                        mapRenderImage.OnBeginDrag(new PointerEventData(EventSystem.current) { position = cursorMapCoords, dragging = isDragging[pointerId] });
+                        var data = new PointerEventData(EventSystem.current)
+                        {
+                            position = cursorMapCoords,
+                            dragging = isDragging[pointerId]
+                        };
+
+                        // mapRenderImage.OnPointerClick(data);
+                        mapRenderImage.OnBeginDrag(data);
+                        lastEventData.Pointer.IsFocusLocked = false;
+                        Debug.Log($"update:OnBeginDrag: {cursorMapCoords}, {isDragging[pointerId]}");
                     }
                     else if (!isTriggerDown[pointerId] && triggerLastState[pointerId] && isDragging[pointerId])
                     {
                         mapRenderImage.OnEndDrag(new PointerEventData(EventSystem.current) { position = cursorMapCoords, dragging = isDragging[pointerId] });
                         isDragging[pointerId] = false;
+                        Debug.Log($"update:OnEndDrag: {cursorMapCoords}, {isDragging[pointerId]}");
                     }
                     else
                     {
                         mapRenderImage.OnPointerMove(new PointerEventData(EventSystem.current) { position = cursorMapCoords, dragging = isDragging[pointerId] });
+                        // Debug.Log($"update:OnPointerMove: {cursorMapCoords}, {isDragging[pointerId]}");
                     }
 
                     triggerLastState[pointerId] = isTriggerDown[pointerId];
                 }
-                else
+                else //dragged off of the map area
                 {
                     if (isDragging[pointerId] && !isTriggerDown[pointerId])
                     {
                         mapRenderImage.OnEndDrag(new PointerEventData(EventSystem.current) { position = cursorMapCoords, dragging = isDragging[pointerId] });
+                        Debug.Log($"update:OnEndDrag: off map {cursorMapCoords}, {isDragging[pointerId]}");
                         isDragging[pointerId] = false;
                     }
                 }
 
                 if (isTriggerDown[pointerId] && isDragging[pointerId])
+                {
                     mapRenderImage.OnDrag(new PointerEventData(EventSystem.current) { position = cursorMapCoords, dragging = isDragging[pointerId] });
+                    Debug.Log($"update:OnDrag: {cursorMapCoords}, {isDragging[pointerId]}");
+                }
             }
         }
     }
@@ -115,7 +132,7 @@ public class PointerHelper : MonoBehaviour, IMixedRealityPointerHandler
     {
         if (CoreServices.FocusProvider.PrimaryPointer == null || CoreServices.FocusProvider.PrimaryPointer.Result.Details.Object == null)
         {
-            isCursorOverMap = false;
+            isCursorOverMap[pointerId] = false;
             return false;
         }
         // EventSystem.current.RaycastAll(uiRaycastPointerEventData, uiRaycastResults);
@@ -133,12 +150,12 @@ public class PointerHelper : MonoBehaviour, IMixedRealityPointerHandler
             // Debug.Log($"Clint: raycast hit {hit.Value}, point {point}, local {localPointerPos},  {CoreServices.FocusProvider?.PrimaryPointer.Result.Details.Object.name}");
             cursorMapCoords.x = (int) (localPointerPos.x * scaleFactor);
             cursorMapCoords.y = (int) (localPointerPos.y * scaleFactor);
-            isCursorOverMap = true;
+            isCursorOverMap[pointerId] = true;
             return true;
         }
         // cursorMapCoords.x = -50000;
         // cursorMapCoords.y = -50000;
-        isCursorOverMap = false;
+        isCursorOverMap[pointerId] = false;
         return false;
     }
 
@@ -173,6 +190,7 @@ public class PointerHelper : MonoBehaviour, IMixedRealityPointerHandler
         initialPressPosition[pointerId] = cursorMapCoords;
         initialPressTime[pointerId] = Time.time;
         isTriggerDown[pointerId] = true;
+        lastEventData = eventData;
     }
 
     public void OnPointerDragged(MixedRealityPointerEventData eventData)
@@ -197,6 +215,8 @@ public class PointerHelper : MonoBehaviour, IMixedRealityPointerHandler
         if(isDragging[pointerId])
         {
             mapRenderImage.OnEndDrag(new PointerEventData(EventSystem.current) { position = cursorMapCoords, dragging = isDragging[pointerId] });
+            Debug.Log($"OnPointerUp:OnEndDrag: {cursorMapCoords}, {isDragging[pointerId]}");
+            eventData.Pointer.IsFocusLocked = true;
             isDragging[pointerId] = false;
         }
         else
@@ -207,6 +227,7 @@ public class PointerHelper : MonoBehaviour, IMixedRealityPointerHandler
                 dragging = false,
             };
             mapRenderImage.OnPointerClick(data);
+            Debug.Log($"OnPointerUp:OnPointerClick: {cursorMapCoords}, {isDragging[pointerId]}");
         }
     }
 
@@ -224,6 +245,7 @@ public class PointerHelper : MonoBehaviour, IMixedRealityPointerHandler
                 dragging = isDragging[pointerId],
             };
             mapRenderImage.OnPointerClick(data);
+            Debug.Log($"OnPointerClicked:OnPointerClick: {cursorMapCoords}, {isDragging[pointerId]}");
         }
     }
 
@@ -233,6 +255,7 @@ public class PointerHelper : MonoBehaviour, IMixedRealityPointerHandler
         if (isDragging[pointerId])
         {
             mapRenderImage.OnEndDrag(new PointerEventData(EventSystem.current) { position = cursorMapCoords, dragging = isDragging[pointerId] });
+            Debug.Log($"OnPointerExited:OnEndDrag: {cursorMapCoords}, {isDragging[pointerId]}");
             isDragging[pointerId] = false;
             isTriggerDown[pointerId] = false;
         }
