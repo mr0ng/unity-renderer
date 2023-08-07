@@ -112,6 +112,24 @@
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": true
+                },
+                {
+                    "name": "Emotes",
+                    "type": "Button",
+                    "id": "8849d6e2-58b5-41e9-a554-c9c0b03970ee",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "EmotesSelect",
+                    "type": "Value",
+                    "id": "b9017433-4c61-40ca-aa2c-174bbe4335cc",
+                    "expectedControlType": "Vector2",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
                 }
             ],
             "bindings": [
@@ -308,7 +326,7 @@
                     "path": "<Keyboard>/escape",
                     "interactions": "",
                     "processors": "",
-                    "groups": "Keyboard&Mouse",
+                    "groups": "Keyboard&Mouse;XR",
                     "action": "OpenMenu",
                     "isComposite": false,
                     "isPartOfComposite": false
@@ -316,7 +334,7 @@
                 {
                     "name": "",
                     "id": "7b0f9a1a-e815-45bb-a8ef-bb603119982d",
-                    "path": "<WMRSpatialController>/menu",
+                    "path": "<XRController>{LeftHand}/menu",
                     "interactions": "",
                     "processors": "",
                     "groups": "XR",
@@ -330,7 +348,7 @@
                     "path": "<Keyboard>/space",
                     "interactions": "",
                     "processors": "",
-                    "groups": "Keyboard&Mouse",
+                    "groups": "Keyboard&Mouse;XR",
                     "action": "Jump",
                     "isComposite": false,
                     "isPartOfComposite": false
@@ -458,12 +476,34 @@
                 },
                 {
                     "name": "",
-                    "id": "1d64adf0-fdda-479c-a0e2-cac73c20be0f",
-                    "path": "<XRController>{RightHand}/primaryButton",
+                    "id": "ae84207d-874d-4437-8945-575591e9ac80",
+                    "path": "<Keyboard>/b",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Emotes",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "18bd4e47-87d1-4e44-9d70-65d95b412f90",
+                    "path": "<XRController>{RightHand}/secondaryButton",
                     "interactions": "",
                     "processors": "",
                     "groups": "XR",
-                    "action": "OpenMenu",
+                    "action": "Emotes",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "7102d242-44f0-475f-b726-ad210c7ce37b",
+                    "path": "<XRController>{LeftHand}/joystick",
+                    "interactions": "",
+                    "processors": "StickDeadzone",
+                    "groups": "XR",
+                    "action": "EmotesSelect",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

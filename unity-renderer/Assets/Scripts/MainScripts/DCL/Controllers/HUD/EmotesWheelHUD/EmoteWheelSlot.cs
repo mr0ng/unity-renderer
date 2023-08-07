@@ -12,6 +12,7 @@ namespace DCL.EmotesWheel
         [SerializeField] internal Image rarityImage;
         [SerializeField] internal GameObject loadingSpinnerGO;
         [SerializeField] internal Sprite defaultImage;
+        internal Animator animator;
 
         public event Action<string> onSlotHover;
 
@@ -20,6 +21,9 @@ namespace DCL.EmotesWheel
 
         private string emoteName;
 
+        void Start() {
+            animator = GetComponent<Animator>();
+        }
         public void SetId(string id) { emoteId = id; }
 
         public void SetName(string name) { emoteName = name; }
@@ -30,7 +34,7 @@ namespace DCL.EmotesWheel
             rarityImage.color = color;
         }
 
-        public void SetImage(Sprite sprite) 
+        public void SetImage(Sprite sprite)
         {
             if (sprite != null)
                 image.SetImage(sprite);
@@ -38,7 +42,7 @@ namespace DCL.EmotesWheel
                 image.SetImage(sprite);
         }
 
-        public void SetImage(string uri) 
+        public void SetImage(string uri)
         {
             if (!string.IsNullOrEmpty(uri))
                 image.SetImage(uri);
@@ -55,7 +59,7 @@ namespace DCL.EmotesWheel
         }
 
         public void OnPointerEnter(PointerEventData eventData) { onSlotHover?.Invoke(emoteName); }
-        
+
         public void OnPointerExit(PointerEventData eventData) { onSlotHover?.Invoke(string.Empty); }
     }
 }

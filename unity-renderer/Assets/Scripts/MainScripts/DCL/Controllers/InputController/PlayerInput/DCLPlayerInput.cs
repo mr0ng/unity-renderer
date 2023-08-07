@@ -136,6 +136,24 @@ namespace DCL
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": true
+                },
+                {
+                    ""name"": ""Emotes"",
+                    ""type"": ""Button"",
+                    ""id"": ""8849d6e2-58b5-41e9-a554-c9c0b03970ee"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""EmotesSelect"",
+                    ""type"": ""Value"",
+                    ""id"": ""b9017433-4c61-40ca-aa2c-174bbe4335cc"",
+                    ""expectedControlType"": ""Vector2"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": true
                 }
             ],
             ""bindings"": [
@@ -332,7 +350,7 @@ namespace DCL
                     ""path"": ""<Keyboard>/escape"",
                     ""interactions"": """",
                     ""processors"": """",
-                    ""groups"": ""Keyboard&Mouse"",
+                    ""groups"": ""Keyboard&Mouse;XR"",
                     ""action"": ""OpenMenu"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
@@ -340,7 +358,7 @@ namespace DCL
                 {
                     ""name"": """",
                     ""id"": ""7b0f9a1a-e815-45bb-a8ef-bb603119982d"",
-                    ""path"": ""<WMRSpatialController>/menu"",
+                    ""path"": ""<XRController>{LeftHand}/menu"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": ""XR"",
@@ -354,7 +372,7 @@ namespace DCL
                     ""path"": ""<Keyboard>/space"",
                     ""interactions"": """",
                     ""processors"": """",
-                    ""groups"": ""Keyboard&Mouse"",
+                    ""groups"": ""Keyboard&Mouse;XR"",
                     ""action"": ""Jump"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
@@ -482,12 +500,34 @@ namespace DCL
                 },
                 {
                     ""name"": """",
-                    ""id"": ""1d64adf0-fdda-479c-a0e2-cac73c20be0f"",
-                    ""path"": ""<XRController>{RightHand}/primaryButton"",
+                    ""id"": ""ae84207d-874d-4437-8945-575591e9ac80"",
+                    ""path"": ""<Keyboard>/b"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Emotes"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""18bd4e47-87d1-4e44-9d70-65d95b412f90"",
+                    ""path"": ""<XRController>{RightHand}/secondaryButton"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": ""XR"",
-                    ""action"": ""OpenMenu"",
+                    ""action"": ""Emotes"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""7102d242-44f0-475f-b726-ad210c7ce37b"",
+                    ""path"": ""<XRController>{LeftHand}/joystick"",
+                    ""interactions"": """",
+                    ""processors"": ""StickDeadzone"",
+                    ""groups"": ""XR"",
+                    ""action"": ""EmotesSelect"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 }
@@ -1076,6 +1116,8 @@ namespace DCL
             m_Player_SecondaryInteraction = m_Player.FindAction("SecondaryInteraction", throwIfNotFound: true);
             m_Player_MoveHMD = m_Player.FindAction("MoveHMD", throwIfNotFound: true);
             m_Player_RotateHMD = m_Player.FindAction("RotateHMD", throwIfNotFound: true);
+            m_Player_Emotes = m_Player.FindAction("Emotes", throwIfNotFound: true);
+            m_Player_EmotesSelect = m_Player.FindAction("EmotesSelect", throwIfNotFound: true);
             // UI
             m_UI = asset.FindActionMap("UI", throwIfNotFound: true);
             m_UI_Navigate = m_UI.FindAction("Navigate", throwIfNotFound: true);
@@ -1161,6 +1203,8 @@ namespace DCL
         private readonly InputAction m_Player_SecondaryInteraction;
         private readonly InputAction m_Player_MoveHMD;
         private readonly InputAction m_Player_RotateHMD;
+        private readonly InputAction m_Player_Emotes;
+        private readonly InputAction m_Player_EmotesSelect;
         public struct PlayerActions
         {
             private @DCLPlayerInput m_Wrapper;
@@ -1177,6 +1221,8 @@ namespace DCL
             public InputAction @SecondaryInteraction => m_Wrapper.m_Player_SecondaryInteraction;
             public InputAction @MoveHMD => m_Wrapper.m_Player_MoveHMD;
             public InputAction @RotateHMD => m_Wrapper.m_Player_RotateHMD;
+            public InputAction @Emotes => m_Wrapper.m_Player_Emotes;
+            public InputAction @EmotesSelect => m_Wrapper.m_Player_EmotesSelect;
             public InputActionMap Get() { return m_Wrapper.m_Player; }
             public void Enable() { Get().Enable(); }
             public void Disable() { Get().Disable(); }
@@ -1222,6 +1268,12 @@ namespace DCL
                 @RotateHMD.started += instance.OnRotateHMD;
                 @RotateHMD.performed += instance.OnRotateHMD;
                 @RotateHMD.canceled += instance.OnRotateHMD;
+                @Emotes.started += instance.OnEmotes;
+                @Emotes.performed += instance.OnEmotes;
+                @Emotes.canceled += instance.OnEmotes;
+                @EmotesSelect.started += instance.OnEmotesSelect;
+                @EmotesSelect.performed += instance.OnEmotesSelect;
+                @EmotesSelect.canceled += instance.OnEmotesSelect;
             }
 
             private void UnregisterCallbacks(IPlayerActions instance)
@@ -1262,6 +1314,12 @@ namespace DCL
                 @RotateHMD.started -= instance.OnRotateHMD;
                 @RotateHMD.performed -= instance.OnRotateHMD;
                 @RotateHMD.canceled -= instance.OnRotateHMD;
+                @Emotes.started -= instance.OnEmotes;
+                @Emotes.performed -= instance.OnEmotes;
+                @Emotes.canceled -= instance.OnEmotes;
+                @EmotesSelect.started -= instance.OnEmotesSelect;
+                @EmotesSelect.performed -= instance.OnEmotesSelect;
+                @EmotesSelect.canceled -= instance.OnEmotesSelect;
             }
 
             public void RemoveCallbacks(IPlayerActions instance)
@@ -1456,6 +1514,8 @@ namespace DCL
             void OnSecondaryInteraction(InputAction.CallbackContext context);
             void OnMoveHMD(InputAction.CallbackContext context);
             void OnRotateHMD(InputAction.CallbackContext context);
+            void OnEmotes(InputAction.CallbackContext context);
+            void OnEmotesSelect(InputAction.CallbackContext context);
         }
         public interface IUIActions
         {
