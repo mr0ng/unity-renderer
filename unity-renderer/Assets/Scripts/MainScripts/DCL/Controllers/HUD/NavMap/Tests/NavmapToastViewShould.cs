@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using DCL;
 using DCLServices.MapRendererV2;
+using DCLServices.PlacesAPIService;
 using NSubstitute;
 using NUnit.Framework;
 using UnityEngine;
@@ -35,7 +36,13 @@ namespace Tests
             yield return base.SetUp();
             yield return null;
 
-            controller = new MinimapHUDController(Substitute.For<MinimapMetadataController>(), Substitute.For<IHomeLocationController>(), DCL.Environment.i);
+            controller = new MinimapHUDController(
+                Substitute.For<MinimapMetadataController>(),
+                Substitute.For<IHomeLocationController>(),
+                DCL.Environment.i,
+                Substitute.For<IPlacesAPIService>(),
+                Substitute.For<IPlacesAnalytics>(),
+                Substitute.For<IClipboard>());
             controller.Initialize();
             navmapView = Object.FindObjectOfType<NavmapView>();
             navmapToastView = navmapView.toastView;

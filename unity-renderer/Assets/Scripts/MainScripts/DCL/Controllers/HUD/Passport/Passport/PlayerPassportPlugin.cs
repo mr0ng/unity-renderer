@@ -17,11 +17,13 @@ public class PlayerPassportPlugin : IPlugin
 
     public PlayerPassportPlugin()
     {
+
         #if DCL_VR
         PlayerPassportReferenceContainer referenceContainer = Object.Instantiate(Resources.Load<GameObject>("PlayerPassportVR")).GetComponent<PlayerPassportReferenceContainer>();
         #else
         PlayerPassportReferenceContainer referenceContainer = Object.Instantiate(Resources.Load<GameObject>("PlayerPassport")).GetComponent<PlayerPassportReferenceContainer>();
         #endif
+
 
         referenceContainer.PlayerPreviewView.Initialize(new PreviewCameraRotationController());
 
@@ -62,7 +64,8 @@ public class PlayerPassportPlugin : IPlugin
                                 Environment.i.serviceLocator.Get<ILandsService>(),
                                 Environment.i.serviceLocator.Get<INamesService>(),
                                 NotificationsController.i),
-                            referenceContainer.PassportNavigationView),
+                            referenceContainer.PassportNavigationView,
+                            Clipboard.Create()),
                         new UserProfileWebInterfaceBridge(),
                         new WebInterfacePassportApiBridge(),
                         new SocialAnalytics(

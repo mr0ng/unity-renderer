@@ -1,4 +1,5 @@
-﻿using System;
+﻿using DCLServices.PlacesAPIService;
+using System;
 using TMPro;
 using UnityEngine;
 
@@ -23,14 +24,17 @@ namespace DCL
         private RectTransform RectTransform => rectTransform ??= transform as RectTransform;
         private BaseVariable<Transform> configureMapInFullscreenMenu => DataStore.i.exploreV2.configureMapInFullscreenMenu;
 
+
         [SerializeField] private Camera vrCamera;
+
 
         private void Start()
         {
-            navmapVisibilityBehaviour = new NavmapVisibilityBehaviour(DataStore.i.HUDs.navmapVisible, zoom, toastView, navmapRendererConfiguration);
-            #if DCL_VR
+            navmapVisibilityBehaviour = new NavmapVisibilityBehaviour(DataStore.i.HUDs.navmapVisible, zoom, toastView, navmapRendererConfiguration, Environment.i.platform.serviceLocator.Get<IPlacesAPIService>(), new PlacesAnalytics());
+			#if DCL_VR
             navmapVisibilityBehaviour.hudCamera = vrCamera;
             #endif
+
             ConfigureMapInFullscreenMenuChanged(configureMapInFullscreenMenu.Get(), null);
             DataStore.i.HUDs.isNavMapInitialized.Set(true);
         }

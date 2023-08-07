@@ -4,6 +4,8 @@ using DCL.Helpers;
 using DCL.Models;
 using System.Collections;
 using DCL.Controllers;
+using DCL.World.PortableExperiences;
+using NSubstitute;
 using NUnit.Framework;
 using Tests;
 using UnityEngine;
@@ -36,8 +38,9 @@ public class VideoComponentDesktopShould : IntegrationTestSuite
     {
         #if !UNITY_ANDROID
         DCLVideoTexture.videoPluginWrapperBuilder = () => new VideoPluginWrapper_Native();
+
         #endif
-        serviceLocator.Register<ISceneController>(() => new SceneController());
+        serviceLocator.Register<ISceneController>(() => new SceneController(Substitute.For<IConfirmedExperiencesRepository>()));
         serviceLocator.Register<IWorldState>(() => new WorldState());
         serviceLocator.Register<IRuntimeComponentFactory>(() => new RuntimeComponentFactory());
     }
