@@ -84,7 +84,7 @@ namespace DCL
             Action<UnityWebRequest> onSuccess = null,
             Action<UnityWebRequest> onfail = null,
             int requestAttemps = 3,
-            int timeout = 0,
+            int timeout = 300,
             CancellationToken cancellationToken = default,
             Dictionary<string, string> headers = null,
             bool isSigned = false)
@@ -100,7 +100,7 @@ namespace DCL
             Action<UnityWebRequest> onSuccess = null,
             Action<UnityWebRequest> onFail = null,
             int requestAttemps = 3,
-            int timeout = 0,
+            int timeout = 300,
             CancellationToken cancellationToken = default,
             Dictionary<string, string> headers = null,
             bool isSigned = false)
@@ -117,7 +117,7 @@ namespace DCL
             Action<UnityWebRequest> onSuccess = null,
             Action<UnityWebRequest> onfail = null,
             int requestAttemps = 3,
-            int timeout = 0,
+            int timeout = 300,
             CancellationToken cancellationToken = default,
             Dictionary<string, string> headers = null,
             bool isSigned = false)
@@ -134,7 +134,7 @@ namespace DCL
             Action<UnityWebRequest> onSuccess = null,
             Action<UnityWebRequest> onfail = null,
             int requestAttemps = 3,
-            int timeout = 0,
+            int timeout = 300,
             CancellationToken cancellationToken = default,
             Dictionary<string, string> headers = null,
             bool isSigned = false)
@@ -150,7 +150,7 @@ namespace DCL
             Action<UnityWebRequest> onSuccess = null,
             Action<UnityWebRequest> onFail = null,
             int requestAttemps = 3,
-            int timeout = 0,
+            int timeout = 300,
             CancellationToken cancellationToken = default,
             Dictionary<string, string> headers = null,
             bool isSigned = false)
@@ -164,7 +164,7 @@ namespace DCL
             Action<UnityWebRequest> onSuccess = null,
             Action<UnityWebRequest> onfail = null,
             int requestAttemps = 3,
-            int timeout = 0,
+            int timeout = 300,
             CancellationToken cancellationToken = default)
         {
             return await SendWebRequest(assetBundleFactory, url, null, onSuccess, onfail, requestAttemps,
@@ -177,7 +177,7 @@ namespace DCL
             Action<UnityWebRequest> onSuccess = null,
             Action<UnityWebRequest> onfail = null,
             int requestAttemps = 3,
-            int timeout = 0,
+            int timeout = 300,
             CancellationToken cancellationToken = default)
         {
             assetBundleFactory.SetHash(hash);
@@ -190,7 +190,7 @@ namespace DCL
             Action<UnityWebRequest> onSuccess = null,
             Action<UnityWebRequest> onfail = null,
             int requestAttemps = 3,
-            int timeout = 0,
+            int timeout = 300,
             bool isReadable = true,
             CancellationToken cancellationToken = default,
             Dictionary<string, string> headers = null)
@@ -205,7 +205,7 @@ namespace DCL
             Action<UnityWebRequest> onSuccess = null,
             Action<UnityWebRequest> onfail = null,
             int requestAttemps = 3,
-            int timeout = 0,
+            int timeout = 300,
             CancellationToken cancellationToken = default)
         {
             audioClipWebRequestFactory.SetAudioType(audioType);
@@ -297,7 +297,7 @@ namespace DCL
             Action<IWebRequestAsyncOperation> OnSuccess = null,
             Action<IWebRequestAsyncOperation> OnFail = null,
             int requestAttemps = 3,
-            int timeout = 0,
+            int timeout = 300,
             bool disposeOnCompleted = true,
             Dictionary<string, string> headers = null)
         {
@@ -312,7 +312,7 @@ namespace DCL
             Action<IWebRequestAsyncOperation> OnSuccess = null,
             Action<IWebRequestAsyncOperation> OnFail = null,
             int requestAttemps = 3,
-            int timeout = 0,
+            int timeout = 300,
             bool disposeOnCompleted = true,
             Dictionary<string, string> headers = null)
         {
@@ -326,7 +326,7 @@ namespace DCL
             Action<IWebRequestAsyncOperation> OnSuccess = null,
             Action<IWebRequestAsyncOperation> OnFail = null,
             int requestAttemps = 3,
-            int timeout = 0,
+            int timeout = 300,
             bool disposeOnCompleted = true)
         {
             return SendWebRequest(assetBundleFactory, url, null, OnSuccess, OnFail, requestAttemps, timeout, disposeOnCompleted);
@@ -339,7 +339,7 @@ namespace DCL
             Action<IWebRequestAsyncOperation> OnSuccess = null,
             Action<IWebRequestAsyncOperation> OnFail = null,
             int requestAttemps = 3,
-            int timeout = 0,
+            int timeout = 300,
             bool disposeOnCompleted = true)
         {
             assetBundleFactory.SetHash(hash);
@@ -352,7 +352,7 @@ namespace DCL
             Action<IWebRequestAsyncOperation> OnSuccess = null,
             Action<IWebRequestAsyncOperation> OnFail = null,
             int requestAttemps = 3,
-            int timeout = 0,
+            int timeout = 300,
             bool disposeOnCompleted = true,
             bool isReadable = true,
             Dictionary<string, string> headers = null)
@@ -368,7 +368,7 @@ namespace DCL
             Action<IWebRequestAsyncOperation> OnSuccess = null,
             Action<IWebRequestAsyncOperation> OnFail = null,
             int requestAttemps = 3,
-            int timeout = 0,
+            int timeout = 300,
             bool disposeOnCompleted = true)
         {
             audioClipWebRequestFactory.SetAudioType(audioType);

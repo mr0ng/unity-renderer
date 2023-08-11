@@ -4,11 +4,74 @@ using UnityEngine;
 using System;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
+using System.Security.Cryptography;
+using System.Text;
+using System.Text.RegularExpressions;
+using Newtonsoft.Json;
 
 [Serializable]
 public class SettingsData
 {
     public Dictionary<string, string> settings = new Dictionary<string, string>();
+    public Dictionary<string, bool> encryptedKeys = new Dictionary<string, bool>(); // Keep track of encrypted keys
+}
+public class Crypto
+{
+    private static readonly byte[] key = Encoding.UTF8.GetBytes("k1#90LknL0z3IB87");
+    private static readonly byte[] iv = Encoding.UTF8.GetBytes("m2Kor9gRbx90Pwi9");
+    public static string Encrypt(string plainText)
+    {
+        using (Aes aes = Aes.Create())
+        {
+            ICryptoTransform encryptor = aes.CreateEncryptor(key, iv);
+            using (MemoryStream ms = new MemoryStream())
+            {
+                using (CryptoStream cs = new CryptoStream(ms, encryptor, CryptoStreamMode.Write))
+                {
+                    using (StreamWriter sw = new StreamWriter(cs))
+                    {
+                        sw.Write(plainText);
+                    }
+                    return Convert.ToBase64String(ms.ToArray());
+                }
+            }
+        }
+    }
+    public static string Decrypt(string cipherText)
+    {
+        if (string.IsNullOrEmpty(cipherText) || !IsBase64String(cipherText))
+        {
+            Debug.LogWarning("Invalid cipher text provided for decryption.");
+            return null;
+        }
+        try
+        {
+            using (Aes aes = Aes.Create())
+            {
+                ICryptoTransform decryptor = aes.CreateDecryptor(key, iv);
+                using (MemoryStream ms = new MemoryStream(Convert.FromBase64String(cipherText)))
+                {
+                    using (CryptoStream cs = new CryptoStream(ms, decryptor, CryptoStreamMode.Read))
+                    {
+                        using (StreamReader sr = new StreamReader(cs))
+                        {
+                            return sr.ReadToEnd();
+                        }
+                    }
+                }
+            }
+        }
+        catch (FormatException e)
+        {
+            Debug.LogError($"Error decrypting text: {e}");
+            return null;
+        }
+    }
+    public static bool IsBase64String(string s)
+    {
+        s = s.Trim();
+        return (s.Length % 4 == 0) && Regex.IsMatch(s, @"^[a-zA-Z0-9\+/]*={0,3}$", RegexOptions.None);
+    }
 }
 
 public class VRSettingsManager : MonoBehaviour
@@ -34,8 +97,11 @@ public class VRSettingsManager : MonoBehaviour
             Destroy(gameObject);
             return;
         }
-        settingsPath = Path.Combine(Application.persistentDataPath, "vrsettings.dat");
+        if (settingsData == null)
+        {
+            settingsPath = Path.Combine(Application.persistentDataPath, "EMGvrsettings.dat");
         settingsData = LoadSettings();
+        }
 
         // Initialize OnSettingChanged for each key
         foreach (var key in keys)
@@ -43,39 +109,81 @@ public class VRSettingsManager : MonoBehaviour
             OnSettingChanged[key] = null;
         }
     }
+    public bool IsSettingEncrypted(string key)
+    {
+        if (string.IsNullOrEmpty(key) || settingsData.encryptedKeys == null || !settingsData.encryptedKeys.ContainsKey(key))
+        {
+            return false; // Default to not encrypted
+        }
+        return settingsData.encryptedKeys[key];
+    }
 
-    public void SaveSettings(Dictionary<string, string> newSettings)
+    public void SaveSettings(Dictionary<string, string> newSettings, bool encrypt = false)
     {
         // Create a copy of newSettings
         Dictionary<string, string> newSettingsCopy = new Dictionary<string, string>(newSettings);
 
         foreach (var setting in newSettingsCopy)
         {
+            string value = setting.Value;
+            if (encrypt)
+            {
+                value = Crypto.Encrypt(value);
+                if (settingsData.encryptedKeys.ContainsKey(setting.Key))
+                {
+                    settingsData.encryptedKeys[setting.Key] = true;
+                }
+                else
+                {
+                    settingsData.encryptedKeys.Add(setting.Key, true);
+                }
+            }
             if (settingsData.settings.ContainsKey(setting.Key))
             {
-                settingsData.settings[setting.Key] = setting.Value;
+                settingsData.settings[setting.Key] = value;
             }
             else
             {
-                settingsData.settings.Add(setting.Key, setting.Value);
+                settingsData.settings.Add(setting.Key, value);
             }
         }
 
-        BinaryFormatter bf = new BinaryFormatter();
-        FileStream file = File.Create(settingsPath);
-        bf.Serialize(file, settingsData);
-        file.Close();
+        string jsonData = JsonConvert.SerializeObject(settingsData);
+        File.WriteAllText(settingsPath, jsonData);
     }
 
     public SettingsData LoadSettings()
     {
+        try
+        {
         if (File.Exists(settingsPath))
         {
-            BinaryFormatter bf = new BinaryFormatter();
-            FileStream file = File.Open(settingsPath, FileMode.Open);
-            SettingsData data = (SettingsData)bf.Deserialize(file);
-            file.Close();
+                string jsonData = File.ReadAllText(settingsPath);
+                SettingsData data = JsonConvert.DeserializeObject<SettingsData>(jsonData);
+                // Ensure that encryptedKeys is initialized, even if missing from file
+                if (data.encryptedKeys == null)
+                {
+                    data.encryptedKeys = new Dictionary<string, bool>();
+                }
 
+                foreach (var key in data.encryptedKeys.Keys)
+                {
+                    if (data.encryptedKeys[key])
+                    {
+                        string encryptedValue = data.settings[key];
+                        try
+                        {
+                            string decryptedValue =
+                                Crypto.Decrypt(encryptedValue); // Decrypt individual values if encrypted
+                            data.settings[key] = encryptedValue;
+                        }
+                        catch (CryptographicException ex)
+                        {
+                            Debug.LogError($"Error decrypting value for key {key} : {ex.Message}");
+                            data.settings[key] = Crypto.Encrypt("");
+                        }
+                    }
+                }
             return data;
         }
         else
@@ -85,7 +193,15 @@ public class VRSettingsManager : MonoBehaviour
             for (int i = 0; i < keys.Count; i++)
             {
                 settingsData.settings.Add(keys[i], defaultValues[i]);
+                }
+                SaveSettings(settingsData.settings);
+                return settingsData;
             }
+        }
+        catch (Exception e)
+        {
+            Debug.LogError($"Error loading settings: {e}");
+            settingsData = new SettingsData();
 
             // Save the default settings.
             SaveSettings(settingsData.settings);
@@ -98,16 +214,38 @@ public class VRSettingsManager : MonoBehaviour
     // Get setting value by key
     public string GetSetting(string key)
     {
+        if (settingsData == null)
+        {
+            settingsPath = Path.Combine(Application.persistentDataPath, "EMGvrsettings.dat");
+            settingsData = LoadSettings();
+        }
         if (settingsData.settings.ContainsKey(key))
         {
-            return settingsData.settings[key];
+            string value = settingsData.settings[key];
+            if (IsSettingEncrypted(key))
+            {
+                value = Crypto.Decrypt(value); // Decrypt if it's encrypted
+            }
+            return value;
         }
 
         return "";
     }
 
-    public void SetSetting(string key, string value)
+    public void SetSetting(string key, string value, bool encrypt = false)
     {
+        if (encrypt)
+        {
+            value = Crypto.Encrypt(value);
+            if (settingsData.encryptedKeys.ContainsKey(key))
+            {
+                settingsData.encryptedKeys[key] = true;
+            }
+            else
+            {
+                settingsData.encryptedKeys.Add(key, true);
+            }
+        }
         if (settingsData.settings.ContainsKey(key))
         {
             settingsData.settings[key] = value;

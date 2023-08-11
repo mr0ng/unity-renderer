@@ -17,7 +17,7 @@ MonoBehaviour:
   - displayName: Low
     baseResolution: 0
     antiAliasing: 1
-    renderScale: 0.7
+    renderScale: 0.85
     shadows: 0
     softShadows: 0
     shadowResolution: 256
@@ -27,41 +27,41 @@ MonoBehaviour:
     shadowDistance: 45
     enableDetailObjectCulling: 1
     detailObjectCullingLimit: 85
-    ssaoQuality: 1
+    ssaoQuality: 0
     maxHQAvatars: 25
     reflectionResolution: 0
     shaderQuality: 0
   - displayName: Medium
     baseResolution: 1
     antiAliasing: 1
-    renderScale: 1
+    renderScale: 0.95
     shadows: 1
     softShadows: 1
     shadowResolution: 1024
     cameraDrawDistance: 150
-    bloom: 1
+    bloom: 0
     fpsCap: 1
     shadowDistance: 60
     enableDetailObjectCulling: 1
     detailObjectCullingLimit: 50
-    ssaoQuality: 2
+    ssaoQuality: 0
     maxHQAvatars: 40
     reflectionResolution: 0
     shaderQuality: 1
   - displayName: High
     baseResolution: 1
     antiAliasing: 4
-    renderScale: 1
+    renderScale: 0.98
     shadows: 1
     softShadows: 1
     shadowResolution: 2048
     cameraDrawDistance: 250
-    bloom: 1
+    bloom: 0
     fpsCap: 0
     shadowDistance: 70
     enableDetailObjectCulling: 1
     detailObjectCullingLimit: 50
-    ssaoQuality: 2
+    ssaoQuality: 0
     maxHQAvatars: 60
     reflectionResolution: 0
     shaderQuality: 2
@@ -73,12 +73,12 @@ MonoBehaviour:
     softShadows: 1
     shadowResolution: 4096
     cameraDrawDistance: 500
-    bloom: 1
+    bloom: 0
     fpsCap: 0
     shadowDistance: 100
     enableDetailObjectCulling: 0
     detailObjectCullingLimit: 0
-    ssaoQuality: 3
+    ssaoQuality: 0
     maxHQAvatars: 100
     reflectionResolution: 0
     shaderQuality: 2

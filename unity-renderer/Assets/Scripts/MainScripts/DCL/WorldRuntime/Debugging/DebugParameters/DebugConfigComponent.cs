@@ -342,7 +342,13 @@ namespace DCL
             {
                 baseUrl = "http://play.decentraland.zone/?";
             }
-
+            #if DCL_VR
+            #if UNITY_STANDALONE || UNITY_EDITOR
+                baseUrl += "dcl_renderer_type=vr_desktop&";
+            #else
+                baseUrl += "dcl_renderer_type=vr_android&";
+            #endif
+            #endif
             switch (network)
             {
                 case Network.SEPOLIA:

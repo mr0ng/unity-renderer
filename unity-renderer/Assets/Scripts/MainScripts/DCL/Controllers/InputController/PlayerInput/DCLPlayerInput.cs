@@ -147,13 +147,13 @@ namespace DCL
                     ""initialStateCheck"": false
                 },
                 {
-                    ""name"": ""EmotesSelect"",
-                    ""type"": ""Value"",
-                    ""id"": ""b9017433-4c61-40ca-aa2c-174bbe4335cc"",
-                    ""expectedControlType"": ""Vector2"",
+                    ""name"": ""SelectEmote"",
+                    ""type"": ""Button"",
+                    ""id"": ""d46ebb65-8874-4ded-b4c7-407cb0dde5e0"",
+                    ""expectedControlType"": ""Button"",
                     ""processors"": """",
                     ""interactions"": """",
-                    ""initialStateCheck"": true
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -522,12 +522,12 @@ namespace DCL
                 },
                 {
                     ""name"": """",
-                    ""id"": ""7102d242-44f0-475f-b726-ad210c7ce37b"",
-                    ""path"": ""<XRController>{LeftHand}/joystick"",
+                    ""id"": ""88de0e84-d71b-4e91-b9af-ff5a6b7c51e0"",
+                    ""path"": ""<XRController>{LeftHand}/joystickClicked"",
                     ""interactions"": """",
-                    ""processors"": ""StickDeadzone"",
-                    ""groups"": ""XR"",
-                    ""action"": ""EmotesSelect"",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""SelectEmote"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 }
@@ -1117,7 +1117,7 @@ namespace DCL
             m_Player_MoveHMD = m_Player.FindAction("MoveHMD", throwIfNotFound: true);
             m_Player_RotateHMD = m_Player.FindAction("RotateHMD", throwIfNotFound: true);
             m_Player_Emotes = m_Player.FindAction("Emotes", throwIfNotFound: true);
-            m_Player_EmotesSelect = m_Player.FindAction("EmotesSelect", throwIfNotFound: true);
+            m_Player_SelectEmote = m_Player.FindAction("SelectEmote", throwIfNotFound: true);
             // UI
             m_UI = asset.FindActionMap("UI", throwIfNotFound: true);
             m_UI_Navigate = m_UI.FindAction("Navigate", throwIfNotFound: true);
@@ -1204,7 +1204,7 @@ namespace DCL
         private readonly InputAction m_Player_MoveHMD;
         private readonly InputAction m_Player_RotateHMD;
         private readonly InputAction m_Player_Emotes;
-        private readonly InputAction m_Player_EmotesSelect;
+        private readonly InputAction m_Player_SelectEmote;
         public struct PlayerActions
         {
             private @DCLPlayerInput m_Wrapper;
@@ -1222,7 +1222,7 @@ namespace DCL
             public InputAction @MoveHMD => m_Wrapper.m_Player_MoveHMD;
             public InputAction @RotateHMD => m_Wrapper.m_Player_RotateHMD;
             public InputAction @Emotes => m_Wrapper.m_Player_Emotes;
-            public InputAction @EmotesSelect => m_Wrapper.m_Player_EmotesSelect;
+            public InputAction @SelectEmote => m_Wrapper.m_Player_SelectEmote;
             public InputActionMap Get() { return m_Wrapper.m_Player; }
             public void Enable() { Get().Enable(); }
             public void Disable() { Get().Disable(); }
@@ -1271,9 +1271,9 @@ namespace DCL
                 @Emotes.started += instance.OnEmotes;
                 @Emotes.performed += instance.OnEmotes;
                 @Emotes.canceled += instance.OnEmotes;
-                @EmotesSelect.started += instance.OnEmotesSelect;
-                @EmotesSelect.performed += instance.OnEmotesSelect;
-                @EmotesSelect.canceled += instance.OnEmotesSelect;
+                @SelectEmote.started += instance.OnSelectEmote;
+                @SelectEmote.performed += instance.OnSelectEmote;
+                @SelectEmote.canceled += instance.OnSelectEmote;
             }
 
             private void UnregisterCallbacks(IPlayerActions instance)
@@ -1317,9 +1317,9 @@ namespace DCL
                 @Emotes.started -= instance.OnEmotes;
                 @Emotes.performed -= instance.OnEmotes;
                 @Emotes.canceled -= instance.OnEmotes;
-                @EmotesSelect.started -= instance.OnEmotesSelect;
-                @EmotesSelect.performed -= instance.OnEmotesSelect;
-                @EmotesSelect.canceled -= instance.OnEmotesSelect;
+                @SelectEmote.started -= instance.OnSelectEmote;
+                @SelectEmote.performed -= instance.OnSelectEmote;
+                @SelectEmote.canceled -= instance.OnSelectEmote;
             }
 
             public void RemoveCallbacks(IPlayerActions instance)
@@ -1515,7 +1515,7 @@ namespace DCL
             void OnMoveHMD(InputAction.CallbackContext context);
             void OnRotateHMD(InputAction.CallbackContext context);
             void OnEmotes(InputAction.CallbackContext context);
-            void OnEmotesSelect(InputAction.CallbackContext context);
+            void OnSelectEmote(InputAction.CallbackContext context);
         }
         public interface IUIActions
         {

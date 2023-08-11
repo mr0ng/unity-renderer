@@ -100,7 +100,7 @@ namespace DCL.EmotesWheel
 
         private void OnEquippedEmotesSet(IEnumerable<EquippedEmoteData> equippedEmotes) { UpdateEmoteSlots(); }
 
-        private void UpdateEmoteSlots()
+        internal void UpdateEmoteSlots()
         {
             List<EmotesWheelView.EmoteSlotData> emotesToSet = new List<EmotesWheelView.EmoteSlotData>();
 

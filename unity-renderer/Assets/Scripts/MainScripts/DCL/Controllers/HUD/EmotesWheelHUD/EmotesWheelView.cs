@@ -89,7 +89,10 @@ namespace DCL.EmotesWheel
 
                     if (equippedEmote != null)
                     {
-                        emoteButtons[i].button.onClick.AddListener(() => onEmoteClicked?.Invoke(equippedEmote.emoteItem.id));
+                        emoteButtons[i].button.onClick.AddListener(() =>
+                        {
+                            onEmoteClicked?.Invoke(equippedEmote.emoteItem.id);
+                        });
 
                         if (equippedEmote.thumbnailSprite != null)
                             emoteButtons[i].SetImage(equippedEmote.thumbnailSprite);

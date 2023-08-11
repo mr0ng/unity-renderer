@@ -27,7 +27,7 @@ ScriptedImporter:
   - type: 2
     originalUri: Assets\Ongvr\LoginUI\Models\tree plot.bin
     assetPath: Assets\Ongvr\LoginUI\Models\tree plot.bin
-  - type: 2
+  - type: 1
     originalUri: Assets\Ongvr\LoginUI\Models\image_0.png
     assetPath: Assets\Ongvr\LoginUI\Models\image_0.png
   reportItems: []

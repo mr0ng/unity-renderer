@@ -33,10 +33,11 @@ namespace DCLServices.DCLFileBrowser
             {
                 fileName += $".{extensionsFilter[0].Extensions[0]}";
             }
-
+    #if !UNITY_ANDROID
             if (!WebGLFileSaver.IsSavingSupported())
                 throw new Exception("File saving is not supported in the browser");
             WebGLFileSaver.SaveFile(content, fileName);
+#endif
         }
 
         private bool FileNameContainsAnyExtension(string fileName, ExtensionFilter[] extensionsFilter)

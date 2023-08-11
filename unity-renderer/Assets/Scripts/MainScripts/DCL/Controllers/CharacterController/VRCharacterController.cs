@@ -34,7 +34,9 @@ public class VRCharacterController : MonoBehaviour
  //#if (UNITY_ANDROID && !UNITY_EDITOR)
 //     private readonly Vector3 offset = new Vector3(0f, 0.55f, 0f);
 // #else
-    private readonly Vector3 offset = new Vector3(0f, -0.85f, 0f);
+
+[SerializeField]private Vector3 offset = new Vector3(0f, 0.1f, 0f);
+//0.53 Sitting to match head height.
 // #endif
     private Transform mixedRealityPlayspace;
 
@@ -85,7 +87,7 @@ public class VRCharacterController : MonoBehaviour
         PlaceCamera();
         menuOpen.OnChange -= MenuOpened;
     }
-
+    [ContextMenu("PlaceCamera")]
     private void PlaceCamera()
     {
         mixedRealityPlayspace.parent = cameraParent;

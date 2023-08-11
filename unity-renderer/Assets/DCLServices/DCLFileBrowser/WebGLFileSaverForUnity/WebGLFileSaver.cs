@@ -5,6 +5,7 @@ using System.Runtime.InteropServices;
 
 public class WebGLFileSaver
 {
+    #if !UNITY_ANDROID
 
     [DllImport("__Internal")]
     private static extern void UNITY_SAVE(string content, string name, string MIMEType);
@@ -86,4 +87,5 @@ public class WebGLFileSaver
         CheckInit();
         return UNITY_IS_SUPPORTED();
     }
+#endif
 }

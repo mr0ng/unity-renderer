@@ -39,9 +39,9 @@ public class DebugConfigHelper : MonoBehaviour
     private string GetClientType()
     {
 #if UNITY_STANDALONE || UNITY_EDITOR
-        return "VR_TYPE=desktop&";
+        return "dcl_renderer_type=vr_desktop&";
 #else
-        return "VR_TYPE=android&";
+        return "dcl_renderer_type=vr_android&";
 #endif
     }
 }

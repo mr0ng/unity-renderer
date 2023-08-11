@@ -1726,7 +1726,6 @@ GameObject:
   - component: {fileID: 6448993919918096393}
   - component: {fileID: 4929217135905694146}
   - component: {fileID: 6144669497761666816}
-  - component: {fileID: 3598776479059833437}
   m_Layer: 5
   m_Name: PhoneInputField
   m_TagString: Untagged
@@ -1904,18 +1903,6 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 77923f43d3e4aa24f887f73d463e3515, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
---- !u!114 &3598776479059833437
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6331248030716142137}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3d4ded867e561ad4fbd434e1b7dbc807, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!1 &7028609850798398887

@@ -16,7 +16,11 @@ public class UUIDEventsPlugin : IPlugin
     public UUIDEventsPlugin()
     {
         inputControllerLegacy = new InputController_Legacy();
+        #if DCL_VR
+        hoverCanvas = LoadAndInstantiate<InteractionHoverCanvasController>("InteractionHoverCanvasVR");
+        #else
         hoverCanvas = LoadAndInstantiate<InteractionHoverCanvasController>("InteractionHoverCanvas");
+        #endif
 
         pointerEventsController = new PointerEventsController(inputControllerLegacy, hoverCanvas, SceneReferences.i?.mouseCatcher, DataStore.i.Get<DataStore_World>().currentRaycaster);
 

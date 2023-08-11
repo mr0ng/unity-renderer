@@ -148,7 +148,6 @@ GameObject:
   - component: {fileID: 72238369309359061}
   - component: {fileID: 6859779996693374826}
   - component: {fileID: 8114059859674282854}
-  - component: {fileID: 2162145341383748936}
   m_Layer: 5
   m_Name: InputEmail
   m_TagString: Untagged
@@ -317,18 +316,6 @@ MonoBehaviour:
   isAlert: 0
   m_InputValidator: {fileID: 0}
   m_ShouldActivateOnSelect: 1
---- !u!114 &2162145341383748936
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 579543157188496642}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3d4ded867e561ad4fbd434e1b7dbc807, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1 &706022184231525018
 GameObject:
   m_ObjectHideFlags: 0
@@ -3056,7 +3043,6 @@ GameObject:
   - component: {fileID: 1551997721391603307}
   - component: {fileID: 4554737333371424649}
   - component: {fileID: 6588702801670224650}
-  - component: {fileID: 5843530915017844211}
   m_Layer: 5
   m_Name: InputName
   m_TagString: Untagged
@@ -3225,18 +3211,6 @@ MonoBehaviour:
   isAlert: 0
   m_InputValidator: {fileID: 0}
   m_ShouldActivateOnSelect: 1
---- !u!114 &5843530915017844211
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4491748286744018315}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3d4ded867e561ad4fbd434e1b7dbc807, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1 &4681674058129223728
 GameObject:
   m_ObjectHideFlags: 0
