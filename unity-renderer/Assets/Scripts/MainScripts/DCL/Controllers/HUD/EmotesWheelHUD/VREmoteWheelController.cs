@@ -45,7 +45,7 @@ namespace DCL.EmotesWheel
 
             emoteAction.Enable();
             moveAction.Enable();
-            emotesCustomizationDataStore.equippedEmotes.OnSet += OnEquippedEmotesSet;
+            
         }
         private void OnEquippedEmotesSet(IEnumerable<EquippedEmoteData> equippedEmotes) { emotesWheelCtrl.UpdateEmoteSlots(); }
 
@@ -58,7 +58,7 @@ namespace DCL.EmotesWheel
 
             emotesWheelView = emotesWheelCtrl.view;
             emotesWheelView.onEmoteClicked += OnEmoteClicked;
-
+            emotesCustomizationDataStore.equippedEmotes.OnSet += OnEquippedEmotesSet;
 
             var helper = (MonoBehaviour)emotesWheelView.gameObject.GetComponent("MenuHudHelper");
 

@@ -54,8 +54,9 @@ namespace DCL.Components.Video.Plugin
                     if (!isReady)
                     {
                         isReady = true;
-
+// #if !UNITY_ANDROID
                         texture = plugin.PrepareTexture(videoPlayerId);
+// #endif
                     }
 
                     if (playWhenReady)
@@ -66,9 +67,10 @@ namespace DCL.Components.Video.Plugin
 
                     break;
                 case VideoState.PLAYING:
+// #if !UNITY_ANDROID
                     if (visible)
                         plugin.TextureUpdate(videoPlayerId);
-
+// #endif
                     break;
             }
         }

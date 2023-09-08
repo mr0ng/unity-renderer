@@ -41,14 +41,26 @@ public class InputFieldClickHandler : MonoBehaviour
         // Get the hit GameObject
         GameObject hitObject = CoreServices.FocusProvider.PrimaryPointer.Result.Details.Object;
 
+        TMP_InputField hitInputField = hitObject.GetComponentInParent<TMP_InputField>();
+
+        if (hitInputField != null && hitInputField == KeyboardManager.keyboard.InputField)
+        {
+            return;
+        }
         // Check for TMP_InputField on the hit object or its parents
         TMP_InputField inputField = hitObject.GetComponentInParent<TMP_InputField>();
 
         if (inputField != null)
         {
-            // If we found a TMP_InputField, open the keyboard for it
-            KeyboardManager.Instance.OpenKeyboard(inputField);
+            if (KeyboardManager.Instance.IsKeyboardOpenFor(inputField))
+            {
+                KeyboardManager.Instance.UpdateKeyboardText(inputField.text);
+            }
+            else
+            {
+                KeyboardManager.Instance.OpenKeyboard(inputField);
+            }
         }
     }
-
+    
 }

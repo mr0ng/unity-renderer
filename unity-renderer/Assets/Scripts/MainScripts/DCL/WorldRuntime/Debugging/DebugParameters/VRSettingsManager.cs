@@ -216,7 +216,7 @@ public class VRSettingsManager : MonoBehaviour
     {
         if (settingsData == null)
         {
-            settingsPath = Path.Combine(Application.persistentDataPath, "EMGvrsettings.dat");
+            settingsPath = Path.Combine(Application.persistentDataPath, "vrsettings.dat");
             settingsData = LoadSettings();
         }
         if (settingsData.settings.ContainsKey(key))

@@ -93,13 +93,13 @@ public class PointerHelper : MonoBehaviour, IMixedRealityPointerHandler
                         // mapRenderImage.OnPointerClick(data);
                         mapRenderImage.OnBeginDrag(data);
                         lastEventData.Pointer.IsFocusLocked = false;
-                        Debug.Log($"update:OnBeginDrag: {cursorMapCoords}, {isDragging[pointerId]}");
+                        // Debug.Log($"update:OnBeginDrag: {cursorMapCoords}, {isDragging[pointerId]}");
                     }
                     else if (!isTriggerDown[pointerId] && triggerLastState[pointerId] && isDragging[pointerId])
                     {
                         mapRenderImage.OnEndDrag(new PointerEventData(EventSystem.current) { position = cursorMapCoords, dragging = isDragging[pointerId] });
                         isDragging[pointerId] = false;
-                        Debug.Log($"update:OnEndDrag: {cursorMapCoords}, {isDragging[pointerId]}");
+                        // Debug.Log($"update:OnEndDrag: {cursorMapCoords}, {isDragging[pointerId]}");
                     }
                     else
                     {
@@ -114,7 +114,7 @@ public class PointerHelper : MonoBehaviour, IMixedRealityPointerHandler
                     if (isDragging[pointerId] && !isTriggerDown[pointerId])
                     {
                         mapRenderImage.OnEndDrag(new PointerEventData(EventSystem.current) { position = cursorMapCoords, dragging = isDragging[pointerId] });
-                        Debug.Log($"update:OnEndDrag: off map {cursorMapCoords}, {isDragging[pointerId]}");
+                        // Debug.Log($"update:OnEndDrag: off map {cursorMapCoords}, {isDragging[pointerId]}");
                         isDragging[pointerId] = false;
                     }
                 }
@@ -122,7 +122,7 @@ public class PointerHelper : MonoBehaviour, IMixedRealityPointerHandler
                 if (isTriggerDown[pointerId] && isDragging[pointerId])
                 {
                     mapRenderImage.OnDrag(new PointerEventData(EventSystem.current) { position = cursorMapCoords, dragging = isDragging[pointerId] });
-                    Debug.Log($"update:OnDrag: {cursorMapCoords}, {isDragging[pointerId]}");
+                    // Debug.Log($"update:OnDrag: {cursorMapCoords}, {isDragging[pointerId]}");
                 }
             }
         }

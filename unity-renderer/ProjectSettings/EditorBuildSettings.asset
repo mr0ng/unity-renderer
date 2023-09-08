@@ -11,9 +11,18 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/InitialScene_VR.unity
     guid: 5ab5df3b186685b4aa5cee56a310ef3b
+  - enabled: 0
+    path: Assets/AVProVideo/Demos/Scenes/Demo_DisplayComponents.unity
+    guid: 4313ef3d8aef8764ea98fd3a15361c9b
   m_configObjects:
     Unity.XR.Oculus.Settings: {fileID: 11400000, guid: 03845b16a704ea747ad8aaa2ddf11812,
       type: 2}
+    com.unity.adaptiveperformance.google.android.provider_settings: {fileID: 11400000,
+      guid: 9c2135c5eac5f1847874a39eef851e33, type: 2}
+    com.unity.adaptiveperformance.loader_settings: {fileID: 11400000, guid: 63674853b393b6a46a50577b0c644736,
+      type: 2}
+    com.unity.adaptiveperformance.simulator.provider_settings: {fileID: 11400000,
+      guid: 5b3b35cf87e47ea4f9762e9274b40e07, type: 2}
     com.unity.addressableassets: {fileID: 11400000, guid: dcdfa91e8fac49c4892ed95233457266,
       type: 2}
     com.unity.input.settings: {fileID: 11400000, guid: ed92f4994d89900418375e16b663e852,

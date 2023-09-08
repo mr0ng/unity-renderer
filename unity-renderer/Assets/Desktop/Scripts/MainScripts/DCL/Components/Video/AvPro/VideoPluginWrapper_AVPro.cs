@@ -6,7 +6,7 @@ using UnityEngine;
 public class VideoPluginWrapper_AVPro : IVideoPluginWrapper
 {
 
-    private Dictionary<string, IVideoPlayer> videoPlayers = new Dictionary<string, IVideoPlayer>();
+    private static Dictionary<string, IVideoPlayer> videoPlayers = new Dictionary<string, IVideoPlayer>();
 
     public void Create(string id, string url, bool useHls)
     {

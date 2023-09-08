@@ -1558,7 +1558,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &3052138440549759273
 RectTransform:
   m_ObjectHideFlags: 0
@@ -2558,7 +2558,7 @@ PrefabInstance:
     - target: {fileID: 5430154721472367846, guid: e399265a17d26494da5c9fe6063ea2d2,
         type: 3}
       propertyPath: m_PresetInfoIsWorld
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6473396510046919356, guid: e399265a17d26494da5c9fe6063ea2d2,
         type: 3}
@@ -2728,7 +2728,6 @@ MonoBehaviour:
   offset: {x: 3332, y: 1356, z: 0}
   scaleFactor: 0.15
   localPointerPos: {x: 0, y: 0, z: 0}
-  isCursorOverMap: 0
   mapRenderImage: {fileID: 8513748176281374316}
   cursorMapCoords: {x: 0, y: 0}
   dragDistance: 70

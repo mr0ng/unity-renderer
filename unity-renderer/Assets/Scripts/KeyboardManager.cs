@@ -2,6 +2,7 @@
 using TMPro;
 using UnityEngine;
 using System;
+using System.Collections;
 
 namespace DCL.Interface
 {
@@ -10,18 +11,20 @@ namespace DCL.Interface
         public static KeyboardManager Instance;
 
         private static GameObject canvasKeyboard;
-        private static NonNativeKeyboard keyboard;
+        public static NonNativeKeyboard keyboard;
         private static Transform _keyboardTrans;
 
-        private TMP_InputField activeInputField;
-
+        private static TMP_InputField activeInputField;
+        static int previousActiveInputCaretPosition = 0;
+        static int previousKeyboardInputCaretPosition = 0;
+        private static bool isFocused = false;
         private void Awake()
         {
             // Setup singleton
             if (Instance == null)
             {
                 Instance = this;
-                DontDestroyOnLoad(gameObject);
+                // DontDestroyOnLoad(gameObject);
             }
             else
             {
@@ -40,6 +43,7 @@ namespace DCL.Interface
 #endif
             canvasKeyboard = Instantiate((GameObject)Resources.Load("Prefabs/KeyboardCanvas"));
             keyboard = NonNativeKeyboard.Instance;
+            keyboard.CloseOnInactivity = false;
             _keyboardTrans = canvasKeyboard.transform;
             Canvas canvas = keyboard.transform.GetComponent<Canvas>();
             canvas.renderMode = RenderMode.WorldSpace;
@@ -49,6 +53,7 @@ namespace DCL.Interface
             // Set the layer of the keyboard and all its children to UI.
             SetLayerRecursively(canvasKeyboard, LayerMask.NameToLayer("UI"));
             SetLayerRecursively(keyboard.gameObject, LayerMask.NameToLayer("UI"));
+            keyboard.OnClosed += CloseKeyboard;
         }
 
         private static void SetLayerRecursively(GameObject obj, int newLayer)
@@ -72,12 +77,30 @@ namespace DCL.Interface
 
         public void OpenKeyboard(TMP_InputField inputField)
         {
+            keyboard.ShowAlphaKeyboard();
+            keyboard.PresentKeyboard();
+            // keyboard.InputField.gameObject.SetActive(false);
             if (_keyboardTrans == null)
                 return;
+
+            if (keyboard.isActiveAndEnabled && activeInputField == inputField) // If keyboard is already open for the same field
+            {
+
+                keyboard.InputField.caretPosition = activeInputField.caretPosition;
+                keyboard.InputField.stringPosition = activeInputField.stringPosition;
+                previousActiveInputCaretPosition = activeInputField.caretPosition;
+                previousKeyboardInputCaretPosition = activeInputField.caretPosition;
+                return;
+            }
 
             activeInputField = inputField;
             CleanUpEvents();
             keyboard.InputField.text = activeInputField.text;
+            int cursorPos = inputField.caretPosition;  // or calculate based on click position if needed
+            keyboard.InputField.caretPosition = cursorPos;
+            keyboard.InputField.stringPosition = cursorPos;
+            previousActiveInputCaretPosition = cursorPos;
+             previousKeyboardInputCaretPosition = cursorPos;
             SetupEvents();
             keyboard.PresentKeyboard(NonNativeKeyboard.LayoutType.URL);
             // Position and orientation code
@@ -94,6 +117,7 @@ namespace DCL.Interface
             _keyboardTrans.rotation = forwardRotation * tiltUpRotation;
 
             canvasKeyboard.SetActive(true);
+            StartCoroutine(TrackCursorChangeCoroutine());
         }
 
         private void HandleSubmit(object sender, EventArgs e)
@@ -103,10 +127,140 @@ namespace DCL.Interface
                 activeInputField.text = keyboard.InputField.text;
                 activeInputField.onSubmit.Invoke(activeInputField.text);
             }
+            // CloseKeyboard();
         }
 
-        private void CleanUpEvents() { keyboard.OnTextSubmitted -= HandleSubmit; }
 
-        private void SetupEvents() { keyboard.OnTextSubmitted += HandleSubmit; }
+        public static void CloseKeyboard(object sender, EventArgs eventArgs)
+        {
+            KeyboardManager.Instance.StopCoroutine(TrackCursorChangeCoroutine());
+            canvasKeyboard.SetActive(false);
+            KeyboardManager.Instance.CleanUpEvents();
+            activeInputField = null;
+        }
+
+        public void UpdateKeyboardText(string newText)
+        {
+            keyboard.InputField.text = newText;
+        }
+
+        private void HandleTextUpdated(string s)
+        {
+            if (activeInputField != null && s != "")
+            {
+                int selectionStart = Mathf.Min(keyboard.InputField.selectionAnchorPosition, keyboard.InputField.selectionFocusPosition);
+                int selectionEnd = Mathf.Max(keyboard.InputField.selectionAnchorPosition, keyboard.InputField.selectionFocusPosition);
+
+                // Check if there's a range selected
+                if (selectionStart != selectionEnd)
+                {
+                    string leftPart = activeInputField.text.Substring(0, selectionStart);
+                    string rightPart = activeInputField.text.Substring(selectionEnd);
+
+                    // Deduce the new character from the difference in s and activeInputField.text
+                    string difference = FindDifference(activeInputField.text, s);
+
+                    activeInputField.text = leftPart + difference + rightPart;
+                    activeInputField.caretPosition = selectionStart + difference.Length;
+                    activeInputField.selectionFocusPosition = activeInputField.caretPosition;
+                    keyboard.InputField.selectionAnchorPosition = activeInputField.caretPosition;
+                    keyboard.InputField.selectionFocusPosition = activeInputField.caretPosition;
+                    keyboard.InputField.text = activeInputField.text;
+                }
+                else
+                {
+                    activeInputField.text = keyboard.InputField.text;
+                    activeInputField.caretPosition = keyboard.InputField.caretPosition;
+                    activeInputField.stringPosition = keyboard.InputField.stringPosition;
+                }
+            }
+        }
+
+private string FindDifference(string oldText, string newText)
+{
+    int minLength = Mathf.Min(oldText.Length, newText.Length);
+
+    int startDifference = 0;
+    while (startDifference < minLength && oldText[startDifference] == newText[startDifference])
+    {
+        startDifference++;
     }
+
+    int endDifferenceOld = oldText.Length - 1;
+    int endDifferenceNew = newText.Length - 1;
+    while (endDifferenceOld >= startDifference && endDifferenceNew >= startDifference && oldText[endDifferenceOld] == newText[endDifferenceNew])
+    {
+        endDifferenceOld--;
+        endDifferenceNew--;
+    }
+
+    if (endDifferenceNew >= startDifference)
+        return newText.Substring(startDifference, endDifferenceNew - startDifference + 1);
+    else
+        return string.Empty;
+}
+
+
+
+        private void SetupEvents()
+        {
+            activeInputField.onSelect.AddListener(OnInputFieldSelect);
+            activeInputField.onDeselect.AddListener(OnInputFieldDeselect);
+            keyboard.OnTextSubmitted += HandleSubmit;
+            keyboard.OnTextUpdated += HandleTextUpdated;
+        }
+
+        void OnInputFieldSelect(string text)
+        {
+            isFocused = true;
+        }
+
+        void OnInputFieldDeselect(string text)
+        {
+            isFocused = false;
+        }
+
+        private void CleanUpEvents()
+        {
+            activeInputField.onSelect.RemoveListener(OnInputFieldSelect);
+            activeInputField.onDeselect.RemoveListener(OnInputFieldDeselect);
+            keyboard.OnTextSubmitted -= HandleSubmit;
+            keyboard.OnTextUpdated -= HandleTextUpdated;
+        }
+        public bool IsKeyboardOpenFor(TMP_InputField inputField)
+        {
+            return (canvasKeyboard.activeSelf && activeInputField == inputField);
+        }
+
+        private static IEnumerator TrackCursorChangeCoroutine()
+        {
+
+
+            while (keyboard != null && activeInputField != null && keyboard.isActiveAndEnabled)
+            {
+                // Check if the caret position of the active input field has changed (indicating a click)
+
+
+                // Check if the caret position of the keyboard input field has changed
+                 if (previousKeyboardInputCaretPosition != keyboard.InputField.caretPosition && !Input.anyKeyDown)
+                {
+                    activeInputField.caretPosition = keyboard.InputField.caretPosition;
+                    activeInputField.stringPosition = keyboard.InputField.stringPosition;
+                }
+                 else if (isFocused && previousActiveInputCaretPosition != activeInputField.caretPosition && !Input.anyKeyDown)
+                {
+                    keyboard.InputField.caretPosition = activeInputField.caretPosition;
+                    keyboard.InputField.stringPosition = activeInputField.stringPosition;
+
+                }
+                // Update the tracked caret positions
+                previousActiveInputCaretPosition = activeInputField.caretPosition;
+                previousKeyboardInputCaretPosition = keyboard.InputField.caretPosition;
+
+                yield return new WaitForSeconds(0.01f);
+            }
+        }
+
+    }
+
 }

@@ -21,7 +21,11 @@ public class AvProVideoPlayer : IVideoPlayer, IDisposable
     
     public AvProVideoPlayer(string id, string url)
     {
+        #if UNITY_ANDROID && !UNITY_EDITOR
+        avProMediaPlayer = GameObject.Instantiate(Resources.Load<MediaPlayer>("AVPro/AVProMediaPlayerAndroid"), null);
+#else
         avProMediaPlayer = GameObject.Instantiate(Resources.Load<MediaPlayer>("AVPro/AVProMediaPlayer"), null);
+#endif
         this.id = id;
         avProMediaPlayer.name = "_AvProMediaFor_" + id;
         avProMediaPlayer.OpenMedia(MediaPathType.AbsolutePathOrURL, url, false);

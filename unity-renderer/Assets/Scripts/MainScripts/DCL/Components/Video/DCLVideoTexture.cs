@@ -10,6 +10,7 @@ using DCL.SettingsCommon;
 using UnityEngine.Assertions;
 using AudioSettings = DCL.SettingsCommon.AudioSettings;
 using Decentraland.Sdk.Ecs6;
+using RenderHeads.Media.AVProVideo;
 
 namespace DCL.Components
 {
@@ -22,7 +23,7 @@ namespace DCL.Components
         private const float VIDEO_PROGRESS_UPDATE_INTERVAL_IN_SECONDS = 1f;
 
         public static System.Func<IVideoPluginWrapper> videoPluginWrapperBuilder = () => new VideoPluginWrapper_WebGL();
-
+        private string videoId;
         [System.Serializable]
         public new class Model : BaseModel
         {
@@ -52,7 +53,7 @@ namespace DCL.Components
                 if (pbModel.VideoTexture.HasSeek) pb.seek = pbModel.VideoTexture.Seek;
                 if (pbModel.VideoTexture.HasWrap) pb.wrap = (BabylonWrapMode)pbModel.VideoTexture.Wrap;
                 if (pbModel.VideoTexture.HasSamplingMode) pb.samplingMode = (FilterMode)pbModel.VideoTexture.SamplingMode;
-                
+
                 return pb;
             }
         }
@@ -135,6 +136,11 @@ namespace DCL.Components
                 }
 
                 texture = texturePlayer.texture;
+                Material customMat = Resources.Load<Material>("AVPro/AndroidVideoMaterial");
+                if (customMat != null)
+                {
+                    customMat.mainTexture = texture;
+                }
                 SetPlayStateDirty();
             }
 
@@ -170,7 +176,7 @@ namespace DCL.Components
             if (isInitialized) return;
             isInitialized = true;
 
-            string videoId = scene.sceneData.sceneNumber > 0 ? scene.sceneData.sceneNumber + id : scene.GetHashCode().ToString() + id;
+            videoId = scene.sceneData.sceneNumber > 0 ? scene.sceneData.sceneNumber + id : scene.GetHashCode().ToString() + id;
             texturePlayer = new WebVideoPlayer(videoId, dclVideoClip.GetUrl(), dclVideoClip.isStream, videoPluginWrapperBuilder.Invoke());
             texturePlayerUpdateRoutine = CoroutineStarter.Start(OnUpdate());
 
@@ -344,6 +350,27 @@ namespace DCL.Components
             component.OnAttach += SetPlayStateDirty;
             component.OnDetach += SetPlayStateDirty;
             DCLVideoTextureUtils.SubscribeToEntityUpdates(component, SetPlayStateDirty);
+            #if UNITY_ANDROID && !UNITY_EDITOR && DCL_VR
+            Debug.Log($"Applied video texture {videoId}");
+            GameObject foundGameObject = GameObject.Find("_AvProMediaFor_" + videoId);
+            if (foundGameObject != null)
+            {
+                MediaPlayer mediaPlayer = foundGameObject.GetComponent<MediaPlayer>();
+                if (mediaPlayer != null)
+                {
+                    DCLVideoTextureUtils.SetAVProMaterial(component, mediaPlayer, "_AvProMediaFor_" + videoId);
+                    Debug.Log("MediaPlayer component found and set.");
+                }
+                else
+                {
+                    Debug.LogError("MediaPlayer component not found on the GameObject.");
+                }
+            }
+            else
+            {
+                Debug.LogError("GameObject not found.");
+            }
+        #endif
         }
 
         public override void DetachFrom(ISharedComponent component)

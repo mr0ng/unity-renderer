@@ -51,7 +51,7 @@ Material:
     - _StencilOp: 0
     - _StencilReadMask: 255
     - _StencilWriteMask: 255
-    - _fillHead: 0.4747199
+    - _fillHead: 0.01976267
     - _fillTail: 0
     - _fillTails: 0.5
     m_Colors:
@@ -59,5 +59,5 @@ Material:
     - Color_989feb42c0074e3caa405393ba881f21: {r: 0.9529411, g: 0, b: 0.03656221,
         a: 1}
     - _BackgroundColor: {r: 1, g: 1, b: 1, a: 1}
-    - _color01: {r: 1, g: 0.1764706, b: 0.33333334, a: 1}
+    - _color01: {r: 1, g: 0.7372549, b: 0.35686275, a: 1}
   m_BuildTextureStacks: []
