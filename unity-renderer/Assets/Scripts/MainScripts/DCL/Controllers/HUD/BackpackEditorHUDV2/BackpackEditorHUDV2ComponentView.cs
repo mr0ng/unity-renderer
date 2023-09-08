@@ -82,11 +82,13 @@ namespace DCL.Backpack
             IPreviewCameraZoomController avatarPreviewZoomController)
         {
             ConfigureSectionSelector();
+
             backpackPreviewPanel.Initialize(
                 characterPreviewFactory,
                 avatarPreviewRotationController,
                 avatarPreviewPanningController,
                 avatarPreviewZoomController);
+
             colorPickerComponentView.OnColorChanged += OnColorPickerColorChanged;
             colorPickerComponentView.OnColorPickerToggle += ColorPickerToggle;
 
@@ -105,9 +107,7 @@ namespace DCL.Backpack
         private void ToggleOutfitSection()
         {
             if (outfitSection.activeInHierarchy)
-            {
                 ToggleNormalSection();
-            }
             else
             {
                 normalSection.SetActive(false);
@@ -237,6 +237,7 @@ namespace DCL.Backpack
             {
                 ResetPreviewPanel();
                 await UniTask.Delay(MS_TO_RESET_PREVIEW_ANIMATION, cancellationToken: ct);
+
                 backpackPreviewPanel.TakeSnapshots(
                     (face256, body) => onSuccess?.Invoke(face256, body),
                     () => onFailed?.Invoke());
@@ -296,20 +297,23 @@ namespace DCL.Backpack
 
         private void ConfigureSectionSelector()
         {
-            sectionSelector.GetSection(AVATAR_SECTION_INDEX).onSelect.AddListener((isSelected) =>
-            {
-                wearablesSection.SetActive(isSelected);
+            sectionSelector.GetSection(AVATAR_SECTION_INDEX)
+                           .onSelect.AddListener((isSelected) =>
+                            {
+                                wearablesSection.SetActive(isSelected);
 
-                if (isSelected)
-                    ResetPreviewPanel();
-            });
-            sectionSelector.GetSection(EMOTES_SECTION_INDEX).onSelect.AddListener((isSelected) =>
-            {
-                emotesSection.SetActive(isSelected);
+                                if (isSelected)
+                                    ResetPreviewPanel();
+                            });
 
-                if (isSelected)
-                    ResetPreviewPanel();
-            });
+            sectionSelector.GetSection(EMOTES_SECTION_INDEX)
+                           .onSelect.AddListener((isSelected) =>
+                            {
+                                emotesSection.SetActive(isSelected);
+
+                                if (isSelected)
+                                    ResetPreviewPanel();
+                            });
         }
 
         public void ResetPreviewPanel()
@@ -323,9 +327,14 @@ namespace DCL.Backpack
         {
             async UniTaskVoid UpdateAvatarAsync(CancellationToken ct)
             {
-                await backpackPreviewPanel.TryUpdatePreviewModelAsync(avatarModelToUpdate, ct);
-                backpackPreviewPanel.SetLoadingActive(false);
-                OnAvatarUpdated?.Invoke();
+                try
+                {
+                    await backpackPreviewPanel.TryUpdatePreviewModelAsync(avatarModelToUpdate, ct);
+                    backpackPreviewPanel.SetLoadingActive(false);
+                    OnAvatarUpdated?.Invoke();
+                }
+                catch (OperationCanceledException) { Debug.LogWarning("Update avatar preview cancelled"); }
+                catch (Exception e) { Debug.LogException(e); }
             }
 
             if (!isAvatarDirty)

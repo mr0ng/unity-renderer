@@ -49,7 +49,8 @@ namespace DCL
 #if !UNITY_ANDROID
             pluginSystem.Register<SkyboxController>(() => new SkyboxController(DataStore.i));
 #endif
-            pluginSystem.Register<ExperiencesViewerFeature>(() => new ExperiencesViewerFeature());
+            pluginSystem.Register<ExperiencesViewerPlugin>(() => new ExperiencesViewerPlugin());
+
             pluginSystem.RegisterWithFlag<ExperiencesConfirmationPlugin>(() => new ExperiencesConfirmationPlugin(), "px_confirm_enabled");
             pluginSystem.Register<EmoteAnimationsPlugin>(() => new EmoteAnimationsPlugin());
             pluginSystem.Register<TeleportHUDPlugin>(() => new TeleportHUDPlugin());

@@ -1,20 +1,21 @@
-using Cysharp.Threading.Tasks;
 using DCL;
-using DCLServices.WearablesCatalogService;
-using System.Threading;
-using UI.InWorldCamera.Scripts;
+using DCLServices.CameraReelService;
+using System;
+using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Networking;
 using UnityEngine.UI;
 
 namespace DCLFeatures.CameraReel.ScreenshotViewer
 {
     public class ScreenshotVisiblePersonView : MonoBehaviour
     {
+        public static readonly BaseHashSet<ScreenshotVisiblePersonView> Instances = new ();
+
         [Header("PROFILE")]
         [SerializeField] private ProfileCardComponentView profileCard;
         [SerializeField] private GameObject isGuestImage;
         [SerializeField] private Button wearablesListButton;
+        [SerializeField] private Button userNameButton;
         [SerializeField] private Image dropdownArrow;
         [SerializeField] private Sprite arrowUp;
 
@@ -23,78 +24,84 @@ namespace DCLFeatures.CameraReel.ScreenshotViewer
         [SerializeField] private Transform wearablesListContainer;
         [SerializeField] private GameObject emptyWearablesListMessage;
 
+        private readonly Dictionary<NFTIconComponentView, PoolableObject> wearables = new ();
+
         private Sprite arrowDown;
         private bool isShowingWearablesList;
-
         private bool hasWearables;
+
+        public event Action<VisiblePerson> OnConfigureRequested;
+        public event Action<NFTIconComponentModel> OnOpenWearableMarketplaceRequested;
+        public event Action OnOpenProfileRequested;
 
         private void Awake()
         {
             wearablesListButton.onClick.AddListener(ShowHideList);
+            userNameButton.onClick.AddListener(() => OnOpenProfileRequested?.Invoke());
             arrowDown = dropdownArrow.sprite;
+
+            if (!Instances.Contains(this))
+                Instances.Add(this);
+        }
+
+        private void OnDestroy()
+        {
+            Instances.Remove(this);
         }
 
         public void Configure(VisiblePerson visiblePerson)
         {
-            profileCard.SetProfileName(visiblePerson.userName);
-            profileCard.SetProfileAddress(visiblePerson.userAddress);
-            UpdateProfileIcon(visiblePerson.userAddress, profileCard);
+            if (!Instances.Contains(this))
+                Instances.Add(this);
 
-            if (visiblePerson.isGuest)
-            {
-                isGuestImage.SetActive(true);
-                wearablesListButton.interactable = false;
-            }
-            else if (visiblePerson.wearables.Length > 0)
-            {
-                IWearablesCatalogService wearablesService = Environment.i.serviceLocator.Get<IWearablesCatalogService>();
-                FetchWearables(visiblePerson, wearablesService);
-            }
+            wearablesListContainer.gameObject.SetActive(false);
+            OnConfigureRequested?.Invoke(visiblePerson);
         }
 
-        private static async void UpdateProfileIcon(string userId, IProfileCardComponentView person)
+        public void ClearWearables()
         {
-            UserProfile profile = UserProfileController.userProfilesCatalog.Get(userId) ?? await UserProfileController.i.RequestFullUserProfileAsync(userId);
+            foreach ((NFTIconComponentView _, PoolableObject poolObj) in wearables)
+                poolObj.Release();
 
-            UnityWebRequest request = UnityWebRequestTexture.GetTexture(profile.face256SnapshotURL);
-            await request.SendWebRequest();
-
-            if (request.result != UnityWebRequest.Result.Success)
-                Debug.Log(request.error);
-            else
-            {
-                Texture2D texture = ((DownloadHandlerTexture)request.downloadHandler).texture;
-                person.SetProfilePicture(Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), new Vector2(0.5f, 0.5f)));
-            }
+            wearables.Clear();
         }
 
-        private async void FetchWearables(VisiblePerson person, IWearablesCatalogService wearablesService)
+        public void AddWearable(NFTIconComponentModel nftModel)
         {
             wearablesListContainer.gameObject.SetActive(false);
+            hasWearables = true;
 
-            hasWearables = person.wearables.Length > 0;
+            Pool wearablePool = GetWearableEntryPool();
+            PoolableObject poolObj = wearablePool.Get();
+            NFTIconComponentView wearableEntry = poolObj.gameObject.GetComponent<NFTIconComponentView>();
+            wearableEntry.transform.SetParent(wearablesListContainer, false);
+            wearableEntry.Configure(nftModel);
+            Button equipButton = wearableEntry.GetComponent<Button>();
+            equipButton.onClick.RemoveAllListeners();
+            equipButton.onClick.AddListener(() => OnOpenWearableMarketplaceRequested?.Invoke(nftModel));
+            wearableEntry.gameObject.SetActive(true);
+            wearables[wearableEntry] = poolObj;
+        }
 
-            foreach (string wearable in person.wearables)
-            {
-                WearableItem wearableItem = await wearablesService.RequestWearableAsync(wearable, default(CancellationToken));
+        public void SetProfileName(string userName)
+        {
+            profileCard.SetProfileName(userName);
+        }
 
-                var newModel = new NFTIconComponentModel
-                {
-                    name = wearableItem.GetName(),
-                    imageURI = wearableItem.ComposeThumbnailUrl(),
-                    rarity = wearableItem.rarity,
-                    nftInfo = wearableItem.GetNftInfo(),
-                    marketplaceURI = wearableItem.GetMarketplaceLink(),
-                    showMarketplaceButton = true,
-                    showType = false,
-                    type = wearableItem.data.category,
-                };
+        public void SetProfileAddress(string address)
+        {
+            profileCard.SetProfileAddress(address);
+        }
 
-                NFTIconComponentView wearableEntry = Instantiate(wearableTemplate, wearablesListContainer);
-                wearableEntry.Configure(newModel);
-                wearableEntry.GetComponent<Button>().onClick.AddListener(() => { Application.OpenURL(newModel.marketplaceURI); });
-                wearableEntry.gameObject.SetActive(true);
-            }
+        public void SetProfilePicture(string url)
+        {
+            profileCard.SetProfilePicture(url);
+        }
+
+        public void SetGuestMode(bool isGuest)
+        {
+            isGuestImage.SetActive(isGuest);
+            wearablesListButton.interactable = !isGuest;
         }
 
         private void ShowHideList()
@@ -108,6 +115,21 @@ namespace DCLFeatures.CameraReel.ScreenshotViewer
                 emptyWearablesListMessage.SetActive(isShowingWearablesList);
 
             LayoutRebuilder.ForceRebuildLayoutImmediate(transform as RectTransform);
+        }
+
+        private Pool GetWearableEntryPool()
+        {
+            const string POOL_ID = "CameraReelPictureDetailProfileWearables";
+            var entryPool = PoolManager.i.GetPool(POOL_ID);
+            if (entryPool != null) return entryPool;
+
+            entryPool = PoolManager.i.AddPool(
+                POOL_ID,
+                Instantiate(wearableTemplate).gameObject,
+                maxPrewarmCount: 10,
+                isPersistent: true);
+
+            return entryPool;
         }
     }
 }

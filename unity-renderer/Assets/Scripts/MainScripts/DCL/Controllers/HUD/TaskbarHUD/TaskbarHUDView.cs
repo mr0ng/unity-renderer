@@ -138,7 +138,7 @@ public class TaskbarHUDView : MonoBehaviour
     public void SetExperiencesVisibility(bool visible)
     {
         experiencesContainer.SetActive(visible);
-        experiencesContainer.transform.SetAsLastSibling();
+        intercomButton.transform.SetAsLastSibling();
     }
 
     public void ToggleOn(TaskbarButtonType buttonType) => ToggleOn(buttonsByType[buttonType], false);

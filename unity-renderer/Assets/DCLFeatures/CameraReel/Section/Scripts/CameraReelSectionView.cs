@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace DCLFeatures.CameraReel.Section
 {
-    public class CameraReelSectionView : MonoBehaviour
+    public class CameraReelSectionView : MonoBehaviour, ICameraReelSectionView
     {
         [SerializeField] private Canvas canvas;
         [SerializeField] private GameObject loadingSpinner;
@@ -16,10 +16,10 @@ namespace DCLFeatures.CameraReel.Section
         public void SwitchVisibility(bool isVisible) =>
             canvas.enabled = isVisible;
 
-        public void ShowGalleryWhenLoaded()
+        public void HideLoading()
         {
-            GalleryView.SwitchVisibility(isVisible: true);
             loadingSpinner.SetActive(false);
+            GalleryStorageView.Show();
         }
     }
 }

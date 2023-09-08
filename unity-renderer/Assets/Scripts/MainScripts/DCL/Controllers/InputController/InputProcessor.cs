@@ -218,22 +218,26 @@ public static class InputProcessor
     {
         if (!PassModifiers(modifiers))
         {
-            action.RaiseOnValueChanged(0);
+            action.SetValue(0);
             return;
         }
 
-        if (axisValue is string axisName)
-        {
-            action.RaiseOnValueChanged(Input.GetAxis(axisName));
-        }
-        else if (axisValue is float axisFloatValue)
-        {
-            action.RaiseOnValueChanged(axisFloatValue);
-        }
-        else
-        {
-            throw new ArgumentException("Invalid axis value type. Must be a string or float.");
-        }
+// <<<<<<< HEAD
+        // if (axisValue is string axisName)
+        // {
+            // action.RaiseOnValueChanged(Input.GetAxis(axisName));
+        // }
+        // else if (axisValue is float axisFloatValue)
+        // {
+            // action.RaiseOnValueChanged(axisFloatValue);
+        // }
+        // else
+        // {
+            // throw new ArgumentException("Invalid axis value type. Must be a string or float.");
+        // }
+// =======
+        action.SetValue(Input.GetAxis(axisName));
+// >>>>>>> upstream/main
     }
 
     /// <summary>

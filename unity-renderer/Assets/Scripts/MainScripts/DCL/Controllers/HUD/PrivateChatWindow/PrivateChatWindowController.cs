@@ -5,6 +5,7 @@ using Cysharp.Threading.Tasks;
 using DCL.Interface;
 using DCL.Social.Chat.Mentions;
 using DCL.Social.Friends;
+using DCLServices.CopyPaste.Analytics;
 using SocialFeaturesAnalytics;
 using UnityEngine;
 
@@ -26,6 +27,7 @@ namespace DCL.Social.Chat
         private readonly IMouseCatcher mouseCatcher;
         private readonly IChatMentionSuggestionProvider chatMentionSuggestionProvider;
         private readonly IClipboard clipboard;
+        private readonly ICopyPasteAnalyticsService copyPasteAnalyticsService;
         private ChatHUDController chatHudController;
         private UserProfile conversationProfile;
         private float lastRequestTime;
@@ -46,7 +48,8 @@ namespace DCL.Social.Chat
             ISocialAnalytics socialAnalytics,
             IMouseCatcher mouseCatcher,
             IChatMentionSuggestionProvider chatMentionSuggestionProvider,
-            IClipboard clipboard)
+            IClipboard clipboard,
+            ICopyPasteAnalyticsService copyPasteAnalyticsService)
         {
             this.dataStore = dataStore;
             this.userProfileBridge = userProfileBridge;
@@ -56,6 +59,7 @@ namespace DCL.Social.Chat
             this.mouseCatcher = mouseCatcher;
             this.chatMentionSuggestionProvider = chatMentionSuggestionProvider;
             this.clipboard = clipboard;
+            this.copyPasteAnalyticsService = copyPasteAnalyticsService;
         }
 
         public void Initialize(IPrivateChatComponentView view)
@@ -87,7 +91,8 @@ namespace DCL.Social.Chat
                 },
                 socialAnalytics,
                 chatController,
-                clipboard);
+                clipboard,
+                copyPasteAnalyticsService);
 
             chatHudController.Initialize(view.ChatHUD);
             chatHudController.SortingStrategy = new ChatEntrySortingByTimestamp();
@@ -285,13 +290,7 @@ namespace DCL.Social.Chat
 
         private void Unfriend(string friendId)
         {
-            dataStore.notifications.GenericConfirmation.Set(GenericConfirmationNotificationData.CreateUnFriendData(
-                UserProfileController.userProfilesCatalog.Get(friendId)?.userName,
-                () =>
-                {
-                    friendsController.RemoveFriend(friendId);
-                    Hide();
-                }), true);
+            Hide();
         }
 
         private bool IsMessageFomCurrentConversation(ChatMessage message)

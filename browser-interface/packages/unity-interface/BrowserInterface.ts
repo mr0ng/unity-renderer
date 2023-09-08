@@ -89,7 +89,6 @@ import {
 import {
   joinVoiceChat,
   leaveVoiceChat,
-  requestToggleVoiceChatRecording,
   requestVoiceChatRecording,
   setAudioDevice,
   setVoiceChatPolicy,
@@ -847,10 +846,6 @@ export class BrowserInterface {
     store.dispatch(leaveVoiceChat())
   }
 
-  public ToggleVoiceChatRecording() {
-    store.dispatch(requestToggleVoiceChatRecording())
-  }
-
   public ApplySettings(settingsMessage: { voiceChatVolume: number; voiceChatAllowCategory: number }) {
     store.dispatch(setVoiceChatVolume(settingsMessage.voiceChatVolume))
     store.dispatch(setVoiceChatPolicy(settingsMessage.voiceChatAllowCategory))
@@ -1040,7 +1035,7 @@ export class BrowserInterface {
         const successMessage = `Welcome to realm ${serverName}!`
         notifyStatusThroughChat(successMessage)
         getUnityInstance().ConnectionToRealmSuccess(data)
-        TeleportController.goTo(x, y, successMessage).then(
+        TeleportController.goTo(x, y, false, successMessage).then(
           () => {},
           () => {}
         )

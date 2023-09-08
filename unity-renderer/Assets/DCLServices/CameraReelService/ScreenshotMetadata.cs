@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-namespace UI.InWorldCamera.Scripts
+namespace DCLServices.CameraReelService
 {
     [Serializable]
     public class ScreenshotMetadata
@@ -17,6 +17,9 @@ namespace UI.InWorldCamera.Scripts
         public Scene scene;
         public VisiblePerson[] visiblePeople;
 
+        private static bool isWorld => DataStore.i.common.isWorld.Get();
+        private static string realmName => DataStore.i.realm.realmName.Get();
+
         public static ScreenshotMetadata Create(DataStore_Player player, IAvatarsLODController avatarsLODController, Camera screenshotCamera)
         {
             Player ownPlayer = player.ownPlayer.Get();
@@ -27,10 +30,10 @@ namespace UI.InWorldCamera.Scripts
                 userName = UserProfileController.userProfilesCatalog.Get(ownPlayer.id).userName,
                 userAddress = ownPlayer.id,
                 dateTime = DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString(),
-                realm = DataStore.i.realm.realmName.Get(),
+                realm = realmName,
                 scene = new Scene
                 {
-                    name = MinimapMetadata.GetMetadata().GetSceneInfo(playerPosition.x, playerPosition.y).name,
+                    name = isWorld? $"World {realmName}" : MinimapMetadata.GetMetadata().GetSceneInfo(playerPosition.x, playerPosition.y).name,
                     location = new Location(playerPosition),
                 },
                 visiblePeople = GetVisiblePeoplesMetadata(
@@ -45,11 +48,9 @@ namespace UI.InWorldCamera.Scripts
             var visiblePeople = new VisiblePerson[visiblePlayers.Count];
             UserProfileDictionary userProfilesCatalog = UserProfileController.userProfilesCatalog;
 
-            UserProfile profile;
-
             for (var i = 0; i < visiblePlayers.Count; i++)
             {
-                profile = userProfilesCatalog.Get(visiblePlayers[i].id);
+                UserProfile profile = userProfilesCatalog.Get(visiblePlayers[i].id);
 
                 visiblePeople[i] = new VisiblePerson
                 {
@@ -85,9 +86,13 @@ namespace UI.InWorldCamera.Scripts
         public DateTime GetLocalizedDateTime()
         {
             if (!long.TryParse(dateTime, out long unixTimestamp)) return new DateTime();
+            return DateTimeOffset.FromUnixTimeSeconds(unixTimestamp).ToLocalTime().DateTime;
+        }
 
-            var epoch = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
-            return epoch.AddSeconds(unixTimestamp).ToLocalTime();
+        public DateTime GetStartOfTheMonthDate()
+        {
+            DateTime localizedDateTime = GetLocalizedDateTime();
+            return new DateTime(localizedDateTime.Year, localizedDateTime.Month, 1);
         }
     }
 

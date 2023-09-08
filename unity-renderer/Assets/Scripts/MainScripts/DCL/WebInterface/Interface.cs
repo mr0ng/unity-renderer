@@ -404,12 +404,6 @@ namespace DCL.Interface
         public class RaycastHitAllResponse : RaycastResponse<RaycastHitEntities> { }
 
         [System.Serializable]
-        public class UserAcceptedCollectiblesPayload
-        {
-            public string id;
-        }
-
-        [System.Serializable]
         public class SendBlockPlayerPayload
         {
             public string userId;

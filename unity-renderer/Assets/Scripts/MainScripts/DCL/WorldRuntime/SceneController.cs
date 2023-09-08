@@ -11,6 +11,8 @@ using System.Threading;
 using Cysharp.Threading.Tasks;
 using DCL.Components;
 using DCL.World.PortableExperiences;
+using DCLServices.PortableExperiences.Analytics;
+using Newtonsoft.Json;
 using UnityEngine;
 using Debug = UnityEngine.Debug;
 
@@ -32,6 +34,7 @@ namespace DCL
         private BaseDictionary<string, (string name, string description, string icon)> disabledPortableExperiences => DataStore.i.world.disabledPortableExperienceIds;
         private BaseHashSet<string> portableExperienceIds => DataStore.i.world.portableExperienceIds;
         private BaseVariable<ExperiencesConfirmationData> pendingPortableExperienceToBeConfirmed => DataStore.i.world.portableExperiencePendingToConfirm;
+        private IPortableExperiencesAnalyticsService portableExperiencesAnalytics => Environment.i.serviceLocator.Get<IPortableExperiencesAnalyticsService>();
 
         public EntityIdHelper entityIdHelper { get; } = new EntityIdHelper();
         public bool enabled { get; set; } = true;
@@ -812,6 +815,8 @@ namespace DCL
 
                     if (!portableExperienceIds.Contains(sceneData.id))
                         portableExperienceIds.Add(sceneData.id);
+
+                    portableExperiencesAnalytics.Spawn(sceneData.id);
                 }
 
                 messagingControllersManager.AddControllerIfNotExists(this, newGlobalSceneNumber, isGlobal: true);
@@ -879,11 +884,14 @@ namespace DCL
 
                 if (DataStore.i.featureFlags.flags.Get().IsFeatureEnabled("px_confirm_enabled"))
                 {
-                    confirmPx = !IsPortableExperienceAlreadyConfirmed(pxId);
+                    if (!IsPortableExperienceInWhiteList(pxId))
+                    {
+                        confirmPx = !IsPortableExperienceAlreadyConfirmed(pxId);
 
-                    disablePx = IsPortableExperienceAlreadyConfirmed(pxId)
-                                && !ShouldForceAcceptPortableExperience(pxId)
-                                && !IsPortableExperienceConfirmedAndAccepted(pxId);
+                        disablePx = IsPortableExperienceAlreadyConfirmed(pxId)
+                                    && !ShouldForceAcceptPortableExperience(pxId)
+                                    && !IsPortableExperienceConfirmedAndAccepted(pxId);
+                    }
                 }
 
                 IWorldState worldState = Environment.i.world.state;
@@ -951,5 +959,22 @@ namespace DCL
 
         private bool IsPortableExperienceAlreadyConfirmed(string pxId) =>
             confirmedExperiencesRepository.Contains(pxId);
+
+        private bool IsPortableExperienceInWhiteList(string pxId)
+        {
+            FeatureFlag flags = DataStore.i.featureFlags.flags.Get();
+            FeatureFlagVariantPayload payload = flags.GetFeatureFlagVariantPayload("initial_portable_experiences:calendarpx");
+
+            if (payload == null) return false;
+
+            string[] whitelistedPxs = JsonConvert.DeserializeObject<string[]>(payload.value);
+
+            if (whitelistedPxs == null) return false;
+
+            for (var i = 0; i < whitelistedPxs.Length; i++)
+                if (whitelistedPxs[i].StartsWith(pxId)) return true;
+
+            return false;
+        }
     }
 }
