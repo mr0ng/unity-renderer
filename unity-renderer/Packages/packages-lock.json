@@ -232,7 +232,7 @@
       "url": "https://packages.unity.com"
     },
     "com.unity.inputsystem": {
-      "version": "1.5.0",
+      "version": "1.6.3",
       "depth": 1,
       "source": "registry",
       "dependencies": {
@@ -345,15 +345,6 @@
         "com.unity.searcher": "4.9.2"
       }
     },
-    "com.unity.subsystemregistration": {
-      "version": "1.1.0",
-      "depth": 2,
-      "source": "registry",
-      "dependencies": {
-        "com.unity.modules.subsystems": "1.0.0"
-      },
-      "url": "https://packages.unity.com"
-    },
     "com.unity.test-framework": {
       "version": "2.0.1-pre.18",
       "depth": 0,
@@ -422,23 +413,28 @@
       "dependencies": {}
     },
     "com.unity.xr.arfoundation": {
-      "version": "4.2.7",
+      "version": "5.0.6",
       "depth": 1,
       "source": "registry",
       "dependencies": {
-        "com.unity.xr.arsubsystems": "4.2.7",
+        "com.unity.inputsystem": "1.3.0",
+        "com.unity.xr.core-utils": "2.1.0",
         "com.unity.xr.management": "4.0.1",
-        "com.unity.modules.particlesystem": "1.0.0"
+        "com.unity.ugui": "1.0.0",
+        "com.unity.mathematics": "1.2.5",
+        "com.unity.modules.particlesystem": "1.0.0",
+        "com.unity.modules.ui": "1.0.0",
+        "com.unity.modules.unityanalytics": "1.0.0",
+        "com.unity.modules.unitywebrequest": "1.0.0"
       },
       "url": "https://packages.unity.com"
     },
-    "com.unity.xr.arsubsystems": {
-      "version": "4.2.7",
+    "com.unity.xr.core-utils": {
+      "version": "2.2.2",
       "depth": 2,
       "source": "registry",
       "dependencies": {
-        "com.unity.subsystemregistration": "1.1.0",
-        "com.unity.xr.management": "4.0.1"
+        "com.unity.modules.xr": "1.0.0"
       },
       "url": "https://packages.unity.com"
     },
@@ -452,17 +448,15 @@
       },
       "url": "https://packages.unity.com"
     },
-
     "com.unity.xr.management": {
-      "version": "4.2.0",
+      "version": "4.4.0",
       "depth": 1,
       "source": "registry",
       "dependencies": {
         "com.unity.modules.subsystems": "1.0.0",
         "com.unity.modules.vr": "1.0.0",
         "com.unity.modules.xr": "1.0.0",
-        "com.unity.xr.legacyinputhelpers": "2.1.7",
-        "com.unity.subsystemregistration": "1.0.6"
+        "com.unity.xr.legacyinputhelpers": "2.1.7"
       },
       "url": "https://packages.unity.com"
     },
@@ -494,7 +488,7 @@
         "com.unity.inputsystem": "1.4.4"
       },
       "url": "https://packages.unity.com"
-	},
+    },
     "com.vrmc.gltf": {
       "version": "https://github.com/decentraland/UniVRM.git?path=/Assets/UniGLTF#master",
       "depth": 0,
@@ -556,15 +550,15 @@
       "dependencies": {},
       "hash": "10864e9fd9b15f6342e9d5326d417b98e0e13e9e"
     },
-    "com.unity.modules.androidjni": {
-      "version": "1.0.0",
-      "depth": 0,
-	        "source": "builtin",
-      "dependencies": {}
-    },
     "com.unity.modules.ai": {
       "version": "1.0.0",
       "depth": 1,
+      "source": "builtin",
+      "dependencies": {}
+    },
+    "com.unity.modules.androidjni": {
+      "version": "1.0.0",
+      "depth": 0,
       "source": "builtin",
       "dependencies": {}
     },
@@ -682,6 +676,15 @@
       "depth": 0,
       "source": "builtin",
       "dependencies": {}
+    },
+    "com.unity.modules.unityanalytics": {
+      "version": "1.0.0",
+      "depth": 2,
+      "source": "builtin",
+      "dependencies": {
+        "com.unity.modules.unitywebrequest": "1.0.0",
+        "com.unity.modules.jsonserialize": "1.0.0"
+      }
     },
     "com.unity.modules.unitywebrequest": {
       "version": "1.0.0",

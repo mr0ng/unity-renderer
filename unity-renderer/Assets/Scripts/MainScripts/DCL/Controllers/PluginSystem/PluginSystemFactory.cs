@@ -71,7 +71,9 @@ namespace DCL
             pluginSystem.Register<ChatNotificationsFeature>(() => new ChatNotificationsFeature());
             pluginSystem.Register<ConnectWalletModalPlugin>(() => new ConnectWalletModalPlugin());
             pluginSystem.Register<FallbackFontsLoaderPlugin>(() => new FallbackFontsLoaderPlugin());
+            #if !DCL_VR
             pluginSystem.Register<SentryPlugin>(() => new SentryPlugin());
+            #endif
             pluginSystem.Register<LoadingScreenPlugin>(() => new LoadingScreenPlugin());
             pluginSystem.Register<SignupHUDPlugin>(() => new SignupHUDPlugin());
             pluginSystem.Register<PortableExperiencesTogglePlugin>(() => new PortableExperiencesTogglePlugin());

@@ -161,10 +161,11 @@ namespace DCL.Backpack
             #if DCL_VR
             CanvasGroup canvasGroup = GetComponent<CanvasGroup>();
             canvasGroup.blocksRaycasts = true;
-            Position();
+            // Position();
             #endif
             gameObject.SetActive(true);
             backpackPreviewPanel.SetPreviewEnabled(true);
+
         }
 
         public override void Hide(bool instant = false)

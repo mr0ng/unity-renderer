@@ -31,6 +31,7 @@ namespace DCL.Social.Chat.Channels
             IChannelsFeatureFlagService channelsFeatureFlagService)
         {
             this.view = view;
+            this.view.Hide();
             this.chatController = chatController;
             this.dataStore = dataStore;
             channelsDataStore = dataStore.channels;

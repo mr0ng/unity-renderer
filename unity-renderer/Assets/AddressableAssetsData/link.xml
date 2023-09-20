@@ -27,6 +27,8 @@
   <assembly fullname="CameraReel, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
     <type fullname="DCLFeatures.CameraReel.Gallery.CameraReelGalleryStorageView" preserve="all" />
     <type fullname="DCLFeatures.CameraReel.Gallery.CameraReelGalleryView" preserve="all" />
+    <type fullname="DCLFeatures.CameraReel.Gallery.CameraReelThumbnail" preserve="all" />
+    <type fullname="DCLFeatures.CameraReel.Gallery.ThumbnailContextMenuView" preserve="all" />
     <type fullname="DCLFeatures.CameraReel.ScreenshotViewer.ScreenshotViewerActionsPanelView" preserve="all" />
     <type fullname="DCLFeatures.CameraReel.ScreenshotViewer.ScreenshotViewerInfoSidePanelView" preserve="all" />
     <type fullname="DCLFeatures.CameraReel.ScreenshotViewer.ScreenshotViewerView" preserve="all" />
@@ -43,6 +45,18 @@
     <type fullname="DCL.Social.Chat.PoolChatEntryFactory" preserve="all" />
     <type fullname="DCL.Social.Chat.ChatHUDView/Model" preserve="nothing" serialized="true" />
   </assembly>
+  <assembly fullname="Cinemachine, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
+    <type fullname="Cinemachine.CinemachineBrain" preserve="all" />
+    <type fullname="Cinemachine.CinemachineHardLockToTarget" preserve="all" />
+    <type fullname="Cinemachine.CinemachinePipeline" preserve="all" />
+    <type fullname="Cinemachine.CinemachineSameAsFollowTarget" preserve="all" />
+    <type fullname="Cinemachine.CinemachineVirtualCamera" preserve="all" />
+    <type fullname="Cinemachine.CinemachineBlendDefinition" preserve="nothing" serialized="true" />
+    <type fullname="Cinemachine.CinemachineBrain/BrainEvent" preserve="nothing" serialized="true" />
+    <type fullname="Cinemachine.CinemachineBrain/VcamActivatedEvent" preserve="nothing" serialized="true" />
+    <type fullname="Cinemachine.CinemachineVirtualCameraBase/TransitionParams" preserve="nothing" serialized="true" />
+    <type fullname="Cinemachine.LensSettings" preserve="nothing" serialized="true" />
+  </assembly>
   <assembly fullname="ConnectWalletHUD, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
     <type fullname="DCL.Guests.HUD.ConnectWallet.ConnectWalletComponentView" preserve="all" />
   </assembly>
@@ -51,17 +65,18 @@
   </assembly>
   <assembly fullname="ExperienciesConfirmation, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
     <type fullname="DCL.PortableExperiences.Confirmation.ExperiencesConfirmationPopupComponentView" preserve="all" />
+    <type fullname="DCL.PortableExperiences.Confirmation.ExperiencesConfirmationPopupComponentView/PermissionContainer" preserve="nothing" serialized="true" />
   </assembly>
   <assembly fullname="FriendsHUD, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
     <type fullname="CollapsableSortedFriendEntryList" preserve="all" />
+    <type fullname="DCL.Social.Friends.FriendsHUDComponentView" preserve="all" />
     <type fullname="FriendEntry" preserve="all" />
     <type fullname="FriendRequestEntry" preserve="all" />
     <type fullname="FriendRequestsTabComponentView" preserve="all" />
-    <type fullname="FriendsHUDComponentView" preserve="all" />
     <type fullname="FriendsTabComponentView" preserve="all" />
     <type fullname="JumpInButton" preserve="all" />
+    <type fullname="DCL.Social.Friends.FriendsHUDComponentView/Model" preserve="nothing" serialized="true" />
     <type fullname="FriendRequestsTabComponentView/Model" preserve="nothing" serialized="true" />
-    <type fullname="FriendsHUDComponentView/Model" preserve="nothing" serialized="true" />
     <type fullname="FriendsTabComponentView/FriendListComponents" preserve="nothing" serialized="true" />
     <type fullname="FriendsTabComponentView/Model" preserve="nothing" serialized="true" />
   </assembly>
@@ -146,6 +161,9 @@
     <type fullname="NFTTypeIconsAndColors" preserve="all" />
     <type fullname="NFTIconComponentModel" preserve="nothing" serialized="true" />
   </assembly>
+  <assembly fullname="PlayerName, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
+    <type fullname="PlayerName" preserve="all" />
+  </assembly>
   <assembly fullname="PrivateChatWindowHUD, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
     <type fullname="DCL.Social.Chat.PoolPrivateChatEntryFactory" preserve="all" />
     <type fullname="DCL.Social.Chat.PrivateChatHUDView" preserve="all" />
@@ -187,6 +205,11 @@
   <assembly fullname="RenderingUIScripts, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
     <type fullname="UILoadingSpinner" preserve="all" />
     <type fullname="UIRainbowController" preserve="all" />
+  </assembly>
+  <assembly fullname="ScreencaptureCamera, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
+    <type fullname="DCLFeatures.ScreencaptureCamera.CameraObject.ScreencaptureCameraBehaviour" preserve="all" />
+    <type fullname="DCLFeatures.ScreencaptureCamera.CameraObject.ScreencaptureCameraMovement" preserve="all" />
+    <type fullname="DCLFeatures.ScreencaptureCamera.UI.ScreencaptureCameraHUDView" preserve="all" />
   </assembly>
   <assembly fullname="ShaderPrewarm, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
     <type fullname="MainScripts.DCL.Controllers.ShaderPrewarm.ShaderVariantsData" preserve="all" />
@@ -233,6 +256,7 @@
   </assembly>
   <assembly fullname="Unity.RenderPipelines.Universal.Runtime, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
     <type fullname="UnityEngine.Rendering.Universal.UniversalAdditionalCameraData" preserve="all" />
+    <type fullname="UnityEngine.Rendering.Universal.TemporalAA/Settings" preserve="nothing" serialized="true" />
   </assembly>
   <assembly fullname="Unity.ResourceManager, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null" preserve="all">
     <type fullname="UnityEngine.ResourceManagement.ResourceProviders.AssetBundleProvider" preserve="all" />
@@ -289,6 +313,9 @@
     <type fullname="UnityEngine.U2D.SpriteAtlas" preserve="all" />
     <type fullname="UnityEngine.Events.PersistentCallGroup" preserve="nothing" serialized="true" />
     <type fullname="UnityEngine.RectOffset" preserve="nothing" serialized="true" />
+  </assembly>
+  <assembly fullname="UnityEngine.PhysicsModule, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
+    <type fullname="UnityEngine.CharacterController" preserve="all" />
   </assembly>
   <assembly fullname="UnityEngine.TextRenderingModule, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
     <type fullname="UnityEngine.Font" preserve="all" />

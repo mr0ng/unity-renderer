@@ -3,7 +3,7 @@
 --- !u!129 &1
 PlayerSettings:
   m_ObjectHideFlags: 0
-  serializedVersion: 24
+  serializedVersion: 26
   productGUID: ba694a7606b27db49bcb086b36d520cc
   AndroidProfiler: 0
   AndroidFilterTouchesWhenObscured: 0
@@ -16,9 +16,9 @@ PlayerSettings:
   productName: Decentraland
   defaultCursor: {fileID: 0}
   cursorHotspot: {x: 0, y: 0}
-  m_SplashScreenBackgroundColor: {r: 0.2784314, g: 0.2784314, b: 0.2784314, a: 1}
-  m_ShowUnitySplashScreen: 1
-  m_ShowUnitySplashLogo: 1
+  m_SplashScreenBackgroundColor: {r: 0, g: 0, b: 0, a: 1}
+  m_ShowUnitySplashScreen: 0
+  m_ShowUnitySplashLogo: 0
   m_SplashScreenOverlayOpacity: 1
   m_SplashScreenAnimation: 0
   m_SplashScreenLogoStyle: 1
@@ -51,14 +51,15 @@ PlayerSettings:
   defaultScreenHeightWeb: 600
   m_StereoRenderingPath: 0
   m_ActiveColorSpace: 1
+  m_SpriteBatchVertexThreshold: 300
   m_MTRendering: 1
   mipStripping: 0
   numberOfMipsStripped: 0
-  m_StackTraceTypes: 010000000100000001000000010000000100000001000000
+  numberOfMipsStrippedPerMipmapLimitGroup: {}
+  m_StackTraceTypes: 020000000200000002000000020000000200000001000000
   iosShowActivityIndicatorOnLoading: -1
   androidShowActivityIndicatorOnLoading: -1
   iosUseCustomAppBackgroundBehavior: 0
-  iosAllowHTTPDownload: 1
   allowedAutorotateToPortrait: 1
   allowedAutorotateToPortraitUpsideDown: 1
   allowedAutorotateToLandscapeRight: 1
@@ -122,8 +123,11 @@ PlayerSettings:
   switchNVNShaderPoolsGranularity: 33554432
   switchNVNDefaultPoolsGranularity: 16777216
   switchNVNOtherPoolsGranularity: 16777216
+  switchGpuScratchPoolGranularity: 2097152
+  switchAllowGpuScratchShrinking: 0
   switchNVNMaxPublicTextureIDCount: 0
   switchNVNMaxPublicSamplerIDCount: 0
+  switchNVNGraphicsFirmwareMemory: 32
   stadiaPresentMode: 0
   stadiaTargetFramerate: 0
   vulkanNumSwapchainBuffers: 3
@@ -131,19 +135,15 @@ PlayerSettings:
   vulkanEnablePreTransform: 0
   vulkanEnableLateAcquireNextImage: 0
   vulkanEnableCommandBufferRecycling: 1
-  m_SupportedAspectRatios:
-    4:3: 1
-    5:4: 1
-    16:10: 1
-    16:9: 1
-    Others: 1
-  bundleVersion: 1.4
+  loadStoreDebugModeEnabled: 0
+  bundleVersion: 1.5
   preloadedAssets:
   - {fileID: 11400000, guid: ed92f4994d89900418375e16b663e852, type: 2}
-  - {fileID: 6703885487727502143, guid: 64ffe5463b3a4e84e852a82cea687469, type: 2}
   - {fileID: 11400000, guid: 9c2135c5eac5f1847874a39eef851e33, type: 2}
+  - {fileID: 11400000, guid: c66abaf02f2507a41bdd0f83e338218f, type: 2}
   - {fileID: 11400000, guid: c35f85f4de4b3c147a106d22c71fae7b, type: 2}
   - {fileID: -8801917618543006495, guid: 63674853b393b6a46a50577b0c644736, type: 2}
+  - {fileID: 6703885487727502143, guid: 64ffe5463b3a4e84e852a82cea687469, type: 2}
   - {fileID: 9171797508319984906, guid: 6282d2254e4b7b946bbfa2fcce697753, type: 2}
   metroInputSource: 0
   wsaTransparentSwapchain: 0
@@ -156,7 +156,7 @@ PlayerSettings:
   enableFrameTimingStats: 0
   enableOpenGLProfilerGPURecorders: 1
   useHDRDisplay: 0
-  D3DHDRBitDepth: 0
+  hdrBitDepth: 0
   m_ColorGamuts: 0000000003000000
   targetPixelDensity: 30
   resolutionScalingMode: 0
@@ -168,13 +168,14 @@ PlayerSettings:
     Standalone: com.Decentraland.Decentraland
   buildNumber:
     Standalone: 0
+    VisionOS: 0
     iPhone: 0
     tvOS: 0
   overrideDefaultApplicationIdentifier: 0
   AndroidBundleVersionCode: 1
-  AndroidMinSdkVersion: 22
-  AndroidTargetSdkVersion: 0
-  AndroidPreferredInstallLocation: 1
+  AndroidMinSdkVersion: 29
+  AndroidTargetSdkVersion: 33
+  AndroidPreferredInstallLocation: 2
   aotOptions: 
   stripEngineCode: 1
   iPhoneStrippingLevel: 0
@@ -185,12 +186,15 @@ PlayerSettings:
   APKExpansionFiles: 0
   keepLoadedShadersAlive: 1
   StripUnusedMeshComponents: 0
+  strictShaderVariantMatching: 0
   VertexChannelCompressionMask: 4054
   iPhoneSdkVersion: 988
   iOSTargetOSVersionString: 12.0
   tvOSSdkVersion: 0
   tvOSRequireExtendedGameController: 0
   tvOSTargetOSVersionString: 12.0
+  VisionOSSdkVersion: 0
+  VisionOSTargetOSVersionString: 1.0
   uIPrerenderedIcon: 0
   uIRequiresPersistentWiFi: 0
   uIRequiresFullScreen: 1
@@ -238,8 +242,10 @@ PlayerSettings:
   appleDeveloperTeamID: 
   iOSManualSigningProvisioningProfileID: 
   tvOSManualSigningProvisioningProfileID: 
+  VisionOSManualSigningProvisioningProfileID: 
   iOSManualSigningProvisioningProfileType: 0
   tvOSManualSigningProvisioningProfileType: 0
+  VisionOSManualSigningProvisioningProfileType: 0
   appleEnableAutomaticSigning: 0
   iOSRequireARKit: 0
   iOSAutomaticallyDetectAndAddCapabilities: 1
@@ -253,7 +259,8 @@ PlayerSettings:
   useCustomMainGradleTemplate: 0
   useCustomLauncherGradleManifest: 0
   useCustomBaseGradleTemplate: 0
-  useCustomGradlePropertiesTemplate: 1
+  useCustomGradlePropertiesTemplate: 0
+  useCustomGradleSettingsTemplate: 0
   useCustomProguardFile: 1
   AndroidTargetArchitectures: 2
   AndroidTargetDevices: 0
@@ -261,8 +268,9 @@ PlayerSettings:
   androidSplashScreen: {fileID: 2800000, guid: 87bf14092660947eb9909d5772886279, type: 3}
   AndroidKeystoreName: '{dedicated}: DCLVR.keystore'
   AndroidKeyaliasName: dclvr
+  AndroidEnableArmv9SecurityFeatures: 0
   AndroidBuildApkPerCpuArchitecture: 0
-  AndroidTVCompatibility: 1
+  AndroidTVCompatibility: 0
   AndroidIsGame: 1
   AndroidEnableTango: 0
   androidEnableBanner: 1
@@ -274,7 +282,6 @@ PlayerSettings:
     banner: {fileID: 0}
   androidGamepadSupportLevel: 0
   chromeosInputEmulation: 1
-  AndroidMinifyWithR8: 0
   AndroidMinifyRelease: 0
   AndroidMinifyDebug: 0
   AndroidValidateAppBundleSize: 1
@@ -601,10 +608,12 @@ PlayerSettings:
     iPhone: 1
     tvOS: 1
   m_BuildTargetGroupLightmapEncodingQuality: []
+  m_BuildTargetGroupHDRCubemapEncodingQuality: []
   m_BuildTargetGroupLightmapSettings:
   - m_BuildTarget: WebGL
     m_TextureStreamingEnabled: 0
     m_TextureStreamingPriority: 0
+  m_BuildTargetGroupLoadStoreDebugModeSettings: []
   m_BuildTargetNormalMapEncoding: []
   m_BuildTargetDefaultTextureCompressionFormat: []
   playModeTestRunnerEnabled: 0
@@ -617,6 +626,7 @@ PlayerSettings:
   locationUsageDescription: 
   microphoneUsageDescription: 
   bluetoothUsageDescription: 
+  macOSTargetOSVersion: 10.13.0
   switchNMETAOverride: 
   switchNetLibKey: 
   switchSocketMemoryPoolSize: 6144
@@ -628,6 +638,7 @@ PlayerSettings:
   switchLTOSetting: 0
   switchApplicationID: 0x01004b9000490000
   switchNSODependencies: 
+  switchCompilerFlags: 
   switchTitleNames_0: 
   switchTitleNames_1: 
   switchTitleNames_2: 
@@ -838,11 +849,12 @@ PlayerSettings:
   monoEnv: 
   splashScreenBackgroundSourceLandscape: {fileID: 0}
   splashScreenBackgroundSourcePortrait: {fileID: 0}
-  blurSplashScreenBackground: 1
+  blurSplashScreenBackground: 0
   spritePackerPolicy: 
   webGLMemorySize: 512
   webGLExceptionSupport: 1
   webGLNameFilesAsHashes: 0
+  webGLShowDiagnostics: 0
   webGLDataCaching: 0
   webGLDebugSymbols: 1
   webGLEmscriptenArgs: ' --profiling-funcs '
@@ -855,6 +867,12 @@ PlayerSettings:
   webGLLinkerTarget: 1
   webGLThreadsSupport: 0
   webGLDecompressionFallback: 0
+  webGLInitialMemorySize: 32
+  webGLMaximumMemorySize: 2048
+  webGLMemoryGrowthMode: 2
+  webGLMemoryLinearGrowthStep: 16
+  webGLMemoryGeometricGrowthStep: 0.2
+  webGLMemoryGeometricGrowthCap: 96
   webGLPowerPreference: 2
   scriptingDefineSymbols:
     : UNITY_POST_PROCESSING_STACK_V2;GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE;GLTFAST_SAFE
@@ -866,8 +884,10 @@ PlayerSettings:
     Nintendo Switch: UNITY_POST_PROCESSING_STACK_V2
     PS4: UNITY_POST_PROCESSING_STACK_V2
     PS5: UNITY_POST_PROCESSING_STACK_V2
+    QNX: UNITY_POST_PROCESSING_STACK_V2
     Stadia: UNITY_POST_PROCESSING_STACK_V2
     Standalone: UNITY_POST_PROCESSING_STACK_V2;GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE;GLTFAST_SAFE;UNITASK_DOTWEEN_SUPPORT;VUPLEX_CCU;VUPLEX_DISABLE_SRP_WARNING;MRTK_GLTF_IMPORTER_OFF;DCL_VR;USE_INPUT_SYSTEM_POSE_CONTROL;AV_PRO_PRESENT;VUPLEX_MRTK;VUPLEX_STANDALONE;VUPLEX_OCULUS;UNIGLTF_DISABLE_DEFAULT_GLB_IMPORTER;UNIGLTF_DISABLE_DEFAULT_GLTF_IMPORTER
+    VisionOS: UNITY_POST_PROCESSING_STACK_V2
     WebGL: UNITY_POST_PROCESSING_STACK_V2;GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE;GLTFAST_SAFE;UNITASK_DOTWEEN_SUPPORT
     Windows Store Apps: UNITY_POST_PROCESSING_STACK_V2;USE_INPUT_SYSTEM_POSE_CONTROL
     XboxOne: UNITY_POST_PROCESSING_STACK_V2
@@ -880,17 +900,16 @@ PlayerSettings:
   il2cppCompilerConfiguration:
     Android: 1
     WebGL: 2
+  il2cppCodeGeneration:
+    Android: 0
   managedStrippingLevel: {}
   incrementalIl2cppBuild: {}
   suppressCommonWarnings: 1
   allowUnsafeCode: 1
   useDeterministicCompilation: 1
-  enableRoslynAnalyzers: 1
-  selectedPlatform: 2
   additionalIl2CppArgs: ' --emit-source-mapping'
   scriptingRuntimeVersion: 1
   gcIncremental: 0
-  assemblyVersionValidation: 1
   gcWBarrierValidation: 0
   apiCompatibilityLevelPerPlatform:
     Standalone: 3
@@ -966,6 +985,11 @@ PlayerSettings:
   luminVersion:
     m_VersionCode: 1
     m_VersionName: 
+  hmiPlayerDataPath: 
+  hmiForceSRGBBlit: 1
+  embeddedLinuxEnableGamepadInput: 1
+  hmiLogStartupTiming: 0
+  hmiCpuConfiguration: 
   apiCompatibilityLevel: 6
   activeInputHandler: 2
   windowsGamepadBackendHint: 0
@@ -976,6 +1000,7 @@ PlayerSettings:
   organizationId: 
   cloudEnabled: 0
   legacyClampBlendShapeWeights: 0
-  playerDataPath: 
-  forceSRGBBlit: 1
+  hmiLoadingImage: {fileID: 0}
+  platformRequiresReadableAssets: 0
   virtualTexturingSupportEnabled: 0
+  insecureHttpOption: 2

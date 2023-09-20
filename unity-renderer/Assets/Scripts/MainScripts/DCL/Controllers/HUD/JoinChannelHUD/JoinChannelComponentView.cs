@@ -90,9 +90,13 @@ namespace DCL.Social.Chat.Channels
 
         internal static JoinChannelComponentView Create()
         {
+            #if DCL_VR
+            JoinChannelComponentView joinChannelComponenView = Instantiate(Resources.Load<GameObject>("JoinChannelHUDVR")).GetComponent<JoinChannelComponentView>();
+            joinChannelComponenView.name = "_JoinChannelHUD";
+            #else
             JoinChannelComponentView joinChannelComponenView = Instantiate(Resources.Load<GameObject>("JoinChannelHUD")).GetComponent<JoinChannelComponentView>();
             joinChannelComponenView.name = "_JoinChannelHUD";
-
+#endif
             return joinChannelComponenView;
         }
     }

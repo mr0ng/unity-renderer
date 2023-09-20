@@ -5,12 +5,13 @@ PrefabInstance:
   m_ObjectHideFlags: 0
   serializedVersion: 2
   m_Modification:
+    serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
     - target: {fileID: 3913061650656900571, guid: df69cac29ad6a5648a6c6a0493b43a37,
         type: 3}
       propertyPath: m_PresetInfoIsWorld
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 4023895160674195516, guid: df69cac29ad6a5648a6c6a0493b43a37,
         type: 3}
@@ -117,6 +118,16 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 4113707060361468368, guid: df69cac29ad6a5648a6c6a0493b43a37,
+        type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: -1691.28
+      objectReference: {fileID: 0}
+    - target: {fileID: 4113707060361468368, guid: df69cac29ad6a5648a6c6a0493b43a37,
+        type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: -742
+      objectReference: {fileID: 0}
     - target: {fileID: 4133243069450078464, guid: df69cac29ad6a5648a6c6a0493b43a37,
         type: 3}
       propertyPath: m_RenderMode
@@ -132,12 +143,33 @@ PrefabInstance:
       propertyPath: m_Name
       value: JoinChannelHUDVR
       objectReference: {fileID: 0}
+    - target: {fileID: 6774760554202220480, guid: df69cac29ad6a5648a6c6a0493b43a37,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 8446212860349718336, guid: df69cac29ad6a5648a6c6a0493b43a37,
         type: 3}
       propertyPath: showHideAnimator
       value: 
       objectReference: {fileID: 3004309269396973793}
+    - target: {fileID: 9063275830000227921, guid: df69cac29ad6a5648a6c6a0493b43a37,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 6774760554202220480, guid: df69cac29ad6a5648a6c6a0493b43a37,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: -5385582872988347369}
+    - targetCorrespondingSourceObject: {fileID: 6774760554202220480, guid: df69cac29ad6a5648a6c6a0493b43a37,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: -4638685401955716716}
   m_SourcePrefab: {fileID: 100100000, guid: df69cac29ad6a5648a6c6a0493b43a37, type: 3}
 --- !u!1 &980287180132021659 stripped
 GameObject:

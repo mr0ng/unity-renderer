@@ -13,7 +13,7 @@ public class WebViewLoginController2 : MonoBehaviour
 {
     public static WebViewLoginController2 I;
     protected IWebView webView;
-
+    [SerializeField] private GameObject loginElements;
     [SerializeField] protected BaseWebViewPrefab webViewPrefab;
     [SerializeField] private RawImage webviewImage;
     [SerializeField] private CanvasKeyboard keyboard;
@@ -41,6 +41,8 @@ public class WebViewLoginController2 : MonoBehaviour
     [SerializeField] private Toggle useNewUIToggle;
     [SerializeField] private bool useNewUI = true;
     [SerializeField] private TMP_Text browserMessage;
+    [SerializeField] private Button settingsButton;
+    [SerializeField] private GameObject settingsPanel;
 
     private const string GUEST_CLICK = "guestClick";
     private const string WALLET_CLICK = "walletClick";
@@ -72,6 +74,7 @@ public class WebViewLoginController2 : MonoBehaviour
 
 
 
+
     private Dictionary<string, string> jsQueries = new Dictionary<string, string>
     {
         { "guestClick", "document.querySelector('.LoginGuestItem .ui.huge.primary.button').click();" },
@@ -96,23 +99,9 @@ public class WebViewLoginController2 : MonoBehaviour
         I = this;
 
         yield return new WaitUntil(() => VRSettingsManager.I != null);
-        string existingValue = VRSettingsManager.I.GetSetting("useNewUI");
+        useNewUI = VRSettingsManager.I.GetSetting("useNewUI",useNewUI);
 
-        if (existingValue == null || existingValue == "")
-        {
-            VRSettingsManager.I.SetSetting("useNewUI", useNewUI.ToString());
-            useNewUI = false;
-
-        }
-        else
-        {
-            useNewUI = bool.Parse(existingValue);
-        }
-
-
-
-
-
+        CrossPlatformManager.SetCameraForGame();
         webView = webViewPrefab.WebView;
         fortmaticLoginPanel.transform.localPosition = new Vector3(-0.009f, -1000.0613f, 1000.24f);
 
@@ -131,7 +120,19 @@ public class WebViewLoginController2 : MonoBehaviour
         panels.Add(FORTMATIC_LOGIN_PANEL, fortmaticLoginPanel);
         panels.Add(WALLET_CONNECT_LOGIN_PANEL, walletConnectLoginPanel);
         panels.Add(COINBASE_LOGIN_PANEL, coinbaseLoginPanel);
+        settingsButton.onClick.AddListener(() =>
+        {
+            settingsPanel.SetActive(!settingsPanel.activeSelf);
 
+            if (settingsPanel.activeSelf)
+            {
+                loginElements.SetActive(false);
+            }
+            else
+            {
+                loginElements.SetActive(true);
+            }
+        });
 
         // Add more as required
 
@@ -139,41 +140,12 @@ public class WebViewLoginController2 : MonoBehaviour
         buttons[GUEST_LOGIN_BUTTON]
            .onClick.AddListener(() =>
             {
-                fortmaticLoginPanel.transform.localPosition = new Vector3(-0.009f, -1000.0613f, 1000.24f);
-                webViewPrefab.gameObject.SetActive(true);
-                ShowPanel(FORTMATIC_LOGIN_PANEL, true);
-                StartCoroutine(ButtonClick(GUEST_CLICK, (bool success) =>
-                {
-                    if (success)
-                    {
-                        buttons[GUEST_LOGIN_BUTTON].gameObject.SetActive(false);
-                        buttons[WALLET_LOGIN_BUTTON].gameObject.SetActive(false);
-                    }
-                    else { }
-                }));
+                StartCoroutine(WaitAndExecuteGuestButtonClick());
             });
 
         buttons[WALLET_LOGIN_BUTTON].onClick.AddListener(() =>
             {
-                fortmaticLoginPanel.transform.localPosition = new Vector3(-0.009f, -1000.0613f, 1000.24f);
-                webViewPrefab.gameObject.SetActive(true);
-                ShowPanel(FORTMATIC_LOGIN_PANEL, true);
-                StartCoroutine(ButtonClick(WALLET_CLICK, (bool success) =>
-                {
-                    if (success)
-                    {
-                        StartCoroutine(WaitForElement("body > div.ui.page.modals.dimmer.transition.visible.active > div > div.content > div.dcl.option.metamask", (bool elementExists) =>
-                        {
-                            if (elementExists)
-                            {
-                                CrossPlatformManager.SetCameraForGame();
-                                buttons[GUEST_LOGIN_BUTTON].gameObject.SetActive(false);
-                                buttons[WALLET_LOGIN_BUTTON].gameObject.SetActive(false);
-                                ShowPanel(WALLET_LOGIN_PANEL, true);
-                            }
-                        }));
-                    }
-                }));
+                StartCoroutine(WaitAndExecuteWalletButtonClick());
             });
 
         buttons[WALLET_CLOSE_BUTTON]
@@ -307,7 +279,76 @@ public class WebViewLoginController2 : MonoBehaviour
         OnOpenInternalBrowserChanged( VRSettingsManager.I.GetSetting("openInternalBrowser"));
 
     }
+    private IEnumerator WaitAndExecuteGuestButtonClick()
+    {
+        // Wait for the element to become available
+        yield return WaitForElement(".LoginGuestItem .ui.huge.primary.button", (bool success) =>
+        {
+            if (success)
+            {
+                // Element is available, execute the rest of the logic
+                fortmaticLoginPanel.transform.localPosition = new Vector3(-0.009f, -1000.0613f, 1000.24f);
+                webViewPrefab.gameObject.SetActive(true);
+                ShowPanel(FORTMATIC_LOGIN_PANEL, true);
+                StartCoroutine(ButtonClick(GUEST_CLICK, (bool clickSuccess) =>
+                {
+                    if (clickSuccess)
+                    {
+                        buttons[GUEST_LOGIN_BUTTON].gameObject.SetActive(false);
+                        buttons[WALLET_LOGIN_BUTTON].gameObject.SetActive(false);
+                    }
+                    else
+                    {
+                        // Handle failure here if needed
+                    }
+                }));
+            }
+            else
+            {
+                // Element was not found within the timeout period; handle this case as needed
+            }
+        });
+    }
 
+    private IEnumerator WaitAndExecuteWalletButtonClick()
+    {
+        // Wait for the element to become available
+        yield return WaitForElement(".LoginGuestItem .ui.huge.primary.button", (bool success) =>
+        {
+            if (success)
+            {
+                // Element is available, execute the rest of the logic
+                fortmaticLoginPanel.transform.localPosition = new Vector3(-0.009f, -1000.0613f, 1000.24f);
+                webViewPrefab.gameObject.SetActive(true);
+                ShowPanel(FORTMATIC_LOGIN_PANEL, true);
+
+                StartCoroutine(ButtonClick(WALLET_CLICK, (bool clickSuccess) =>
+                {
+                    if (clickSuccess)
+                    {
+                        StartCoroutine(WaitForElement("body > div.ui.page.modals.dimmer.transition.visible.active > div > div.content > div.dcl.option.metamask", (bool elementExists) =>
+                        {
+                            if (elementExists)
+                            {
+                                CrossPlatformManager.SetCameraForGame();
+                                buttons[GUEST_LOGIN_BUTTON].gameObject.SetActive(false);
+                                buttons[WALLET_LOGIN_BUTTON].gameObject.SetActive(false);
+                                ShowPanel(WALLET_LOGIN_PANEL, true);
+                            }
+                        }));
+                    }
+                    else
+                    {
+                        // Handle failure here if needed
+                    }
+                }));
+            }
+            else
+            {
+                // Element was not found within the timeout period; handle this case as needed
+            }
+        });
+    }
     public IEnumerator ButtonClick(string key, Action<bool> callback)
     {
         if (webView == null) webView = webViewPrefab.WebView;
@@ -473,8 +514,8 @@ public class WebViewLoginController2 : MonoBehaviour
             keyboard.gameObject.SetActive(false);
             coinbaseQRImage2.transform.parent.gameObject.SetActive(false);
             walletConnectQRImage2.transform.parent.gameObject.SetActive(false);
-            webViewPrefab.transform.parent = this.transform.parent;
-            webViewPrefab.transform.localPosition = new Vector3(0.171f,1.445205f, -0.04f);
+            webViewPrefab.transform.parent = loginElements.transform.parent;
+            webViewPrefab.transform.localPosition = new Vector3(0.171f,0f, -0.04f);
         }
     }
     void OnOpenInternalBrowserChanged(string newValue)

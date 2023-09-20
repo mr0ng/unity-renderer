@@ -158,7 +158,13 @@ namespace DCL.Components
             }
             else
             {
+                if(model!= null && parentTransform != null)
                 height = model.height.GetScaledValue(parentTransform.rect.height);
+                else
+                {
+                    height = 1.0f;
+                    Debug.Log($"{model.name} does not have a height.");
+                }
             }
 
             referencesContainer.layoutElementRT.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, width);

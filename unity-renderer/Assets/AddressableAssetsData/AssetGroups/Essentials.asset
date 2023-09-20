@@ -22,88 +22,109 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels:
     - SkyboxConfiguration
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: fc948706d8d335241a2349aa97f0767d
     m_Address: SkyboxElements.prefab
     m_ReadOnly: 0
     m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: c8b11fb3e63ab6f41b65f3cb2035d5d7
     m_Address: SkyboxProbe.prefab
     m_ReadOnly: 0
     m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 4b89ee2270ac7d54ab7e4ab2b4cf1e47
     m_Address: SkyboxMaterialData.asset
     m_ReadOnly: 0
     m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 1d1d09408e4e00c4b99f60953e0f4569
     m_Address: EmbeddedEmotes.asset
     m_ReadOnly: 0
     m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: d46b1af13bd8fd94eabb1ee09e49475e
     m_Address: dab.anim
     m_ReadOnly: 0
     m_SerializedLabels:
     - TestResources
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 155565c20994e334ea44df2fc77b9097
     m_Address: tik.anim
     m_ReadOnly: 0
     m_SerializedLabels:
     - TestResources
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 3484a1b33c5bb0545b5a70bd5b7d65a8
     m_Address: ToSPopupHUD
     m_ReadOnly: 0
     m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: a67f56023d497422b838e441d896e8e0
     m_Address: QuestStartedPopupHUD
     m_ReadOnly: 0
     m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: a1bfb905da9234077a62aac3c9796243
     m_Address: QuestCompletedHUD
     m_ReadOnly: 0
     m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 64b1eee227d634ff883737e85ae4c85f
     m_Address: QuestLogHUD
     m_ReadOnly: 0
     m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 6975ac42cd724416c96b57d7a9c83184
     m_Address: MockQuestService
     m_ReadOnly: 0
     m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 28a5e483ac296394fa443a19ec0d9eae
     m_Address: ChannelLeaveErrorModalVR
     m_ReadOnly: 0
     m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: fa04c9ac7ecb48e4d9e177310e17e0c3
     m_Address: ChannelLimitReachedModalVR
     m_ReadOnly: 0
     m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 8e5cae0ce170bc549b5eb19b476200ec
     m_Address: ChannelJoinErrorModalVR
     m_ReadOnly: 0
     m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 48bd0f4ca4923534196926fd7c6402ce
     m_Address: ChannelSearchHUDVR
     m_ReadOnly: 0
     m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: d36a2083f5036fb41abddff834e3a148
     m_Address: PromoteChannelsHUDVR
     m_ReadOnly: 0
     m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: afbee8c423d0d02438b6c47b2b0b382c
     m_Address: MyAccountSectionHUDVR
     m_ReadOnly: 0
     m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: f445ddaf2119d7a458dfeaaf32972f59
     m_Address: WalletSectionHUDVR
     m_ReadOnly: 0
     m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 3a0f5c3266011984f88148422ad1230b
     m_Address: ToSPopupHUDVR
     m_ReadOnly: 0
     m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 2d2c2cf4b9dcb20428217194b5b32347
     m_Address: VRMExporter
     m_ReadOnly: 0
     m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   m_ReadOnly: 0
   m_Settings: {fileID: 11400000, guid: 436e0d4fdc1cdfa4aaef13be2e8bcef8, type: 2}
   m_SchemaSet:

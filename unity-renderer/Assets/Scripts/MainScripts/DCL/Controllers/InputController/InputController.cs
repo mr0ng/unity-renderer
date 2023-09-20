@@ -481,6 +481,14 @@ public class InputController : MonoBehaviour
                 case DCLAction_Measurable.MouseWheel:
                     InputProcessor.FromAxis(action, player.ScrollMouse.ReadValue<float>(), modifiers: InputProcessor.Modifier.FocusNotInInput);
                     break;
+                case DCLAction_Measurable.ScreenshotCameraXRotationAxis:
+                    break;
+                case DCLAction_Measurable.ScreenshotCameraXTranslationAxis:
+                    break;
+                case DCLAction_Measurable.ScreenshotCameraYRotationAxis:
+                    break;
+                case DCLAction_Measurable.ScreenshotCameraYTranslationAxis:
+                    break;
                 default:
                     throw new ArgumentOutOfRangeException();
 

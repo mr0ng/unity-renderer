@@ -48,6 +48,7 @@ public class AvProVideoPlayer : IVideoPlayer, IDisposable
             case MediaPlayerEvent.EventType.Error:
                 lastError = $"AVProError {arg2} for id {id}";
                 avProMediaPlayer.CloseMedia();
+                avProMediaPlayer.OpenMedia();
                 currentState = VideoState.ERROR;
                 break;
             case MediaPlayerEvent.EventType.ResolutionChanged:

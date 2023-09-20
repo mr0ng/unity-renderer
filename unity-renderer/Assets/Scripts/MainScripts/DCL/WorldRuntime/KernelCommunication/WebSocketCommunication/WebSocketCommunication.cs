@@ -6,7 +6,10 @@ using System.Net.Sockets;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using DCL;
-
+using System.IO;
+#if UNITY_ANDROID && !UNITY_EDITOR
+using UnityEngine.Android;
+#endif
 using UnityEngine;
 using WebSocketSharp;
 using WebSocketSharp.Server;
@@ -29,6 +32,7 @@ public class WebSocketCommunication : IKernelCommunication
     private int currentPort = 0;
     WebSocketServer ws;
     public static event Action<string> OnProfileLoading;
+
     public WebSocketCommunication(bool withSSL = false, int startPort = 7666, int endPort = 7800)
     {
         if (currentPort != 0) startPort = currentPort + 1;
@@ -48,32 +52,56 @@ public class WebSocketCommunication : IKernelCommunication
     }
 
     public bool isServerReady => ws.IsListening;
+
     public void Dispose()
     {
-        if(ws!= null)
+        if (ws != null)
             ws.Stop();
     }
-    public static event Action<DCLWebSocketService> OnWebSocketServiceAdded;
 
+    public static event Action<DCLWebSocketService> OnWebSocketServiceAdded;
+#if UNITY_ANDROID && !UNITY_EDITOR
+
+    void MakeSecureRequest() {
+    if (Application.platform == RuntimePlatform.Android) {
+        Debug.Log("About to make secure request...");
+
+        AndroidJavaClass unityPlayerClass = new AndroidJavaClass("com.unity3d.player.UnityPlayer");
+        AndroidJavaObject activity = unityPlayerClass.GetStatic<AndroidJavaObject>("currentActivity");
+        Debug.Log($"Activity object: {activity}");
+        AndroidJavaClass javaClass = new AndroidJavaClass("com.example.certhandler.MyCertificateHandler");
+        bool success = javaClass.CallStatic<bool>("handleCertificate", activity);
+
+        if (success) {
+            Debug.Log("Android Certificate Granted");
+        } else {
+            Debug.Log("Android Certificate Failed");
+        }
+    }
+}
+
+#endif
     private string StartServer(int port, int maxPort, bool withSSL, bool verbose = false)
     {
         currentPort = port;
         Debug.Log($"WebSocketCommunication: StartServer 1");
-        if (port > maxPort)
-        {
-            throw new SocketException((int)SocketError.AddressAlreadyInUse);
-        }
+
+        if (port > maxPort) { throw new SocketException((int)SocketError.AddressAlreadyInUse); }
+
         string wssServerUrl;
         string wssServiceId = "dcl";
+
         try
         {
             if (withSSL)
             {
 #if UNITY_ANDROID && !UNITY_EDITOR
+                MakeSecureRequest();
                 wssServerUrl = $"wss://127.0.0.1:{port}/";
 #else
                 wssServerUrl = $"wss://localhost:{port}/";
 #endif
+                Debug.Log($"WebSocketCommunication: StartServer 2");
                 ws = new WebSocketServer(wssServerUrl)
                 {
                     SslConfiguration =
@@ -86,6 +114,7 @@ public class WebSocketCommunication : IKernelCommunication
                     },
                     KeepClean = false
                 };
+                Debug.Log($"WebSocketCommunication: StartServer 3");
             }
             else
             {
@@ -94,13 +123,14 @@ public class WebSocketCommunication : IKernelCommunication
 #else
                 wssServerUrl = $"ws://localhost:{port}/";
 #endif
+                Debug.Log($"WebSocketCommunication: StartServer 4");
                 ws = new WebSocketServer(wssServerUrl);
             }
-
+            Debug.Log($"WebSocketCommunication: StartServer 5");
             ws.AddWebSocketService("/" + wssServiceId, () =>
             {
                 service = new DCLWebSocketService();
-
+                Debug.Log($"WebSocketCommunication: StartServer 6");
                 service.OnCloseEvent += () =>
                 {
                     // DataStore.i.wsCommunication.communicationReady.Set(false);
@@ -111,47 +141,50 @@ public class WebSocketCommunication : IKernelCommunication
                     //ws.WebSocketServices.Clear();
 
                     queuedMessages.Clear();
-                    //service.Context.WebSocket.Connect();
 
+                    //service.Context.WebSocket.Connect();
 
                     service = null;
                     ws = null;
                     requestStop = false;
                     queuedMessagesDirty = false;
 
-
                     UnityThread.executeCoroutine(
                         RestartCommunication(port, maxPort, withSSL)
                     );
-
-
                 };
+                Debug.Log($"WebSocketCommunication: StartServer 7");
                 OnWebSocketServiceAdded?.Invoke(service);
+                Debug.Log($"WebSocketCommunication: StartServer 8");
                 return service;
             });
-
+            Debug.Log($"WebSocketCommunication: StartServer 9");
             if (verbose)
             {
                 ws.Log.Level = LogLevel.Debug;
                 ws.Log.Output += OnWebSocketLog;
             }
+            Debug.Log($"WebSocketCommunication: StartServer 10");
             ws.Start();
+            Debug.Log($"WebSocketCommunication: StartServer 11");
         }
         catch (InvalidOperationException e)
         {
+            Debug.Log($"WebSocketCommunication: StartServer 12");
             ws.Stop();
+
             if (withSSL) // Search for available ports only if we're using SSL
             {
                 SocketException se = (SocketException)e.InnerException;
-                if (se is { SocketErrorCode: SocketError.AddressAlreadyInUse })
-                {
-                    return StartServer(port + 1, maxPort, withSSL);
-                }
+                Debug.Log($"WebSocketCommunication: StartServer 13");
+                if (se is { SocketErrorCode: SocketError.AddressAlreadyInUse }) { return StartServer(port + 1, maxPort, withSSL); }
             }
+
             throw new InvalidOperationException(e.Message, e.InnerException);
         }
-
+        Debug.Log($"WebSocketCommunication: StartServer 14");
         string wssUrl = wssServerUrl + wssServiceId;
+        Debug.Log($"WebSocketCommunication: StartServer 15 {wssUrl}");
         return wssUrl;
     }
 
@@ -160,6 +193,7 @@ public class WebSocketCommunication : IKernelCommunication
         yield return new WaitForSeconds(3);
         DataStore.i.wsCommunication.communicationReady.Set(false);
         DataStore.i.common.isApplicationQuitting.Set(false);
+
         //
         // yield return new WaitForSeconds(3);
         // InitMessageTypeToBridgeName();
@@ -176,11 +210,50 @@ public class WebSocketCommunication : IKernelCommunication
         //
         yield return new WaitForSeconds(1);
         DebugConfigComponent.i.ShowWebviewScreen();
-
     }
-    private X509Certificate2 loadSelfSignedServerCertificate() {
+
+    private X509Certificate2 loadSelfSignedServerCertificate()
+    {
         byte[] rawData = Convert.FromBase64String(SelfCertificateData.data);
-        return new X509Certificate2(rawData, "cert");
+        X509Certificate2 cert = new X509Certificate2(rawData, "cert");
+
+        // // Export the certificate to a byte array in DER format (.cer)
+        // byte[] exportedCert = cert.Export(X509ContentType.Cert);
+        //
+        // // Or, for PEM format, use X509ContentType.Pfx or X509ContentType.Pkcs12
+        //
+        // // Save the byte array to a .cer file
+        // string filePath = Path.Combine(Application.persistentDataPath, "myCertificate.cer");
+        // File.WriteAllBytes(filePath, exportedCert);
+        //
+        // byte[] exportedCert2 = cert.Export(X509ContentType.Pfx);
+        //
+        // // Or, for PEM format, use X509ContentType.Pfx or X509ContentType.Pkcs12
+        //
+        // // Save the byte array to a .cer file
+        // string filePath2 = Path.Combine(Application.persistentDataPath, "myCertificate.pfx");
+        // File.WriteAllBytes(filePath2, exportedCert2);
+        //
+        // byte[] exportedCert3 = cert.Export(X509ContentType.Pkcs12);
+        //
+        // // Or, for PEM format, use X509ContentType.Pfx or X509ContentType.Pkcs12
+        //
+        // // Save the byte array to a .cer file
+        // string filePath3 = Path.Combine(Application.persistentDataPath, "myCertificate.Pkcs12");
+        // File.WriteAllBytes(filePath3, exportedCert3);
+
+        // Certificate validation logic for Android
+        // #if UNITY_ANDROID && !UNITY_EDITOR
+        //     // Remove existing callbacks to avoid multiple calls
+        //     ServicePointManager.ServerCertificateValidationCallback = null;
+        //
+        //     // Add a new callback
+        //     ServicePointManager.ServerCertificateValidationCallback += (sender, certificate, chain, sslPolicyErrors) => {
+        //         // Compare with your known certificate
+        //         return certificate.Equals(cert);
+        //     };
+        // #endif
+        return cert;
     }
 
     private void OnWebSocketLog(LogData logData, string message)
@@ -332,18 +405,20 @@ public class WebSocketCommunication : IKernelCommunication
                                 {
                                     hudControllerGO.SendMessage(msg.type, value);
                                 }
+
                                 break;
                             case "RunPerformanceMeterTool":
                                 if (float.TryParse(msg.payload, out float durationInSeconds)) // The payload should be `string`, this will be changed in a `renderer-protocol` refactor
                                 {
                                     mainGO.SendMessage(msg.type, durationInSeconds);
                                 }
+
                                 break;
                             default:
-                                #if DCL_VR
+#if DCL_VR
                                 if (msg.type == "LoadProfile")
                                     OnProfileLoading?.Invoke(msg.payload);
-                                #endif
+#endif
                                 if (!messageTypeToBridgeName.TryGetValue(msg.type, out string bridgeName))
                                 {
                                     bridgeName = "Bridges"; // Default bridge
@@ -355,10 +430,8 @@ public class WebSocketCommunication : IKernelCommunication
                                     bridgeGameObjects.Add(bridgeName, bridgeObject);
                                 }
 
-                                if (bridgeObject != null)
-                                {
-                                    bridgeObject.SendMessage(msg.type, msg.payload);
-                                }
+                                if (bridgeObject != null) { bridgeObject.SendMessage(msg.type, msg.payload); }
+
                                 break;
                         }
 
@@ -371,6 +444,7 @@ public class WebSocketCommunication : IKernelCommunication
                     }
                 }
             }
+
             yield return null;
         }
     }

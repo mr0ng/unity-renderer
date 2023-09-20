@@ -10,6 +10,7 @@ using TMPro;
 using DCL.Interface;
 using DCL.SettingsCommon;
 using System.Collections.Generic;
+using UnityEngine.Serialization;
 using UnityEngine.UI;
 using Vuplex.WebView;
 
@@ -35,6 +36,7 @@ namespace DCL
         private string webViewURL = "";
         private bool isMainTab = true;
 		public bool openInternalBrowser;
+        public bool vrSettingsLoaded = false;
         private GeneralSettings currentSettings;
         //end VR
         private readonly DataStoreRef<DataStore_LoadingScreen> dataStoreLoadingScreen;
@@ -69,6 +71,7 @@ namespace DCL
             CUSTOM,
         }
 
+        public string catalyst;
         public enum Network
         {
             MAINNET,
@@ -167,7 +170,8 @@ namespace DCL
                 ["dom.webnotifications.allowcrossoriginiframe"] = "true",
                 ["dom.webnotifications.allowinsecure"] = "true",
                 ["network.auth.subresource-img-cross-origin-http-auth-allow"] = "true",
-                ["network.http.referer.XOriginPolicy"] = "1"
+                ["network.http.referer.XOriginPolicy"] = "1",
+                ["network.proxy.allow_hijacking_localhost"] = "true"
             });
 
 #endif
@@ -177,22 +181,10 @@ namespace DCL
         private void Start()
         {
 #if DCL_VR
-            string existingValue = VRSettingsManager.I.GetSetting("openInternalBrowser");
-
-            if (existingValue == null || existingValue == "")
-            {
-                VRSettingsManager.I.SetSetting("openInternalBrowser", openInternalBrowser.ToString());
-            }
-            else
-            {
-                openInternalBrowser = bool.Parse(existingValue);
-            }
-            useInternalBrowser.isOn = openInternalBrowser;
-			if (!Debug.isDebugBuild)
+            LoadSettings();
+            if (!Debug.isDebugBuild)
             {
                 startMenu.gameObject.SetActive(true);
-
-
 
 #if UNITY_ANDROID && !UNITY_EDITOR
 //don't have a method of using external browser on quest2.
@@ -200,15 +192,15 @@ namespace DCL
                 useInternalBrowser.transform.parent.gameObject.SetActive(false);
 
                 // CommonScriptableObjects.useInternalBrowser.Set(true);
-                webSocketSSL = false;
-                baseUrlMode = BaseUrl.CUSTOM;
+                // webSocketSSL = false;
+                // baseUrlMode = BaseUrl.CUSTOM;
 
 
 
 #else
                 useInternalBrowser.transform.parent.gameObject.SetActive(true);
-                webSocketSSL = true;
-                baseUrlMode = BaseUrl.ORG;
+                // webSocketSSL = true;
+                // baseUrlMode = BaseUrl.ORG;
 
 #endif
 
@@ -232,6 +224,39 @@ namespace DCL
                 else { DataStore.i.wsCommunication.communicationReady.OnChange += OnCommunicationReadyChangedValue; }
             }
         }
+
+        public void LoadSettings()
+        {
+            vrSettingsLoaded = false;
+            openInternalBrowser = VRSettingsManager.I.GetSetting("openInternalBrowser", openInternalBrowser);
+            baseUrlMode = VRSettingsManager.I.GetSetting("baseUrlMode", baseUrlMode);
+
+            // If BaseUrl is CUSTOM, also load customURL
+            if (baseUrlMode == BaseUrl.CUSTOM)
+            {
+                customURL = VRSettingsManager.I.GetSetting("customURL", customURL);
+            }
+
+            startInCoords = VRSettingsManager.I.GetSetting("startInCoords", startInCoords); // Custom method to handle Vector2
+            disableGLTFDownloadThrottle = VRSettingsManager.I.GetSetting("disableGLTFDownloadThrottle", disableGLTFDownloadThrottle);
+            multithreaded = VRSettingsManager.I.GetSetting("multithreaded", multithreaded);
+            network = VRSettingsManager.I.GetSetting("network", network);
+            OpenBrowserOnStart = VRSettingsManager.I.GetSetting("OpenBrowserOnStart", OpenBrowserOnStart);
+            webSocketSSL = VRSettingsManager.I.GetSetting("webSocketSSL", webSocketSSL);
+            kernelVersion = VRSettingsManager.I.GetSetting("kernelVersion", kernelVersion);
+            useCustomContentServer = VRSettingsManager.I.GetSetting("useCustomContentServer", useCustomContentServer);
+            customContentServerUrl = VRSettingsManager.I.GetSetting("customContentServerUrl", customContentServerUrl);
+            realm = VRSettingsManager.I.GetSetting("realm", realm);
+            catalyst = VRSettingsManager.I.GetSetting("catalyst", catalyst);
+            enableTutorial = VRSettingsManager.I.GetSetting("enableTutorial", enableTutorial);
+            builderInWorld = VRSettingsManager.I.GetSetting("builderInWorld", builderInWorld);
+            soloScene = VRSettingsManager.I.GetSetting("soloScene", soloScene);
+            disableAssetBundles = VRSettingsManager.I.GetSetting("disableAssetBundles", disableAssetBundles);
+            enableDebugMode = VRSettingsManager.I.GetSetting("enableDebugMode", enableDebugMode);
+            debugPanelMode = VRSettingsManager.I.GetSetting("debugPanelMode", debugPanelMode);
+            vrSettingsLoaded = true;
+        }
+
 
         private void UpdateBrowserType(bool current)
         {
@@ -329,22 +354,26 @@ namespace DCL
             }
             else if (baseUrlMode.Equals(BaseUrl.ORG))
             {
-                baseUrl = "http://play.decentraland.org/?";
+                baseUrl = "https://play.decentraland.org/?";
                 if (!webSocketSSL)
                 {
-                    Debug.LogError(
-                        "play.decentraland.org only works with WebSocket SSL, please change the base URL to play.decentraland.zone");
-                    QuitGame();
-                    return;
+                    webSocketSSL = true;
+                    // Debug.LogError(
+                    //     "play.decentraland.org only works with WebSocket SSL, please change the base URL to play.decentraland.zone");
+                    // QuitGame();
+                    // return;
                 }
             }
             else
             {
                 baseUrl = "http://play.decentraland.zone/?";
             }
-            #if DCL_VR
-            #if UNITY_STANDALONE || UNITY_EDITOR
-                baseUrl += "dcl_renderer_type=vr_desktop&";
+
+            if (catalyst != "")
+                baseUrl += $"CATALYST={catalyst}&";
+#if DCL_VR
+#if UNITY_STANDALONE || UNITY_EDITOR
+                                   baseUrl += "dcl_renderer_type=vr_desktop&";
             #else
                 baseUrl += "dcl_renderer_type=vr_android&";
             #endif

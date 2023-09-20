@@ -286,6 +286,7 @@ namespace DCL.EmotesWheel
             emoteAction.performed -= OnEmote;
             moveAction.performed -= OnMove;
             emoteSelect.performed -= OnEmoteSelect;
+            if(emotesWheelView!= null)
             emotesWheelView.onEmoteClicked -= OnEmoteClicked;
             emotesWheelCtrl.Dispose();
 

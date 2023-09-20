@@ -13,11 +13,13 @@ public class NotificationHUDView : MonoBehaviour, IDisposable
 
     #if DCL_VR
     private const string VIEW_PATH = "NotificationHUDVR";
+    private const string VIEW_OBJECT_NAME = "_NotificationHUDVR";
     #else
     private const string VIEW_PATH = "NotificationHUD";
+    private const string VIEW_OBJECT_NAME = "_NotificationHUD";
     #endif
 
-    private const string VIEW_OBJECT_NAME = "_NotificationHUD";
+
 
    // internal static NotificationHUDView Create()
    // {

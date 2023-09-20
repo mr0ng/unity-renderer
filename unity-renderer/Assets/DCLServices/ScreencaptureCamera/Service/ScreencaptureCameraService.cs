@@ -13,9 +13,13 @@ namespace DCLServices.ScreencaptureCamera.Service
 {
     public class ScreencaptureCameraService : IScreencaptureCameraService
     {
-        private const string CONTROLLER_PATH = "ScreencaptureCameraController";
+        #if DCL_VR
+        private const string CONTROLLER_PATH = "ScreencaptureCameraControllerVR";
+        private const string MAIN_BUTTON_PATH = "ScreencaptureMainButtonVR";
+        #else
+    private const string CONTROLLER_PATH = "ScreencaptureCameraController";
         private const string MAIN_BUTTON_PATH = "ScreencaptureMainButton";
-
+#endif
         private readonly IAddressableResourceProvider resourceProvider;
         private readonly BaseVariable<FeatureFlag> featureFlags;
         private readonly DataStore_Player player;

@@ -77,11 +77,12 @@ namespace DCL.Interface
 
         public void OpenKeyboard(TMP_InputField inputField)
         {
-            keyboard.ShowAlphaKeyboard();
-            keyboard.PresentKeyboard();
+            // keyboard.ShowAlphaKeyboard();
+            // keyboard.AlphaSubKeys.enabled = true;
+            // keyboard.PresentKeyboard();
             // keyboard.InputField.gameObject.SetActive(false);
-            if (_keyboardTrans == null)
-                return;
+            if (canvasKeyboard == null || keyboard == null || _keyboardTrans == null)
+                Create();
 
             if (keyboard.isActiveAndEnabled && activeInputField == inputField) // If keyboard is already open for the same field
             {
@@ -102,7 +103,7 @@ namespace DCL.Interface
             previousActiveInputCaretPosition = cursorPos;
              previousKeyboardInputCaretPosition = cursorPos;
             SetupEvents();
-            keyboard.PresentKeyboard(NonNativeKeyboard.LayoutType.URL);
+            keyboard.PresentKeyboard(NonNativeKeyboard.LayoutType.Alpha);
             // Position and orientation code
             var rawForward = CommonScriptableObjects.cameraForward.Get();
             _keyboardTrans.position = CommonScriptableObjects.cameraPosition.Get() + (.7f * rawForward) + new UnityEngine.Vector3(0, -0.38f, 0);
@@ -137,6 +138,7 @@ namespace DCL.Interface
             canvasKeyboard.SetActive(false);
             KeyboardManager.Instance.CleanUpEvents();
             activeInputField = null;
+            Destroy(canvasKeyboard);
         }
 
         public void UpdateKeyboardText(string newText)
@@ -229,6 +231,7 @@ private string FindDifference(string oldText, string newText)
         }
         public bool IsKeyboardOpenFor(TMP_InputField inputField)
         {
+            if (canvasKeyboard == null) return false;
             return (canvasKeyboard.activeSelf && activeInputField == inputField);
         }
 

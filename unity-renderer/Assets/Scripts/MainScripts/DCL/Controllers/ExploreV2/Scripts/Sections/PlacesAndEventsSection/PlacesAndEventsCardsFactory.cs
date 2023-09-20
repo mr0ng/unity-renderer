@@ -9,8 +9,13 @@ using Object = UnityEngine.Object;
 
 public static class PlacesAndEventsCardsFactory
 {
+    #if DCL_VR
+    internal const string EVENT_CARD_MODAL_ID = "EventCard_ModalVR";
+    internal const string PLACE_CARD_MODAL_ID = "PlaceCard_ModalVR";
+    #else
     internal const string EVENT_CARD_MODAL_ID = "EventCard_Modal";
     internal const string PLACE_CARD_MODAL_ID = "PlaceCard_Modal";
+#endif
     internal const string ALL_ID = "all";
     internal const string ALL_TEXT = "All";
 

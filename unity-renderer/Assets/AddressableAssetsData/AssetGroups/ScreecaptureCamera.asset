@@ -21,10 +21,22 @@ MonoBehaviour:
     m_Address: ScreencaptureCameraController
     m_ReadOnly: 0
     m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 0ec15e0bcbdac1a4e89571580222c90b
     m_Address: ScreencaptureMainButton
     m_ReadOnly: 0
     m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: d8884267458f658499ad5ce08f739b9a
+    m_Address: ScreencaptureCameraControllerVR
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: d5294d0c6079faa4795addcd99b471fd
+    m_Address: ScreencaptureMainButtonVR
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   m_ReadOnly: 0
   m_Settings: {fileID: 11400000, guid: 436e0d4fdc1cdfa4aaef13be2e8bcef8, type: 2}
   m_SchemaSet:
