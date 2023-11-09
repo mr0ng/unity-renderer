@@ -126,10 +126,11 @@ namespace DCL
 #else
             browserOptionsButton.SetActive(false);
 #endif
+            ShowWebviewScreen();
 #endif
             if (sharedInstance == null)
                 sharedInstance = this;
-            ShowWebviewScreen();
+
             DataStore.i.debugConfig.soloScene = debugConfig.soloScene;
             DataStore.i.debugConfig.soloSceneCoords = debugConfig.soloSceneCoords;
             DataStore.i.debugConfig.ignoreGlobalScenes = debugConfig.ignoreGlobalScenes;

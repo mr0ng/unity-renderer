@@ -540,8 +540,10 @@ public class WebViewLoginController2 : MonoBehaviour
             coinbaseQRImage2.transform.parent.gameObject.SetActive(false);
             walletConnectQRImage2.transform.parent.gameObject.SetActive(false);
             backgroundObjects.SetActive(true);
+            #if DCL_VR
             DebugConfigComponent.i.ShowWebviewScreen();
             //this.transform.localPosition = new Vector3(-0.009f, -1000.0613f, 1000.24f);
+            #endif
         }
     }
     void OnDestroy()

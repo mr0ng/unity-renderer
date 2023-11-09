@@ -183,7 +183,9 @@ namespace DCL
             // DebugConfigComponent.i.ReloadPage();
             // We trigger the Decentraland logic once everything is initialized.
             DCL.Interface.WebInterface.StartDecentraland();
+#if DCL_VR
             DebugConfigComponent.i.ShowWebviewScreen();
+#endif
         }
     }
 }

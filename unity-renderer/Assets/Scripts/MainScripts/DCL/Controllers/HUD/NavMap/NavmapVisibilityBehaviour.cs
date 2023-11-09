@@ -35,7 +35,7 @@ namespace DCL
         private IMapCameraController cameraController;
 #if !DCL_VR
         public Camera hudCamera => DataStore.i.camera.hudsCamera.Get();
-         }
+         
 #else
         public Camera hudCamera;
 #endif

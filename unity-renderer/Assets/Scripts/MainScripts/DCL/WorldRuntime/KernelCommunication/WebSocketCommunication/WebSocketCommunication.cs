@@ -209,7 +209,9 @@ public class WebSocketCommunication : IKernelCommunication
         // updateCoroutine = CoroutineStarter.Start(ProcessMessages());
         //
         yield return new WaitForSeconds(1);
+        #if DCL_VR
         DebugConfigComponent.i.ShowWebviewScreen();
+        #endif
     }
 
     private X509Certificate2 loadSelfSignedServerCertificate()
